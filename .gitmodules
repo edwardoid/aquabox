@@ -1,0 +1,12 @@
+[submodule "3dp/plog"]
+	path = 3dp/plog
+	url = https://github.com/SergiusTheBest/plog.git
+[submodule "3dp/pistache"]
+	path = 3dp/pistache
+	url = https://github.com/oktal/pistache.git
+[submodule "3dp/qrencode"]
+	path = 3dp/qrencode
+	url = https://github.com/fukuchi/libqrencode.git
+[submodule "3dp/nlohmann"]
+	path = 3dp/nlohmann
+	url = https://github.com/nlohmann/json.git

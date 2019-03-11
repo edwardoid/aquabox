@@ -1,0 +1,420 @@
+﻿#include "iwlib.h"
+#include <sys/time.h>
+
+#include <iostream>
+#include <iomanip>
+#include <string>
+#include <vector>
+
+
+#define LOG_ERROR std::cout
+#define LOG_INFO std::cout
+
+enum class Authentification
+{
+    None,
+    WEP,
+    WPA,
+    WPA2
+};
+
+enum class Fequency
+{
+    GHZ_5_2,
+    GHZ_2_4
+};
+
+struct Quality
+{
+    uint32_t quality;
+    uint32_t max;
+};
+
+struct WifiNetwork
+{
+    static const uint16_t HIDDEN_FLAG = 0;
+    uint16_t cell;
+    std::string SSID;
+    uint16_t index;
+    uint16_t channel = 0;
+    bool encryption = false;
+    std::string mode;
+    Authentification Auth = Authentification::None;
+    uint16_t AuthVersion = 1;
+    uint16_t SignalLevel;
+    Fequency fequency;
+    std::array<char, ETH_ALEN> Address;
+    Quality quality;
+};
+
+static inline char * iw_saether_ntop(const struct sockaddr *sap, char* bufp)
+{
+  iw_ether_ntop((const struct ether_addr *) sap->sa_data, bufp);
+  return bufp;
+}
+
+/****************************** TYPES ******************************/
+
+/*
+ * Scan state and meta-information, used to decode events...
+ */
+typedef struct iwscan_state
+{
+    /* State */
+    int            ap_num;        /* Access Point number 1->N */
+    int            val_index;    /* Value in table 0->(N-1) */
+} iwscan_state;
+
+#define IW_SCAN_HACK        0x8000
+
+#define IW_ARRAY_LEN(x) (sizeof(x)/sizeof((x)[0]))
+
+/* Values for the IW_IE_CIPHER_* in GENIE */
+static const char *    iw_ie_cypher_name[] = {
+    "none",
+    "WEP-40",
+    "TKIP",
+    "WRAP",
+    "CCMP",
+    "WEP-104",
+};
+#define    IW_IE_CYPHER_NUM    IW_ARRAY_LEN(iw_ie_cypher_name)
+
+/* Values for the IW_IE_KEY_MGMT_* in GENIE */
+static const char *    iw_ie_key_mgmt_name[] = {
+    "none",
+    "802.1x",
+    "PSK",
+};
+#define    IW_IE_KEY_MGMT_NUM    IW_ARRAY_LEN(iw_ie_key_mgmt_name)
+
+
+/*------------------------------------------------------------------*/
+/*
+ * Print the name corresponding to a value, with overflow check.
+ */
+static void
+iw_print_value_name(unsigned int        value,
+                    const char *        names[],
+                    const unsigned int        num_names)
+{
+    if(value >= num_names)
+        printf(" unknown (%d)", value);
+    else
+        printf(" %s", names[value]);
+}
+
+/*------------------------------------------------------------------*/
+/*
+ * Parse, and display the results of a WPA or WPA2 IE.
+ *
+ */
+void iw_print_ie_wpa(char * iebuf, int buflen, WifiNetwork& net)
+{
+    int ielen = iebuf[1] + 2;
+    int offset = 2;    /* Skip the IE id, and the length. */
+    const char wpa1_oui[3] = {0x00, 0x50, 0xf2};
+    const char wpa2_oui[3] = {0x00, 0x0f, 0xac};
+    int            i;
+    uint16_t        ver = 0;
+    uint16_t        cnt = 0;
+
+    if(ielen > buflen)
+        ielen = buflen;
+    const char * wpa_oui;
+    
+    switch(iebuf[0])
+    {
+    case 0x30: {        /* WPA2 */
+        /* Check if we have enough data */
+        if(ielen < 4)
+            return;
+
+        wpa_oui = wpa2_oui;
+        break;
+    }
+    case 0xdd: {        /* WPA or else */
+        wpa_oui = wpa1_oui;
+
+        /* Not all IEs that start with 0xdd are WPA.
+         * So check that the OUI is valid. Note : offset==2 */
+        if((ielen < 8) || (memcmp(&iebuf[offset], wpa_oui, 3) != 0) || (iebuf[offset + 3] != 0x01))
+        {
+            return;
+        }
+
+        offset += 4;
+        break;
+    }
+    default:
+        return;
+    }
+
+    /* Pick version number (little endian) */
+    printf("\n                    IE: ");
+    ver = iebuf[offset] | (iebuf[offset + 1] << 8);
+    offset += 2;
+
+    if(iebuf[0] == 0xdd)
+        printf("WPA Version %d\n", ver);
+    if(iebuf[0] == 0x30)
+        printf("IEEE 802.11i/WPA2 Version %d\n", ver);
+}
+
+void iw_print_gen_ie(unsigned char * buffer, int buflen, WifiNetwork& net)
+{
+    int offset = 0;
+
+    /* Loop on each IE, each IE is minimum 2 bytes */
+    while(offset <= (buflen - 2))
+    {
+        /* Check IE type */
+        switch(buffer[offset])
+        {
+        case 0xdd:    /* WPA1 (and other) */
+        case 0x30:    /* WPA2 */
+            iw_print_ie_wpa(buffer + offset, buflen);
+            break;
+        default:
+            break;
+        }
+        /* Skip over this IE to the next one in the list. */
+        offset += buffer[offset+1] + 2;
+    }
+}
+
+void print_scanning_token(struct stream_descr *    stream,    /* Stream of events */
+                     struct iw_event *        event,    /* Extracted token */
+                     struct iwscan_state *    state,
+                     struct iw_range *    iw_range,    /* Range info */
+                     int        has_range,
+                     std::vector<WifiNetwork>& networks)
+{
+    char        buffer[128];    /* Temporary buffer *
+
+    /* Now, let's decode the event */
+    switch(event->cmd)
+    {
+    case SIOCGIWAP: {
+        WifiNetwork net;
+        net.cell = networks.size();
+        std::copy(net.Address.begin(), net.Address.end(), event->u.ap_addr.sa_data);
+        networks.push_back(net);
+        break;
+    }
+    case SIOCGIWNWID: /* NWID */ { break; }
+    case SIOCGIWFREQ:
+    {
+        double        freq;            /* Frequency/channel */
+        int        channel = -1;        /* Converted to channel */
+        freq = iw_freq2float(&(event->u.freq));
+        /* Convert to channel if possible */
+        if(has_range)
+            channel = iw_freq_to_channel(freq, iw_range);
+        iw_print_freq(buffer, sizeof(buffer),
+                      freq, channel, event->u.freq.flags);
+        printf("                    %s\n", buffer);
+    }
+    break;
+    case SIOCGIWMODE: {
+        if(event->u.mode >= IW_NUM_OPER_MODE)
+            event->u.mode = IW_NUM_OPER_MODE;
+        networks.rbegin()->mode = iw_operation_mode[event->u.mode];
+        break;
+    }
+    case SIOCGIWNAME: /* Protocol */ { break; }
+    case SIOCGIWESSID:
+    {
+        networks.rbegin()->SSID.assign(static_cast<char*>(event->u.essid.pointer), static_cast<char*>(event->u.essid.pointer) + event->u.essid.length);
+        networks.rbegin()->index = event->u.essid.flags & IW_ENCODE_INDEX;
+        break;
+    }
+    case SIOCGIWENCODE:
+    {
+        unsigned char    key[IW_ENCODING_TOKEN_MAX];
+        if(event->u.data.pointer)
+            memcpy(key, event->u.data.pointer, event->u.data.length);
+        else
+            event->u.data.flags |= IW_ENCODE_NOKEY;
+        printf("                    Encryption key:");
+        if(event->u.data.flags & IW_ENCODE_DISABLED)
+            printf("off\n");
+        else
+        {
+            /* Display the key */
+            iw_print_key(buffer, sizeof(buffer), key, event->u.data.length,
+                         event->u.data.flags);
+            printf("%s", buffer);
+
+            /* Other info... */
+            if((event->u.data.flags & IW_ENCODE_INDEX) > 1)
+                printf(" [%d]", event->u.data.flags & IW_ENCODE_INDEX);
+            if(event->u.data.flags & IW_ENCODE_RESTRICTED)
+                printf("   Security mode:restricted");
+            if(event->u.data.flags & IW_ENCODE_OPEN)
+                printf("   Security mode:open");
+            printf("\n");
+        }
+    }
+    break;
+    case SIOCGIWRATE: /* "Bitrates" */ { break; }
+    case SIOCGIWMODUL: { break; }
+    case IWEVQUAL:
+        iw_print_stats(buffer, sizeof(buffer),
+                       &event->u.qual, iw_range, has_range);
+        printf("                    %s\n", buffer);
+        break;
+    case IWEVGENIE:
+        /* Informations Elements are complex, let's do only some of them */
+        iw_print_gen_ie(reinterpret_cast<unsigned char*>(event->u.data.pointer), event->u.data.length);
+        break;
+    case IWEVCUSTOM: // "Extra"
+      break;
+    default:
+        LOG_ERROR << "Unknown Wireless Token " << std::hex << event->cmd;
+    }
+}
+
+int print_scanning_info(int skfd, std::string adapter, std::vector<WifiNetwork>& networks)
+{
+    int timeout = 15000000;        /* 15s */
+
+    iw_range    range;
+    bool has_range = iw_get_range_info(skfd, adapter.c_str(), &range) != -1;
+    if((!has_range) || (range.we_version_compiled < 14))
+    {
+        LOG_ERROR << adapter << " does not support scanning";
+        return false;
+    }
+
+    struct timeval    tv;
+    tv.tv_sec = 0;
+    tv.tv_usec = 10000;
+
+    iw_scan_req scanopt;
+    memset(&scanopt, 0, sizeof(scanopt));
+
+    iwreq wrq;
+    wrq.u.data.pointer = NULL;
+    wrq.u.data.flags = 0;
+    wrq.u.data.length = 0;
+
+    LOG_INFO << "Scanning...";
+
+    if(iw_set_ext(skfd, adapter.c_str(), SIOCSIWSCAN, &wrq) < 0)
+    {
+        LOG_ERROR << adapter << " does not support scanning. Error " << errno;
+        //return false;
+    }
+
+    timeout -= tv.tv_usec;
+    std::vector<unsigned char> buffer;
+    while(1)
+    {
+        fd_set rfds;
+
+        FD_ZERO(&rfds);
+        int last_fd = -1;
+
+        int ret = select(last_fd + 1, &rfds, NULL, NULL, &tv);
+
+        if(ret < 0)
+        {
+            if(errno == EAGAIN || errno == EINTR)
+                continue;
+            LOG_ERROR << "Unhandled signal";
+            return false;
+        }
+        else if(ret == 0)
+        {
+            unsigned char *    newbuf;
+
+            int            buflen = IW_SCAN_MAX_DATA; /* Min for compat WE<17 */
+
+            bool needModeData = false;
+            buffer.resize(buflen);
+
+            wrq.u.data.pointer = buffer.data();
+            wrq.u.data.flags = 0;
+            wrq.u.data.length = buflen;
+
+            int res = 0;
+
+            while((res = iw_get_ext(skfd, adapter.c_str(), SIOCGIWSCAN, &wrq)) < 0 &&
+                  (errno == E2BIG) &&
+                  (range.we_version_compiled > 16))
+            {
+              if(wrq.u.data.length > buflen)
+                  buflen = wrq.u.data.length;
+              else
+                  buflen *= 2;
+
+            }
+
+            if (res < 0)
+            {
+              if(errno == EAGAIN)
+              {
+                  tv.tv_sec = 0;
+                  tv.tv_usec = 100000;
+                  timeout -= tv.tv_usec;
+                  if(timeout > 0)
+                      continue;    /* Try again later */
+              }
+              
+              LOG_ERROR << "Bad scan result..." << res;
+            }
+            else
+                break;
+        }
+    }
+
+    if(wrq.u.data.length)
+    {
+        struct iw_event        iwe;
+        struct stream_descr    stream;
+        struct iwscan_state    state = { .ap_num = 1, .val_index = 0 };
+        int ret;
+
+        LOG_INFO << adapter << " scan completed";
+        iw_init_event_stream(&stream, reinterpret_cast<char*>(buffer.data()), wrq.u.data.length);
+        do
+        {
+            ret = iw_extract_event_stream(&stream, &iwe,
+                                          range.we_version_compiled);
+            if(ret > 0)
+                print_scanning_token(&stream, &iwe, &state,
+                                     &range, has_range, networks);
+        }
+        while(ret > 0);
+    }
+    else
+        LOG_INFO << "No scan info...";
+
+    return true;
+}
+
+
+int main(int    argc, char **    argv)
+{
+    const char *dev = "wlp4s0";
+
+    int skfd = iw_sockets_open();
+    if(skfd < 0)
+    {
+        LOG_ERROR << "Can't conenct to kernel...";
+        return false;
+    }
+
+    std::vector<WifiNetwork> networks;
+    print_scanning_info(skfd, dev, networks);
+
+    iw_sockets_close(skfd);
+
+    for (auto& n : networks)
+    {
+        LOG_ERROR << "\n" << n.SSID << "<- Was found";
+    }
+
+    return 0;
+}
