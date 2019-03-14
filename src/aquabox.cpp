@@ -33,7 +33,7 @@ int AquaBox::start()
 
     m_router.initFromDescription(initRestApi());
 
-    m_server = std::make_unique<Pistache::Http::Endpoint>(address);
+    m_server = std::make_shared<Pistache::Http::Endpoint>(address);
     auto opts = Pistache::Http::Endpoint::options().threads(1).flags(Pistache::Tcp::Options::ReuseAddr);
     
     try

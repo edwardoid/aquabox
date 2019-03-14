@@ -13,7 +13,7 @@ const std::string Settings::WIFI_ENCRYPTION = "encryption";
 bool Settings::dataToWrite = false;
 bool Settings::ready = false;
 std::recursive_mutex Settings::mx;
-JsonWrapper Settings::json;
+nlohmann::json Settings::json;
 
 void Settings::read()
 {
@@ -24,8 +24,8 @@ void Settings::read()
     std::string line; 
     while(std::getline(is, line))
         content += line + "\n";
-    
-    json.Parse(content);
+    if(!content.empty())
+        json = json.parse(content);
     ready = true;
 }
 
@@ -36,14 +36,14 @@ void Settings::write()
     if (!dataToWrite)
         return;
     std::ofstream os(Config::ConfigurationFile);
-    os << json.str();
+    os << json.dump(4);
     dataToWrite = false;
 }
 
 void Settings::set(std::string key, bool value)
 {
     std::lock_guard<std::recursive_mutex> lock(mx);
-    json.set(key, value);
+    json[key, value];
     dataToWrite = true;
     write();
 }
@@ -51,7 +51,7 @@ void Settings::set(std::string key, bool value)
 void Settings::set(std::string key, int value)
 {
     std::lock_guard<std::recursive_mutex> lock(mx);
-    json.set(key, value);
+    json[key] = value;
     dataToWrite = true;
     write();
 }
@@ -59,7 +59,7 @@ void Settings::set(std::string key, int value)
 void Settings::set(std::string key, double value)
 {
     std::lock_guard<std::recursive_mutex> lock(mx);
-    json.set(key, value);
+    json[key] = value;
     dataToWrite = true;
     write();
 }
@@ -67,7 +67,7 @@ void Settings::set(std::string key, double value)
 void Settings::set(std::string key, std::string value)
 {
     std::lock_guard<std::recursive_mutex> lock(mx);
-    json.set(key, value);
+    json[key] = value;
     dataToWrite = true;
     write();
 }
@@ -75,6 +75,12 @@ void Settings::set(std::string key, std::string value)
 bool Settings::boolean(std::string key, bool def)
 {
     std::lock_guard<std::recursive_mutex> lock(mx);
+    auto pos = json.find(key);
+    if (pos != json.end())
+    {
+        if (pos->is_boolean())
+            return pos->get<bool>();
+    }
 }
 
 int Settings::integer(std::string key, int def)
@@ -82,11 +88,11 @@ int Settings::integer(std::string key, int def)
     std::lock_guard<std::recursive_mutex> lock(mx);
     if (!ready)
         read();
-    auto pos = json.FindMember(key.c_str());
-    if (pos != json.MemberEnd())
+    auto pos = json.find(key);
+    if (pos != json.end())
     {
-        if (pos->value.IsInt())
-            return pos->value.GetInt();
+        if (pos->is_number())
+            return pos->get<int>();
     }
 
     set(key, def);
@@ -103,11 +109,11 @@ std::string Settings::string(std::string key, std::string def)
     std::lock_guard<std::recursive_mutex> lock(mx);
     if (!ready)
         read();
-    auto pos = json.FindMember(key.c_str());
-    if (pos != json.MemberEnd())
+    auto pos = json.find(key.c_str());
+    if (pos != json.end())
     {
-        if (pos->value.IsString())
-            return pos->value.GetString();
+        if (pos->is_string())
+            return pos->get<std::string>();
     }
 
     set(key, def);
@@ -117,10 +123,4 @@ std::string Settings::string(std::string key, std::string def)
 bool Settings::has(std::string key)
 {
     std::lock_guard<std::recursive_mutex> lock(mx);
-}
-
-JsonWrapper& Settings::obj()
-{
-    std::lock_guard<std::recursive_mutex> lock(mx);
-    return json;
 }

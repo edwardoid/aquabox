@@ -1,7 +1,7 @@
 #ifndef SETTINGS_H
 #define SETTINGS_H
 
-#include "jsonwrapper.h"
+#include <nlohmann/json.hpp>
 #include <string>
 #include <mutex>
 
@@ -30,12 +30,11 @@ namespace aquabox
         static double floating(std::string key, double value);
         static std::string string(std::string key, std::string def);
         static bool has(std::string key);
-        static JsonWrapper& obj();
     private:
         static bool dataToWrite;
         static bool ready;
         static std::recursive_mutex mx;
-        static JsonWrapper json;
+        static nlohmann::json json;
     };
 }
 

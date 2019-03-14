@@ -4,7 +4,6 @@
 #include <string>
 #include <vector>
 #include "log.h"
-#include "jsonwrapper.h"
 #include "pistache/http.h"
 #include "pistache/router.h"
 #include "pistache/description.h"
@@ -30,7 +29,6 @@ namespace aquabox
     {
         using Request = Pistache::Rest::Request; 
         using Response = Pistache::Http::ResponseWriter;
-        using Json = JsonWrapper;
 
         DECLARE_API_IMPL(Status);
         DECLARE_API_IMPL(WiFiQR);

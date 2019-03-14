@@ -2,6 +2,8 @@
 #include "log.h"
 #include "qr.h"
 #include "settings.h"
+#include "config.h"
+#include <nlohmann/json.hpp>
 #include <stdio.h>
 #include <random>
 using namespace aquabox::rest;
@@ -9,13 +11,26 @@ using namespace Pistache;
 
 DEFINE_API_IMPL(Status)
 {
-    Json res;
-    res.set("setupComplete", false);
-    res.set("ssid", Settings::string(Settings::SSID, ""));
-    res.set("password", Settings::string(Settings::WIFI_PASSWORD, ""));
-    res.set("encryption", Settings::string(Settings::WIFI_ENCRYPTION, "none"));
+    nlohmann::json wifi({
+        { "ssid" , Settings::string(Settings::SSID, "") },
+        { "password" , Settings::string(Settings::WIFI_PASSWORD, "")},
+        { "encryption" , Settings::string(Settings::WIFI_ENCRYPTION, "")}
+    });
 
-    response.send(Http::Code::Ok, res.str());
+    nlohmann::json version({
+        { "version" , Config::VERSION },
+        { "build" , Config::GIT_HASH },
+        { "major" , Config::VERSION_MAJOR },
+        { "minor" , Config::VERSION_MINOR }
+    });
+
+    nlohmann::json status({
+        { "setupComplete" , false },
+        { "version" , version },
+        { "wifi" , wifi }
+    });
+
+    response.send(Http::Code::Ok, status.dump(4));
 }
 
 DEFINE_API_IMPL(WiFiQR)

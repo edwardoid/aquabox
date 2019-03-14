@@ -22,7 +22,7 @@ namespace aquabox
     private:
         Pistache::Rest::Description initRestApi();
     private:
-        std::unique_ptr<Pistache::Http::Endpoint> m_server;
+        std::shared_ptr<Pistache::Http::Endpoint> m_server;
         Pistache::Rest::Description m_desc;
         Pistache::Rest::Router m_router;
         rest::API REST;

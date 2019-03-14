@@ -56,18 +56,21 @@ bool Qr::create(std::string data, std::string pngPath, double zoomFactor)
 	png_ptr = png_create_write_struct(PNG_LIBPNG_VER_STRING, NULL, NULL, NULL);
 	if(png_ptr == NULL) {
 		LOG_ERROR << "Failed to initialize PNG writer.";
+		fclose(fp);
 		return false;
 	}
 
 	info_ptr = png_create_info_struct(png_ptr);
 	if(info_ptr == NULL) {
 		LOG_ERROR << "Failed to initialize PNG write.\n";
+		fclose(fp);
         return false;
 	}
 
 	if(setjmp(png_jmpbuf(png_ptr))) {
 		png_destroy_write_struct(&png_ptr, &info_ptr);
 		LOG_ERROR <<  "Failed to write PNG image.";
+		fclose(fp);
 		return false;
 	}
     

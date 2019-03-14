@@ -10,6 +10,7 @@ namespace aquabox
         static const std::string APPLICATION;
         static const std::string DESCRIPTION;
         static const std::string VERSION;
+        static const std::string GIT_HASH;
         static const uint16_t VERSION_MAJOR;
         static const uint16_t VERSION_MINOR;
         static const std::string LOCK_FILE;
