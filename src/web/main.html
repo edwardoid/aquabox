@@ -1,0 +1,49 @@
+<ons-page>
+<ons-splitter ng-controller="PageCtrl">
+    <ons-splitter-side id="menu" side="right" width="220px" collapse swipeable>
+        <ons-page>
+            <ons-list>
+                <ons-list-item ng-click="loadPage('home.html')" tappable>
+                    Home
+                </ons-list-item>
+                <ons-list-item ng-click="loadPage('status.html')" tappable>
+                    Cards
+                </ons-list-item>
+                <ons-list-item ng-click="loadPage('status.html')" tappable>
+                    Status
+                </ons-list-item>
+            </ons-list>
+        </ons-page>
+    </ons-splitter-side>
+    <ons-splitter-content>
+        <ons-navigator var="navi" page="home.html"></ons-navigator>
+    </ons-splitter-content>
+</ons-splitter>
+
+<template id="home.html">
+    <ons-page>
+        <ons-toolbar>
+            <div class="center">
+                Splitter+Navigator
+            </div>
+            <div class="right">
+                <ons-toolbar-button ng-click="openMenu()">
+                    <ons-icon icon="md-menu"></ons-icon>
+                </ons-toolbar-button>
+            </div>
+        </ons-toolbar>
+
+        <h2>Home</h2>
+        <div style="text-align: center">
+            <br>
+            <ons-button ng-click="navi.pushPage('pageNav1.html')">
+                Push Page
+            </ons-button>
+        </div>
+
+        <p style="text-align: center; opacity: 0.6; padding-top: 20px;">
+            Swipe left to open the menu!
+        </p>
+    </ons-page>
+</template>
+</ons-page>
