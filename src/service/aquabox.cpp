@@ -4,6 +4,7 @@
 #include "lockfile.h"
 #include "log.h"
 #include "restapi.h"
+#include "path.h"
 #include "pistache/net.h"
 #include "pistache/http.h"
 #include "pistache/router.h"
@@ -20,7 +21,6 @@ AquaBox::AquaBox()
 int AquaBox::start()
 {
     Lockfile lock;
-    srand(time(NULL));
 
     LOG_INFO << "Starting " << Config::APPLICATION << " ver. " << std::hex << Config::VERSION_MAJOR << "." << Config::VERSION_MINOR;
     if(lock.exists())
@@ -29,12 +29,45 @@ int AquaBox::start()
         std::exit(EXIT_FAILURE);
     }
 
+    srand(time(NULL));
+    std::string procPath = "/proc/";
+    procPath += std::to_string(static_cast<int>(getpid()));
+    procPath += "/exe";
+
+    char cwd[1024];
+    memset(cwd,'\0', 1024);
+
+    int bytes = std::min<size_t>(readlink(procPath.c_str(), cwd, 1024), 1024 - 1);
+    if(bytes >= 0)
+        cwd[bytes] = '\0';
+
+    Path wd = Settings::string(Settings::WORKING_DIRECTORY, cwd);
+    if (!wd.normalize())
+    {
+        LOG_ERROR << "Bad working directory path " << wd;
+    }
+    else
+    {
+        if(0 != chdir(wd.c_str()))
+        {
+            LOG_ERROR << "Can't change working directory to " << wd << " errno: " << errno << " : " << strerror(errno);
+        }
+        else
+        {
+            LOG_INFO << "Changed workign direcotry to " << wd;
+        }
+    }
+
     Pistache::Address address(Pistache::Ipv4::any(), Settings::integer(Settings::HTTP_PORT, Config::REST_PORT));
 
-    m_router.initFromDescription(initRestApi());
+
+    initRestApi();
+    m_webServer.setRoot(m_desc, "", Settings::string(Settings::WEB_ROOT, cwd), true);
+
+    m_router.initFromDescription(m_desc);
 
     m_server = std::make_shared<Pistache::Http::Endpoint>(address);
-    auto opts = Pistache::Http::Endpoint::options().threads(1).flags(Pistache::Tcp::Options::ReuseAddr);
+    auto opts = Pistache::Http::Endpoint::options().threads(1).flags(Pistache::Tcp::Options::ReuseAddr | Pistache::Tcp::Options::InstallSignalHandler);
     
     try
     {
@@ -65,13 +98,12 @@ Pistache::Rest::Description AquaBox::initRestApi()
 
     m_desc = Pistache::Rest::Description(Config::APPLICATION, Config::VERSION, Config::DESCRIPTION);
     m_desc.info().contact(Config::APPLICATION, "", Config::EMAIL);
+    auto error = m_desc.response(Http::Code::Internal_Server_Error, "An error occured with the backend");
 
     m_desc.schemes(Scheme::Http)
             .basePath("/v1")
             .produces(MIME(Application, Json))
             .consumes(MIME(Application, Json));
-
-    auto error = m_desc.response(Http::Code::Internal_Server_Error, "An error occured with the backend");
 
     auto v1 = m_desc.path("/v1");
 

@@ -1,5 +1,8 @@
 {
+    "workingDirectory" : "/home/esargsyan/Pr/aquabox",
+    "webRoot" : "./src/web",
     "httpPort": 8974,
+    "http": "",
     "encryption": "WPA",
     "ssid": "Sargsyan5",
     "password": "azazello"

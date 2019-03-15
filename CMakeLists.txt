@@ -53,7 +53,7 @@ include_directories(${PISTACHE_INCLUDE_DIR})
 include_directories(${QRENDOCE_INCLUDE_DIR})
 include_directories(${NLOHMANN_INCLUDE_DIR})
 
-file(GLOB SOURCES "src/*.cpp")
+file(GLOB SOURCES "src/service/*.cpp")
 
 add_executable(${PROJECT_NAME} ${SOURCES})
 set(AB_V 1)

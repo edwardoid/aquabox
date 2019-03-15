@@ -5,6 +5,10 @@
 
 using namespace aquabox;
 
+
+const std::string Settings::WORKING_DIRECTORY = "workingDirectory";
+const std::string Settings::WEB_ROOT = "webRoot";
+
 const std::string Settings::HTTP_PORT = "httpPort";
 const std::string Settings::SSID = "ssid";
 const std::string Settings::WIFI_PASSWORD = "password";

@@ -15,6 +15,9 @@ namespace aquabox
         static void write();
     public:
 
+        static const std::string WORKING_DIRECTORY;
+        static const std::string WEB_ROOT;
+
         static const std::string HTTP_PORT;
         static const std::string SSID;
         static const std::string WIFI_PASSWORD;

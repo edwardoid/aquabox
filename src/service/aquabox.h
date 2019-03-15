@@ -6,6 +6,7 @@
 #include "pistache/router.h"
 #include "pistache/endpoint.h"
 #include "restapi.h"
+#include "web.h"
 #include <memory>
 
 namespace aquabox
@@ -25,6 +26,7 @@ namespace aquabox
         std::shared_ptr<Pistache::Http::Endpoint> m_server;
         Pistache::Rest::Description m_desc;
         Pistache::Rest::Router m_router;
+        ServeDir m_webServer;
         rest::API REST;
     };
 }
