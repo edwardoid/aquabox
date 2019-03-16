@@ -6,6 +6,7 @@
 #include "pistache/router.h"
 #include "pistache/endpoint.h"
 #include "restapi.h"
+#include "device.h"
 #include "web.h"
 #include <memory>
 
@@ -16,14 +17,20 @@ namespace aquabox
         AquaBox(const AquaBox&) = delete;
         AquaBox(AquaBox&&) = delete;
         AquaBox& operator = (const AquaBox&) = delete;
-    public:
         AquaBox();
+        static AquaBox Instance;
+    public:
+        static AquaBox& i();
         int start();
         ~AquaBox() = default;
+        const std::vector<Device>& devices() const;
     private:
         Pistache::Rest::Description initRestApi();
+        void readDevices();
     private:
+        plog::ColorConsoleAppender<plog::TxtFormatter> m_consoleAppender;
         std::shared_ptr<Pistache::Http::Endpoint> m_server;
+        std::vector<Device> m_devices;
         Pistache::Rest::Description m_desc;
         Pistache::Rest::Router m_router;
         ServeDir m_webServer;

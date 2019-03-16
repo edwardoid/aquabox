@@ -23,16 +23,21 @@ namespace aquabox
         static const std::string WIFI_PASSWORD;
         static const std::string WIFI_ENCRYPTION;
 
+        static const std::string DEVICES;
+
         static void set(std::string key, bool value);
         static void set(std::string key, int value);
         static void set(std::string key, double value);
         static void set(std::string key, std::string value);
+        static void set(std::string key, nlohmann::json value);
 
         static bool boolean(std::string key, bool def);
         static int integer(std::string key, int def);
         static double floating(std::string key, double value);
         static std::string string(std::string key, std::string def);
         static bool has(std::string key);
+
+        static std::vector<nlohmann::json> array(std::string key);
     private:
         static bool dataToWrite;
         static bool ready;

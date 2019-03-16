@@ -31,12 +31,14 @@ namespace aquabox
         using Response = Pistache::Http::ResponseWriter;
 
         DECLARE_API_IMPL(Status);
+        DECLARE_API_IMPL(Devices);
         DECLARE_API_IMPL(WiFiQR);
 
         struct API
         {
             ENABLE_API(Status)
             ENABLE_API(WiFiQR)
+            ENABLE_API(Devices)
         };
     }
 }

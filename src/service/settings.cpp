@@ -14,6 +14,8 @@ const std::string Settings::SSID = "ssid";
 const std::string Settings::WIFI_PASSWORD = "password";
 const std::string Settings::WIFI_ENCRYPTION = "encryption";
 
+const std::string Settings::DEVICES = "devices";
+
 bool Settings::dataToWrite = false;
 bool Settings::ready = false;
 std::recursive_mutex Settings::mx;
@@ -46,29 +48,25 @@ void Settings::write()
 
 void Settings::set(std::string key, bool value)
 {
-    std::lock_guard<std::recursive_mutex> lock(mx);
-    json[key, value];
-    dataToWrite = true;
-    write();
+    set(key, nlohmann::json(value));
 }
 
 void Settings::set(std::string key, int value)
 {
-    std::lock_guard<std::recursive_mutex> lock(mx);
-    json[key] = value;
-    dataToWrite = true;
-    write();
+    set(key, nlohmann::json(value));
 }
 
 void Settings::set(std::string key, double value)
 {
-    std::lock_guard<std::recursive_mutex> lock(mx);
-    json[key] = value;
-    dataToWrite = true;
-    write();
+    set(key, nlohmann::json(value));
 }
 
 void Settings::set(std::string key, std::string value)
+{
+    set(key, nlohmann::json(value));
+}
+
+void Settings::set(std::string key, nlohmann::json value)
 {
     std::lock_guard<std::recursive_mutex> lock(mx);
     json[key] = value;
@@ -122,6 +120,23 @@ std::string Settings::string(std::string key, std::string def)
 
     set(key, def);
     return def;
+}
+
+std::vector<nlohmann::json> Settings::array(std::string key)
+{
+    std::lock_guard<std::recursive_mutex> lock(mx);
+    if (!ready)
+        read();
+    auto pos = json.find(key.c_str());
+    if (pos != json.end())
+    {
+        if (pos->is_array())
+            return pos->get<std::vector<nlohmann::json>>();
+    }
+
+    set(key, nlohmann::json::array());
+    return {};
+
 }
 
 bool Settings::has(std::string key)

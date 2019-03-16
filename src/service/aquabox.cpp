@@ -13,6 +13,14 @@
 
 using namespace aquabox;
 
+AquaBox AquaBox::Instance;
+
+
+AquaBox& AquaBox::i()
+{
+    return Instance;
+}
+
 AquaBox::AquaBox()
     : m_desc(Config::APPLICATION, Config::VERSION, Config::DESCRIPTION)
 {
@@ -20,6 +28,8 @@ AquaBox::AquaBox()
 
 int AquaBox::start()
 {
+    plog::init(plog::verbose, &m_consoleAppender);
+    
     Lockfile lock;
 
     LOG_INFO << "Starting " << Config::APPLICATION << " ver. " << std::hex << Config::VERSION_MAJOR << "." << Config::VERSION_MINOR;
@@ -41,6 +51,8 @@ int AquaBox::start()
     if(bytes >= 0)
         cwd[bytes] = '\0';
 
+    
+
     Path wd = Settings::string(Settings::WORKING_DIRECTORY, cwd);
     if (!wd.normalize())
     {
@@ -60,7 +72,7 @@ int AquaBox::start()
 
     Pistache::Address address(Pistache::Ipv4::any(), Settings::integer(Settings::HTTP_PORT, Config::REST_PORT));
 
-
+    readDevices();
     initRestApi();
     m_webServer.setRoot(m_desc, "", Settings::string(Settings::WEB_ROOT, cwd), true);
 
@@ -105,10 +117,15 @@ Pistache::Rest::Description AquaBox::initRestApi()
             .produces(MIME(Application, Json))
             .consumes(MIME(Application, Json));
 
-    auto v1 = m_desc.path("/v1");
+    auto v1 = m_desc.path("/api/v1");
 
     v1.route(m_desc.get("/status"), "Get system current state")
        .bind(&rest::API::Status, &REST)
+       .produces(MIME(Application, Json))
+       .response(error);
+
+    v1.route(m_desc.get("/devices"), "Get available devices")
+       .bind(&rest::API::Devices, &REST)
        .produces(MIME(Application, Json))
        .response(error);
 
@@ -119,4 +136,22 @@ Pistache::Rest::Description AquaBox::initRestApi()
        .response(error);
 
     return m_desc;
+}
+
+void AquaBox::readDevices()
+{
+    auto devs = Settings::array(Settings::DEVICES);
+    
+    LOG_INFO << "Loading " << devs.size() << " devices...";
+    for (auto d : devs)
+    {
+        Device dev;
+        if(dev.init(d))
+            m_devices.push_back(dev);
+    }
+}
+
+const std::vector<Device>& AquaBox::devices() const
+{
+    return m_devices;
 }

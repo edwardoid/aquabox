@@ -7,16 +7,14 @@
     <script src="static/js/angular-onsenui.min.js"></script>
     <script src="static/js/app.js"></script>
     <script src="https://unpkg.com/jquery/dist/jquery.js"></script>
+    <script src="static/js/ngStorage.js"></script>
 
     <link rel="stylesheet" href="static//css/onsen-css-components.min.css">
     <link rel="stylesheet" href="static/css/onsenui.css">
 </head>
 
-<body>
-    <ons-navigator var="navi" page="login.html"></ons-navigator>
-
-    <template id="main">
-    </template>
+<body ng-controller='LoginController'>
+    <ons-navigator var="navi" page="{{initialPage}}"></ons-navigator>
 </body>
 
 </html>

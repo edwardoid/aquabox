@@ -1,9 +1,62 @@
 {
-    "workingDirectory" : "/home/esargsyan/Pr/aquabox",
-    "webRoot" : "./src/web",
-    "httpPort": 8974,
-    "http": "",
     "encryption": "WPA",
+    "http": "",
+    "httpPort": 8974,
+    "password": "azazello",
     "ssid": "Sargsyan5",
-    "password": "azazello"
+    "webRoot": "./src/web",
+    "workingDirectory": "/home/edward/Programming/aquabox",
+
+    "devices": [
+        {
+            "id" : "dev0",
+            "name" : "CristalProfi",
+            "class" : "relay",
+            "type" : "filter",
+            "meta": {
+                "vendor" : "jbl",
+                "model" : "CristalProfi e401"
+            }
+        },
+        {
+            "id" : "dev1",
+            "name" : "Light 5400lm",
+            "class" : "relay",
+            "type" : "light",
+            "meta": {
+                "vendor" : "daytime",
+                "model" : "80.3"
+            }
+        },
+        {
+            "id" : "dev2",
+            "name" : "Light 1000lm",
+            "class" : "relay",
+            "type" : "light",
+            "meta": {
+                "vendor" : "eheim",
+                "model" : "classicLED"
+            }
+        },
+        {
+            "id" : "dev3",
+            "name" : "Heater",
+            "class" : "relay",
+            "type" : "heater",
+            "meta": {
+                "vendor" : "juwel",
+                "model" : "100W"
+            }
+        },
+        {
+            "id" : "dev4",
+            "name" : "CO2",
+            "class" : "relay",
+            "type" : "co2",
+            "meta": {
+                "vendor" : "generic_co2",
+                "model" : "acid+biocarabonade"
+            }
+        }
+    ]
 }

@@ -1,3 +1,4 @@
+
 function jumpToPage(target) {
   console.log("Going to");
   if (target === "main") {
@@ -5,8 +6,30 @@ function jumpToPage(target) {
   }
 }
 
-ons.bootstrap()
-  .controller('PageCtrl', function ($scope) {
+var login = function(){}
+
+var bootstrap = ons.bootstrap(['ngStorage']);
+
+bootstrap
+  .controller('LoginController', function($scope, $localStorage) {
+      var token = $localStorage.$default({
+        token : "xxxx"
+      });
+
+      var initialPage = token.length > 0 ? "main.html" : "login.html"
+
+
+      $scope.login = function() {
+        $localStorage.token = "ZZZZ";
+        navi.pushPage('main.html')
+      }
+
+
+      login = $scope.login
+  });
+
+bootstrap
+  .controller('PageCtrl', function ($scope, $localStorage) {
     $scope.openMenu = function () {
       var menu = document.getElementById('menu');
       menu.open();
@@ -22,6 +45,25 @@ ons.bootstrap()
     document.addEventListener('init', function (event) {
     });
   });
+bootstrap
+  .controller("DevicesListController", function ($scope, $http, $timeout) {
+      var ts = this;
+      this.devices = []
+
+      this.load = function($done) {
+        $http.get("/api/v1/devices").then(
+          function successCallBack(response) {
+            ts.devices = response.data.devices  
+            if($done)
+              $done();
+          },
+          function errorCallBack(response) {   
+            if($done)
+              $done();
+          }
+        )
+      };
+  });
 
 document.addEventListener('init', function (event) {
   if (event.target.id === 'pageNav1') {
@@ -33,15 +75,3 @@ document.addEventListener('init', function (event) {
     event.target.querySelector('ons-card div.title').textContent = cardTitle;
   }
 });
-
-var customPush = function () {
-  navi.pushPage('pageNav1.html', { data: { title: navi.topPage.querySelector('ons-input').value } })
-};
-
-var customPush2 = function (event) {
-  navi.pushPage('pageNav2.html', { data: { cardTitle: event.target.textContent } })
-};
-
-function login() {
-  jumpToPage("main");
-}

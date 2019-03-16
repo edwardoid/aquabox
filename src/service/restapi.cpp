@@ -3,6 +3,7 @@
 #include "qr.h"
 #include "settings.h"
 #include "config.h"
+#include "aquabox.h"
 #include <nlohmann/json.hpp>
 #include <stdio.h>
 #include <random>
@@ -61,4 +62,17 @@ DEFINE_API_IMPL(WiFiQR)
             std::remove(path.c_str());
         },
         Async::IgnoreException);
+}
+
+
+DEFINE_API_IMPL(Devices)
+{
+    std::vector<nlohmann::json> all;
+    for (auto& dev : AquaBox::i().devices())
+    {
+        all.push_back(dev.data());
+    }
+    nlohmann::json res = nlohmann::json::object();
+    res["devices"] = all;
+    response.send(Http::Code::Ok, res.dump(4));
 }
