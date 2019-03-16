@@ -10,6 +10,21 @@
 using namespace aquabox::rest;
 using namespace Pistache;
 
+DEFINE_API_IMPL(Login)
+{
+    auto raw = request.body();
+    for(auto& user : AquaBox::i().users())
+    {
+        LOG_DEBUG << "Existing user " << user.token() << " comparing with " << raw;
+        if(user.token() == raw)
+        {
+            response.send(Http::Code::Ok);
+        }
+    }
+
+    response.send(Http::Code::Forbidden);
+}
+
 DEFINE_API_IMPL(Status)
 {
     nlohmann::json wifi({

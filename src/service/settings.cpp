@@ -15,6 +15,7 @@ const std::string Settings::WIFI_PASSWORD = "password";
 const std::string Settings::WIFI_ENCRYPTION = "encryption";
 
 const std::string Settings::DEVICES = "devices";
+const std::string Settings::USERS = "users";
 
 bool Settings::dataToWrite = false;
 bool Settings::ready = false;

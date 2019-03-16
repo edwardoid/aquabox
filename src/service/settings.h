@@ -24,6 +24,7 @@ namespace aquabox
         static const std::string WIFI_ENCRYPTION;
 
         static const std::string DEVICES;
+        static const std::string USERS;
 
         static void set(std::string key, bool value);
         static void set(std::string key, int value);

@@ -73,6 +73,7 @@ int AquaBox::start()
     Pistache::Address address(Pistache::Ipv4::any(), Settings::integer(Settings::HTTP_PORT, Config::REST_PORT));
 
     readDevices();
+    readUsers();
     initRestApi();
     m_webServer.setRoot(m_desc, "", Settings::string(Settings::WEB_ROOT, cwd), true);
 
@@ -119,6 +120,11 @@ Pistache::Rest::Description AquaBox::initRestApi()
 
     auto v1 = m_desc.path("/api/v1");
 
+    v1.route(m_desc.post("/login"), "Authenticate")
+       .bind(&rest::API::Login, &REST)
+       .produces(MIME(Application, Json))
+       .response(error);
+
     v1.route(m_desc.get("/status"), "Get system current state")
        .bind(&rest::API::Status, &REST)
        .produces(MIME(Application, Json))
@@ -151,7 +157,25 @@ void AquaBox::readDevices()
     }
 }
 
+void AquaBox::readUsers()
+{
+    auto users = Settings::array(Settings::USERS);
+    
+    LOG_INFO << "Loading " << users.size() << " users...";
+    for (auto u : users)
+    {
+        User usr;
+        if(usr.init(u))
+            m_users.push_back(usr);
+    }
+}
+
 const std::vector<Device>& AquaBox::devices() const
 {
     return m_devices;
+}
+
+const std::vector<User>& AquaBox::users() const
+{
+    return m_users;
 }

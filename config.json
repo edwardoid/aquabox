@@ -1,62 +1,67 @@
 {
+    "devices": [
+        {
+            "class": "relay",
+            "id": "dev0",
+            "meta": {
+                "model": "CristalProfi e401",
+                "vendor": "jbl"
+            },
+            "name": "CristalProfi",
+            "type": "filter"
+        },
+        {
+            "class": "relay",
+            "id": "dev1",
+            "meta": {
+                "model": "80.3",
+                "vendor": "daytime"
+            },
+            "name": "Light 5400lm",
+            "type": "light"
+        },
+        {
+            "class": "relay",
+            "id": "dev2",
+            "meta": {
+                "model": "classicLED",
+                "vendor": "eheim"
+            },
+            "name": "Light 1000lm",
+            "type": "light"
+        },
+        {
+            "class": "relay",
+            "id": "dev3",
+            "meta": {
+                "model": "100W",
+                "vendor": "juwel"
+            },
+            "name": "Heater",
+            "type": "heater"
+        },
+        {
+            "class": "relay",
+            "id": "dev4",
+            "meta": {
+                "model": "acid+biocarabonade",
+                "vendor": "generic_co2"
+            },
+            "name": "CO2",
+            "type": "co2"
+        }
+    ],
     "encryption": "WPA",
     "http": "",
     "httpPort": 8974,
     "password": "azazello",
     "ssid": "Sargsyan5",
-    "webRoot": "./src/web",
-    "workingDirectory": "/home/edward/Programming/aquabox",
-
-    "devices": [
+    "users": [
         {
-            "id" : "dev0",
-            "name" : "CristalProfi",
-            "class" : "relay",
-            "type" : "filter",
-            "meta": {
-                "vendor" : "jbl",
-                "model" : "CristalProfi e401"
-            }
-        },
-        {
-            "id" : "dev1",
-            "name" : "Light 5400lm",
-            "class" : "relay",
-            "type" : "light",
-            "meta": {
-                "vendor" : "daytime",
-                "model" : "80.3"
-            }
-        },
-        {
-            "id" : "dev2",
-            "name" : "Light 1000lm",
-            "class" : "relay",
-            "type" : "light",
-            "meta": {
-                "vendor" : "eheim",
-                "model" : "classicLED"
-            }
-        },
-        {
-            "id" : "dev3",
-            "name" : "Heater",
-            "class" : "relay",
-            "type" : "heater",
-            "meta": {
-                "vendor" : "juwel",
-                "model" : "100W"
-            }
-        },
-        {
-            "id" : "dev4",
-            "name" : "CO2",
-            "class" : "relay",
-            "type" : "co2",
-            "meta": {
-                "vendor" : "generic_co2",
-                "model" : "acid+biocarabonade"
-            }
+            "user" : "admin",
+            "password" : "pass"
         }
-    ]
+    ],
+    "webRoot": "./src/web",
+    "workingDirectory": "/home/esargsyan/Pr/aquabox"
 }

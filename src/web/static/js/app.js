@@ -1,52 +1,10 @@
+var app = ons.bootstrap('aquabox', ['onsen', 'ngStorage']);
+var pc = undefined;
+var TOKEN_KEY = 'aquabox-user-token'
+var authenticated = false;
 
-function jumpToPage(target) {
-  console.log("Going to");
-  if (target === "main") {
-    navi.pushPage('main.html')
-  }
-}
-
-var login = function(){}
-
-var bootstrap = ons.bootstrap(['ngStorage']);
-
-bootstrap
-  .controller('LoginController', function($scope, $localStorage) {
-      var token = $localStorage.$default({
-        token : "xxxx"
-      });
-
-      var initialPage = token.length > 0 ? "main.html" : "login.html"
-
-
-      $scope.login = function() {
-        $localStorage.token = "ZZZZ";
-        navi.pushPage('main.html')
-      }
-
-
-      login = $scope.login
-  });
-
-bootstrap
-  .controller('PageCtrl', function ($scope, $localStorage) {
-    $scope.openMenu = function () {
-      var menu = document.getElementById('menu');
-      menu.open();
-    };
-
-    $scope.loadPage = function (page) {
-      var menu = document.getElementById('menu');
-
-      menu.close();
-      $scope.navi.pushPage(page);
-    };
-
-    document.addEventListener('init', function (event) {
-    });
-  });
-bootstrap
-  .controller("DevicesListController", function ($scope, $http, $timeout) {
+app
+  .controller("DevicesListController", ['$scope', '$http', function ($scope, $http, $timeout) {
       var ts = this;
       this.devices = []
 
@@ -63,15 +21,71 @@ bootstrap
           }
         )
       };
-  });
+  }]);
 
-document.addEventListener('init', function (event) {
-  if (event.target.id === 'pageNav1') {
-    var title = event.target.data && event.target.data.title ? event.target.data.title : 'Custom Page';
-    event.target.querySelector('ons-toolbar div.center').textContent = title;
-  }
-  if (event.target.id === 'pageNav2') {
-    var cardTitle = event.target.data && event.target.data.cardTitle ? event.target.data.cardTitle : 'Custom Card';
-    event.target.querySelector('ons-card div.title').textContent = cardTitle;
-  }
-});
+app
+  .controller('PageCtrl', ['$scope', '$http', function ($scope, $http) {
+    pc = $scope;
+
+    $scope.openMenu = function () {
+      var menu = document.getElementById('menu');
+      menu.open();
+    };
+
+    $scope.loadPage = function (page) {
+      var menu = document.getElementById('menu');
+      menu.close();
+    };
+
+    $scope.logout =function() {
+      var menu = document.getElementById('menu');
+      menu.close();
+      $scope.authFail("");
+    }
+
+    $scope.authOk = function(token) {
+      localStorage.setItem(TOKEN_KEY, token)
+      authenticated = true;
+      console.log("ok")
+      navi.pushPage('main.html')
+    };
+
+    $scope.authFail = function(token) {
+      localStorage.setItem(TOKEN_KEY, "")
+      authenticated = false;
+      navi.pushPage('login.html')
+    };
+
+    $scope.doAuth = function(token) {
+      var Url = "/api/v1/login";
+      var Body = token;
+      $http.post(Url, Body).then(
+        function successCallBack(response) {
+          $scope.authOk(token)
+        },
+        function errorCallBack(response) {   
+          $scope.authFail(token)
+        }
+      )
+    };
+
+    $scope.login = function () {
+      var username = document.getElementById('username').value;
+      var password = document.getElementById('password').value;
+      var possibleToken = username + ":" + password;
+      possibleToken = sha512(possibleToken);
+      if (possibleToken.length > 0) {
+        pc.doAuth(possibleToken)
+      }
+    };
+
+    angular.element(document).ready(function () {
+      if (authenticated)
+        return;
+      $scope.doAuth(localStorage.getItem(TOKEN_KEY))
+    })
+
+    document.addEventListener('init', function (event) {
+    });
+  }]);
+
