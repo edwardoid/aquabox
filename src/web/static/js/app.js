@@ -37,6 +37,10 @@ app
       menu.close();
     };
 
+    $scope.goTo = function (state) {
+      naviMain.pushPage(state + ".html")
+    }
+
     $scope.logout =function() {
       var menu = document.getElementById('menu');
       menu.close();

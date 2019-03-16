@@ -1,4 +1,18 @@
 <ons-page>
+    <ons-toolbar>
+        <div class="center">
+            AquaBox
+        </div>
+        <div class="right">
+            <ons-toolbar-button ng-click="openMenu()">
+                <ons-icon icon="md-menu"></ons-icon>
+            </ons-toolbar-button>
+        </div>
+        <div class="left">
+            <ons-back-button >Back</ons-back-button>
+        </div>
+    </ons-toolbar>
+        
 <ons-splitter ng-controller="PageCtrl">
     <ons-splitter-side id="menu" side="right" width="220px" collapse swipeable>
         <ons-page>
@@ -19,7 +33,7 @@
         </ons-page>
     </ons-splitter-side>
     <ons-splitter-content>
-        <ons-navigator var="navi" page="devices.html"></ons-navigator>
+        <ons-navigator var="naviMain" page="devices.html"></ons-navigator>
     </ons-splitter-content>
 </ons-splitter>
 </ons-page>
