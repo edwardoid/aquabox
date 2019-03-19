@@ -9,14 +9,73 @@
 #include <random>
 using namespace aquabox::rest;
 using namespace Pistache;
+using namespace aquabox;
+
+nlohmann::json getStatusInfo() {
+    nlohmann::json wifi({{"ssid", Settings::string(Settings::SSID, "")},
+                         {"password", Settings::string(Settings::WIFI_PASSWORD, "")},
+                         {"encryption", Settings::string(Settings::WIFI_ENCRYPTION, "")}});
+
+    nlohmann::json version({{"version", Config::VERSION},
+                            {"build", Config::GIT_HASH},
+                            {"major", Config::VERSION_MAJOR},
+                            {"minor", Config::VERSION_MINOR}});
+
+    nlohmann::json host({
+        {"port", Settings::integer(Settings::HTTP_PORT, Config::REST_PORT)}
+    });
+
+    char name[HOST_NAME_MAX];
+    if (0 == gethostname(name, HOST_NAME_MAX))
+        host["host"] = name;
+
+    nlohmann::json status({{"aquabox", host},
+                           {"setupComplete", false},
+                           {"version", version},
+                           {"wifi", wifi}});
+
+
+    return status;
+}
+
+DEFINE_API_IMPL(WhoAmI)
+{
+    std::string path = "whoami_qr_" + std::to_string(std::rand()) + ".png";
+    double factor = 0.;
+
+    if (request.query().has("factor"))
+    {
+        std::string factorString = request.query().get("factor").getOrElse("1.0");
+        try
+        {
+            factor = std::stod(factorString);
+        }
+        catch (const std::invalid_argument &)
+        {
+            LOG_ERROR << "Bad zoom factor value \"" << factorString << "\"";
+            factor = 0;
+        }
+    }
+
+    if (factor < 1.)
+        factor = 1;
+
+    LOG_DEBUG << "Generating QR with zoom factor " << factor;
+    
+    qr::Qr::create(getStatusInfo().dump(4), path, factor);
+
+    Pistache::Http::serveFile(response, path).then([this, path](ssize_t bytes) {
+        std::remove(path.c_str());
+    }, Async::IgnoreException);
+}
 
 DEFINE_API_IMPL(Login)
 {
     auto raw = request.body();
-    for(auto& user : AquaBox::i().users())
+    for (auto &user : AquaBox::i().users())
     {
         LOG_DEBUG << "Existing user " << user.token() << " comparing with " << raw;
-        if(user.token() == raw)
+        if (user.token() == raw)
         {
             response.send(Http::Code::Ok);
         }
@@ -27,44 +86,27 @@ DEFINE_API_IMPL(Login)
 
 DEFINE_API_IMPL(Status)
 {
-    nlohmann::json wifi({
-        { "ssid" , Settings::string(Settings::SSID, "") },
-        { "password" , Settings::string(Settings::WIFI_PASSWORD, "")},
-        { "encryption" , Settings::string(Settings::WIFI_ENCRYPTION, "")}
-    });
-
-    nlohmann::json version({
-        { "version" , Config::VERSION },
-        { "build" , Config::GIT_HASH },
-        { "major" , Config::VERSION_MAJOR },
-        { "minor" , Config::VERSION_MINOR }
-    });
-
-    nlohmann::json status({
-        { "setupComplete" , false },
-        { "version" , version },
-        { "wifi" , wifi }
-    });
-
-    response.send(Http::Code::Ok, status.dump(4));
+    response.send(Http::Code::Ok, getStatusInfo().dump(4));
 }
 
 DEFINE_API_IMPL(WiFiQR)
 {
     std::string path = "wifi_qr_" + std::to_string(std::rand()) + ".png";
     double factor = 0.;
-    
+
     if (request.query().has("factor"))
     {
         std::string factorString = request.query().get("factor").getOrElse("1.0");
-        try {
+        try
+        {
             factor = std::stod(factorString);
         }
-        catch(const std::invalid_argument&) {
+        catch (const std::invalid_argument &)
+        {
             LOG_ERROR << "Bad zoom factor value \"" << factorString << "\"";
             factor = 0;
         }
-    } 
+    }
 
     if (factor < 1.)
         factor = 1;
@@ -72,18 +114,15 @@ DEFINE_API_IMPL(WiFiQR)
     LOG_DEBUG << "Generating QR with zoom factor " << factor;
     qr::Qr::create("asdasda", path, factor);
 
-    Pistache::Http::serveFile(response, path).then([this, path](ssize_t bytes)
-        {
-            std::remove(path.c_str());
-        },
-        Async::IgnoreException);
+    Pistache::Http::serveFile(response, path).then([this, path](ssize_t bytes) {
+        std::remove(path.c_str());
+    },Async::IgnoreException);
 }
-
 
 DEFINE_API_IMPL(Devices)
 {
     std::vector<nlohmann::json> all;
-    for (auto& dev : AquaBox::i().devices())
+    for (auto &dev : AquaBox::i().devices())
     {
         all.push_back(dev.data());
     }

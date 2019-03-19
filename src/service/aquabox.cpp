@@ -130,6 +130,10 @@ Pistache::Rest::Description AquaBox::initRestApi()
        .produces(MIME(Application, Json))
        .response(error);
 
+    v1.route(m_desc.get("/status/qr"), "Get system current state as QR code")
+       .bind(&rest::API::WhoAmI, &REST)
+       .response(error);
+
     v1.route(m_desc.get("/devices"), "Get available devices")
        .bind(&rest::API::Devices, &REST)
        .produces(MIME(Application, Json))

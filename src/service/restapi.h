@@ -15,6 +15,7 @@
                          {                                                                          \
                            try {                                                                    \
                              LOG_DEBUG << "API call " << rq.method() << " " <<  rq.resource();      \
+                            rp .headers().add(std::make_shared<Pistache::Http::Header::AccessControlAllowOrigin>("*"));   \
                              Name ## Impl().exec(rq, rp);                                           \
                            } catch (const std::exception& e) {                                      \
                              LOG_ERROR << "An error occured during API call. Details: " << e.what();\
@@ -30,6 +31,7 @@ namespace aquabox
         using Request = Pistache::Rest::Request; 
         using Response = Pistache::Http::ResponseWriter;
 
+        DECLARE_API_IMPL(WhoAmI);
         DECLARE_API_IMPL(Login);
         DECLARE_API_IMPL(Status);
         DECLARE_API_IMPL(Devices);
@@ -37,6 +39,7 @@ namespace aquabox
 
         struct API
         {
+            ENABLE_API(WhoAmI);
             ENABLE_API(Login)
             ENABLE_API(Status)
             ENABLE_API(WiFiQR)
