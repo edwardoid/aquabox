@@ -7,8 +7,10 @@
 #include "pistache/endpoint.h"
 #include "restapi.h"
 #include "device.h"
+#include "rule.h"
 #include "user.h"
 #include "web.h"
+#include "path.h"
 #include <memory>
 
 namespace aquabox
@@ -24,17 +26,22 @@ namespace aquabox
         static AquaBox& i();
         int start();
         ~AquaBox() = default;
-        const std::vector<Device>& devices() const;
-        const std::vector<User>& users() const;
+        std::shared_ptr<Device> findDevice(std::string id);
+        std::shared_ptr<Rule> findRule(std::string id);
+        const DevicesMap& devices() const;
+        const UsersMap& users() const;
+        const RulesMap& rules() const;
     private:
         Pistache::Rest::Description initRestApi();
         void readDevices();
         void readUsers();
+        void readRules(const Path& root);
     private:
         plog::ColorConsoleAppender<plog::TxtFormatter> m_consoleAppender;
         std::shared_ptr<Pistache::Http::Endpoint> m_server;
-        std::vector<Device> m_devices;
-        std::vector<User> m_users;
+        DevicesMap m_devices;
+        UsersMap m_users;
+        RulesMap m_rules;
         Pistache::Rest::Description m_desc;
         Pistache::Rest::Router m_router;
         ServeDir m_webServer;

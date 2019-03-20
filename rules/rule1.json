@@ -1,0 +1,18 @@
+{
+    "id" : "1",
+    "device" : "dev1",
+    "actions": [
+        {
+            "type" : "turn_on",
+            "at" : 1030
+        },
+        {
+            "type" : "turn_off",
+            "at" : 1830
+        }
+    ],
+    "created_at": 125,
+    "repeat": {
+        "count" : 175
+    }
+}

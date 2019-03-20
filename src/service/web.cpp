@@ -34,7 +34,7 @@ void ServeDir::setRoot(Pistache::Rest::Description& description, std::string web
         if (!front.realPath.isDirectory())
             continue;
 
-        LOG_DEBUG << "Serving " << front.realPath.c_str() << " as " << front.alias + "/:file";
+        LOG_VERBOSE << "Serving " << front.realPath.c_str() << " as " << front.alias + "/:file";
         description.route(description.get(front.alias + "/:file"), front.realPath.c_str())
                    .bind(&ServeDir::operator(), this);
         
@@ -70,7 +70,7 @@ void ServeDir::operator()(const Pistache::Rest::Request& request, Pistache::Http
     }
     else
     {
-        LOG_DEBUG << "Requested file = " << file;
+        LOG_VERBOSE << "Requested file = " << file;
     }
 
     if (!p.contains(m_root))

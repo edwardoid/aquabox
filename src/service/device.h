@@ -4,6 +4,9 @@
 #include <nlohmann/json.hpp>
 #include "identifiable.h"
 #include "devicetype.h"
+#include <string>
+#include <unordered_map>
+#include <memory>
 
 namespace aquabox
 {
@@ -31,6 +34,8 @@ namespace aquabox
         DeviceType m_type;
         nlohmann::json m_meta;
     };
+
+    using DevicesMap = std::unordered_map<std::string, std::shared_ptr<Device>>;
 }
 
 #endif // DEVICE_H

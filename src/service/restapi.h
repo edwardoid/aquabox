@@ -15,9 +15,9 @@
                          {                                                                          \
                            try {                                                                    \
                              LOG_DEBUG << "API call " << rq.method() << " " <<  rq.resource();      \
-                            rp .headers().add(std::make_shared<Pistache::Http::Header::AccessControlAllowOrigin>("*"));   \
+                             rp .headers().add(std::make_shared<Pistache::Http::Header::AccessControlAllowOrigin>("*"));   \
                              Name ## Impl().exec(rq, rp);                                           \
-                           } catch (const std::exception& e) {                                      \
+                           } catch (std::exception e) {                                      \
                              LOG_ERROR << "An error occured during API call. Details: " << e.what();\
                            } catch (...) {                                                          \
                              LOG_ERROR << "Unknown error occured during API call";                  \
@@ -35,6 +35,8 @@ namespace aquabox
         DECLARE_API_IMPL(Login);
         DECLARE_API_IMPL(Status);
         DECLARE_API_IMPL(Devices);
+        DECLARE_API_IMPL(Rules);
+        DECLARE_API_IMPL(DeviceRules);
         DECLARE_API_IMPL(WiFiQR);
 
         struct API
@@ -44,6 +46,8 @@ namespace aquabox
             ENABLE_API(Status)
             ENABLE_API(WiFiQR)
             ENABLE_API(Devices)
+            ENABLE_API(Rules)
+            ENABLE_API(DeviceRules);
         };
     }
 }

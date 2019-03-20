@@ -20,6 +20,7 @@ add_subdirectory("${THREE_DP_DIR}/qrencode")
 add_subdirectory("${THREE_DP_DIR}/nlohmann")
 
 set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_BUILD_TYPE Debug)
 
 set(PLOG_INCLUDE_DIR "${PROJECT_SOURCE_DIR}/3dp/plog/include")
 set(PISTACHE_INCLUDE_DIR "${PROJECT_SOURCE_DIR}/3dp/pistache/include")

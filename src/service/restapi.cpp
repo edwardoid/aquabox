@@ -72,10 +72,10 @@ DEFINE_API_IMPL(WhoAmI)
 DEFINE_API_IMPL(Login)
 {
     auto raw = request.body();
-    for (auto &user : AquaBox::i().users())
+    for (auto user : AquaBox::i().users())
     {
-        LOG_DEBUG << "Existing user " << user.token() << " comparing with " << raw;
-        if (user.token() == raw)
+        LOG_DEBUG << "Existing user " << user.second->token() << " comparing with " << raw;
+        if (user.second->token() == raw)
         {
             response.send(Http::Code::Ok);
         }
@@ -124,9 +124,42 @@ DEFINE_API_IMPL(Devices)
     std::vector<nlohmann::json> all;
     for (auto &dev : AquaBox::i().devices())
     {
-        all.push_back(dev.data());
+        all.push_back(dev.second->data());
     }
     nlohmann::json res = nlohmann::json::object();
     res["devices"] = all;
+    response.send(Http::Code::Ok, res.dump(4));
+}
+
+DEFINE_API_IMPL(Rules)
+{
+    std::vector<nlohmann::json> all;
+    for (auto &rule : AquaBox::i().rules())
+    {
+        nlohmann::json data;
+        rule.second->json(data);
+        all.push_back(data);
+    }
+    nlohmann::json res = nlohmann::json::object();
+    res["rules"] = all;
+    response.send(Http::Code::Ok, res.dump(4));
+}
+
+DEFINE_API_IMPL(DeviceRules)
+{
+    LOG_ERROR_IF(!request.hasParam(":dev")) << "No device parameter in URL";
+    std::string dev = request.param(":dev").as<std::string>();
+    std::vector<nlohmann::json> all;
+    for (auto &rule : AquaBox::i().rules()) {
+        if (((std::string) rule.second->Device) == dev) {
+            nlohmann::json data;
+            rule.second->json(data);
+            all.push_back(data);
+        }
+    }
+    nlohmann::json res({
+        { "rules" , all },
+        { "device" , dev }
+    });
     response.send(Http::Code::Ok, res.dump(4));
 }

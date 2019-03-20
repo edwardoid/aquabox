@@ -74,6 +74,7 @@ int AquaBox::start()
 
     readDevices();
     readUsers();
+    readRules(wd);
     initRestApi();
     m_webServer.setRoot(m_desc, "", Settings::string(Settings::WEB_ROOT, cwd), true);
 
@@ -139,6 +140,16 @@ Pistache::Rest::Description AquaBox::initRestApi()
        .produces(MIME(Application, Json))
        .response(error);
 
+    v1.route(m_desc.get("/rules"), "Get available rules")
+       .bind(&rest::API::Rules, &REST)
+       .produces(MIME(Application, Json))
+       .response(error);
+
+    v1.route(m_desc.get("/rules/:dev"), "Get available rules for specific device")
+       .bind(&rest::API::DeviceRules, &REST)
+       .produces(MIME(Application, Json))
+       .response(error);
+
     auto wifi = v1.path("/wifi");
     wifi.route(m_desc.get("/qr"), "Get QR code for easy WiFi authorisation")
        .bind(&rest::API::WiFiQR, &REST)
@@ -155,9 +166,9 @@ void AquaBox::readDevices()
     LOG_INFO << "Loading " << devs.size() << " devices...";
     for (auto d : devs)
     {
-        Device dev;
-        if(dev.init(d))
-            m_devices.push_back(dev);
+        auto dev = std::make_shared<Device>();
+        if(dev->init(d))
+            m_devices.insert({ dev->id(), dev});
     }
 }
 
@@ -168,18 +179,55 @@ void AquaBox::readUsers()
     LOG_INFO << "Loading " << users.size() << " users...";
     for (auto u : users)
     {
-        User usr;
-        if(usr.init(u))
-            m_users.push_back(usr);
+        auto usr = std::make_shared<User>();
+        if(usr->init(u))
+            m_users.insert({usr->user(), usr});
     }
 }
 
-const std::vector<Device>& AquaBox::devices() const
+void AquaBox::readRules(const Path& p)
+{
+    Path root = p;
+    root.append("rules");
+    LOG_INFO << "Loading rules from" << root.c_str();
+    for(Path p : root.children())
+    {
+        if(p.isDirectory())
+            continue;
+        LOG_INFO << "Loading rule: " << p.c_str();
+        auto rule = std::make_shared<Rule>();
+        if(rule->parseFile(p))
+            m_rules.insert({ rule->Id.Value, rule });
+    }
+}
+
+std::shared_ptr<Device> AquaBox::findDevice(std::string id)
+{
+    auto p = m_devices.find(id);
+    if (p == m_devices.end())
+        return nullptr;
+    return p->second;
+}
+
+std::shared_ptr<Rule> AquaBox::findRule(std::string id)
+{
+    auto p = m_rules.find(id);
+    if (p == m_rules.end())
+        return nullptr;
+    return p->second;
+}
+
+const DevicesMap& AquaBox::devices() const
 {
     return m_devices;
 }
 
-const std::vector<User>& AquaBox::users() const
+const RulesMap& AquaBox::rules() const
+{
+    return m_rules;
+}
+
+const UsersMap& AquaBox::users() const
 {
     return m_users;
 }
