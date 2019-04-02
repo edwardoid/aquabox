@@ -5,17 +5,21 @@
 
 using namespace aquabox;
 
+const std::string Settings::LOG_LEVEL = "log";
 
 const std::string Settings::WORKING_DIRECTORY = "workingDirectory";
 const std::string Settings::WEB_ROOT = "webRoot";
 
 const std::string Settings::HTTP_PORT = "httpPort";
+const std::string Settings::STREAM_PORT = "streamPort";
 const std::string Settings::SSID = "ssid";
 const std::string Settings::WIFI_PASSWORD = "password";
 const std::string Settings::WIFI_ENCRYPTION = "encryption";
 
 const std::string Settings::DEVICES = "devices";
 const std::string Settings::USERS = "users";
+
+const std::string Settings::THREADS = "threads";
 
 bool Settings::dataToWrite = false;
 bool Settings::ready = false;

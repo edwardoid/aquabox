@@ -1,23 +1,29 @@
 #ifndef DEVICE_TYPE_H
 #define DEVICE_TYPE_H
 
+
+#include "enumerations.h"
+
 namespace aquabox
 {
-    enum class DeviceClass
+    enum class DeviceClass: int
     {
         Unknown = 0,
         Relay,
         AnalogRelay
     };
 
-    enum class DeviceType
+    enum class DeviceType: int
     {
         Generic = 0,
         Light,
-        Compressor,
+        AirPump,
+        WaterPump,
         Filter,
         Heater,
-        CO2
+        Feeder,
+        CO2,
+        UV,
     };
 }
 

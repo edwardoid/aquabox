@@ -4,35 +4,32 @@
 #include <nlohmann/json.hpp>
 #include "identifiable.h"
 #include "devicetype.h"
+#include "property.h"
 #include <string>
 #include <unordered_map>
 #include <memory>
 
 namespace aquabox
 {
-    class Device: public Identifiable
+
+    using Metadata = PrimitiveProperty<nlohmann::json, nlohmann::detail::value_t::object>;
+
+    class Device: public ClassProperty
     {
     public:
-        Device() = default;
+        Device();
+        Device(const Device& src);
+        Device(Device&& src);
+        const Device& operator = (const Device& src);
 
-        bool init(const nlohmann::json& data);
-        nlohmann::json data() const;
+        std::vector<std::shared_ptr<class Rule>> rules() const;
 
-        void read();
-        const std::string& name() const;
-        void setName(std::string name);
-
-        DeviceClass deviceClass() const;
-        void setClass(DeviceClass deviceClass);
-        DeviceType type() const;
-        void setType(DeviceType type);
-        const nlohmann::json& meta() const;
-        void setMeta(const nlohmann::json& meta);
-    private:
-        std::string m_name;
-        DeviceClass m_class;
-        DeviceType m_type;
-        nlohmann::json m_meta;
+        property(Id, StringProperty)
+        property(Index, UnsignedNumberProperty);
+        property(Name, StringProperty)
+        property(Type, EnumProperty<DeviceType>)
+        property(Class, EnumProperty<DeviceClass>)
+        property(Meta, Metadata)
     };
 
     using DevicesMap = std::unordered_map<std::string, std::shared_ptr<Device>>;

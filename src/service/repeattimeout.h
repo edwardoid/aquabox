@@ -3,17 +3,17 @@
 
 #include <nlohmann/json.hpp>
 #include "property.h"
+#include "enumerations.h"
 
 namespace aquabox
 {
     enum class RepeatUnit: int
     {
-        Minute,
-        Hour,
-        Day,
-        Week,
-        Month,
-        Always
+        Minute = 0,
+        Hour = 1,
+        Day = 2,
+        Week = 3,
+        Month = 4
     };
 
     class RepeatTimeout: public ClassProperty
@@ -24,7 +24,8 @@ namespace aquabox
         RepeatTimeout(RepeatTimeout&& src);
         const RepeatTimeout& operator = (const RepeatTimeout& src);
 
-        UnsignedNumberProperty Count;
+        property(Unit, EnumProperty<RepeatUnit>);
+        property(Count, UnsignedNumberProperty);
     };
 }
 

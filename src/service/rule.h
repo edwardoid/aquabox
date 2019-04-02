@@ -47,12 +47,16 @@ namespace aquabox
         const Rule& operator = (const Rule& src);
 
         bool parseFile(const std::string& file);
+        bool saveToFile(const std::string& file);
 
-        StringProperty Id;
-        DeviceReference Device;
-        Time CreatedAt;
-        RepeatTimeout Repeat;
-        ClassArrayProperty<Action> Actions;
+        property(Id, StringProperty)
+        property(Index, UnsignedNumberProperty)
+        property(Device, DeviceReference)
+        property(Enabled, BooleanProperty)
+        property(CreatedAt, Time)
+        property(LastRunAt, Time)
+        property(Repeat, RepeatTimeout)
+        property(Actions, ClassArrayProperty<Action>)
     };
 
     using RulesMap = std::unordered_map<std::string, std::shared_ptr<Rule>>;

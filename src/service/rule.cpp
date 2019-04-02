@@ -5,44 +5,48 @@
 using namespace aquabox;
 
 Rule::Rule()
-    : ClassProperty("-class Rule", {&Id, &Device, &CreatedAt, &Repeat, &Actions} , false)
-    , Id("id")
-    , Device("device")
-    , CreatedAt("created_at")
-    , Repeat("repeat")
-    , Actions("actions")
+    : ClassProperty("-class Rule", {&m_Id, &m_Index, &m_Device, &m_Enabled,&m_CreatedAt, &m_LastRunAt, &m_Repeat, &m_Actions} , false)
+    , m_Id("id")
+    , m_Index("index")
+    , m_Device("device")
+    , m_Enabled("enabled")
+    , m_CreatedAt("created_at")
+    , m_LastRunAt("lastRun", false)
+    , m_Repeat("repeat")
+    , m_Actions("actions")
 {}
 
 Rule::Rule(const Rule& src)
     : Rule()
 {
-    copyData(src);
-    Id = src.Id;
-    Device = src.Device;
-    CreatedAt = src.CreatedAt;
-    Repeat = src.Repeat;
-    Actions = src.Actions;
+    *this = src;
 }
 
 Rule::Rule(Rule&& src)
     : Rule()
 {
     moveData(src);
-    Id = std::move(src.Id);
-    Device = std::move(src.Device);
-    CreatedAt = std::move(src.CreatedAt);
-    Repeat = std::move(src.Repeat);
-    Actions = std::move(src.Actions);
+    moveProperty(Id);
+    moveProperty(Index);
+    moveProperty(Device);
+    moveProperty(Enabled);
+    moveProperty(CreatedAt);
+    moveProperty(LastRunAt);
+    moveProperty(Repeat);
+    moveProperty(Actions);
 }
         
 const Rule& Rule::operator = (const Rule& src)
 {
     copyData(src);
-    Id = src.Id;
-    Device = src.Device;
-    CreatedAt = src.CreatedAt;
-    Repeat = src.Repeat;
-    Actions = src.Actions;
+    copyProperty(Index);
+    copyProperty(Id);
+    copyProperty(Device);
+    copyProperty(Enabled);
+    copyProperty(CreatedAt);
+    copyProperty(LastRunAt);
+    copyProperty(Repeat);
+    copyProperty(Actions);
     return *this;
 }
 
@@ -65,10 +69,23 @@ bool Rule::parseFile(const std::string& file)
         return false; 
     }
 
-    if(nullptr == Device.resolve())
+    if(nullptr == m_Device.resolve())
     {
-        LOG_ERROR << "Device " << Device << " can not be found";
+        LOG_ERROR << "Device " << m_Device.Value << " can not be found";
         return false;
     }
+    return true;
+}
+
+bool Rule::saveToFile(const std::string& file)
+{
+    std::ofstream os(file);
+    if(!os)
+        return false;
+    nlohmann::json data;
+    json(data);
+    os << data.dump(4);
+    os.flush();
+    os.close();
     return true;
 }

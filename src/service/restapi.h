@@ -16,13 +16,13 @@
                            try {                                                                    \
                              LOG_DEBUG << "API call " << rq.method() << " " <<  rq.resource();      \
                              rp .headers().add(std::make_shared<Pistache::Http::Header::AccessControlAllowOrigin>("*"));   \
-                             Name ## Impl().exec(rq, rp);                                           \
-                           } catch (std::exception e) {                                      \
-                             LOG_ERROR << "An error occured during API call. Details: " << e.what();\
-                           } catch (...) {                                                          \
-                             LOG_ERROR << "Unknown error occured during API call";                  \
-                           }                                                                        \
-                         }
+                             Name ## Impl().exec(rq, rp);                                                         \
+                           } catch (std::exception e) {                                                           \
+                             LOG_ERROR << "An error occured during API call. Details: " << e.what();              \
+                           } catch (...) {                                                                        \
+                             LOG_ERROR << "Unknown error occured during API call. Details: "  << strerror(errno); \
+                           }                                                                                      \
+                         }                                                                                        \
 
 namespace aquabox
 {
@@ -36,8 +36,11 @@ namespace aquabox
         DECLARE_API_IMPL(Status);
         DECLARE_API_IMPL(Devices);
         DECLARE_API_IMPL(Rules);
+        DECLARE_API_IMPL(GetRule);
+        DECLARE_API_IMPL(CreateRule);
         DECLARE_API_IMPL(DeviceRules);
         DECLARE_API_IMPL(WiFiQR);
+        DECLARE_API_IMPL(SupportedRepeatTimeouts);
 
         struct API
         {
@@ -47,7 +50,10 @@ namespace aquabox
             ENABLE_API(WiFiQR)
             ENABLE_API(Devices)
             ENABLE_API(Rules)
-            ENABLE_API(DeviceRules);
+            ENABLE_API(GetRule)
+            ENABLE_API(CreateRule)
+            ENABLE_API(DeviceRules)
+            ENABLE_API(SupportedRepeatTimeouts)
         };
     }
 }

@@ -15,16 +15,21 @@ namespace aquabox
         static void write();
     public:
 
+        static const std::string LOG_LEVEL;
+
         static const std::string WORKING_DIRECTORY;
         static const std::string WEB_ROOT;
 
         static const std::string HTTP_PORT;
+        static const std::string STREAM_PORT;
         static const std::string SSID;
         static const std::string WIFI_PASSWORD;
         static const std::string WIFI_ENCRYPTION;
 
         static const std::string DEVICES;
         static const std::string USERS;
+
+        static const std::string THREADS;
 
         static void set(std::string key, bool value);
         static void set(std::string key, int value);

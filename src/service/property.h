@@ -7,14 +7,30 @@
 #include "log.h"
 #include "enumerations.h"
 
-#define property(name, type)
+#define property_name(name) m_ ## name
+
+#define property(name, type) private:                                           \
+                                type property_name(name);                       \
+                             public:                                            \
+                                inline void set ## name (const type & value)    \
+                                {                                               \
+                                    property_name(name) = value;                \
+                                }                                               \
+                                inline const type & get ## name () const        \
+                                {                                               \
+                                    return property_name(name);                 \
+                                }                                               \
+
+#define copyProperty(name) this -> property_name(name) = src.property_name(name);
+#define moveProperty(name) this -> property_name(name) = std::move(src.property_name(name));
+
 
 namespace aquabox
 {
     class Convertable
     {
     public:
-        virtual std::string getName() const = 0;
+        virtual std::string getDebugName() const = 0;
 
         virtual bool parse(const nlohmann::json& json) = 0;
         virtual void json(nlohmann::json& json) const = 0;
@@ -24,6 +40,9 @@ namespace aquabox
     class AbstractProperty: public Convertable
     {
     public:
+
+        using ValueType = T;
+
         AbstractProperty(const char* name_, bool required_ = true)
             : name(name_), required(required_) {}
 
@@ -34,14 +53,19 @@ namespace aquabox
         inline operator T () { return Value; };
         inline operator T& () { return Value; };
         inline operator const T& () const { return Value; };
-
-        std::string getName() const override { return name; }
+        inline T* operator -> () { return &Value; }
+        inline const T* operator -> () const { return &Value; }
+        inline T& operator * () { return Value; }
+        inline const T& operator * () const { return Value; }
+        std::string getDebugName() const override { return name; }
     };
 
     template<typename T>
     class EnumProperty: public AbstractProperty<T>
     {
     public:
+        using ValueType = typename AbstractProperty<T>::ValueType;
+
         EnumProperty(const char* name, bool required = true)
             : AbstractProperty<T>(name, required) {}
         
@@ -70,9 +94,10 @@ namespace aquabox
     template<typename T, nlohmann::detail::value_t MappedType>
     class PrimitiveProperty: public AbstractProperty<T>
     {
-    protected:
-        using ValueType = T;
     public:
+
+        using ValueType = typename AbstractProperty<T>::ValueType;
+
         PrimitiveProperty(const char* name, bool required = true)
             : AbstractProperty<T>(name, required) {}
 
@@ -87,7 +112,7 @@ namespace aquabox
             }
 
             if (pos->type() != MappedType) {
-                LOG_ERROR << "Property \"" << AbstractProperty<T>::Value << "\" must NOT have type " << pos->type_name();  
+                LOG_ERROR << "Property \"" << AbstractProperty<T>::name << "\" must NOT have type " << pos->type_name();  
                 return false;
             }
             AbstractProperty<T>::Value = *pos;
@@ -95,6 +120,12 @@ namespace aquabox
         }
 
         void json(nlohmann::json& json) const override { json[AbstractProperty<T>::name] = AbstractProperty<T>::Value; }
+
+        const PrimitiveProperty& operator = (const T& v)
+        {
+            AbstractProperty<T>::Value = v;
+            return *this;
+        }
     };
 
     using BooleanProperty = PrimitiveProperty<bool, nlohmann::detail::value_t::boolean>;
@@ -117,6 +148,9 @@ namespace aquabox
         ClassProperty(ClassProperty&&) = delete;
         const ClassProperty& operator = (const ClassProperty&) = delete;
     public:
+
+        using ValueType = ClassProperty;
+
         ClassProperty(const char* name_ = "", std::initializer_list<Convertable*> dependencies = {}, bool required_ = true)
             : name(name_), Dependencies(dependencies), required(required_) {}
 
@@ -162,7 +196,7 @@ namespace aquabox
                 {
                     continue;
                 }
-                LOG_DEBUG << "Serializing " << d->getName();
+                LOG_DEBUG << "Serializing " << d->getDebugName();
                 d->json(obj);
             }
             if(!name.empty() && name[0] != '-')
@@ -172,7 +206,7 @@ namespace aquabox
             LOG_DEBUG << "Serialization done!";
         }
 
-        std::string getName() const override { return name; }
+        virtual std::string getDebugName() const { return name; }
 
         std::string name;
         bool required;
@@ -246,7 +280,6 @@ namespace aquabox
             json[AbstractProperty<std::vector<ClassPropertyImpl>>::name] = res;
         }
     };
-
 } // namespace aquabox
 
 #endif // PROPERTY_H

@@ -15,8 +15,8 @@ namespace aquabox
         Action(Action&& src);
         const Action& operator = (const Action& src);
 
-        EnumProperty<ActionType> Type;
-        Time At;
+        property(At, Time);
+        property(Type, EnumProperty<ActionType>);
     };
 }
 

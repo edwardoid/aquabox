@@ -2,6 +2,8 @@
 #define TIME_H
 
 #include "property.h"
+#include <chrono>
+#include <ctime>
 
 namespace aquabox
 {
@@ -9,6 +11,7 @@ namespace aquabox
     {
     public:
         Time(std::string name, bool required = true);
+        std::tm getDetails() const;
     };
 }
 

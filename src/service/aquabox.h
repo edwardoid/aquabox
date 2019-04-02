@@ -2,15 +2,17 @@
 #define AQUABOX_H
 
 #include "identifiable.h"
-#include "pistache/description.h"
-#include "pistache/router.h"
-#include "pistache/endpoint.h"
+#include <pistache/description.h>
+#include <pistache/router.h>
+#include <pistache/endpoint.h>
+#include <thread_pool.hpp>
 #include "restapi.h"
 #include "device.h"
 #include "rule.h"
 #include "user.h"
 #include "web.h"
 #include "path.h"
+#include "rulestimer.h"
 #include <memory>
 
 namespace aquabox
@@ -28,9 +30,11 @@ namespace aquabox
         ~AquaBox() = default;
         std::shared_ptr<Device> findDevice(std::string id);
         std::shared_ptr<Rule> findRule(std::string id);
-        const DevicesMap& devices() const;
-        const UsersMap& users() const;
-        const RulesMap& rules() const;
+        DevicesMap devices() const;
+        UsersMap users() const;
+        RulesMap rules() const;
+        bool addRule(std::shared_ptr<Rule>& rule, bool replace = false);
+        void doLater(std::function<void(void)>&& task);
     private:
         Pistache::Rest::Description initRestApi();
         void readDevices();
@@ -39,9 +43,13 @@ namespace aquabox
     private:
         plog::ColorConsoleAppender<plog::TxtFormatter> m_consoleAppender;
         std::shared_ptr<Pistache::Http::Endpoint> m_server;
+        tp::ThreadPoolOptions m_poolOptions;
+        std::unique_ptr<tp::ThreadPool> m_pool;
         DevicesMap m_devices;
         UsersMap m_users;
+        Path m_rulesDir;
         RulesMap m_rules;
+        RulesTimer m_timer;
         Pistache::Rest::Description m_desc;
         Pistache::Rest::Router m_router;
         ServeDir m_webServer;

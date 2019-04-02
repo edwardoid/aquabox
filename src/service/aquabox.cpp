@@ -28,9 +28,10 @@ AquaBox::AquaBox()
 
 int AquaBox::start()
 {
-    plog::init(plog::verbose, &m_consoleAppender);
-    
     Lockfile lock;
+
+    plog::init( plog::severityFromString(Settings::string(Settings::LOG_LEVEL, plog::severityToString(plog::Severity::info)).c_str()),
+                &m_consoleAppender);
 
     LOG_INFO << "Starting " << Config::APPLICATION << " ver. " << std::hex << Config::VERSION_MAJOR << "." << Config::VERSION_MINOR;
     if(lock.exists())
@@ -70,6 +71,11 @@ int AquaBox::start()
         }
     }
 
+    m_poolOptions.setQueueSize(Settings::integer(Settings::THREADS, std::thread::hardware_concurrency()));
+    m_poolOptions.setQueueSize(1024);
+
+    m_pool.reset(new tp::ThreadPool(m_poolOptions));
+
     Pistache::Address address(Pistache::Ipv4::any(), Settings::integer(Settings::HTTP_PORT, Config::REST_PORT));
 
     readDevices();
@@ -77,10 +83,9 @@ int AquaBox::start()
     readRules(wd);
     initRestApi();
     m_webServer.setRoot(m_desc, "", Settings::string(Settings::WEB_ROOT, cwd), true);
-
     m_router.initFromDescription(m_desc);
-
     m_server = std::make_shared<Pistache::Http::Endpoint>(address);
+    m_timer.start();
     auto opts = Pistache::Http::Endpoint::options().threads(1).flags(Pistache::Tcp::Options::ReuseAddr | Pistache::Tcp::Options::InstallSignalHandler);
     
     try
@@ -98,6 +103,8 @@ int AquaBox::start()
     {
         LOG_FATAL << "Unhandled on starting REST API exception...";
     }
+
+    m_ws.get_connection()
 
     std::getchar();
 
@@ -145,6 +152,26 @@ Pistache::Rest::Description AquaBox::initRestApi()
        .produces(MIME(Application, Json))
        .response(error);
 
+    v1.route(m_desc.get("/rule/:rule"), "Get rule")
+       .bind(&rest::API::GetRule, &REST)
+       .produces(MIME(Application, Json))
+       .response(error);
+
+    v1.route(m_desc.put("/device/:dev/rule"), "Create new rule")
+       .bind(&rest::API::CreateRule, &REST)
+       .produces(MIME(Application, Json))
+       .response(error);
+
+    v1.route(m_desc.post("/device/:dev/rule"), "Update extsting rule")
+       .bind(&rest::API::CreateRule, &REST)
+       .produces(MIME(Application, Json))
+       .response(error);
+
+    v1.route(m_desc.get("/config/repeat_units"), "Get available units to repeat for a rule")
+      .bind(&rest::API::SupportedRepeatTimeouts, &REST)
+      .produces(MIME(Application, Json))
+      .response(error);
+
     v1.route(m_desc.get("/rules/:dev"), "Get available rules for specific device")
        .bind(&rest::API::DeviceRules, &REST)
        .produces(MIME(Application, Json))
@@ -167,8 +194,8 @@ void AquaBox::readDevices()
     for (auto d : devs)
     {
         auto dev = std::make_shared<Device>();
-        if(dev->init(d))
-            m_devices.insert({ dev->id(), dev});
+        if(dev->parse(d))
+            m_devices.insert({ dev->getId().Value, dev});
     }
 }
 
@@ -187,17 +214,17 @@ void AquaBox::readUsers()
 
 void AquaBox::readRules(const Path& p)
 {
-    Path root = p;
-    root.append("rules");
-    LOG_INFO << "Loading rules from" << root.c_str();
-    for(Path p : root.children())
+    m_rulesDir = p;
+    m_rulesDir.append("rules");
+    LOG_INFO << "Loading rules from" << m_rulesDir.c_str();
+    for(Path p : m_rulesDir.children())
     {
         if(p.isDirectory())
             continue;
         LOG_INFO << "Loading rule: " << p.c_str();
         auto rule = std::make_shared<Rule>();
         if(rule->parseFile(p))
-            m_rules.insert({ rule->Id.Value, rule });
+            m_rules.insert({ rule->getId(), rule });
     }
 }
 
@@ -217,17 +244,44 @@ std::shared_ptr<Rule> AquaBox::findRule(std::string id)
     return p->second;
 }
 
-const DevicesMap& AquaBox::devices() const
+DevicesMap AquaBox::devices() const
 {
     return m_devices;
 }
 
-const RulesMap& AquaBox::rules() const
+RulesMap AquaBox::rules() const
 {
     return m_rules;
 }
 
-const UsersMap& AquaBox::users() const
+bool AquaBox::addRule(std::shared_ptr<Rule>& rule, bool replace)
+{
+    auto pos = m_rules.find(rule->getId().Value);
+    if (pos != m_rules.end()) {
+        if (!replace) { return false; };
+        pos->second = rule;
+    }
+    else {
+        m_rules.insert({ rule->getId().Value, rule });
+    }
+
+    Path p = m_rulesDir;
+
+    bool saved = p.append(rule->getId().Value + ".json") && p.normalize() ? rule->saveToFile(p) : false;
+    if (!saved)
+        m_rules.erase(m_rules.find(rule->getId().Value));
+    return saved;
+}
+
+UsersMap AquaBox::users() const
 {
     return m_users;
+}
+
+void AquaBox::doLater(std::function<void(void)>&& task)
+{
+    if(!m_pool->tryPost(task))
+    {
+        LOG_ERROR << "Can't schedule a new task";
+    }
 }

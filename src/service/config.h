@@ -19,6 +19,7 @@ namespace aquabox
         static const std::string ConfigurationFile;
 
         static int REST_PORT;
+        static int WS_PORT;
     };
 }
 

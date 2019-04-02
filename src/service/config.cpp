@@ -18,3 +18,4 @@ const std::string Config::AUTHOR = "Edward Sargsyan";
 const std::string Config::EMAIL = "edward.sarkisyan@gmail.com";
 const std::string Config::ConfigurationFile = "config.json";
 int Config::REST_PORT = 1213;
+int Config::WS_PORT = 1214;
