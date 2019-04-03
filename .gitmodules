@@ -13,6 +13,3 @@
 [submodule "3dp/thread-pool-cpp"]
 	path = 3dp/thread-pool-cpp
 	url = https://github.com/inkooboo/thread-pool-cpp.git
-[submodule "3dp/websocketpp"]
-	path = 3dp/websocketpp
-	url = https://github.com/zaphoyd/websocketpp.git
