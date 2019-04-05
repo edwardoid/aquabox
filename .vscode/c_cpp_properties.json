@@ -4,11 +4,11 @@
             "name": "Linux",
             "includePath": [
                 "${workspaceFolder}/**",
-                "${workspaceFolder}/3dp/pistache/include",
-                "${workspaceFolder}/3dp/pistache/third-party/rapidjson/include"
+                "${workspaceFolder}/3dp/swshttp",
+                "${workspaceFolder}/3dp/swsws"
             ],
             "defines": [],
-            "compilerPath": "/usr/bin/clang",
+            "compilerPath": "/usr/bin/g++",
             "cStandard": "c11",
             "cppStandard": "c++17",
             "intelliSenseMode": "clang-x64"

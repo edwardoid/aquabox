@@ -54,14 +54,15 @@
     "encryption": "WPA",
     "http": "",
     "httpPort": 8974,
+    "log": "INFO",
     "password": "azazello",
     "ssid": "Sargsyan5",
+    "threads": 8,
     "users": [
         {
-            "user" : "admin",
-            "password" : "pass"
+            "password": "pass",
+            "user": "admin"
         }
     ],
-    "webRoot": "./src/web",
-    "workingDirectory": "/home/esargsyan/Pr/aquabox"
+    "workingDirectory": "/home/esargsyan/ionictests/aquabox/build"
 }

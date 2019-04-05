@@ -1,9 +1,6 @@
 [submodule "3dp/plog"]
 	path = 3dp/plog
 	url = https://github.com/SergiusTheBest/plog.git
-[submodule "3dp/pistache"]
-	path = 3dp/pistache
-	url = https://github.com/oktal/pistache.git
 [submodule "3dp/qrencode"]
 	path = 3dp/qrencode
 	url = https://github.com/fukuchi/libqrencode.git
@@ -13,3 +10,9 @@
 [submodule "3dp/thread-pool-cpp"]
 	path = 3dp/thread-pool-cpp
 	url = https://github.com/inkooboo/thread-pool-cpp.git
+[submodule "3dp/swshttp"]
+	path = 3dp/swshttp
+	url = https://gitlab.com/eidheim/Simple-Web-Server.git
+[submodule "3dp/swsws"]
+	path = 3dp/swsws
+	url = https://gitlab.com/eidheim/Simple-WebSocket-Server.git

@@ -1,0 +1,40 @@
+#ifndef WEB_SERVER_H
+#define WEB_SERVER_H
+
+#include <thread>
+#include <server_http.hpp>
+#include <server_ws.hpp>
+#include "route.h"
+#include "restapi.h"
+
+namespace aquabox
+{
+    class WebServer
+    {
+    public:
+        bool start();
+        void setupRoutes();
+        bool bindApiCalls();
+        
+    private:
+        SimpleWeb::Server<SimpleWeb::HTTP> m_http;
+        SimpleWeb::SocketServer<SimpleWeb::WS> m_ws;
+        std::thread m_rest;
+        std::thread m_stream;
+        rest::API m_API;
+        Route m_updates;
+        Route m_login;
+        Route m_status;
+        Route m_statusQR;
+        Route m_allDevices;
+        Route m_allRules;
+        Route m_ruleById;
+        Route m_createRule;
+        Route m_updateRule;
+        Route m_rulesForDevice;
+        Route m_repeatUnits;
+        Route m_wifi;
+    };
+}
+
+#endif // WEB_SERVER_H

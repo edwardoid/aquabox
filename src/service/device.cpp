@@ -6,7 +6,7 @@ using namespace aquabox;
 
 Device::Device()
     : ClassProperty("-class Device", { &m_Id, &m_Index, &m_Name, &m_Type, &m_Class, &m_Meta })
-    , m_Id("id"), m_Index("index"),m_Name("name"), m_Type("type"), m_Class("class"), m_Meta("meta")
+    , m_Id("id"), m_Index("index", false),m_Name("name"), m_Type("type"), m_Class("class"), m_Meta("meta")
 {}
 
 Device::Device(const Device& src)

@@ -5,9 +5,6 @@
 #include "log.h"
 #include "restapi.h"
 #include "path.h"
-#include "pistache/net.h"
-#include "pistache/http.h"
-#include "pistache/router.h"
 #include <exception>
 #include <random>
 
@@ -22,9 +19,7 @@ AquaBox& AquaBox::i()
 }
 
 AquaBox::AquaBox()
-    : m_desc(Config::APPLICATION, Config::VERSION, Config::DESCRIPTION)
-{
-}
+{}
 
 int AquaBox::start()
 {
@@ -52,8 +47,6 @@ int AquaBox::start()
     if(bytes >= 0)
         cwd[bytes] = '\0';
 
-    
-
     Path wd = Settings::string(Settings::WORKING_DIRECTORY, cwd);
     if (!wd.normalize())
     {
@@ -76,24 +69,26 @@ int AquaBox::start()
 
     m_pool.reset(new tp::ThreadPool(m_poolOptions));
 
-    Pistache::Address address(Pistache::Ipv4::any(), Settings::integer(Settings::HTTP_PORT, Config::REST_PORT));
+    //Pistache::Address address(Pistache::Ipv4::any(), Settings::integer(Settings::HTTP_PORT, Config::REST_PORT));
 
     readDevices();
     readUsers();
     readRules(wd);
-    initRestApi();
-    m_webServer.setRoot(m_desc, "", Settings::string(Settings::WEB_ROOT, cwd), true);
-    m_router.initFromDescription(m_desc);
-    m_server = std::make_shared<Pistache::Http::Endpoint>(address);
+    m_server.start();
+    //initRestApi();
+    //m_webServer.setRoot(m_desc, "", Settings::string(Settings::WEB_ROOT, cwd), true);
+    //m_router.initFromDescription(m_desc);
+    //m_server = std::make_shared<Pistache::Http::Endpoint>(address);
     m_timer.start();
-    auto opts = Pistache::Http::Endpoint::options().threads(1).flags(Pistache::Tcp::Options::ReuseAddr | Pistache::Tcp::Options::InstallSignalHandler);
+    //auto opts = Pistache::Http::Endpoint::options().threads(1).flags(Pistache::Tcp::Options::ReuseAddr | Pistache::Tcp::Options::InstallSignalHandler);
     
     try
     {
-        m_server->init(opts);
+        m_server.start();
+        /*m_server->init(opts);
         m_server->setHandler(m_router.handler());
         LOG_INFO << "Started REST api on " << address.host() << ":" << address.port();
-        m_server->serveThreaded();
+        m_server->serveThreaded();*/
     }
     catch(std::exception& e)
     {
@@ -104,13 +99,11 @@ int AquaBox::start()
         LOG_FATAL << "Unhandled on starting REST API exception...";
     }
 
-    m_ws.get_connection()
-
     std::getchar();
 
     return EXIT_SUCCESS;
 }
-
+/*
 Pistache::Rest::Description AquaBox::initRestApi()
 {
     using namespace Pistache;
@@ -185,7 +178,7 @@ Pistache::Rest::Description AquaBox::initRestApi()
 
     return m_desc;
 }
-
+*/
 void AquaBox::readDevices()
 {
     auto devs = Settings::array(Settings::DEVICES);

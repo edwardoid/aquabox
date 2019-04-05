@@ -6,14 +6,57 @@
 #include "aquabox.h"
 #include "repeattimeout.h"
 #include "enumerations.h"
+#include <fstream>
 #include <nlohmann/json.hpp>
 #include <stdio.h>
 #include <random>
+
 using namespace aquabox::rest;
-using namespace Pistache;
 using namespace aquabox;
 
-nlohmann::json getStatusInfo() {
+void serveStream(Response response, std::string path, std::shared_ptr<std::ifstream> ifs)
+{
+    std::vector<char> buffer(131072); // Safe when server is running on one thread
+    std::streamsize read_length;
+    if ((read_length = ifs->read(buffer.data(), static_cast<std::streamsize>(buffer.size())).gcount()) > 0)
+    {
+        response->write(&buffer[0], read_length);
+        if (read_length == static_cast<std::streamsize>(buffer.size()))
+        {
+            response->send([response, ifs, path](const SimpleWeb::error_code &ec) {
+                if (!ec)
+                    serveStream(response, path, ifs);
+                else
+                    LOG_DEBUG << "Connection interrupted while sending file ";
+            });
+        }
+    }
+    else
+    {
+        std::remove(path.c_str());
+    }
+}
+
+void serveFile(Response response, std::string path, Headers& headers)
+{
+    auto ifs = std::make_shared<std::ifstream>(path, std::ifstream::in | std::ios::binary | std::ios::ate);
+    if (ifs->bad())
+    {
+        LOG_DEBUG << "File '" << path << "'can't be found/opened so send over http";
+        response->write(SimpleWeb::StatusCode::client_error_not_found, headers);
+        return;
+    }
+
+    auto length = ifs->tellg();
+    ifs->seekg(0, std::ios::beg);
+
+    headers.emplace("Content-Length", std::to_string(length));
+    response->write(headers);
+    serveStream(response, path, ifs);
+}
+
+nlohmann::json getStatusInfo()
+{
     nlohmann::json wifi({{"ssid", Settings::string(Settings::SSID, "")},
                          {"password", Settings::string(Settings::WIFI_PASSWORD, "")},
                          {"encryption", Settings::string(Settings::WIFI_ENCRYPTION, "")}});
@@ -23,9 +66,7 @@ nlohmann::json getStatusInfo() {
                             {"major", Config::VERSION_MAJOR},
                             {"minor", Config::VERSION_MINOR}});
 
-    nlohmann::json host({
-        {"port", Settings::integer(Settings::HTTP_PORT, Config::REST_PORT)}
-    });
+    nlohmann::json host({{"port", Settings::integer(Settings::HTTP_PORT, Config::REST_PORT)}});
 
     char name[HOST_NAME_MAX];
     if (0 == gethostname(name, HOST_NAME_MAX))
@@ -36,18 +77,19 @@ nlohmann::json getStatusInfo() {
                            {"version", version},
                            {"wifi", wifi}});
 
-
     return status;
 }
 
-DEFINE_API_IMPL(WhoAmI)
+DEFINE_API_IMPL(StatusQR)
 {
-    std::string path = "whoami_qr_" + std::to_string(std::rand()) + ".png";
+    std::string path = "./whoami_qr_" + std::to_string(std::rand()) + ".png";
     double factor = 0.;
 
-    if (request.query().has("factor"))
+    auto query = request->parse_query_string();
+
+    if (query.count("factor") > 0)
     {
-        std::string factorString = request.query().get("factor").getOrElse("1.0");
+        std::string factorString = query.find("factor")->second;
         try
         {
             factor = std::stod(factorString);
@@ -63,32 +105,30 @@ DEFINE_API_IMPL(WhoAmI)
         factor = 1;
 
     LOG_DEBUG << "Generating QR with zoom factor " << factor;
-    
+
     qr::Qr::create(getStatusInfo().dump(4), path, factor);
 
-    Pistache::Http::serveFile(response, path).then([this, path](ssize_t bytes) {
-        std::remove(path.c_str());
-    }, Async::IgnoreException);
+    serveFile(response, path, headers);
 }
 
 DEFINE_API_IMPL(Login)
 {
-    auto raw = request.body();
+    auto raw = request->content.string();
     for (auto user : AquaBox::i().users())
     {
         LOG_DEBUG << "Existing user " << user.second->token() << " comparing with " << raw;
         if (user.second->token() == raw)
         {
-            response.send(Http::Code::Ok);
+            response->write(SimpleWeb::StatusCode::success_ok, headers);
         }
     }
 
-    response.send(Http::Code::Forbidden);
+    response->write(SimpleWeb::StatusCode::client_error_forbidden, headers);
 }
 
 DEFINE_API_IMPL(Status)
 {
-    response.send(Http::Code::Ok, getStatusInfo().dump(4));
+    response->write(SimpleWeb::StatusCode::success_ok, getStatusInfo().dump(4), headers);
 }
 
 DEFINE_API_IMPL(WiFiQR)
@@ -96,9 +136,10 @@ DEFINE_API_IMPL(WiFiQR)
     std::string path = "wifi_qr_" + std::to_string(std::rand()) + ".png";
     double factor = 0.;
 
-    if (request.query().has("factor"))
+    auto query = request->parse_query_string();
+    if (query.count("factor") > 0)
     {
-        std::string factorString = request.query().get("factor").getOrElse("1.0");
+        std::string factorString = query.find("factor")->second;
         try
         {
             factor = std::stod(factorString);
@@ -116,9 +157,7 @@ DEFINE_API_IMPL(WiFiQR)
     LOG_DEBUG << "Generating QR with zoom factor " << factor;
     qr::Qr::create("asdasda", path, factor);
 
-    Pistache::Http::serveFile(response, path).then([this, path](ssize_t bytes) {
-        std::remove(path.c_str());
-    },Async::IgnoreException);
+    serveFile(response, path, headers);
 }
 
 DEFINE_API_IMPL(Devices)
@@ -132,7 +171,7 @@ DEFINE_API_IMPL(Devices)
     }
     nlohmann::json res = nlohmann::json::object();
     res["devices"] = all;
-    response.send(Http::Code::Ok, res.dump(4));
+    response->write(SimpleWeb::StatusCode::success_ok, res.dump(4), headers);
 }
 
 DEFINE_API_IMPL(Rules)
@@ -146,94 +185,115 @@ DEFINE_API_IMPL(Rules)
     }
     nlohmann::json res = nlohmann::json::object();
     res["rules"] = all;
-    response.send(Http::Code::Ok, res.dump(4));
+    response->write(SimpleWeb::StatusCode::success_ok, res.dump(4), headers);
 }
 
 DEFINE_API_IMPL(GetRule)
 {
-    LOG_ERROR_IF(!request.hasParam(":rule")) << "No rule id parameter in URL";
-    std::string rule = request.param(":rule").as<std::string>();
+    auto params = route.extract(request->path);
+    if (params.count(":rule") == 0)
+    {
+        LOG_ERROR << "No rule id parameter in URL";
+        response->write(SimpleWeb::StatusCode::client_error_bad_request, headers);
+        return;
+    }
+    std::string rule = params[":rule"];
 
     auto all = AquaBox::i().rules();
     auto pos = all.find(rule);
 
     if (pos == all.end())
-        response.send(Http::Code::Not_Found);
+        response->write(SimpleWeb::StatusCode::client_error_not_found, headers);
     else
     {
         nlohmann::json data;
         pos->second->json(data);
-        response.send(Http::Code::Ok, data.dump(4));
+        response->write(SimpleWeb::StatusCode::success_ok, data.dump(4), headers);
     }
 }
 
 DEFINE_API_IMPL(CreateRule)
 {
-    LOG_ERROR_IF(!request.hasParam(":dev")) << "No device parameter in URL";
-    std::string dev = request.param(":dev").as<std::string>();
+    auto params = route.extract(request->path);
+    if (params.count(":dev") == 0)
+    {
+        LOG_ERROR << "No device id parameter in URL";
+        response->write(SimpleWeb::StatusCode::client_error_bad_request, headers);
+        return;
+    }
+    std::string dev = params[":dev"];
     nlohmann::json data;
     nlohmann::json ruleData;
-    try{
-        ruleData = nlohmann::json::parse(request.body());
-    }
-    catch(nlohmann::detail::parse_error& e)
+    try
     {
-        data["data"] = request.body();
+        ruleData = nlohmann::json::parse(request->content.string());
+    }
+    catch (nlohmann::detail::parse_error &e)
+    {
+        data["data"] = request->content.string();
         data["error"] = e.what();
-        response.send(Http::Code::Bad_Request, data.dump(4));
+        response->write(SimpleWeb::StatusCode::client_error_bad_request, data.dump(4), headers);
         return;
     }
 
     std::shared_ptr<Rule> r = std::make_shared<Rule>();
-    if(!r->parse(ruleData)) {
-        response.send(Http::Code::Bad_Request, data.dump(4));
-        return;
-    }
-
-    if(r->getDevice().resolve() == nullptr) {
-        data["data"] = request.body();
-        data["error"] = "Can't find device";
-        response.send(Http::Code::Not_Found, data.dump(4));
-        return;
-    }
-
-    if(!AquaBox::i().addRule(r, request.method() == Http::Method::Post))
+    if (!r->parse(ruleData))
     {
-        response.send(Http::Code::Bad_Request, data.dump(4));
+        response->write(SimpleWeb::StatusCode::client_error_bad_request, data.dump(4), headers);
+        return;
+    }
+
+    if (r->getDevice().resolve() == nullptr)
+    {
+        data["data"] = request->content.string();
+        data["error"] = "Can't find device";
+        response->write(SimpleWeb::StatusCode::client_error_bad_request, data.dump(4), headers);
+        return;
+    }
+
+    if (!AquaBox::i().addRule(r, request->method == "GET"))
+    {
+        response->write(SimpleWeb::StatusCode::client_error_bad_request, data.dump(4), headers);
         return;
     }
 
     data["rule"] = ruleData;
-    response.send(Http::Code::Ok, data.dump(4));
+    response->write(SimpleWeb::StatusCode::success_ok, data.dump(4), headers);
 }
 
 DEFINE_API_IMPL(DeviceRules)
 {
-    LOG_ERROR_IF(!request.hasParam(":dev")) << "No device parameter in URL";
-    std::string dev = request.param(":dev").as<std::string>();
+    auto params = route.extract(request->path);
+    if (params.count(":dev") == 0)
+    {
+        LOG_ERROR << "No dev id parameter in URL";
+        response->write(SimpleWeb::StatusCode::client_error_bad_request, headers);
+        return;
+    }
+    std::string dev = params[":dev"];
     std::vector<nlohmann::json> all;
-    for (auto &rule : AquaBox::i().rules()) {
-        if (((std::string) rule.second->getDevice().Value) == dev) {
+    for (auto &rule : AquaBox::i().rules())
+    {
+        if (((std::string)rule.second->getDevice().Value) == dev)
+        {
             nlohmann::json data;
             rule.second->json(data);
             all.push_back(data);
         }
     }
-    nlohmann::json res({
-        { "rules" , all },
-        { "device" , dev }
-    });
-    response.send(Http::Code::Ok, res.dump(4));
+    nlohmann::json res({{"rules", all},
+                        {"device", dev}});
+    response->write(SimpleWeb::StatusCode::success_ok, res.dump(4), headers);
 }
 
 DEFINE_API_IMPL(SupportedRepeatTimeouts)
 {
     std::vector<RepeatUnit> units;
-    for(auto u : Serializable<RepeatUnit>::val2Str)
+    for (auto u : Serializable<RepeatUnit>::val2Str)
     {
         units.push_back(u.first);
     }
     nlohmann::json res;
     res["units"] = Serializable<RepeatUnit>::val2Str;
-    response.send(Http::Code::Ok, res.dump(4));
+    response->write(SimpleWeb::StatusCode::success_ok, res.dump(4), headers);
 }
