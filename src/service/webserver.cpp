@@ -15,7 +15,7 @@ bool WebServer::start()
         LOG_INFO << "Starting web server on " << m_http.config.address << ":" << m_http.config.port;
         bindApiCalls();
 
-        m_srv.start();
+        m_http.start();
     });
 
     m_stream = std::thread([this]() {
@@ -26,9 +26,9 @@ bool WebServer::start()
 
         auto& updates = m_ws.endpoint[m_updates.url()];
 
-        updates.on_open = [](std::shared_ptr<WsServer::Connection> connection) {
+        updates.on_open = [](std::shared_ptr<SimpleWeb::SocketServer<SimpleWeb::WS>::Connection> connection) {
             LOG_DEBUG << "";
-        }
+        };
 
         m_ws.start();
     });
@@ -65,15 +65,15 @@ void WebServer::setupRoutes()
 
 bool WebServer::bindApiCalls()
 {
-    m_srv.resource[m_login.url()]["GET"] = std::bind(&rest::API::Login, &m_API, m_login, std::placeholders::_1, std::placeholders::_2);
-    m_srv.resource[m_status.url()]["GET"] = std::bind(&rest::API::Status, &m_API, m_status, std::placeholders::_1, std::placeholders::_2);
-    m_srv.resource[m_statusQR.url()]["GET"] = std::bind(&rest::API::StatusQR, &m_API, m_statusQR, std::placeholders::_1, std::placeholders::_2);
-    m_srv.resource[m_allDevices.url()]["GET"] = std::bind(&rest::API::Devices, &m_API, m_allDevices, std::placeholders::_1, std::placeholders::_2);
-    m_srv.resource[m_allRules.url()]["GET"] = std::bind(&rest::API::Rules, &m_API, m_allRules, std::placeholders::_1, std::placeholders::_2);
-    m_srv.resource[m_ruleById.url()]["GET"] = std::bind(&rest::API::GetRule, &m_API, m_ruleById, std::placeholders::_1, std::placeholders::_2);
-    m_srv.resource[m_createRule.url()]["PUT"] = std::bind(&rest::API::CreateRule, &m_API, m_createRule, std::placeholders::_1, std::placeholders::_2);
-    m_srv.resource[m_updateRule.url()]["POST"] = std::bind(&rest::API::CreateRule, &m_API, m_updateRule, std::placeholders::_1, std::placeholders::_2);
-    m_srv.resource[m_rulesForDevice.url()]["GET"] = std::bind(&rest::API::DeviceRules, &m_API, m_rulesForDevice, std::placeholders::_1, std::placeholders::_2);
-    m_srv.resource[m_repeatUnits.url()]["GET"] = std::bind(&rest::API::SupportedRepeatTimeouts, &m_API, m_repeatUnits, std::placeholders::_1, std::placeholders::_2);
-    m_srv.resource[m_wifi.url()]["GET"] = std::bind(&rest::API::WiFiQR, &m_API, m_wifi, std::placeholders::_1, std::placeholders::_2);
+    m_http.resource[m_login.url()]["GET"] = std::bind(&rest::API::Login, &m_API, m_login, std::placeholders::_1, std::placeholders::_2);
+    m_http.resource[m_status.url()]["GET"] = std::bind(&rest::API::Status, &m_API, m_status, std::placeholders::_1, std::placeholders::_2);
+    m_http.resource[m_statusQR.url()]["GET"] = std::bind(&rest::API::StatusQR, &m_API, m_statusQR, std::placeholders::_1, std::placeholders::_2);
+    m_http.resource[m_allDevices.url()]["GET"] = std::bind(&rest::API::Devices, &m_API, m_allDevices, std::placeholders::_1, std::placeholders::_2);
+    m_http.resource[m_allRules.url()]["GET"] = std::bind(&rest::API::Rules, &m_API, m_allRules, std::placeholders::_1, std::placeholders::_2);
+    m_http.resource[m_ruleById.url()]["GET"] = std::bind(&rest::API::GetRule, &m_API, m_ruleById, std::placeholders::_1, std::placeholders::_2);
+    m_http.resource[m_createRule.url()]["PUT"] = std::bind(&rest::API::CreateRule, &m_API, m_createRule, std::placeholders::_1, std::placeholders::_2);
+    m_http.resource[m_updateRule.url()]["POST"] = std::bind(&rest::API::CreateRule, &m_API, m_updateRule, std::placeholders::_1, std::placeholders::_2);
+    m_http.resource[m_rulesForDevice.url()]["GET"] = std::bind(&rest::API::DeviceRules, &m_API, m_rulesForDevice, std::placeholders::_1, std::placeholders::_2);
+    m_http.resource[m_repeatUnits.url()]["GET"] = std::bind(&rest::API::SupportedRepeatTimeouts, &m_API, m_repeatUnits, std::placeholders::_1, std::placeholders::_2);
+    m_http.resource[m_wifi.url()]["GET"] = std::bind(&rest::API::WiFiQR, &m_API, m_wifi, std::placeholders::_1, std::placeholders::_2);
 }
