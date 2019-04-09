@@ -7,7 +7,7 @@ using namespace aquabox;
 Rule::Rule()
     : ClassProperty("-class Rule", {&m_Id, &m_Index, &m_Device, &m_Enabled,&m_CreatedAt, &m_LastRunAt, &m_Repeat, &m_Actions} , false)
     , m_Id("id")
-    , m_Index("index")
+    , m_Index("index", false)
     , m_Device("device")
     , m_Enabled("enabled")
     , m_CreatedAt("created_at")

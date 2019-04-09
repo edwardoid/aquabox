@@ -3,16 +3,22 @@
 
 #include "identifiable.h"
 #include <thread_pool.hpp>
-#include "device.h"
-#include "rule.h"
-#include "user.h"
-#include "path.h"
 #include "rulestimer.h"
 #include "webserver.h"
+#include "path.h"
 #include <memory>
+#include <unordered_map>
 
 namespace aquabox
 {
+    class Device;
+    class Rule;
+    class User;
+
+    using DevicesMap = std::unordered_map<std::string, std::shared_ptr<Device>>;
+    using RulesMap = std::unordered_map<std::string, std::shared_ptr<Rule>>;
+    using UsersMap = std::unordered_map<std::string, std::shared_ptr<User>>;
+
     class AquaBox: public Identifiable
     {
         AquaBox(const AquaBox&) = delete;

@@ -1,5 +1,6 @@
 #include "device.h"
 #include "aquabox.h"
+#include "rule.h"
 #include "log.h"
 
 using namespace aquabox;

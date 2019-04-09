@@ -1,7 +1,6 @@
 #ifndef IDENTIFIABLE_H
 #define IDENTIFIABLE_H
 
-#include "log.h"
 #include <string>
 
 namespace aquabox

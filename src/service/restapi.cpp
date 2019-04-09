@@ -4,6 +4,9 @@
 #include "settings.h"
 #include "config.h"
 #include "aquabox.h"
+#include "rule.h"
+#include "device.h"
+#include "user.h"
 #include "repeattimeout.h"
 #include "enumerations.h"
 #include <fstream>
@@ -14,24 +17,26 @@
 using namespace aquabox::rest;
 using namespace aquabox;
 
-void serveStream(Response response, std::string path, std::shared_ptr<std::ifstream> ifs)
+void serveStream(Response response, std::string path, std::shared_ptr<std::ifstream> ifs, size_t length)
 {
     std::vector<char> buffer(131072); // Safe when server is running on one thread
     std::streamsize read_length;
     if ((read_length = ifs->read(buffer.data(), static_cast<std::streamsize>(buffer.size())).gcount()) > 0)
     {
+        length -= read_length;
         response->write(&buffer[0], read_length);
         if (read_length == static_cast<std::streamsize>(buffer.size()))
         {
             response->send([response, ifs, path](const SimpleWeb::error_code &ec) {
                 if (!ec)
-                    serveStream(response, path, ifs);
+                    serveStream(response, path, ifs, length);
                 else
                     LOG_DEBUG << "Connection interrupted while sending file ";
             });
         }
     }
-    else
+
+    if (length == 0)
     {
         std::remove(path.c_str());
     }
@@ -52,7 +57,7 @@ void serveFile(Response response, std::string path, Headers& headers)
 
     headers.emplace("Content-Length", std::to_string(length));
     response->write(headers);
-    serveStream(response, path, ifs);
+    serveStream(response, path, ifs, length);
 }
 
 nlohmann::json getStatusInfo()
@@ -108,6 +113,7 @@ DEFINE_API_IMPL(StatusQR)
 
     qr::Qr::create(getStatusInfo().dump(4), path, factor);
 
+    headers.find("Content-Type")->second = "image/png";
     serveFile(response, path, headers);
 }
 
@@ -154,6 +160,7 @@ DEFINE_API_IMPL(WiFiQR)
     if (factor < 1.)
         factor = 1;
 
+    headers.find("Content-Type")->second = "image/png";
     LOG_DEBUG << "Generating QR with zoom factor " << factor;
     qr::Qr::create("asdasda", path, factor);
 

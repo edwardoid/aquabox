@@ -32,6 +32,9 @@ bool WebServer::start()
 
         m_ws.start();
     });
+
+    m_rest.join();
+    m_stream.join();
 }
 
 void WebServer::setupRoutes()

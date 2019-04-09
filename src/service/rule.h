@@ -2,8 +2,6 @@
 #define RULE_H
 
 #include <string>
-#include <unordered_map>
-#include <memory>
 #include "repeattimeout.h"
 #include "action.h"
 #include "time.h"
@@ -58,8 +56,6 @@ namespace aquabox
         property(Repeat, RepeatTimeout)
         property(Actions, ClassArrayProperty<Action>)
     };
-
-    using RulesMap = std::unordered_map<std::string, std::shared_ptr<Rule>>;
 }
 
 #endif // RULE_H

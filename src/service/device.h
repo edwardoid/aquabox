@@ -6,12 +6,9 @@
 #include "devicetype.h"
 #include "property.h"
 #include <string>
-#include <unordered_map>
-#include <memory>
 
 namespace aquabox
 {
-
     using Metadata = PrimitiveProperty<nlohmann::json, nlohmann::detail::value_t::object>;
 
     class Device: public ClassProperty
@@ -31,8 +28,6 @@ namespace aquabox
         property(Class, EnumProperty<DeviceClass>)
         property(Meta, Metadata)
     };
-
-    using DevicesMap = std::unordered_map<std::string, std::shared_ptr<Device>>;
 }
 
 #endif // DEVICE_H

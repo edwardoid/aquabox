@@ -4,7 +4,10 @@
 #include "lockfile.h"
 #include "log.h"
 #include "restapi.h"
-#include "path.h"
+#include "rule.h"
+#include "ruleparser.h"
+#include "deviceparser.h"
+#include "user.h"
 #include <exception>
 #include <random>
 
@@ -69,127 +72,21 @@ int AquaBox::start()
 
     m_pool.reset(new tp::ThreadPool(m_poolOptions));
 
-    //Pistache::Address address(Pistache::Ipv4::any(), Settings::integer(Settings::HTTP_PORT, Config::REST_PORT));
-
     readDevices();
     readUsers();
     readRules(wd);
     m_server.start();
-    //initRestApi();
-    //m_webServer.setRoot(m_desc, "", Settings::string(Settings::WEB_ROOT, cwd), true);
-    //m_router.initFromDescription(m_desc);
-    //m_server = std::make_shared<Pistache::Http::Endpoint>(address);
     m_timer.start();
-    //auto opts = Pistache::Http::Endpoint::options().threads(1).flags(Pistache::Tcp::Options::ReuseAddr | Pistache::Tcp::Options::InstallSignalHandler);
     
-    try
-    {
-        m_server.start();
-        /*m_server->init(opts);
-        m_server->setHandler(m_router.handler());
-        LOG_INFO << "Started REST api on " << address.host() << ":" << address.port();
-        m_server->serveThreaded();*/
-    }
-    catch(std::exception& e)
-    {
-        LOG_FATAL << "Error occured on REST API startup. Reason: " << e.what();
-    }
-    catch(...)
-    {
-        LOG_FATAL << "Unhandled on starting REST API exception...";
-    }
+    m_server.start();
 
     std::getchar();
 
     return EXIT_SUCCESS;
 }
-/*
-Pistache::Rest::Description AquaBox::initRestApi()
-{
-    using namespace Pistache;
-    using namespace Pistache::Rest;
-    using namespace Pistache::Rest::Schema;
-
-    m_desc = Pistache::Rest::Description(Config::APPLICATION, Config::VERSION, Config::DESCRIPTION);
-    m_desc.info().contact(Config::APPLICATION, "", Config::EMAIL);
-    auto error = m_desc.response(Http::Code::Internal_Server_Error, "An error occured with the backend");
-
-    m_desc.schemes(Scheme::Http)
-            .basePath("/v1")
-            .produces(MIME(Application, Json))
-            .consumes(MIME(Application, Json));
-
-    auto v1 = m_desc.path("/api/v1");
-
-    v1.route(m_desc.post("/login"), "Authenticate")
-       .bind(&rest::API::Login, &REST)
-       .produces(MIME(Application, Json))
-       .response(error);
-
-    v1.route(m_desc.get("/status"), "Get system current state")
-       .bind(&rest::API::Status, &REST)
-       .produces(MIME(Application, Json))
-       .response(error);
-
-    v1.route(m_desc.get("/status/qr"), "Get system current state as QR code")
-       .bind(&rest::API::WhoAmI, &REST)
-       .response(error);
-
-    v1.route(m_desc.get("/devices"), "Get available devices")
-       .bind(&rest::API::Devices, &REST)
-       .produces(MIME(Application, Json))
-       .response(error);
-
-    v1.route(m_desc.get("/rules"), "Get available rules")
-       .bind(&rest::API::Rules, &REST)
-       .produces(MIME(Application, Json))
-       .response(error);
-
-    v1.route(m_desc.get("/rule/:rule"), "Get rule")
-       .bind(&rest::API::GetRule, &REST)
-       .produces(MIME(Application, Json))
-       .response(error);
-
-    v1.route(m_desc.put("/device/:dev/rule"), "Create new rule")
-       .bind(&rest::API::CreateRule, &REST)
-       .produces(MIME(Application, Json))
-       .response(error);
-
-    v1.route(m_desc.post("/device/:dev/rule"), "Update extsting rule")
-       .bind(&rest::API::CreateRule, &REST)
-       .produces(MIME(Application, Json))
-       .response(error);
-
-    v1.route(m_desc.get("/config/repeat_units"), "Get available units to repeat for a rule")
-      .bind(&rest::API::SupportedRepeatTimeouts, &REST)
-      .produces(MIME(Application, Json))
-      .response(error);
-
-    v1.route(m_desc.get("/rules/:dev"), "Get available rules for specific device")
-       .bind(&rest::API::DeviceRules, &REST)
-       .produces(MIME(Application, Json))
-       .response(error);
-
-    auto wifi = v1.path("/wifi");
-    wifi.route(m_desc.get("/qr"), "Get QR code for easy WiFi authorisation")
-       .bind(&rest::API::WiFiQR, &REST)
-       .produces(MIME(Image, Png))
-       .response(error);
-
-    return m_desc;
-}
-*/
 void AquaBox::readDevices()
 {
-    auto devs = Settings::array(Settings::DEVICES);
-    
-    LOG_INFO << "Loading " << devs.size() << " devices...";
-    for (auto d : devs)
-    {
-        auto dev = std::make_shared<Device>();
-        if(dev->parse(d))
-            m_devices.insert({ dev->getId().Value, dev});
-    }
+    m_devices = DeviceParser::parse();
 }
 
 void AquaBox::readUsers()
@@ -209,16 +106,7 @@ void AquaBox::readRules(const Path& p)
 {
     m_rulesDir = p;
     m_rulesDir.append("rules");
-    LOG_INFO << "Loading rules from" << m_rulesDir.c_str();
-    for(Path p : m_rulesDir.children())
-    {
-        if(p.isDirectory())
-            continue;
-        LOG_INFO << "Loading rule: " << p.c_str();
-        auto rule = std::make_shared<Rule>();
-        if(rule->parseFile(p))
-            m_rules.insert({ rule->getId(), rule });
-    }
+    m_rules = RulesParser::parse(m_rulesDir);
 }
 
 std::shared_ptr<Device> AquaBox::findDevice(std::string id)
