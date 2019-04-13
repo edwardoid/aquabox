@@ -19,10 +19,14 @@ namespace aquabox
         Device(Device&& src);
         const Device& operator = (const Device& src);
 
+        void turnOn();
+        void turnOff();
+
         std::vector<std::shared_ptr<class Rule>> rules() const;
 
         property(Id, StringProperty)
-        property(Index, UnsignedNumberProperty);
+        property(Index, UnsignedNumberProperty)
+        property(Pin, UnsignedShortNumberProperty);
         property(Name, StringProperty)
         property(Type, EnumProperty<DeviceType>)
         property(Class, EnumProperty<DeviceClass>)

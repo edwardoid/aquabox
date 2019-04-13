@@ -13,7 +13,7 @@
 #define ENABLE_API(Name) inline void Name (const Route& route, Response rp, Request rq)                           \
                          {                                                                                        \
                            try {                                                                                  \
-                             LOG_DEBUG << "API call " << rq->method << " " <<  rq->path;                          \
+                             LOG_DEBUG << "API call " << rq->method << " " <<  rq->path << " handler " << #Name ;    \
                              Headers headers;                                                                     \
                              headers.emplace("Access-Control-Allow-Origin", "*");                                 \
                              headers.emplace("Content-Type", "application/json");                                 \
@@ -34,20 +34,28 @@ namespace aquabox
         using Response = std::shared_ptr<HttpServerImpl::Response>;
         using Headers = SimpleWeb::CaseInsensitiveMultimap;
 
+        DECLARE_API_IMPL(OptionsOK);
         DECLARE_API_IMPL(Login);
+        DECLARE_API_IMPL(StaticFiles);
         DECLARE_API_IMPL(Status);
         DECLARE_API_IMPL(StatusQR);
         DECLARE_API_IMPL(Devices);
         DECLARE_API_IMPL(Rules);
         DECLARE_API_IMPL(GetRule);
         DECLARE_API_IMPL(CreateRule);
+        DECLARE_API_IMPL(DeleteRule);
         DECLARE_API_IMPL(DeviceRules);
         DECLARE_API_IMPL(WiFiQR);
         DECLARE_API_IMPL(SupportedRepeatTimeouts);
 
+        DECLARE_API_IMPL(TurnOn);
+        DECLARE_API_IMPL(TurnOff);
+
         struct API
         {
+            ENABLE_API(OptionsOK);
             ENABLE_API(Login)
+            ENABLE_API(StaticFiles)
             ENABLE_API(Status)
             ENABLE_API(StatusQR)
             ENABLE_API(WiFiQR)
@@ -55,8 +63,12 @@ namespace aquabox
             ENABLE_API(Rules)
             ENABLE_API(GetRule)
             ENABLE_API(CreateRule)
+            ENABLE_API(DeleteRule)
             ENABLE_API(DeviceRules)
             ENABLE_API(SupportedRepeatTimeouts)
+
+            ENABLE_API(TurnOn);
+            ENABLE_API(TurnOff);
         };
     }
 }

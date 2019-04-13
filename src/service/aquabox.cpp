@@ -50,20 +50,20 @@ int AquaBox::start()
     if(bytes >= 0)
         cwd[bytes] = '\0';
 
-    Path wd = Settings::string(Settings::WORKING_DIRECTORY, cwd);
-    if (!wd.normalize())
+    m_wd = Settings::string(Settings::WORKING_DIRECTORY, cwd);
+    if (!m_wd.normalize())
     {
-        LOG_ERROR << "Bad working directory path " << wd;
+        LOG_ERROR << "Bad working directory path " << m_wd;
     }
     else
     {
-        if(0 != chdir(wd.c_str()))
+        if(0 != chdir(m_wd.c_str()))
         {
-            LOG_ERROR << "Can't change working directory to " << wd << " errno: " << errno << " : " << strerror(errno);
+            LOG_ERROR << "Can't change working directory to " << m_wd << " errno: " << errno << " : " << strerror(errno);
         }
         else
         {
-            LOG_INFO << "Changed workign direcotry to " << wd;
+            LOG_INFO << "Changed workign direcotry to " << m_wd;
         }
     }
 
@@ -74,7 +74,7 @@ int AquaBox::start()
 
     readDevices();
     readUsers();
-    readRules(wd);
+    readRules(m_wd);
     m_server.start();
     m_timer.start();
     
@@ -125,12 +125,17 @@ std::shared_ptr<Rule> AquaBox::findRule(std::string id)
     return p->second;
 }
 
-DevicesMap AquaBox::devices() const
+const Path& AquaBox::workingDirectory() const
+{
+    return m_wd;
+}
+
+DevicesMap& AquaBox::devices() const
 {
     return m_devices;
 }
 
-RulesMap AquaBox::rules() const
+RulesMap& AquaBox::rules() const
 {
     return m_rules;
 }
@@ -154,7 +159,31 @@ bool AquaBox::addRule(std::shared_ptr<Rule>& rule, bool replace)
     return saved;
 }
 
-UsersMap AquaBox::users() const
+bool AquaBox::removeRule(std::shared_ptr<Rule> rule)
+{
+    auto pos = m_rules.find(rule->getId().Value);
+    if (pos == m_rules.end()) {
+        return false;
+    }
+
+    Path p = m_rulesDir;
+    p.append(rule->getId().Value + ".json");
+    if (!p.exists()) {
+        LOG_ERROR << "Can't find rule " << rule->getId().Value << " tried: " << p.c_str();
+        return false;
+    }
+    std::remove(p.c_str());
+
+    if(p.exists()) {
+        LOG_ERROR << "Can't remove file " << p.c_str();
+        return false;
+    }
+
+    m_rules.erase(pos);
+    return true;
+}
+
+UsersMap& AquaBox::users() const
 {
     return m_users;
 }

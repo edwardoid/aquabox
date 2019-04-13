@@ -32,10 +32,12 @@ namespace aquabox
         ~AquaBox() = default;
         std::shared_ptr<Device> findDevice(std::string id);
         std::shared_ptr<Rule> findRule(std::string id);
-        DevicesMap devices() const;
-        UsersMap users() const;
-        RulesMap rules() const;
+        const Path& workingDirectory() const;
+        DevicesMap& devices() const;
+        UsersMap& users() const;
+        RulesMap& rules() const;
         bool addRule(std::shared_ptr<Rule>& rule, bool replace = false);
+        bool removeRule(std::shared_ptr<Rule> rule);
         void doLater(std::function<void(void)>&& task);
     private:
         void readDevices();
@@ -45,10 +47,11 @@ namespace aquabox
         plog::ColorConsoleAppender<plog::TxtFormatter> m_consoleAppender;
         tp::ThreadPoolOptions m_poolOptions;
         std::unique_ptr<tp::ThreadPool> m_pool;
-        DevicesMap m_devices;
-        UsersMap m_users;
+        mutable DevicesMap m_devices;
+        mutable UsersMap m_users;
+        mutable RulesMap m_rules;
+        Path m_wd;
         Path m_rulesDir;
-        RulesMap m_rules;
         RulesTimer m_timer;
         WebServer m_server;
     };

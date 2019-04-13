@@ -6,6 +6,7 @@
 #include <server_ws.hpp>
 #include "route.h"
 #include "restapi.h"
+#include "wsapi.h"
 
 namespace aquabox
 {
@@ -17,12 +18,15 @@ namespace aquabox
         bool bindApiCalls();
         
     private:
+        using WsServer = SimpleWeb::SocketServer<SimpleWeb::WS>;
+
         SimpleWeb::Server<SimpleWeb::HTTP> m_http;
-        SimpleWeb::SocketServer<SimpleWeb::WS> m_ws;
+        WsServer m_ws;
         std::thread m_rest;
         std::thread m_stream;
         rest::API m_API;
         Route m_updates;
+        Route m_static;
         Route m_login;
         Route m_status;
         Route m_statusQR;
@@ -30,10 +34,14 @@ namespace aquabox
         Route m_allRules;
         Route m_ruleById;
         Route m_createRule;
+        Route m_deleteRule;
         Route m_updateRule;
         Route m_rulesForDevice;
         Route m_repeatUnits;
         Route m_wifi;
+
+        Route m_turnOn;
+        Route m_turnOff;
     };
 }
 

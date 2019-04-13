@@ -3,6 +3,7 @@
 
 #include "timer.h"
 #include "rule.h"
+#include <plog/Log.h>
 #include <memory>
 
 namespace aquabox
@@ -18,6 +19,8 @@ namespace aquabox
         void turnOff();
         void turnOn();
     private:
+        static plog::Logger<1> m_rulesLogger;
+        static plog::RollingFileAppender<plog::CsvFormatter> m_rulesAppender;
         const Timer::ClockTimePoint m_now;
         std::shared_ptr<class Rule> m_rule;
     };

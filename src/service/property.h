@@ -130,6 +130,7 @@ namespace aquabox
 
     using BooleanProperty = PrimitiveProperty<bool, nlohmann::detail::value_t::boolean>;
     using NumberProperty = PrimitiveProperty<int64_t, nlohmann::detail::value_t::number_integer>;
+    using UnsignedShortNumberProperty = PrimitiveProperty<uint8_t, nlohmann::detail::value_t::number_unsigned>;
     using UnsignedNumberProperty = PrimitiveProperty<uint64_t, nlohmann::detail::value_t::number_unsigned>;
     using FloatProperty = PrimitiveProperty<double, nlohmann::detail::value_t::number_float>;
     using StringProperty = PrimitiveProperty<std::string, nlohmann::detail::value_t::string>;

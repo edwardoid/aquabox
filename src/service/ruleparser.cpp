@@ -10,7 +10,7 @@ std::unordered_map<std::string, std::shared_ptr<Rule>> RulesParser::parse(Path& 
     LOG_INFO << "Loading rules from" << root.c_str();
     for(Path p : root.children())
     {
-        if(p.isDirectory())
+        if(p.isDirectory() || p.extension() != "json")
             continue;
         LOG_INFO << "Loading rule: " << p.c_str();
         auto rule = std::make_shared<Rule>();

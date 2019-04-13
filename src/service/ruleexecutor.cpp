@@ -5,11 +5,18 @@
 #include "enumerations.h"
 #include <ctime>
 
+#define LOG_RULE_ACTION LOG_DEBUG_(1)
+
 using namespace aquabox;
+
+plog::Logger<1> RuleExecutor::m_rulesLogger(plog::Severity::debug);
+plog::RollingFileAppender<plog::CsvFormatter> RuleExecutor::m_rulesAppender("rules.log");
 
 RuleExecutor::RuleExecutor(std::shared_ptr<Rule>& rule, Timer::ClockTimePoint now)
     : m_now(now), m_rule(rule)
-{}
+{
+    m_rulesLogger.addAppender(&m_rulesAppender);
+}
 
 void RuleExecutor::operator() ()
 {
@@ -56,7 +63,6 @@ void RuleExecutor::operator() ()
         }
         
         if (ok) {
-
             switch(act.getType().Value) {
                 case ActionType::TurnOff: {
                     return turnOff();

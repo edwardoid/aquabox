@@ -15,9 +15,11 @@ namespace aquabox
         bool normalize();
         bool append(std::string sub);
         bool isDirectory() const;
+        bool exists() const;
         std::list<Path> children() const;
         bool contains(const Path& subPath) const;
         Path subPath(const Path& to) const;
+        std::string extension() const;
     };
 }
 

@@ -3,6 +3,8 @@
         {
             "class": "relay",
             "id": "dev0",
+            "index": 0,
+            "pin": 19,
             "meta": {
                 "model": "CristalProfi e401",
                 "vendor": "jbl"
@@ -13,6 +15,8 @@
         {
             "class": "relay",
             "id": "dev1",
+            "index": 1,
+            "pin": 18,
             "meta": {
                 "model": "80.3",
                 "vendor": "daytime"
@@ -23,6 +27,8 @@
         {
             "class": "relay",
             "id": "dev2",
+            "index": 2,
+            "pin": 198,
             "meta": {
                 "model": "classicLED",
                 "vendor": "eheim"
@@ -33,6 +39,8 @@
         {
             "class": "relay",
             "id": "dev3",
+            "index": 3,
+            "pin": 198,
             "meta": {
                 "model": "100W",
                 "vendor": "juwel"
@@ -43,6 +51,8 @@
         {
             "class": "relay",
             "id": "dev4",
+            "index": 4,
+            "pin": 198,
             "meta": {
                 "model": "acid+biocarabonade",
                 "vendor": "generic_co2"
@@ -54,9 +64,10 @@
     "encryption": "WPA",
     "http": "",
     "httpPort": 8974,
-    "log": "INFO",
+    "log": "VERBOSE",
     "password": "azazello",
     "ssid": "Sargsyan5",
+    "streamPort": 1214,
     "threads": 8,
     "users": [
         {

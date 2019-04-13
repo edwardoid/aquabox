@@ -48,6 +48,7 @@ namespace aquabox
         bool saveToFile(const std::string& file);
 
         property(Id, StringProperty)
+        property(Name, StringProperty)
         property(Index, UnsignedNumberProperty)
         property(Device, DeviceReference)
         property(Enabled, BooleanProperty)

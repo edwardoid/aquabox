@@ -2,12 +2,13 @@
 #include "aquabox.h"
 #include "rule.h"
 #include "log.h"
+#include "gpio.h"
 
 using namespace aquabox;
 
 Device::Device()
-    : ClassProperty("-class Device", { &m_Id, &m_Index, &m_Name, &m_Type, &m_Class, &m_Meta })
-    , m_Id("id"), m_Index("index", false),m_Name("name"), m_Type("type"), m_Class("class"), m_Meta("meta")
+    : ClassProperty("-class Device", { &m_Id, &m_Index, &m_Pin, &m_Name, &m_Type, &m_Class, &m_Meta })
+    , m_Id("id"), m_Index("index", false), m_Pin("pin"),m_Name("name"), m_Type("type"), m_Class("class"), m_Meta("meta")
 {}
 
 Device::Device(const Device& src)
@@ -22,6 +23,7 @@ Device::Device(Device&& src)
     moveData(src);
     moveProperty(Id);
     moveProperty(Index);
+    moveProperty(Pin);
     moveProperty(Name);
     moveProperty(Type);
     moveProperty(Class);
@@ -33,6 +35,7 @@ const Device& Device::operator = (const Device& src)
     copyData(src);
     copyProperty(Id);
     moveProperty(Index);
+    moveProperty(Pin);
     copyProperty(Name);
     copyProperty(Type);
     copyProperty(Class);
@@ -52,4 +55,34 @@ std::vector<std::shared_ptr<Rule>> Device::rules() const
     }
 
     return res;
+}
+
+void Device::turnOn()
+{
+    auto gpio = GPIO::get(m_Pin.Value);
+    if (gpio == nullptr) {
+        LOG_ERROR << "Can't find attached GPIO " << m_Pin.Value;
+    }
+
+    static Bytes ON({ 1 });
+    if (ON.size() != gpio->send(ON, ON.size())) {
+        LOG_ERROR << "Can't write to GPIO " << m_Pin.Value;
+    }
+
+    LOG_DEBUG << "Turned on";
+}
+
+void Device::turnOff()
+{
+    auto gpio = GPIO::get(m_Pin.Value);
+    if (gpio == nullptr) {
+        LOG_ERROR << "Can't find attached GPIO " << m_Pin.Value;
+    }
+
+    static Bytes OFF({ 1 });
+    if (OFF.size() != gpio->send(OFF, OFF.size())) {
+        LOG_ERROR << "Can't write to GPIO " << m_Pin.Value;
+    }
+
+    LOG_DEBUG << "Turned off";
 }

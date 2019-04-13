@@ -1,4 +1,5 @@
 #include "path.h"
+#include <algorithm>
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <unistd.h>
@@ -67,6 +68,12 @@ bool Path::isDirectory() const
     return false;
 }
 
+bool Path::exists() const
+{
+    struct stat buffer;   
+    return (stat (c_str(), &buffer) == 0); 
+}
+
 std::list<Path> Path::children() const
 {
     std::list<Path> paths;
@@ -101,4 +108,12 @@ Path Path::subPath(const Path& to) const
         return substr(to.size());
     }
     return Path("");
+}
+
+std::string Path::extension() const
+{
+    auto pos = find_last_of('.');
+	auto ext = substr(pos == std::string::npos ? size() : pos +1);
+	std::transform(ext.begin(), ext.end(), ext.begin(), ::tolower);
+	return ext;
 }

@@ -5,6 +5,7 @@
 #include <qrencode.h>
 #include <stdio.h>
 #include <vector>
+#include <cmath>
 
 #define INCHES_PER_METER (100.0/2.54)
 

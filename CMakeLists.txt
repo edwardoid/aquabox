@@ -2,9 +2,9 @@ cmake_minimum_required(VERSION 3.5)
 project(aquabox)
 
 set(THREE_DP_DIR "${PROJECT_SOURCE_DIR}/3dp")
-set(CMAKE_INSTALL_PREFIX "${PROJECT_SOURCE_DIR}/fff/ttt")
+set(CMAKE_INSTALL_PREFIX "$ENV{RASPB_SYSROOT}/home/ed/aquabox")
 set(CMAKE_CXX_STANDARD 11)
-set(CMAKE_BUILD_TYPE Debug)
+#set(CMAKE_BUILD_TYPE Debug)
 set(CMAKE_CXX_CPPCHECK "")
 set(PLOG_INCLUDE_DIR "${PROJECT_SOURCE_DIR}/3dp/plog/include")
 set(THREAD_POOL_INCLUDE_DIR "${PROJECT_SOURCE_DIR}/3dp/thread-pool-cpp/include")
@@ -48,13 +48,16 @@ target_compile_definitions(${PROJECT_NAME} PUBLIC AB_VERSION=\"${AB_V}.${AB_v}\"
 target_compile_definitions(${PROJECT_NAME} PUBLIC AB_GIT_HASH=\"${GIT_COMMIT_HASH}\")
 
 
-target_link_libraries(${PROJECT_NAME} qrencode)
-target_link_libraries(${PROJECT_NAME} boost_system)
-
-
 find_package(PNG REQUIRED)
+find_package(Boost REQUIRED COMPONENTS system)
 include_directories(${PNG_INCLUDE_DIR})
 
 
+link_directories(${Boost_LIBRARY_DIRS})
+target_link_libraries(${PROJECT_NAME} qrencode)
+target_link_libraries(${PROJECT_NAME} ${Boost_LIBRARIES})
+target_link_libraries(${PROJECT_NAME} ${OPENSSL_CRYPTO_LIBRARY})
 target_link_libraries(${PROJECT_NAME} ${PNG_LIBRARY})
+target_link_libraries(${PROJECT_NAME} ${ZLIB_LIBRARIES})
+target_link_libraries(${PROJECT_NAME} Boost::system)
 install(TARGETS ${PROJECT_NAME} DESTINATION bin)

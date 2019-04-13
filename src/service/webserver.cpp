@@ -22,13 +22,8 @@ bool WebServer::start()
         m_ws.config.port = Settings::integer(Settings::STREAM_PORT, Config::WS_PORT);
         m_ws.config.address = "0.0.0.0";
         LOG_INFO << "Starting websocket server" << m_ws.config.address << ":" << m_ws.config.port;
-        
 
-        auto& updates = m_ws.endpoint[m_updates.url()];
-
-        updates.on_open = [](std::shared_ptr<SimpleWeb::SocketServer<SimpleWeb::WS>::Connection> connection) {
-            LOG_DEBUG << "";
-        };
+        ws::API::Ping(m_ws, m_updates);
 
         m_ws.start();
     });
@@ -39,6 +34,8 @@ bool WebServer::start()
 
 void WebServer::setupRoutes()
 {
+    m_static.word("static").any();
+
     const Route base = Route().word("api").word("v1");
 
     m_login = base.sub().word("login");
@@ -53,6 +50,8 @@ void WebServer::setupRoutes()
 
     m_ruleById = base.sub().word("rule").string(":rule");
 
+    m_deleteRule = base.sub().word("rule").string(":rule");
+
     m_createRule = base.sub().word("device").string(":dev").word("rule");
 
     m_updateRule = base.sub().word("device").string(":dev").word("rule");
@@ -63,20 +62,36 @@ void WebServer::setupRoutes()
 
     m_wifi.word("wifi");
 
+    m_turnOn = base.sub().word("debug").string(":dev").word("turn_on");
+
+    m_turnOff = base.sub().word("debug").string(":dev").word("turn_off");
+
     m_updates = base.sub().word("updates");
 }
 
 bool WebServer::bindApiCalls()
 {
+    m_http.resource[m_static.url()]["GET"] = std::bind(&rest::API::StaticFiles, &m_API, m_static, std::placeholders::_1, std::placeholders::_2);
     m_http.resource[m_login.url()]["GET"] = std::bind(&rest::API::Login, &m_API, m_login, std::placeholders::_1, std::placeholders::_2);
     m_http.resource[m_status.url()]["GET"] = std::bind(&rest::API::Status, &m_API, m_status, std::placeholders::_1, std::placeholders::_2);
     m_http.resource[m_statusQR.url()]["GET"] = std::bind(&rest::API::StatusQR, &m_API, m_statusQR, std::placeholders::_1, std::placeholders::_2);
     m_http.resource[m_allDevices.url()]["GET"] = std::bind(&rest::API::Devices, &m_API, m_allDevices, std::placeholders::_1, std::placeholders::_2);
     m_http.resource[m_allRules.url()]["GET"] = std::bind(&rest::API::Rules, &m_API, m_allRules, std::placeholders::_1, std::placeholders::_2);
     m_http.resource[m_ruleById.url()]["GET"] = std::bind(&rest::API::GetRule, &m_API, m_ruleById, std::placeholders::_1, std::placeholders::_2);
+
+    m_http.resource[m_deleteRule.url()]["DELETE"] = std::bind(&rest::API::DeleteRule, &m_API, m_ruleById, std::placeholders::_1, std::placeholders::_2);
+    m_http.resource[m_deleteRule.url()]["OPTIONS"] = std::bind(&rest::API::OptionsOK, &m_API, m_ruleById, std::placeholders::_1, std::placeholders::_2);
+    
     m_http.resource[m_createRule.url()]["PUT"] = std::bind(&rest::API::CreateRule, &m_API, m_createRule, std::placeholders::_1, std::placeholders::_2);
+    m_http.resource[m_createRule.url()]["OPTIONS"] = std::bind(&rest::API::OptionsOK, &m_API, m_ruleById, std::placeholders::_1, std::placeholders::_2);
+
     m_http.resource[m_updateRule.url()]["POST"] = std::bind(&rest::API::CreateRule, &m_API, m_updateRule, std::placeholders::_1, std::placeholders::_2);
+    m_http.resource[m_updateRule.url()]["OPTIONS"] = std::bind(&rest::API::OptionsOK, &m_API, m_ruleById, std::placeholders::_1, std::placeholders::_2);
+    
     m_http.resource[m_rulesForDevice.url()]["GET"] = std::bind(&rest::API::DeviceRules, &m_API, m_rulesForDevice, std::placeholders::_1, std::placeholders::_2);
     m_http.resource[m_repeatUnits.url()]["GET"] = std::bind(&rest::API::SupportedRepeatTimeouts, &m_API, m_repeatUnits, std::placeholders::_1, std::placeholders::_2);
     m_http.resource[m_wifi.url()]["GET"] = std::bind(&rest::API::WiFiQR, &m_API, m_wifi, std::placeholders::_1, std::placeholders::_2);
+
+    m_http.resource[m_turnOn.url()]["GET"] = std::bind(&rest::API::TurnOn, &m_API, m_turnOn, std::placeholders::_1, std::placeholders::_2);
+    m_http.resource[m_turnOff.url()]["GET"] = std::bind(&rest::API::TurnOff, &m_API, m_turnOff, std::placeholders::_1, std::placeholders::_2);
 }
