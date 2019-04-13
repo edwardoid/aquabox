@@ -57,16 +57,22 @@ std::vector<std::shared_ptr<Rule>> Device::rules() const
     return res;
 }
 
+bool Device::turnedOn() const
+{
+    auto gpio = GPIO::get(m_Pin.Value);
+    return !gpio->isHigh();
+}
+
 void Device::turnOn()
 {
     auto gpio = GPIO::get(m_Pin.Value);
     if (gpio == nullptr) {
-        LOG_ERROR << "Can't find attached GPIO " << m_Pin.Value;
+        LOG_ERROR << "Can't find attached GPIO " << (int)m_Pin.Value;
     }
 
-    static Bytes ON({ 1 });
+    static Bytes ON({ 0 });
     if (ON.size() != gpio->send(ON, ON.size())) {
-        LOG_ERROR << "Can't write to GPIO " << m_Pin.Value;
+        LOG_ERROR << "Can't write to GPIO " << (int)m_Pin.Value;
     }
 
     LOG_DEBUG << "Turned on";
@@ -76,12 +82,12 @@ void Device::turnOff()
 {
     auto gpio = GPIO::get(m_Pin.Value);
     if (gpio == nullptr) {
-        LOG_ERROR << "Can't find attached GPIO " << m_Pin.Value;
+        LOG_ERROR << "Can't find attached GPIO " << (int)m_Pin.Value;
     }
 
     static Bytes OFF({ 1 });
     if (OFF.size() != gpio->send(OFF, OFF.size())) {
-        LOG_ERROR << "Can't write to GPIO " << m_Pin.Value;
+        LOG_ERROR << "Can't write to GPIO " << (int)m_Pin.Value;
     }
 
     LOG_DEBUG << "Turned off";

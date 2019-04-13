@@ -242,11 +242,37 @@ DEFINE_API_IMPL(Devices)
     {
         nlohmann::json json;
         dev.second->json(json);
+        json["isOn"] = dev.second->turnedOn();
         all.push_back(json);
     }
     nlohmann::json res = nlohmann::json::object();
     res["devices"] = all;
     response->write(SimpleWeb::StatusCode::success_ok, res.dump(4), headers);
+}
+
+DEFINE_API_IMPL(GetDevice)
+{
+    auto params = route.extract(request->path);
+    if (params.count(":dev") == 0) {
+        LOG_ERROR << "No device id parameter in URL";
+        response->write(SimpleWeb::StatusCode::client_error_bad_request, headers);
+        return;
+    }
+    std::string dev = params[":dev"];
+    
+    auto& devices = AquaBox::i().devices();
+    auto pos = devices.find(dev);
+    if (pos == devices.end()) {
+        LOG_ERROR << "No device " << dev << " not found";
+        response->write(SimpleWeb::StatusCode::client_error_not_found, headers);
+        return;
+    }
+
+    nlohmann::json data;
+    pos->second->json(data);
+    data["isOn"] = pos->second->turnedOn();
+
+    response->write(SimpleWeb::StatusCode::success_ok, data.dump(4), headers);
 }
 
 DEFINE_API_IMPL(Rules)

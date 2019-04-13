@@ -20,10 +20,12 @@ namespace aquabox
     private:
         Mode readMode();
         bool writeMode(Mode mode);
+        bool exported() const;
     public:
         static std::shared_ptr<GPIO> get(uint8_t pin);
         bool open() override;
         bool close() override;
+        bool isHigh();
         BytesCount send(const Bytes& data, const BytesCount count = 0) override;
         BytesCount read(Bytes& data, const Offset = 0) override;
     private:

@@ -39,6 +39,7 @@ namespace aquabox
         DECLARE_API_IMPL(StaticFiles);
         DECLARE_API_IMPL(Status);
         DECLARE_API_IMPL(StatusQR);
+        DECLARE_API_IMPL(GetDevice);
         DECLARE_API_IMPL(Devices);
         DECLARE_API_IMPL(Rules);
         DECLARE_API_IMPL(GetRule);
@@ -59,6 +60,7 @@ namespace aquabox
             ENABLE_API(Status)
             ENABLE_API(StatusQR)
             ENABLE_API(WiFiQR)
+            ENABLE_API(GetDevice)
             ENABLE_API(Devices)
             ENABLE_API(Rules)
             ENABLE_API(GetRule)

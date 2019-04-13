@@ -19,6 +19,8 @@ namespace aquabox
         Device(Device&& src);
         const Device& operator = (const Device& src);
 
+        bool turnedOn() const;
+
         void turnOn();
         void turnOff();
 

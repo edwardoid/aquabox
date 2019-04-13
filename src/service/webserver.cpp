@@ -52,19 +52,21 @@ void WebServer::setupRoutes()
 
     m_deleteRule = base.sub().word("rule").string(":rule");
 
+    m_deviceById = base.sub().word("device").string(":dev");
+
     m_createRule = base.sub().word("device").string(":dev").word("rule");
 
     m_updateRule = base.sub().word("device").string(":dev").word("rule");
+
+    m_turnOn = base.sub().word("device").string(":dev").word("turn_on");
+
+    m_turnOff = base.sub().word("device").string(":dev").word("turn_off");
 
     m_rulesForDevice = base.sub().word("rules").string(":dev");
 
     m_repeatUnits = base.sub().word("config").word("repeat_units");
 
     m_wifi.word("wifi");
-
-    m_turnOn = base.sub().word("debug").string(":dev").word("turn_on");
-
-    m_turnOff = base.sub().word("debug").string(":dev").word("turn_off");
 
     m_updates = base.sub().word("updates");
 }
@@ -76,6 +78,8 @@ bool WebServer::bindApiCalls()
     m_http.resource[m_status.url()]["GET"] = std::bind(&rest::API::Status, &m_API, m_status, std::placeholders::_1, std::placeholders::_2);
     m_http.resource[m_statusQR.url()]["GET"] = std::bind(&rest::API::StatusQR, &m_API, m_statusQR, std::placeholders::_1, std::placeholders::_2);
     m_http.resource[m_allDevices.url()]["GET"] = std::bind(&rest::API::Devices, &m_API, m_allDevices, std::placeholders::_1, std::placeholders::_2);
+    m_http.resource[m_deviceById.url()]["GET"] = std::bind(&rest::API::GetDevice, &m_API, m_deviceById, std::placeholders::_1, std::placeholders::_2);
+
     m_http.resource[m_allRules.url()]["GET"] = std::bind(&rest::API::Rules, &m_API, m_allRules, std::placeholders::_1, std::placeholders::_2);
     m_http.resource[m_ruleById.url()]["GET"] = std::bind(&rest::API::GetRule, &m_API, m_ruleById, std::placeholders::_1, std::placeholders::_2);
 

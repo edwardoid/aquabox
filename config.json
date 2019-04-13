@@ -40,7 +40,7 @@
             "class": "relay",
             "id": "dev3",
             "index": 3,
-            "pin": 198,
+            "pin": 199,
             "meta": {
                 "model": "100W",
                 "vendor": "juwel"
