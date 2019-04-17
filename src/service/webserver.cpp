@@ -23,7 +23,7 @@ bool WebServer::start()
         m_ws.config.address = "0.0.0.0";
         LOG_INFO << "Starting websocket server" << m_ws.config.address << ":" << m_ws.config.port;
 
-        ws::API::Ping(m_ws, m_updates);
+        WS.Ping(m_ws, m_updates);
 
         m_ws.start();
     });
@@ -73,29 +73,25 @@ void WebServer::setupRoutes()
 
 bool WebServer::bindApiCalls()
 {
-    m_http.resource[m_static.url()]["GET"] = std::bind(&rest::API::StaticFiles, &m_API, m_static, std::placeholders::_1, std::placeholders::_2);
-    m_http.resource[m_login.url()]["GET"] = std::bind(&rest::API::Login, &m_API, m_login, std::placeholders::_1, std::placeholders::_2);
-    m_http.resource[m_status.url()]["GET"] = std::bind(&rest::API::Status, &m_API, m_status, std::placeholders::_1, std::placeholders::_2);
-    m_http.resource[m_statusQR.url()]["GET"] = std::bind(&rest::API::StatusQR, &m_API, m_statusQR, std::placeholders::_1, std::placeholders::_2);
-    m_http.resource[m_allDevices.url()]["GET"] = std::bind(&rest::API::Devices, &m_API, m_allDevices, std::placeholders::_1, std::placeholders::_2);
-    m_http.resource[m_deviceById.url()]["GET"] = std::bind(&rest::API::GetDevice, &m_API, m_deviceById, std::placeholders::_1, std::placeholders::_2);
+    REST.setup(m_http, "GET", m_static, &rest::API::StaticFiles);
+    REST.setup(m_http, "GET", m_login, &rest::API::Login);
+    REST.setup(m_http, "GET", m_status, &rest::API::Status);
+    REST.setup(m_http, "GET", m_statusQR, &rest::API::StatusQR);
+    REST.setup(m_http, "GET", m_allDevices, &rest::API::Devices);
+    REST.setup(m_http, "GET", m_deviceById, &rest::API::GetDevice);
+    REST.setup(m_http, "GET", m_allRules, &rest::API::Rules);
+    REST.setup(m_http, "GET", m_ruleById, &rest::API::GetRule);
+    REST.setup(m_http, "DELETE", m_deleteRule, &rest::API::DeleteRule);
+    REST.setup(m_http, "PUT", m_createRule, &rest::API::CreateRule);
+    REST.setup(m_http, "POST", m_updateRule, &rest::API::CreateRule);
+    REST.setup(m_http, "GET", m_rulesForDevice, &rest::API::DeviceRules);
+    REST.setup(m_http, "GET", m_repeatUnits, &rest::API::SupportedRepeatTimeouts);
+    REST.setup(m_http, "GET", m_wifi, &rest::API::WiFiQR);
+    REST.setup(m_http, "PUT", m_turnOn, &rest::API::TurnOn);
+    REST.setup(m_http, "PUT", m_turnOff, &rest::API::TurnOff);
+}
 
-    m_http.resource[m_allRules.url()]["GET"] = std::bind(&rest::API::Rules, &m_API, m_allRules, std::placeholders::_1, std::placeholders::_2);
-    m_http.resource[m_ruleById.url()]["GET"] = std::bind(&rest::API::GetRule, &m_API, m_ruleById, std::placeholders::_1, std::placeholders::_2);
-
-    m_http.resource[m_deleteRule.url()]["DELETE"] = std::bind(&rest::API::DeleteRule, &m_API, m_ruleById, std::placeholders::_1, std::placeholders::_2);
-    m_http.resource[m_deleteRule.url()]["OPTIONS"] = std::bind(&rest::API::OptionsOK, &m_API, m_ruleById, std::placeholders::_1, std::placeholders::_2);
-    
-    m_http.resource[m_createRule.url()]["PUT"] = std::bind(&rest::API::CreateRule, &m_API, m_createRule, std::placeholders::_1, std::placeholders::_2);
-    m_http.resource[m_createRule.url()]["OPTIONS"] = std::bind(&rest::API::OptionsOK, &m_API, m_ruleById, std::placeholders::_1, std::placeholders::_2);
-
-    m_http.resource[m_updateRule.url()]["POST"] = std::bind(&rest::API::CreateRule, &m_API, m_updateRule, std::placeholders::_1, std::placeholders::_2);
-    m_http.resource[m_updateRule.url()]["OPTIONS"] = std::bind(&rest::API::OptionsOK, &m_API, m_ruleById, std::placeholders::_1, std::placeholders::_2);
-    
-    m_http.resource[m_rulesForDevice.url()]["GET"] = std::bind(&rest::API::DeviceRules, &m_API, m_rulesForDevice, std::placeholders::_1, std::placeholders::_2);
-    m_http.resource[m_repeatUnits.url()]["GET"] = std::bind(&rest::API::SupportedRepeatTimeouts, &m_API, m_repeatUnits, std::placeholders::_1, std::placeholders::_2);
-    m_http.resource[m_wifi.url()]["GET"] = std::bind(&rest::API::WiFiQR, &m_API, m_wifi, std::placeholders::_1, std::placeholders::_2);
-
-    m_http.resource[m_turnOn.url()]["GET"] = std::bind(&rest::API::TurnOn, &m_API, m_turnOn, std::placeholders::_1, std::placeholders::_2);
-    m_http.resource[m_turnOff.url()]["GET"] = std::bind(&rest::API::TurnOff, &m_API, m_turnOff, std::placeholders::_1, std::placeholders::_2);
+void WebServer::postUpdate(std::shared_ptr<Event> event)
+{
+    WS.postEvent(event);
 }

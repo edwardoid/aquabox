@@ -10,3 +10,4 @@ cmake $PWD/..	-DBoost_INCLUDE_DIRS=$RASPB_SYSROOT/usr/include \
 		-DBOOST_LIBRARYDIR=$RASPB_SYSROOT/usr/lib/arm-linux-gnueabihf \
 		-DPNG_PNG_INCLUDE_DIR=$RASPB_SYSROOT/usr/include \
 		-DZLIB_INCLUDE_DIR=$RASPB_SYSROOT/usr/include/arm-linux-gnueabihf \
+		-DTARGET_DEVICE=YES

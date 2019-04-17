@@ -18,8 +18,14 @@ void handler(int sig) {
   exit(1);
 }
 
-int main()
+int main(int argc, char** argv)
 {
-    signal(SIGSEGV, handler);
-    return aquabox::AquaBox::i().start();
+  bool asService = false;
+  for(int i = 1; i < argc; ++i)
+  {
+    if(strcmp(argv[i], "--service") == 0)
+      asService = true;
+  }
+  signal(SIGSEGV, handler);
+  return aquabox::AquaBox::i().start(asService);
 }

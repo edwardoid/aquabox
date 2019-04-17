@@ -70,6 +70,10 @@ void Device::turnOn()
         LOG_ERROR << "Can't find attached GPIO " << (int)m_Pin.Value;
     }
 
+    if (!turnedOn()) {
+        return;
+    }
+
     static Bytes ON({ 0 });
     if (ON.size() != gpio->send(ON, ON.size())) {
         LOG_ERROR << "Can't write to GPIO " << (int)m_Pin.Value;
@@ -85,10 +89,43 @@ void Device::turnOff()
         LOG_ERROR << "Can't find attached GPIO " << (int)m_Pin.Value;
     }
 
+    if (!turnedOn()) {
+        return;
+    }
+
     static Bytes OFF({ 1 });
     if (OFF.size() != gpio->send(OFF, OFF.size())) {
         LOG_ERROR << "Can't write to GPIO " << (int)m_Pin.Value;
     }
 
     LOG_DEBUG << "Turned off";
+}
+
+void Device::addPendingAction(uint64_t priority, ActionType action)
+{
+    if (m_pendingActionPriority == INVALID_PRIORITY || m_pendingActionPriority >= priority) {
+        m_pendingAction = action;
+        m_pendingActionPriority = priority;
+    }
+}
+
+bool Device::preformPendingAction()
+{
+    if (m_pendingActionPriority != INVALID_PRIORITY) {
+        switch(m_pendingAction)
+        {
+            case ActionType::TurnOn: {
+                turnOn();
+                break;
+            }
+            case ActionType::TurnOff: {
+                turnOff();
+                break;
+            }
+        }
+        m_pendingActionPriority = INVALID_PRIORITY;
+        return true;
+    }
+
+    return false;
 }

@@ -22,14 +22,20 @@ AquaBox& AquaBox::i()
 }
 
 AquaBox::AquaBox()
+    : m_fileAppender("aquabox.log")
 {}
 
-int AquaBox::start()
+int AquaBox::start(bool asService)
 {
     Lockfile lock;
 
     plog::init( plog::severityFromString(Settings::string(Settings::LOG_LEVEL, plog::severityToString(plog::Severity::info)).c_str()),
                 &m_consoleAppender);
+    
+    if (asService) {
+        plog::init( plog::severityFromString(Settings::string(Settings::LOG_LEVEL, plog::severityToString(plog::Severity::info)).c_str()),
+                &m_fileAppender);
+    }
 
     LOG_INFO << "Starting " << Config::APPLICATION << " ver. " << std::hex << Config::VERSION_MAJOR << "." << Config::VERSION_MINOR;
     if(lock.exists())
@@ -75,8 +81,9 @@ int AquaBox::start()
     readDevices();
     readUsers();
     readRules(m_wd);
-    m_server.start();
+
     m_timer.start();
+    m_server.start();
     
     m_server.start();
 
@@ -194,4 +201,9 @@ void AquaBox::doLater(std::function<void(void)>&& task)
     {
         LOG_ERROR << "Can't schedule a new task";
     }
+}
+
+void AquaBox::postUpdate(std::shared_ptr<Event> event)
+{
+    m_server.postUpdate(event);
 }

@@ -10,7 +10,7 @@
             "type": "cppdbg",
             "request": "launch",
             "program": "${workspaceFolder}/build/aquabox",
-            "args": [],
+            "args": [ "--service"],
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}/build",
             "externalConsole": true,

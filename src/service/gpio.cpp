@@ -146,6 +146,7 @@ bool GPIO::close()
     
     std::string num = std::to_string(Pin);
     auto count = fwrite(num.c_str(), sizeof(std::string::value_type), num.size() + 1, fp);
+    fflush(fp);
     fclose(fp);
 
     m_mode = Mode::Unknown;
@@ -185,8 +186,8 @@ BytesCount GPIO::send(const Bytes& data, const BytesCount count)
 
         const char v[] = { static_cast<char>(data[0] + '0'), 0 };
         auto count = fwrite(&v, sizeof(char), 2, fp);
+        fflush(fp);
         fclose(fp);
-        
         return count > 0;
     } else {
         LOG_DEBUG << "Can't open " << DirectionFile << " errno: " << errno;

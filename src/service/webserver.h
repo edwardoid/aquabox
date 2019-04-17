@@ -8,6 +8,8 @@
 #include "restapi.h"
 #include "wsapi.h"
 
+class Event;
+
 namespace aquabox
 {
     class WebServer
@@ -16,7 +18,7 @@ namespace aquabox
         bool start();
         void setupRoutes();
         bool bindApiCalls();
-        
+        void postUpdate(std::shared_ptr<Event> event);
     private:
         using WsServer = SimpleWeb::SocketServer<SimpleWeb::WS>;
 
@@ -24,7 +26,8 @@ namespace aquabox
         WsServer m_ws;
         std::thread m_rest;
         std::thread m_stream;
-        rest::API m_API;
+        rest::API REST;
+        ws::API WS;
         Route m_updates;
         Route m_static;
         Route m_login;

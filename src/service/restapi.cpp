@@ -18,6 +18,15 @@
 using namespace aquabox::rest;
 using namespace aquabox;
 
+void API::setup(HttpServerImpl& server,
+                std::string method,
+                Route& route,
+                void (API::* Callback)(const aquabox::Route&, aquabox::rest::Response, aquabox::rest::Request))
+{
+    server.resource[route.url()][method] = std::bind(Callback, this, route, std::placeholders::_1, std::placeholders::_2);
+    server.resource[route.url()]["OPTIONS"] = std::bind(&API::OptionsOK, this, route, std::placeholders::_1, std::placeholders::_2);
+}
+
 void serveStream(Response response, Path path, std::shared_ptr<std::ifstream> ifs, size_t length, bool removeWhenFinished)
 {
     std::vector<char> buffer(131072); // Safe when server is running on one thread
@@ -122,7 +131,12 @@ nlohmann::json getStatusInfo()
 DEFINE_API_IMPL(OptionsOK)
 {
     if (request->method == "OPTIONS") {
-        headers.emplace("Access-Control-Allow-Methods", "POST, GET, PUT, PATCH, DELETE, OPTIONS");
+        if (headers.count(Access_Control_Allow_Origin) == 0)
+            headers.emplace(Access_Control_Allow_Origin, "*");
+        if (headers.count(Access_Control_Allow_Headers) == 0)
+            headers.emplace(Access_Control_Allow_Headers, "Origin, X-Requested-With, Content-Type, Accept");
+        if (headers.count(Access_Control_Allow_Methods) == 0)
+            headers.emplace(Access_Control_Allow_Methods, "POST, GET, PUT, PATCH, DELETE, OPTIONS");
         response->write(SimpleWeb::StatusCode::success_no_content, headers);
     }
     else {
@@ -352,7 +366,7 @@ DEFINE_API_IMPL(CreateRule)
         return;
     }
 
-    if (!AquaBox::i().addRule(r, request->method == "GET"))
+    if (!AquaBox::i().addRule(r, request->method == "PUT"))
     {
         response->write(SimpleWeb::StatusCode::client_error_bad_request, data.dump(4), headers);
         return;
@@ -442,7 +456,11 @@ DEFINE_API_IMPL(TurnOn)
         response->write(SimpleWeb::StatusCode::client_error_not_found, headers);
     } else {
         pos->second->turnOn();
-        response->write(SimpleWeb::StatusCode::success_ok, headers);
+        nlohmann::json data;
+        pos->second->json(data);
+        data["isOn"] = pos->second->turnedOn();
+
+        response->write(SimpleWeb::StatusCode::success_ok, data.dump(4), headers);
     }
 }
 
@@ -461,6 +479,11 @@ DEFINE_API_IMPL(TurnOff)
         response->write(SimpleWeb::StatusCode::client_error_not_found, headers);
     } else {
         pos->second->turnOff();
-        response->write(SimpleWeb::StatusCode::success_ok, headers);
+        nlohmann::json data;
+        pos->second->json(data);
+        data["isOn"] = pos->second->turnedOn();
+
+        response->write(SimpleWeb::StatusCode::success_ok, data.dump(4), headers);
+
     }
 }

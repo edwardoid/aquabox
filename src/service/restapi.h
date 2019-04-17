@@ -7,17 +7,22 @@
 #include "route.h"
 #include <server_http.hpp>
 
+#define Access_Control_Allow_Origin "Access-Control-Allow-Origin"
+#define Access_Control_Allow_Headers "Access-Control-Allow-Headers"
+#define Access_Control_Allow_Methods "Access-Control-Allow-Methods"
 
-#define DECLARE_API_IMPL(Name)   struct Name ## Impl { void exec(const Route& route, Request& request, Response& response, Headers& headers); };
+#define DECLARE_API_IMPL(Name)   struct Name ## Impl { static void exec(const Route& route, Request& request, Response& response, Headers& headers); };
 #define DEFINE_API_IMPL(Name) void Name ## Impl::exec(const Route& route, Request& request, Response& response, Headers& headers)
 #define ENABLE_API(Name) inline void Name (const Route& route, Response rp, Request rq)                           \
                          {                                                                                        \
                            try {                                                                                  \
                              LOG_DEBUG << "API call " << rq->method << " " <<  rq->path << " handler " << #Name ;    \
                              Headers headers;                                                                     \
-                             headers.emplace("Access-Control-Allow-Origin", "*");                                 \
                              headers.emplace("Content-Type", "application/json");                                 \
-                             Name ## Impl().exec(route, rq, rp, headers);                                         \
+                             headers.emplace(Access_Control_Allow_Origin, "*");                                 \
+                             headers.emplace(Access_Control_Allow_Headers, "Origin, X-Requested-With, Content-Type, Accept"); \
+                             headers.emplace(Access_Control_Allow_Methods, "POST, GET, PUT, PATCH, DELETE, OPTIONS"); \
+                             Name ## Impl::exec(route, rq, rp, headers);                                          \
                            } catch (std::exception e) {                                                           \
                              LOG_ERROR << "An error occured during API call. Details: " << e.what();              \
                            } catch (...) {                                                                        \
@@ -54,23 +59,27 @@ namespace aquabox
 
         struct API
         {
-            ENABLE_API(OptionsOK);
-            ENABLE_API(Login)
-            ENABLE_API(StaticFiles)
-            ENABLE_API(Status)
-            ENABLE_API(StatusQR)
-            ENABLE_API(WiFiQR)
-            ENABLE_API(GetDevice)
-            ENABLE_API(Devices)
-            ENABLE_API(Rules)
-            ENABLE_API(GetRule)
-            ENABLE_API(CreateRule)
-            ENABLE_API(DeleteRule)
-            ENABLE_API(DeviceRules)
-            ENABLE_API(SupportedRepeatTimeouts)
+          void setup(HttpServerImpl& server,
+                     std::string method,
+                     Route& route,
+                     void (API::* Callback)(const aquabox::Route&, aquabox::rest::Response, aquabox::rest::Request));
+          ENABLE_API(OptionsOK);
+          ENABLE_API(Login)
+          ENABLE_API(StaticFiles)
+          ENABLE_API(Status)
+          ENABLE_API(StatusQR)
+          ENABLE_API(WiFiQR)
+          ENABLE_API(GetDevice)
+          ENABLE_API(Devices)
+          ENABLE_API(Rules)
+          ENABLE_API(GetRule)
+          ENABLE_API(CreateRule)
+          ENABLE_API(DeleteRule)
+          ENABLE_API(DeviceRules)
+          ENABLE_API(SupportedRepeatTimeouts)
 
-            ENABLE_API(TurnOn);
-            ENABLE_API(TurnOff);
+          ENABLE_API(TurnOn);
+          ENABLE_API(TurnOff);
         };
     }
 }

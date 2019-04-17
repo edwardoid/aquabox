@@ -2,6 +2,7 @@
 #define RULES_TIMER_H
 
 #include "timer.h"
+#include "log.h"
 
 namespace aquabox
 {
@@ -12,6 +13,9 @@ namespace aquabox
         void start();
         void stop();
     private:
+        plog::RollingFileAppender<plog::CsvFormatter> m_rulesAppender;
+        plog::Logger<1> m_rulesLogger;
+
         Timer m_timer;
     };
 }

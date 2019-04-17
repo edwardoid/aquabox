@@ -3,20 +3,14 @@
 #include "timer.h"
 #include "log.h"
 #include "enumerations.h"
+#include "device.h"
 #include <ctime>
-
-#define LOG_RULE_ACTION LOG_DEBUG_(1)
 
 using namespace aquabox;
 
-plog::Logger<1> RuleExecutor::m_rulesLogger(plog::Severity::debug);
-plog::RollingFileAppender<plog::CsvFormatter> RuleExecutor::m_rulesAppender("rules.log");
-
 RuleExecutor::RuleExecutor(std::shared_ptr<Rule>& rule, Timer::ClockTimePoint now)
     : m_now(now), m_rule(rule)
-{
-    m_rulesLogger.addAppender(&m_rulesAppender);
-}
+{}
 
 void RuleExecutor::operator() ()
 {
@@ -25,6 +19,7 @@ void RuleExecutor::operator() ()
     const std::tm* nowDetails = std::gmtime(&now);
 
     const RepeatUnit unit = m_rule->getRepeat().getUnit();
+    auto dev = m_rule->getDevice().resolve();
     
     for(const Action& act : *(m_rule->getActions()))
     {
@@ -63,26 +58,8 @@ void RuleExecutor::operator() ()
         }
         
         if (ok) {
-            switch(act.getType().Value) {
-                case ActionType::TurnOff: {
-                    return turnOff();
-                }
-                case ActionType::TurnOn: {
-                    return turnOn();
-                }
-                default: {
-                    LOG_WARNING << "Unsupported operation action type " << Serializable<ActionType>::convert(act.getType().Value);
-                }
-            }
+            LOG_DEBUG << "Triggering action " << Serializable<ActionType>::convert(act.getType().Value) << " for " << moment.tm_hour << ":" << moment.tm_min << ":" << moment.tm_sec;
+            dev->addPendingAction(m_rule->getIndex().Value, act.getType().Value);
         }
     }
-}
-
-void RuleExecutor::turnOn()
-{
-
-} 
-
-void RuleExecutor::turnOff()
-{
 }

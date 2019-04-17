@@ -1,10 +1,16 @@
 cmake_minimum_required(VERSION 3.5)
 project(aquabox)
 
+
+set(CMAKE_BUILD_TYPE Debug)
+if (TARGET_DEVICE)
+  set(CMAKE_BUILD_TYPE Release)
+  add_definitions(-DTARGET_DEVICE)
+endif()
+
 set(THREE_DP_DIR "${PROJECT_SOURCE_DIR}/3dp")
 set(CMAKE_INSTALL_PREFIX "$ENV{RASPB_SYSROOT}/home/ed/aquabox")
 set(CMAKE_CXX_STANDARD 11)
-#set(CMAKE_BUILD_TYPE Debug)
 set(CMAKE_CXX_CPPCHECK "")
 set(PLOG_INCLUDE_DIR "${PROJECT_SOURCE_DIR}/3dp/plog/include")
 set(THREAD_POOL_INCLUDE_DIR "${PROJECT_SOURCE_DIR}/3dp/thread-pool-cpp/include")
@@ -29,6 +35,7 @@ add_subdirectory("${THREE_DP_DIR}/swshttp")
 add_subdirectory("${THREE_DP_DIR}/swsws")
 add_subdirectory("${THREE_DP_DIR}/qrencode")
 add_subdirectory("${THREE_DP_DIR}/nlohmann")
+
 
 execute_process(
   COMMAND git log -1 --format=%H

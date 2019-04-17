@@ -1,0 +1,25 @@
+#include "event.h"
+
+using namespace aquabox;
+
+void Event::setSender(std::string sender, std::string _class)
+{
+    m_sender = sender;
+    m_class = _class;
+}
+
+void Event::setData(const nlohmann::json& data)
+{
+    for(auto i : data.items())
+    {
+        m_data.emplace(i.key(), i.value());
+    }
+}
+nlohmann::json Event::serialize() const
+{
+    return nlohmann::json({
+        { "sender", m_sender },
+        { "class", m_class },
+        { "data", m_data} 
+    });
+}
