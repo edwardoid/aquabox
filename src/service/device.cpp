@@ -3,6 +3,8 @@
 #include "rule.h"
 #include "log.h"
 #include "gpio.h"
+#include "event.h"
+#include <time.h>
 
 using namespace aquabox;
 
@@ -63,14 +65,14 @@ bool Device::turnedOn() const
     return !gpio->isHigh();
 }
 
-void Device::turnOn()
+void Device::turnOn(std::string reason)
 {
     auto gpio = GPIO::get(m_Pin.Value);
     if (gpio == nullptr) {
         LOG_ERROR << "Can't find attached GPIO " << (int)m_Pin.Value;
     }
 
-    if (!turnedOn()) {
+    if (turnedOn()) {
         return;
     }
 
@@ -78,11 +80,21 @@ void Device::turnOn()
     if (ON.size() != gpio->send(ON, ON.size())) {
         LOG_ERROR << "Can't write to GPIO " << (int)m_Pin.Value;
     }
+    auto event = std::make_shared<Event>();
+    event->setSender(m_Id.Value, "device");
+    event->setData({
+        { "reason", reason },
+        { "sender_full", m_Name.Value },
+        { "action", Serializable<ActionType>::convert(ActionType::TurnOff) },
+        { "at" , time(NULL) }
+    });
+    
+    AquaBox::i().postUpdate(event);
 
     LOG_DEBUG << "Turned on";
 }
 
-void Device::turnOff()
+void Device::turnOff(std::string reason)
 {
     auto gpio = GPIO::get(m_Pin.Value);
     if (gpio == nullptr) {
@@ -97,6 +109,15 @@ void Device::turnOff()
     if (OFF.size() != gpio->send(OFF, OFF.size())) {
         LOG_ERROR << "Can't write to GPIO " << (int)m_Pin.Value;
     }
+    auto event = std::make_shared<Event>();
+    event->setSender(m_Id.Value, "device");
+    event->setData({
+        { "reason", reason },
+        { "sender_full", m_Name.Value },
+        { "action", Serializable<ActionType>::convert(ActionType::TurnOff) },
+        { "at", time(NULL) }
+    });
+    AquaBox::i().postUpdate(event);
 
     LOG_DEBUG << "Turned off";
 }
@@ -109,17 +130,17 @@ void Device::addPendingAction(uint64_t priority, ActionType action)
     }
 }
 
-bool Device::preformPendingAction()
+bool Device::performPendingAction()
 {
     if (m_pendingActionPriority != INVALID_PRIORITY) {
         switch(m_pendingAction)
         {
             case ActionType::TurnOn: {
-                turnOn();
+                turnOn("rule");
                 break;
             }
             case ActionType::TurnOff: {
-                turnOff();
+                turnOff("rule");
                 break;
             }
         }

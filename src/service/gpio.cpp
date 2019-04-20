@@ -6,9 +6,9 @@
 using namespace aquabox;
 
 #ifndef TARGET_DEVICE
-const std::string GPIO::SysClassGpio("/home/esargsyan/ionictests/armhfbuild/sysroot/sys/class/gpio");
-const std::string GPIO::SysClassGpioExport("/home/esargsyan/ionictests/armhfbuild/sysroot/sys/class/gpio/export");
-const std::string GPIO::SysClassGpioUnexport("/home/esargsyan/ionictests/armhfbuild/sysroot/sys/class/gpio/unexport");
+const std::string GPIO::SysClassGpio("./../../../arm/sysroot/sys/class/gpio");
+const std::string GPIO::SysClassGpioExport("./../../../arm/sysroot/sys/class/gpio/export");
+const std::string GPIO::SysClassGpioUnexport("./../../../arm/sysroot/sys/class/gpio/unexport");
 
 #else
 const std::string GPIO::SysClassGpio("/sys/class/gpio");
@@ -53,7 +53,7 @@ GPIO::GPIO(uint8_t pin)
     , m_mode(Mode::Unknown)
 {
     Bytes b;
-    read(b);
+    send(b, 0);
     close();
 }
 
@@ -78,7 +78,7 @@ GPIO::Mode GPIO::readMode()
         else
             LOG_DEBUG << "Got " << data << " from " << DirectionFile;
     } else {
-        LOG_DEBUG << "Can't open " << DirectionFile << " errno: " << errno;
+        LOG_DEBUG << "Can't open " << DirectionFile << " error: " << strerror(errno);
     }
 
     return m_mode;
@@ -97,7 +97,7 @@ bool GPIO::writeMode(Mode mode) {
         
         m_mode = count == (strlen(dir) + 1) ? mode : Mode::Unknown;
     } else {
-        LOG_DEBUG << "Can't open " << DirectionFile << " errno: " << errno;
+        LOG_DEBUG << "Can't open " << DirectionFile << " error: " << strerror(errno);
     }
 
     return m_mode == mode;
@@ -119,7 +119,7 @@ bool GPIO::open()
     LOG_DEBUG << "Opening " << SysClassGpioExport << " for " << (int)Pin;
     auto fp = fopen(SysClassGpioExport.c_str(), "w");
     if (fp == nullptr) {
-        LOG_ERROR << "Can't open " << SysClassGpioExport << errno;
+        LOG_ERROR << "Can't open " << SysClassGpioExport << " errno:" << strerror(errno);
         return false;
     }
     
@@ -140,7 +140,7 @@ bool GPIO::close()
 
     auto fp = fopen(SysClassGpioUnexport.c_str(), "w");
     if (fp == nullptr) {
-        LOG_ERROR << "Can't open " << SysClassGpioUnexport << " errno" << errno;
+        LOG_ERROR << "Can't open " << SysClassGpioUnexport << " error:" << strerror(errno);
         return false;
     }
     
@@ -165,7 +165,7 @@ bool GPIO::isHigh()
         fclose(fp);
         return count > 0 ? data[0] == '1' : false;
     } else {
-        LOG_DEBUG << "Can't open " << ValueFile << " errno: " << errno;
+        LOG_DEBUG << "Can't open " << ValueFile << " error: " << strerror(errno);
     }
     return false;
 }
@@ -182,15 +182,17 @@ BytesCount GPIO::send(const Bytes& data, const BytesCount count)
     }
 
     auto fp = fopen(ValueFile.c_str(), "w");
-    if (fp != nullptr && count > 0) {
-
-        const char v[] = { static_cast<char>(data[0] + '0'), 0 };
-        auto count = fwrite(&v, sizeof(char), 2, fp);
-        fflush(fp);
+    if (fp != nullptr) {
+        if (count > 0)
+        {
+            const char v[] = { static_cast<char>(data[0] + '0'), 0 };
+            auto count = fwrite(&v, sizeof(char), 2, fp);
+            fflush(fp);
+        }
         fclose(fp);
         return count > 0;
     } else {
-        LOG_DEBUG << "Can't open " << DirectionFile << " errno: " << errno;
+        LOG_DEBUG << "Can't open " << DirectionFile << " error: " << strerror(errno);
     }
 
     return 0;

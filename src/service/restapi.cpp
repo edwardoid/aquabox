@@ -103,27 +103,18 @@ void serveFile(Response response, Path path, Headers& headers, bool removeWhenFi
     serveStream(response, path, ifs, length, removeWhenFinished);
 }
 
-nlohmann::json getStatusInfo()
+nlohmann::json getStatusInfo(bool detailed)
 {
-    nlohmann::json wifi({{"ssid", Settings::string(Settings::SSID, "")},
-                         {"password", Settings::string(Settings::WIFI_PASSWORD, "")},
-                         {"encryption", Settings::string(Settings::WIFI_ENCRYPTION, "")}});
-
-    nlohmann::json version({{"version", Config::VERSION},
-                            {"build", Config::GIT_HASH},
-                            {"major", Config::VERSION_MAJOR},
-                            {"minor", Config::VERSION_MINOR}});
-
-    nlohmann::json host({{"port", Settings::integer(Settings::HTTP_PORT, Config::REST_PORT)}});
+    nlohmann::json host({
+        {"rest", Settings::integer(Settings::HTTP_PORT, Config::REST_PORT)},
+        {"stream", Settings::integer(Settings::STREAM_PORT, Config::WS_PORT)}
+    });
 
     char name[HOST_NAME_MAX];
     if (0 == gethostname(name, HOST_NAME_MAX))
         host["host"] = name;
 
-    nlohmann::json status({{"aquabox", host},
-                           {"setupComplete", false},
-                           {"version", version},
-                           {"wifi", wifi}});
+    nlohmann::json status({{"aquabox", host}});
 
     return status;
 }
@@ -194,7 +185,7 @@ DEFINE_API_IMPL(StatusQR)
 
     LOG_DEBUG << "Generating QR with zoom factor " << factor;
 
-    qr::Qr::create(getStatusInfo().dump(4), path, factor);
+    qr::Qr::create(getStatusInfo(false).dump(4), path, factor);
 
     serveFile(response, path, headers, true);
 }
@@ -217,7 +208,7 @@ DEFINE_API_IMPL(Login)
 
 DEFINE_API_IMPL(Status)
 {
-    response->write(SimpleWeb::StatusCode::success_ok, getStatusInfo().dump(4), headers);
+    response->write(SimpleWeb::StatusCode::success_ok, getStatusInfo(true).dump(4), headers);
 }
 
 DEFINE_API_IMPL(WiFiQR)
@@ -455,7 +446,7 @@ DEFINE_API_IMPL(TurnOn)
     if (pos == AquaBox::i().devices().end()) {
         response->write(SimpleWeb::StatusCode::client_error_not_found, headers);
     } else {
-        pos->second->turnOn();
+        pos->second->turnOn("remote_command");
         nlohmann::json data;
         pos->second->json(data);
         data["isOn"] = pos->second->turnedOn();
@@ -478,7 +469,7 @@ DEFINE_API_IMPL(TurnOff)
     if (pos == AquaBox::i().devices().end()) {
         response->write(SimpleWeb::StatusCode::client_error_not_found, headers);
     } else {
-        pos->second->turnOff();
+        pos->second->turnOff("remote_command");
         nlohmann::json data;
         pos->second->json(data);
         data["isOn"] = pos->second->turnedOn();

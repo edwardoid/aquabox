@@ -28,11 +28,7 @@ void RulesTimer::start()
 
             for(auto& dev : AquaBox::i().devices())
             {
-                auto event = std::make_shared<Event>();
-                event->setSender(dev.first, "device");
-                event->setData({ "rule", "apply" });
-                AquaBox::i().postUpdate(event);
-                if(dev.second->preformPendingAction()) {
+                if(dev.second->performPendingAction()) {
                     LOG_DEBUG_IF_(1, true) << "Device" << dev.second->getName().Value << " changed to Turned " << (dev.second->turnedOn() ? "ON" : "OFF");
                 }
             }

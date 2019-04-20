@@ -22,11 +22,11 @@ namespace aquabox
 
         bool turnedOn() const;
 
-        void turnOn();
-        void turnOff();
+        void turnOn(std::string reason);
+        void turnOff(std::string reason);
 
         void addPendingAction(uint64_t priority, ActionType action);
-        bool preformPendingAction();
+        bool performPendingAction();
 
         std::vector<std::shared_ptr<class Rule>> rules() const;
 

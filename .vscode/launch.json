@@ -9,10 +9,10 @@
             "name": "(gdb) Launch",
             "type": "cppdbg",
             "request": "launch",
-            "program": "${workspaceFolder}/build/aquabox",
+            "program": "${workspaceFolder}/bin/host/aquabox",
             "args": [ "--service"],
             "stopAtEntry": false,
-            "cwd": "${workspaceFolder}/build",
+            "cwd": "${workspaceFolder}/bin/host",
             "externalConsole": true,
             "MIMode": "gdb",
             "setupCommands": [

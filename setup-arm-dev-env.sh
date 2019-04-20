@@ -8,11 +8,12 @@ NCPU=`cat /proc/cpuinfo | grep vendor_id | wc -l`
 
 #The Target mount options. Modify this accordingly.
 
-TARGET_IP=aquabox
+TARGET_IP=edwardoid.servebeer.com
 TARGET_USER=root
 
-export SYSROOT_DIR="$HOME/Programming/arm/sysroot"
-export CROSS_PATH="$HOME/Programming/arm/gcc-linaro-6.3.1-2017.05-x86_64_arm-linux-gnueabihf/bin"
+export ROOT_OF_CC="$PWD/../../../arm"
+export SYSROOT_DIR="$ROOT_OF_CC/sysroot"
+export CROSS_PATH="$ROOT_OF_CC/toolchain/bin"
 
 mkdir -p $SYSROOT_DIR
 echo "checking if Target is mounted on sysroot ... "
@@ -52,25 +53,22 @@ if [ ! -d "/usr/lib/arm-linux-gnueabihf" ]; then
 #TODO: folder must be emtpy before mount
 fi
 
-
-export SYSROOT_DIR="$HOME/Programming/arm/sysroot"
-
 echo "checking if Target's /lib/arm-linux-gnueabihf is mounted on /lib/arm-linux-gnueabihf ( required to link against some target .so files ) ... "
 
 if grep -qs "/lib/arm-linux-gnueabihf" /proc/mounts; then
-        echo "/lib/arm-linux-gnueabihf is mounted, skipping"
+    echo "/lib/arm-linux-gnueabihf is mounted, skipping"
 else
-        echo "Mounting Target's /lib/arm-linux-gnueabihf in /lib/arm-linux-gnueabihf ..."
-        sudo sshfs -o allow_other $TARGET_USER@$TARGET_IP:/lib/arm-linux-gnueabihf /lib/arm-linux-gnueabihf
+    echo "Mounting Target's /lib/arm-linux-gnueabihf in /lib/arm-linux-gnueabihf ..."
+    sudo sshfs -o allow_other $TARGET_USER@$TARGET_IP:/lib/arm-linux-gnueabihf /lib/arm-linux-gnueabihf
 fi
 
 echo "checking if Target's /usr/lib/arm-linux-gnueabihf is mounted on /usr/lib/arm-linux-gnueabihf ( required to link against some target .so files ) ... "
 
 if grep -qs "/usr/lib/arm-linux-gnueabihf" /proc/mounts; then
-         echo "/usr/lib/arm-linux-gnueabihf is mounted, skipping"
+    echo "/usr/lib/arm-linux-gnueabihf is mounted, skipping"
 else
-         echo "Mounting Target's /usr/lib/arm-linux-gnueabihf in /usr/lib/arm-linux-gnueabihf ..."
-         sudo sshfs -o allow_other $TARGET_USER@$TARGET_IP:/usr/lib/arm-linux-gnueabihf /usr/lib/arm-linux-gnueabihf
+    echo "Mounting Target's /usr/lib/arm-linux-gnueabihf in /usr/lib/arm-linux-gnueabihf ..."
+    sudo sshfs -o allow_other $TARGET_USER@$TARGET_IP:/usr/lib/arm-linux-gnueabihf /usr/lib/arm-linux-gnueabihf
 fi
 
 
@@ -110,7 +108,7 @@ export PKG_CONFIG_PATH
 #this could be also subhect of change if extra system includes required.
 #the other include will be determined by pkg-config utility directly on target
 
-export CPPFLAGS="-I${SYSROOT_DIR}/usr/include -I${SYSROOT_DIR}/opt/vc/include/ -I${SYSROOT_DIR}/opt/vc/include/interface/vcos/pthreads -I${SYSROOT_DIR}/opt/vc/include/interface/vmcs_host/linux ${AM_CPPFLAGS_OMX}"
+export CPPFLAGS="-I${SYSROOT_DIR}/usr/include -I${SYSROOT_DIR}/usr/include/arm-linux-gnueabihf -I${SYSROOT_DIR}/opt/vc/include/ -I${SYSROOT_DIR}/opt/vc/include/interface/vcos/pthreads -I${SYSROOT_DIR}/opt/vc/include/interface/vmcs_host/linux ${AM_CPPFLAGS_OMX}"
 
 export CXXFLAGS="$CPPFLAGS -g -O4"
 export CFLAGS="-g -O4"
