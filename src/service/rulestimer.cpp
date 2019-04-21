@@ -4,6 +4,7 @@
 #include "ruleexecutor.h"
 #include "aquabox.h"
 #include "event.h"
+#include "updatevents.h"
 #include <plog/Log.h>
 #include <plog/Severity.h>
 using namespace aquabox;
@@ -28,8 +29,12 @@ void RulesTimer::start()
 
             for(auto& dev : AquaBox::i().devices())
             {
+                bool isOn = dev.second->turnedOn();
                 if(dev.second->performPendingAction()) {
                     LOG_DEBUG_IF_(1, true) << "Device" << dev.second->getName().Value << " changed to Turned " << (dev.second->turnedOn() ? "ON" : "OFF");
+                }
+                if (isOn != dev.second->turnedOn()) {
+                    AquaBox::i().postUpdate(std::make_shared<RuleTriggeredEvent>(dev.second));
                 }
             }
         });

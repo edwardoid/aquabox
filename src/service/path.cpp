@@ -36,7 +36,7 @@ bool Path::normalize()
 {
     char tmp[1024];
     memset(tmp, '\0', 1024);
-    if(NULL != realpath(data(), tmp) ^ errno == ENOENT)
+    if(NULL != realpath(data(), tmp) || errno == ENOENT)
     {
         static_cast<std::string&>(*this) = tmp;
         return true;
@@ -49,6 +49,7 @@ bool Path::append(std::string sub)
     if (!sub.empty() && sub[0] != '/')
         *this += "/";
     *this += sub;
+    return true;
 }
 
 bool Path::contains(const Path& subPath) const

@@ -22,8 +22,8 @@ namespace aquabox
 
         bool turnedOn() const;
 
-        void turnOn(std::string reason);
-        void turnOff(std::string reason);
+        void turnOn();
+        void turnOff();
 
         void addPendingAction(uint64_t priority, ActionType action);
         bool performPendingAction();

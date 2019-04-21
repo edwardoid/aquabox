@@ -10,6 +10,7 @@
 #include "repeattimeout.h"
 #include "enumerations.h"
 #include "path.h"
+#include "updatevents.h"
 #include <fstream>
 #include <nlohmann/json.hpp>
 #include <stdio.h>
@@ -17,6 +18,17 @@
 
 using namespace aquabox::rest;
 using namespace aquabox;
+
+
+void API::init(HttpServerImpl& server)
+{
+    static aquabox::Route route;
+    server.default_resource["OPTIONS"] = std::bind(&API::OptionsOK, this, route, std::placeholders::_1, std::placeholders::_2);
+    server.default_resource["GET"] = std::bind(&API::OptionsOK, this, route, std::placeholders::_1, std::placeholders::_2);
+    server.default_resource["POST"] = std::bind(&API::OptionsOK, this, route, std::placeholders::_1, std::placeholders::_2);
+    server.default_resource["PUT"] = std::bind(&API::OptionsOK, this, route, std::placeholders::_1, std::placeholders::_2);
+    server.default_resource["DELETE"] = std::bind(&API::OptionsOK, this, route, std::placeholders::_1, std::placeholders::_2);
+}
 
 void API::setup(HttpServerImpl& server,
                 std::string method,
@@ -110,9 +122,7 @@ nlohmann::json getStatusInfo(bool detailed)
         {"stream", Settings::integer(Settings::STREAM_PORT, Config::WS_PORT)}
     });
 
-    char name[HOST_NAME_MAX];
-    if (0 == gethostname(name, HOST_NAME_MAX))
-        host["host"] = name;
+    host["host"] = boost::asio::ip::host_name();
 
     nlohmann::json status({{"aquabox", host}});
 
@@ -121,18 +131,13 @@ nlohmann::json getStatusInfo(bool detailed)
 
 DEFINE_API_IMPL(OptionsOK)
 {
-    if (request->method == "OPTIONS") {
-        if (headers.count(Access_Control_Allow_Origin) == 0)
-            headers.emplace(Access_Control_Allow_Origin, "*");
-        if (headers.count(Access_Control_Allow_Headers) == 0)
-            headers.emplace(Access_Control_Allow_Headers, "Origin, X-Requested-With, Content-Type, Accept");
-        if (headers.count(Access_Control_Allow_Methods) == 0)
-            headers.emplace(Access_Control_Allow_Methods, "POST, GET, PUT, PATCH, DELETE, OPTIONS");
-        response->write(SimpleWeb::StatusCode::success_no_content, headers);
-    }
-    else {
-        response->write(SimpleWeb::StatusCode::client_error_bad_request, headers);
-    }
+    if (headers.count(Access_Control_Allow_Origin) == 0)
+        headers.emplace(Access_Control_Allow_Origin, "*");
+    if (headers.count(Access_Control_Allow_Headers) == 0)
+        headers.emplace(Access_Control_Allow_Headers, "Origin, X-Requested-With, Content-Type, Accept");
+    if (headers.count(Access_Control_Allow_Methods) == 0)
+        headers.emplace(Access_Control_Allow_Methods, "POST, GET, PUT, PATCH, DELETE, OPTIONS");
+    response->write(SimpleWeb::StatusCode::success_ok, headers);
 }
 
 DEFINE_API_IMPL(StaticFiles)
@@ -324,7 +329,10 @@ DEFINE_API_IMPL(CreateRule)
     if (params.count(":dev") == 0)
     {
         LOG_ERROR << "No device id parameter in URL";
-        response->write(SimpleWeb::StatusCode::client_error_bad_request, headers);
+        nlohmann::json badurl({
+            { "cause", "Bad url" }
+        });
+        response->write(SimpleWeb::StatusCode::client_error_bad_request, badurl.dump(4), headers);
         return;
     }
     std::string dev = params[":dev"];
@@ -338,6 +346,7 @@ DEFINE_API_IMPL(CreateRule)
     {
         data["data"] = request->content.string();
         data["error"] = e.what();
+        data["cause"] = "Parse Error";
         response->write(SimpleWeb::StatusCode::client_error_bad_request, data.dump(4), headers);
         return;
     }
@@ -349,7 +358,9 @@ DEFINE_API_IMPL(CreateRule)
         return;
     }
 
-    if (r->getDevice().resolve() == nullptr)
+    auto device = r->getDevice().resolve(); 
+
+    if (device == nullptr)
     {
         data["data"] = request->content.string();
         data["error"] = "Can't find device";
@@ -357,13 +368,15 @@ DEFINE_API_IMPL(CreateRule)
         return;
     }
 
-    if (!AquaBox::i().addRule(r, request->method == "PUT"))
+    if (!AquaBox::i().addRule(r, request->method == "POST"))
     {
+        data["cause"] = "Wrong method or internal data";
         response->write(SimpleWeb::StatusCode::client_error_bad_request, data.dump(4), headers);
         return;
     }
 
     data["rule"] = ruleData;
+    data["cause"] = "ok";
     response->write(SimpleWeb::StatusCode::success_created, data.dump(4), headers);
 }
 
@@ -387,10 +400,10 @@ DEFINE_API_IMPL(DeleteRule)
     }
 
     if (AquaBox::i().removeRule(pos->second)) {
-        LOG_DEBUG << "Rule " << pos->first << " removed";
+        LOG_DEBUG << "Rule " << rule << " removed";
         response->write(SimpleWeb::StatusCode::success_no_content, headers);
     } else {
-        LOG_ERROR << "Rule " << pos->first << " removal failed";
+        LOG_ERROR << "Rule " << rule << " removal failed";
         response->write(SimpleWeb::StatusCode::server_error_internal_server_error, headers);
     }
 }
@@ -446,10 +459,11 @@ DEFINE_API_IMPL(TurnOn)
     if (pos == AquaBox::i().devices().end()) {
         response->write(SimpleWeb::StatusCode::client_error_not_found, headers);
     } else {
-        pos->second->turnOn("remote_command");
+        pos->second->turnOn();
         nlohmann::json data;
         pos->second->json(data);
         data["isOn"] = pos->second->turnedOn();
+        AquaBox::i().postUpdate(std::make_shared<ManualStateChangedEvent>(pos->second));
 
         response->write(SimpleWeb::StatusCode::success_ok, data.dump(4), headers);
     }
@@ -469,10 +483,12 @@ DEFINE_API_IMPL(TurnOff)
     if (pos == AquaBox::i().devices().end()) {
         response->write(SimpleWeb::StatusCode::client_error_not_found, headers);
     } else {
-        pos->second->turnOff("remote_command");
+        pos->second->turnOff();
         nlohmann::json data;
         pos->second->json(data);
         data["isOn"] = pos->second->turnedOn();
+
+        AquaBox::i().postUpdate(std::make_shared<ManualStateChangedEvent>(pos->second));
 
         response->write(SimpleWeb::StatusCode::success_ok, data.dump(4), headers);
 

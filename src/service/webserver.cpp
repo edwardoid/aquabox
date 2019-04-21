@@ -11,7 +11,6 @@ bool WebServer::start()
 
     m_rest = std::thread([this]() {
         m_http.config.port = Settings::integer(Settings::HTTP_PORT, Config::REST_PORT);
-        m_http.config.address = "0.0.0.0";
         LOG_INFO << "Starting web server on " << m_http.config.address << ":" << m_http.config.port;
         bindApiCalls();
 
@@ -20,7 +19,6 @@ bool WebServer::start()
 
     m_stream = std::thread([this]() {
         m_ws.config.port = Settings::integer(Settings::STREAM_PORT, Config::WS_PORT);
-        m_ws.config.address = "0.0.0.0";
         LOG_INFO << "Starting websocket server" << m_ws.config.address << ":" << m_ws.config.port;
 
         WS.Ping(m_ws, m_updates);
@@ -73,6 +71,7 @@ void WebServer::setupRoutes()
 
 bool WebServer::bindApiCalls()
 {
+    REST.init(m_http);
     REST.setup(m_http, "GET", m_static, &rest::API::StaticFiles);
     REST.setup(m_http, "GET", m_login, &rest::API::Login);
     REST.setup(m_http, "GET", m_status, &rest::API::Status);

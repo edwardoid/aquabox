@@ -8,6 +8,7 @@
 #include "ruleparser.h"
 #include "deviceparser.h"
 #include "user.h"
+#include "updatevents.h"
 #include <exception>
 #include <random>
 
@@ -151,7 +152,11 @@ bool AquaBox::addRule(std::shared_ptr<Rule>& rule, bool replace)
 {
     auto pos = m_rules.find(rule->getId().Value);
     if (pos != m_rules.end()) {
-        if (!replace) { return false; };
+        if (!replace)
+        {
+            LOG_ERROR << "Rule " << pos->first << " has already beed added, and replace flag was not set";
+            return false;
+        };
         pos->second = rule;
     }
     else {
@@ -160,9 +165,26 @@ bool AquaBox::addRule(std::shared_ptr<Rule>& rule, bool replace)
 
     Path p = m_rulesDir;
 
-    bool saved = p.append(rule->getId().Value + ".json") && p.normalize() ? rule->saveToFile(p) : false;
-    if (!saved)
+    auto device = rule->getDevice().resolve();
+
+    bool pathOk = p.append(rule->getId().Value + ".json");
+    if(!pathOk) {
+        LOG_ERROR << "Can't form path for rule. Root: " << m_rulesDir.c_str() << " formed " << p.c_str() << " error " << strerror(errno);
+        return false;
+    }
+
+    bool saved =  rule->saveToFile(p);
+    if (!saved) {
         m_rules.erase(m_rules.find(rule->getId().Value));
+    }
+
+    if (saved) {
+        postUpdate(std::make_shared<DeviceRulesChangedEvent>(device));
+        if (replace)
+            postUpdate(std::make_shared<RuleUpdatedEvent>(rule));
+        else 
+            postUpdate(std::make_shared<RuleCreatedEvent>(rule));
+    }
     return saved;
 }
 
@@ -185,8 +207,11 @@ bool AquaBox::removeRule(std::shared_ptr<Rule> rule)
         LOG_ERROR << "Can't remove file " << p.c_str();
         return false;
     }
+    auto device = pos->second->getDevice().resolve();
 
+    postUpdate(std::make_shared<RuleDeletedEvent>(pos->second));
     m_rules.erase(pos);
+    postUpdate(std::make_shared<DeviceRulesChangedEvent>(device));
     return true;
 }
 

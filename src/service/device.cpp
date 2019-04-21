@@ -65,7 +65,7 @@ bool Device::turnedOn() const
     return !gpio->isHigh();
 }
 
-void Device::turnOn(std::string reason)
+void Device::turnOn()
 {
     auto gpio = GPIO::get(m_Pin.Value);
     if (gpio == nullptr) {
@@ -80,21 +80,11 @@ void Device::turnOn(std::string reason)
     if (ON.size() != gpio->send(ON, ON.size())) {
         LOG_ERROR << "Can't write to GPIO " << (int)m_Pin.Value;
     }
-    auto event = std::make_shared<Event>();
-    event->setSender(m_Id.Value, "device");
-    event->setData({
-        { "reason", reason },
-        { "sender_full", m_Name.Value },
-        { "action", Serializable<ActionType>::convert(ActionType::TurnOff) },
-        { "at" , time(NULL) }
-    });
-    
-    AquaBox::i().postUpdate(event);
 
     LOG_DEBUG << "Turned on";
 }
 
-void Device::turnOff(std::string reason)
+void Device::turnOff()
 {
     auto gpio = GPIO::get(m_Pin.Value);
     if (gpio == nullptr) {
@@ -109,15 +99,6 @@ void Device::turnOff(std::string reason)
     if (OFF.size() != gpio->send(OFF, OFF.size())) {
         LOG_ERROR << "Can't write to GPIO " << (int)m_Pin.Value;
     }
-    auto event = std::make_shared<Event>();
-    event->setSender(m_Id.Value, "device");
-    event->setData({
-        { "reason", reason },
-        { "sender_full", m_Name.Value },
-        { "action", Serializable<ActionType>::convert(ActionType::TurnOff) },
-        { "at", time(NULL) }
-    });
-    AquaBox::i().postUpdate(event);
 
     LOG_DEBUG << "Turned off";
 }
@@ -136,11 +117,9 @@ bool Device::performPendingAction()
         switch(m_pendingAction)
         {
             case ActionType::TurnOn: {
-                turnOn("rule");
                 break;
             }
             case ActionType::TurnOff: {
-                turnOff("rule");
                 break;
             }
         }

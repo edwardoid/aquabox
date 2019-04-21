@@ -83,8 +83,10 @@ bool Rule::parseFile(const std::string& file)
 bool Rule::saveToFile(const std::string& file)
 {
     std::ofstream os(file);
-    if(!os)
+    if(!os) {
+        LOG_ERROR << "Can't write to " << file << strerror(errno);
         return false;
+    }
     nlohmann::json data;
     json(data);
     os << data.dump(4);

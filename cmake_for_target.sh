@@ -8,4 +8,3 @@ cmake $PWD/../../	-DBoost_INCLUDE_DIRS=$SYSROOT_DIR/usr/include \
 			-DCMAKE_SOURCE_DIR=$PWD/../src/service/ \
 			-DBOOST_LIBRARYDIR=$SYSROOT_DIR/usr/lib/arm-linux-gnueabihf \
 			-DTARGET_DEVICE=YES
-			-DTARGET_SYSROOT=$SYSROOT_DIR

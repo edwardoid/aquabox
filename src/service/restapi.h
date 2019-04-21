@@ -59,6 +59,7 @@ namespace aquabox
 
         struct API
         {
+          void init(HttpServerImpl& server);
           void setup(HttpServerImpl& server,
                      std::string method,
                      Route& route,
