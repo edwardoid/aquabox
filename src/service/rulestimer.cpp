@@ -23,6 +23,8 @@ void RulesTimer::start()
         AquaBox::i().doLater([this, when](){
             for(auto rule : AquaBox::i().rules())
             {
+                if (!rule.second->getEnabled().Value)
+                    continue;
                 RuleExecutor re(rule.second, when);
                 re();
             }

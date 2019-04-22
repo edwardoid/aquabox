@@ -117,9 +117,11 @@ bool Device::performPendingAction()
         switch(m_pendingAction)
         {
             case ActionType::TurnOn: {
+                turnOn();
                 break;
             }
             case ActionType::TurnOff: {
+                turnOff();
                 break;
             }
         }
