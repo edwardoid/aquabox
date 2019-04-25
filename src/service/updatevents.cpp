@@ -58,7 +58,7 @@ RuleCreatedEvent::RuleCreatedEvent(std::shared_ptr<Rule> rule)
     });
 }
 
-RuleUpdatedEvent::RuleUpdatedEvent(std::shared_ptr<Rule> rule)
+RuleUpdatedEvent::RuleUpdatedEvent(std::shared_ptr<Rule> rule, const nlohmann::json& before)
 {
     setSender(rule->getId().Value, "rule");
     setData({
@@ -69,9 +69,18 @@ RuleUpdatedEvent::RuleUpdatedEvent(std::shared_ptr<Rule> rule)
 
     nlohmann::json json;
     rule->json(json);
-    setPropertiesUpdate({
-        { "*",  json }
-    });
+
+    nlohmann::json res;
+    for(auto i : json.items()) {
+        auto p = before.find(i.key());
+        if (p != before.end()) {
+           if (p.value() == i.value())
+               continue;
+        }
+        res[i.key()] = i.value();
+    }
+
+    setPropertiesUpdate(res);
 }
 
 RuleDeletedEvent::RuleDeletedEvent(std::shared_ptr<Rule> rule)
@@ -101,4 +110,28 @@ DeviceRulesChangedEvent::DeviceRulesChangedEvent(std::shared_ptr<Device> device)
     setPropertiesUpdate({
         { "rules",  rules }
     });
+}
+
+DeviceUpdatedEvent::DeviceUpdatedEvent(std::shared_ptr<Device> device, const nlohmann::json& before)
+{
+    setSender(device->getId().Value, "device");
+    setData({
+        { "sender_full", device->getName().Value },
+        { "action", "updated"}
+    });
+
+    nlohmann::json json;
+    device->json(json);
+
+    nlohmann::json res;
+    for(auto i : json.items()) {
+        auto p = before.find(i.key());
+        if (p != before.end()) {
+           if (p.value() == i.value())
+               continue;
+        }
+        res[i.key()] = i.value();
+    }
+
+    setPropertiesUpdate(res);
 }

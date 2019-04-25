@@ -17,7 +17,7 @@ namespace aquabox
     class Event
     {
     public:
-        Event() = default;
+        Event();
         void setSender(std::string sender, std::string _class);
         void setData(const nlohmann::json& data);
         void setPropertiesUpdate(const nlohmann::json& update);

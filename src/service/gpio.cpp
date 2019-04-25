@@ -54,7 +54,6 @@ GPIO::GPIO(uint8_t pin)
 {
     Bytes b;
     send(b, 0);
-    close();
 }
 
 GPIO::Mode GPIO::readMode()

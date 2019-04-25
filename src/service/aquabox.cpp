@@ -151,12 +151,14 @@ RulesMap& AquaBox::rules() const
 bool AquaBox::addRule(std::shared_ptr<Rule>& rule, bool replace)
 {
     auto pos = m_rules.find(rule->getId().Value);
+    nlohmann::json beforeUpdate;
     if (pos != m_rules.end()) {
         if (!replace)
         {
             LOG_ERROR << "Rule " << pos->first << " has already beed added, and replace flag was not set";
             return false;
         };
+        pos->second->json(beforeUpdate);
         pos->second = rule;
     }
     else {
@@ -180,8 +182,9 @@ bool AquaBox::addRule(std::shared_ptr<Rule>& rule, bool replace)
 
     if (saved) {
         postUpdate(std::make_shared<DeviceRulesChangedEvent>(device));
-        if (replace)
-            postUpdate(std::make_shared<RuleUpdatedEvent>(rule));
+        if (replace) {
+            postUpdate(std::make_shared<RuleUpdatedEvent>(rule, beforeUpdate));
+        }
         else 
             postUpdate(std::make_shared<RuleCreatedEvent>(rule));
     }

@@ -9,8 +9,9 @@
 using namespace aquabox;
 
 Device::Device()
-    : ClassProperty("-class Device", { &m_Id, &m_Index, &m_Pin, &m_Name, &m_Type, &m_Class, &m_Meta })
-    , m_Id("id"), m_Index("index", false), m_Pin("pin"),m_Name("name"), m_Type("type"), m_Class("class"), m_Meta("meta")
+    : ClassProperty("-class Device", { &m_Id, &m_Index, &m_Pin, &m_RulesEnabled, &m_Name, &m_Type, &m_Class, &m_Meta })
+    , m_Id("id"), m_Index("index", false), m_Pin("pin"), m_RulesEnabled("rulesEnabled")
+    , m_Name("name"), m_Type("type"), m_Class("class"), m_Meta("meta")
 {}
 
 Device::Device(const Device& src)
@@ -26,6 +27,7 @@ Device::Device(Device&& src)
     moveProperty(Id);
     moveProperty(Index);
     moveProperty(Pin);
+    moveProperty(RulesEnabled);
     moveProperty(Name);
     moveProperty(Type);
     moveProperty(Class);
@@ -36,14 +38,25 @@ const Device& Device::operator = (const Device& src)
 {
     copyData(src);
     copyProperty(Id);
-    moveProperty(Index);
-    moveProperty(Pin);
+    copyProperty(Index);
+    copyProperty(Pin);
+    copyProperty(RulesEnabled);
     copyProperty(Name);
     copyProperty(Type);
     copyProperty(Class);
     copyProperty(Meta);
 
     return *this;
+}
+
+void Device::copyData(const Device& src)
+{
+    copyProperty(Index);
+    copyProperty(RulesEnabled);
+    copyProperty(Name);
+    copyProperty(Type);
+    copyProperty(Class);
+    copyProperty(Meta);
 }
 
 std::vector<std::shared_ptr<Rule>> Device::rules() const

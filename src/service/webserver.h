@@ -35,6 +35,7 @@ namespace aquabox
         Route m_statusQR;
         Route m_allDevices;
         Route m_deviceById;
+        Route m_updateDeviceById;
         Route m_allRules;
         Route m_ruleById;
         Route m_createRule;

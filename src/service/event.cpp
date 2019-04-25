@@ -2,6 +2,11 @@
 
 using namespace aquabox;
 
+Event::Event()
+{
+    m_properties = nlohmann::json({});
+}
+
 void Event::setSender(std::string sender, std::string _class)
 {
     m_sender = sender;

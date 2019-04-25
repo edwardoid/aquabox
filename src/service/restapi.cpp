@@ -285,6 +285,58 @@ DEFINE_API_IMPL(GetDevice)
     response->write(SimpleWeb::StatusCode::success_ok, data.dump(4), headers);
 }
 
+DEFINE_API_IMPL(UpdateDevice)
+{
+    auto params = route.extract(request->path);
+    if (params.count(":dev") == 0) {
+        LOG_ERROR << "No device id parameter in URL";
+        response->write(SimpleWeb::StatusCode::client_error_bad_request, headers);
+        return;
+    }
+    std::string dev = params[":dev"];
+    
+    auto& devices = AquaBox::i().devices();
+    auto pos = devices.find(dev);
+    if (pos == devices.end()) {
+        LOG_ERROR << "No device " << dev << " found";
+        response->write(SimpleWeb::StatusCode::client_error_not_found, headers);
+        return;
+    }
+
+    nlohmann::json data;
+    nlohmann::json deviceData;
+    try
+    {
+        deviceData = nlohmann::json::parse(request->content.string());
+    }
+    catch (nlohmann::detail::parse_error &e)
+    {
+        data["data"] = request->content.string();
+        data["error"] = e.what();
+        data["cause"] = "Parse Error";
+        response->write(SimpleWeb::StatusCode::client_error_bad_request, data.dump(4), headers);
+        return;
+    }
+
+    std::shared_ptr<Device> d = std::make_shared<Device>();
+    if (!d->parse(deviceData)) // Check if all required fields present;
+    {
+        response->write(SimpleWeb::StatusCode::client_error_bad_request, data.dump(4), headers);
+        return;
+    }
+
+    auto& device = pos->second;
+    nlohmann::json before;
+    device->json(before);
+    before["isOn"] = pos->second->turnedOn();
+
+    device->copyData(*d);
+
+    AquaBox::i().postUpdate(std::make_shared<DeviceUpdatedEvent>(device, before));
+
+    response->write(SimpleWeb::StatusCode::success_ok, headers);
+}
+
 DEFINE_API_IMPL(Rules)
 {
     std::vector<nlohmann::json> all;

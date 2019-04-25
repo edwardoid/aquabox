@@ -19,6 +19,7 @@ namespace aquabox
         Device(const Device& src);
         Device(Device&& src);
         const Device& operator = (const Device& src);
+        void copyData(const Device& src);
 
         bool turnedOn() const;
 
@@ -33,6 +34,7 @@ namespace aquabox
         property(Id, StringProperty)
         property(Index, UnsignedNumberProperty)
         property(Pin, UnsignedShortNumberProperty);
+        property(RulesEnabled, BooleanProperty)
         property(Name, StringProperty)
         property(Type, EnumProperty<DeviceType>)
         property(Class, EnumProperty<DeviceClass>)

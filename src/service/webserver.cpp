@@ -52,6 +52,8 @@ void WebServer::setupRoutes()
 
     m_deviceById = base.sub().word("device").string(":dev");
 
+    m_updateDeviceById = base.sub().word("device").string(":dev");
+
     m_createRule = base.sub().word("device").string(":dev").word("rule");
 
     m_updateRule = base.sub().word("device").string(":dev").word("rule");
@@ -78,6 +80,7 @@ bool WebServer::bindApiCalls()
     REST.setup(m_http, "GET", m_statusQR, &rest::API::StatusQR);
     REST.setup(m_http, "GET", m_allDevices, &rest::API::Devices);
     REST.setup(m_http, "GET", m_deviceById, &rest::API::GetDevice);
+    REST.setup(m_http, "POST", m_updateDeviceById, &rest::API::UpdateDevice);
     REST.setup(m_http, "GET", m_allRules, &rest::API::Rules);
     REST.setup(m_http, "GET", m_ruleById, &rest::API::GetRule);
     REST.setup(m_http, "DELETE", m_deleteRule, &rest::API::DeleteRule);
