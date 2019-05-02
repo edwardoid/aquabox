@@ -9,6 +9,7 @@ NCPU=`cat /proc/cpuinfo | grep vendor_id | wc -l`
 #The Target mount options. Modify this accordingly.
 
 TARGET_IP=edwardoid.servebeer.com
+#TARGET_IP=192.168.1.38
 TARGET_USER=root
 
 export ROOT_OF_CC="$PWD/../../../arm"

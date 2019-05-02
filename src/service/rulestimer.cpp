@@ -5,6 +5,7 @@
 #include "aquabox.h"
 #include "event.h"
 #include "updatevents.h"
+#include <set>
 #include <plog/Log.h>
 #include <plog/Severity.h>
 using namespace aquabox;
@@ -21,12 +22,27 @@ void RulesTimer::start()
 {
     m_timer.start([this](const Timer::ClockTimePoint& when){
         AquaBox::i().doLater([this, when](){
+            RulesMap rulesToDelete;
             for(auto rule : AquaBox::i().rules())
             {
-                if (!rule.second->getEnabled().Value)
-                    continue;
-                RuleExecutor re(rule.second, when);
-                re();
+                const Time at = rule.second->getRepeat().getDeleteAfter();
+                const RepeatUnit unit = rule.second->getRepeat().getUnit();
+                if(at.Value != 0 &&
+                   at.getDetails().from(TimeDetails(Timer::Clock::to_time_t(when)),
+                                        true, true, true, true) >=0)
+                {
+                    rulesToDelete.insert({ rule.first, rule.second });
+                }
+                else if(rule.second->getEnabled().Value)
+                {
+                    RuleExecutor re(rule.second, when);
+                    re();
+                }
+            }
+
+            for(auto rule : rulesToDelete)
+            {
+                AquaBox::i().removeRule(rule.second);
             }
 
             for(auto& dev : AquaBox::i().devices())

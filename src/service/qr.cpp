@@ -25,7 +25,7 @@ static void fillRow(std::vector<unsigned char>& row, int num, const unsigned cha
 
 bool Qr::create(std::string data, std::string pngPath, double zoomFactor)
 {
-    int margin = 2;
+    int margin = 1;
     int size = std::ceil(3 * zoomFactor);
     int dpi = 72;
     QRcode *qrcode = QRcode_encodeString(data.c_str(), 0, QR_ECLEVEL_L, QR_MODE_8, 1);
@@ -123,6 +123,6 @@ bool Qr::create(std::string data, std::string pngPath, double zoomFactor)
 	fclose(fp);
 	free(palette);
 
-	return 0;
+	return true;
 
 }

@@ -4,7 +4,7 @@
 #include <string>
 #include <vector>
 
-namespace wifi
+namespace aquabox
 {
     enum class Authentication
     {
@@ -23,10 +23,10 @@ namespace wifi
         bool Hidden = false;
     };
 
-    class Wifi
+    class WiFi
     {
     public:
-        Wifi(const std::string interface);
+        WiFi(const std::string interface);
         std::vector<Network> scan(bool all = false);
     private:
         std::string m_interface;

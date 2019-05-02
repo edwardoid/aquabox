@@ -2,7 +2,7 @@
 #include <unordered_map>
 #include <iwlib.h>
 
-using namespace wifi;
+using namespace aquabox;
 
 std::string Network::qr() const
 {
@@ -30,13 +30,13 @@ std::string Network::qr() const
     return str;
 }
 
-Wifi::Wifi(const std::string interface)
+WiFi::WiFi(const std::string interface)
     : m_interface(interface)
 {
 
 }
 
-std::vector<Network> Wifi::scan(bool all)
+std::vector<Network> WiFi::scan(bool all)
 {
     std::vector<Network> availableNetworks;
     iwrange range;

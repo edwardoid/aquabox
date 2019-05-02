@@ -24,8 +24,8 @@ Serializable<RepeatUnit>::Str2EnumMap Serializable<RepeatUnit>::str2Val({
 });
 
 RepeatTimeout::RepeatTimeout(std::string name)
-    : ClassProperty(name.c_str(), { &m_Count, &m_Unit }, true)
-    , m_Count("count"), m_Unit("unit")
+    : ClassProperty(name.c_str(), { &m_DeleteAfter, &m_Unit }, true)
+    , m_DeleteAfter("deleteAfter"), m_Unit("unit")
 {}
 
 RepeatTimeout::RepeatTimeout(const RepeatTimeout& src)
@@ -38,14 +38,14 @@ RepeatTimeout::RepeatTimeout(RepeatTimeout&& src)
     : RepeatTimeout(src.name)
 {
     moveData(src);
-    moveProperty(Count);
+    moveProperty(DeleteAfter);
     moveProperty(Unit);
 }
 
 const RepeatTimeout& RepeatTimeout::operator = (const RepeatTimeout& src)
 {
     copyData(src);
-    copyProperty(Count);
+    copyProperty(DeleteAfter);
     copyProperty(Unit);
     return *this;
 }

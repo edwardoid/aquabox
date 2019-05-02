@@ -66,7 +66,7 @@ void WebServer::setupRoutes()
 
     m_repeatUnits = base.sub().word("config").word("repeat_units");
 
-    m_wifi.word("wifi");
+    m_wifi = base.sub().word("wifi");
 
     m_updates = base.sub().word("updates");
 }
@@ -88,7 +88,7 @@ bool WebServer::bindApiCalls()
     REST.setup(m_http, "POST", m_updateRule, &rest::API::CreateRule);
     REST.setup(m_http, "GET", m_rulesForDevice, &rest::API::DeviceRules);
     REST.setup(m_http, "GET", m_repeatUnits, &rest::API::SupportedRepeatTimeouts);
-    REST.setup(m_http, "GET", m_wifi, &rest::API::WiFiQR);
+    REST.setup(m_http, "GET", m_wifi, &rest::API::WiFiNetworks);
     REST.setup(m_http, "PUT", m_turnOn, &rest::API::TurnOn);
     REST.setup(m_http, "PUT", m_turnOff, &rest::API::TurnOff);
 }

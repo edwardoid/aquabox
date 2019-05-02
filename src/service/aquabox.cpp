@@ -9,7 +9,9 @@
 #include "deviceparser.h"
 #include "user.h"
 #include "updatevents.h"
+#include "statusimage.h"
 #include <exception>
+#include <chrono>
 #include <random>
 
 using namespace aquabox;
@@ -24,6 +26,7 @@ AquaBox& AquaBox::i()
 
 AquaBox::AquaBox()
     : m_fileAppender("aquabox.log")
+    , m_globalTimer("GlobalRoutines")
 {}
 
 int AquaBox::start(bool asService)
@@ -82,6 +85,11 @@ int AquaBox::start(bool asService)
     readDevices();
     readUsers();
     readRules(m_wd);
+
+    StatusImage::display();
+    m_globalTimer.start([this](const Timer::ClockTimePoint&){
+        StatusImage::display();
+    }, std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::seconds(10)));
 
     m_timer.start();
     m_server.start();

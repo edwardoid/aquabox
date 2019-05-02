@@ -16,3 +16,9 @@
 [submodule "3dp/swsws"]
 	path = 3dp/swsws
 	url = https://gitlab.com/eidheim/Simple-WebSocket-Server.git
+[submodule "3dp/pngwriter"]
+	path = 3dp/pngwriter
+	url = https://github.com/pngwriter/pngwriter.git
+[submodule "3dp/pstreams"]
+	path = 3dp/pstreams
+	url = https://github.com/jwakely/pstreams.git

@@ -4,6 +4,7 @@
 #include <nlohmann/json.hpp>
 #include "property.h"
 #include "enumerations.h"
+#include "time.h"
 
 namespace aquabox
 {
@@ -25,7 +26,7 @@ namespace aquabox
         const RepeatTimeout& operator = (const RepeatTimeout& src);
 
         property(Unit, EnumProperty<RepeatUnit>);
-        property(Count, UnsignedNumberProperty);
+        property(DeleteAfter, Time);
     };
 }
 

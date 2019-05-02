@@ -11,6 +11,7 @@
 #include "enumerations.h"
 #include "path.h"
 #include "updatevents.h"
+#include "wifi.h"
 #include <fstream>
 #include <nlohmann/json.hpp>
 #include <stdio.h>
@@ -185,7 +186,7 @@ DEFINE_API_IMPL(StatusQR)
         }
     }
 
-    if (factor < 1.)
+    if (factor < 0.01)
         factor = 1;
 
     LOG_DEBUG << "Generating QR with zoom factor " << factor;
@@ -545,4 +546,16 @@ DEFINE_API_IMPL(TurnOff)
         response->write(SimpleWeb::StatusCode::success_ok, data.dump(4), headers);
 
     }
+}
+
+DEFINE_API_IMPL(WiFiNetworks)
+{
+    WiFi wifi("wlan0");
+    std::vector<std::string> names;
+    for(auto& network : wifi.scan())
+    {
+        names.push_back(network.ESSID);
+    }
+
+    response->write(SimpleWeb::StatusCode::success_ok, (nlohmann::json({ {"networks", names} })).dump(4));
 }

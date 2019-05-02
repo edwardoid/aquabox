@@ -58,6 +58,7 @@ namespace aquabox
         Path m_rulesDir;
         RulesTimer m_timer;
         WebServer m_server;
+        Timer m_globalTimer;
     };
 }
 
