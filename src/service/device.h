@@ -21,6 +21,9 @@ namespace aquabox
         const Device& operator = (const Device& src);
         void copyData(const Device& src);
 
+        bool parseFile(const std::string& file);
+        bool saveToFile(const std::string& file);
+
         bool turnedOn() const;
 
         void turnOn();

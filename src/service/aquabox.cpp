@@ -5,6 +5,7 @@
 #include "log.h"
 #include "restapi.h"
 #include "rule.h"
+#include "device.h"
 #include "ruleparser.h"
 #include "deviceparser.h"
 #include "user.h"
@@ -29,7 +30,7 @@ AquaBox::AquaBox()
     , m_globalTimer("GlobalRoutines")
 {}
 
-int AquaBox::start(bool asService)
+int AquaBox::start(bool asService, bool doDraw)
 {
     Lockfile lock;
 
@@ -42,8 +43,7 @@ int AquaBox::start(bool asService)
     }
 
     LOG_INFO << "Starting " << Config::APPLICATION << " ver. " << std::hex << Config::VERSION_MAJOR << "." << Config::VERSION_MINOR;
-    if(lock.exists())
-    {
+    if(lock.exists()) {
         LOG_FATAL << "Another instance of " << Config::APPLICATION << " is running...";
         std::exit(EXIT_FAILURE);
     }
@@ -57,22 +57,17 @@ int AquaBox::start(bool asService)
     memset(cwd,'\0', 1024);
 
     int bytes = std::min<size_t>(readlink(procPath.c_str(), cwd, 1024), 1024 - 1);
-    if(bytes >= 0)
+    if(bytes >= 0) {
         cwd[bytes] = '\0';
+    }
 
     m_wd = Settings::string(Settings::WORKING_DIRECTORY, cwd);
-    if (!m_wd.normalize())
-    {
+    if (!m_wd.normalize()) {
         LOG_ERROR << "Bad working directory path " << m_wd;
-    }
-    else
-    {
-        if(0 != chdir(m_wd.c_str()))
-        {
+    } else {
+        if(0 != chdir(m_wd.c_str())) {
             LOG_ERROR << "Can't change working directory to " << m_wd << " errno: " << errno << " : " << strerror(errno);
-        }
-        else
-        {
+        } else {
             LOG_INFO << "Changed workign direcotry to " << m_wd;
         }
     }
@@ -81,28 +76,42 @@ int AquaBox::start(bool asService)
     m_poolOptions.setQueueSize(1024);
 
     m_pool.reset(new tp::ThreadPool(m_poolOptions));
+    
+    m_wifi.reset(new IoT::WiFi());
+    m_wifi->onStateChanged([this](IoT::WiFi::State state) {
+        networkStateChanged(state);
+    });
 
-    readDevices();
-    readUsers();
+    m_wifi->init("", Settings::string(Settings::AP_SSID, Config::AP_SSID), Settings::string(Settings::AP_PASSWORD, Config::AP_PASSWORD));
+
+    readDevices(m_wd);
     readRules(m_wd);
+    readUsers();
 
     StatusImage::display();
-    m_globalTimer.start([this](const Timer::ClockTimePoint&){
-        StatusImage::display();
+    m_globalTimer.start([this, doDraw](const Timer::ClockTimePoint&){
+        if (doDraw)
+            StatusImage::display();
     }, std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::seconds(10)));
 
     m_timer.start();
-    m_server.start();
-    
     m_server.start();
 
     std::getchar();
 
     return EXIT_SUCCESS;
 }
-void AquaBox::readDevices()
+
+void AquaBox::networkStateChanged(IoT::WiFi::State state)
 {
-    m_devices = DeviceParser::parse();
+    // Do some stuff
+}
+
+void AquaBox::readDevices(const Path& p)
+{
+    m_devicesDir = p;
+    m_devicesDir.append("devices");
+    m_devices = DeviceParser::parse(m_devicesDir);
 }
 
 void AquaBox::readUsers()
@@ -110,8 +119,7 @@ void AquaBox::readUsers()
     auto users = Settings::array(Settings::USERS);
     
     LOG_INFO << "Loading " << users.size() << " users...";
-    for (auto u : users)
-    {
+    for (auto u : users) {
         auto usr = std::make_shared<User>();
         if(usr->init(u))
             m_users.insert({usr->user(), usr});
@@ -161,8 +169,7 @@ bool AquaBox::addRule(std::shared_ptr<Rule>& rule, bool replace)
     auto pos = m_rules.find(rule->getId().Value);
     nlohmann::json beforeUpdate;
     if (pos != m_rules.end()) {
-        if (!replace)
-        {
+        if (!replace) {
             LOG_ERROR << "Rule " << pos->first << " has already beed added, and replace flag was not set";
             return false;
         };
@@ -183,7 +190,7 @@ bool AquaBox::addRule(std::shared_ptr<Rule>& rule, bool replace)
         return false;
     }
 
-    bool saved =  rule->saveToFile(p);
+    bool saved = rule->saveToFile(p);
     if (!saved) {
         m_rules.erase(m_rules.find(rule->getId().Value));
     }
@@ -193,8 +200,9 @@ bool AquaBox::addRule(std::shared_ptr<Rule>& rule, bool replace)
         if (replace) {
             postUpdate(std::make_shared<RuleUpdatedEvent>(rule, beforeUpdate));
         }
-        else 
+        else {
             postUpdate(std::make_shared<RuleCreatedEvent>(rule));
+        }
     }
     return saved;
 }
@@ -226,6 +234,24 @@ bool AquaBox::removeRule(std::shared_ptr<Rule> rule)
     return true;
 }
 
+bool AquaBox::updateDevice(std::string id)
+{
+    auto pos = m_devices.find(id);
+    if (pos == m_devices.end()) {
+        return false;
+    }
+
+    Path p = m_devicesDir;
+
+    bool pathOk = p.append(id + ".json");
+    if(!pathOk) {
+        LOG_ERROR << "Can't form path for device. Root: " << m_devicesDir.c_str() << " formed " << p.c_str() << " error " << strerror(errno);
+        return false;
+    }
+
+    return pos->second->saveToFile(p);
+}
+
 UsersMap& AquaBox::users() const
 {
     return m_users;
@@ -233,10 +259,19 @@ UsersMap& AquaBox::users() const
 
 void AquaBox::doLater(std::function<void(void)>&& task)
 {
-    if(!m_pool->tryPost(task))
-    {
+    if(!m_pool->tryPost(task)) {
         LOG_ERROR << "Can't schedule a new task";
     }
+}
+
+std::vector<IoT::WifiNetwork> AquaBox::availableNetworks()
+{
+    return std::move(m_wifi->availableNetworks());
+}
+
+IoT::WiFi& AquaBox::networking()
+{
+    return *m_wifi;
 }
 
 void AquaBox::postUpdate(std::shared_ptr<Event> event)

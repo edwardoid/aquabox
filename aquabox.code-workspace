@@ -63,7 +63,8 @@
 			"codecvt": "cpp",
 			"complex": "cpp",
 			"future": "cpp",
-			"typeindex": "cpp"
+			"typeindex": "cpp",
+			"csetjmp": "cpp"
 		}
 	}
 }

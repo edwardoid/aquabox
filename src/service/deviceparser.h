@@ -1,9 +1,9 @@
 #ifndef DEVICE_PARSER_H
 #define DEVICE_PARSER_H
 
-#include <string>
 #include <unordered_map>
 #include <memory>
+#include "path.h"
 
 namespace aquabox
 {
@@ -12,7 +12,7 @@ namespace aquabox
     class DeviceParser
     {
         public:
-        static std::unordered_map<std::string, std::shared_ptr<Device>> parse();
+        static std::unordered_map<std::string, std::shared_ptr<Device>> parse(Path& root);
     };
 }
 

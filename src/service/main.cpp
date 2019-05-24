@@ -21,11 +21,14 @@ void handler(int sig) {
 int main(int argc, char** argv)
 {
   bool asService = false;
+  bool noDraw = false;
   for(int i = 1; i < argc; ++i)
   {
     if(strcmp(argv[i], "--service") == 0)
       asService = true;
+    if(strcmp(argv[i], "--nodraw") == 0)
+      noDraw = true;
   }
   signal(SIGSEGV, handler);
-  return aquabox::AquaBox::i().start(asService);
+  return aquabox::AquaBox::i().start(asService, !noDraw);
 }

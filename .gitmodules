@@ -22,3 +22,9 @@
 [submodule "3dp/pstreams"]
 	path = 3dp/pstreams
 	url = https://github.com/jwakely/pstreams.git
+[submodule "3dp/libfb"]
+	path = 3dp/libfb
+	url = https://github.com/edwardoid/libfb.git
+[submodule "3dp/iws"]
+	path = 3dp/iws
+	url = https://github.com/edwardoid/iot-wifi-setup.git

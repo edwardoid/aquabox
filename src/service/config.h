@@ -17,6 +17,8 @@ namespace aquabox
         static const std::string AUTHOR;
         static const std::string EMAIL;
         static const std::string ConfigurationFile;
+        static const std::string AP_SSID;
+        static const std::string AP_PASSWORD;
 
         static int REST_PORT;
         static int WS_PORT;

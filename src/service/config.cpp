@@ -19,3 +19,5 @@ const std::string Config::EMAIL = "edward.sarkisyan@gmail.com";
 const std::string Config::ConfigurationFile = "config.json";
 int Config::REST_PORT = 1213;
 int Config::WS_PORT = 1214;
+const std::string Config::AP_SSID = "AquaBox";
+const std::string Config::AP_PASSWORD = "aquabox";

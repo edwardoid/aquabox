@@ -5,6 +5,8 @@
 #include <unistd.h>
 #include <dirent.h>
 #include <memory.h>
+#include <limits.h>
+#include <stdlib.h>
 
 #include "log.h"
 
@@ -34,11 +36,11 @@ bool Path::isRelative() const
 
 bool Path::normalize()
 {
-    char tmp[1024];
-    memset(tmp, '\0', 1024);
-    if(NULL != realpath(data(), tmp) || errno == ENOENT)
+    char tmp[PATH_MAX];
+    memset(tmp, 0, PATH_MAX);
+    if(NULL != realpath(c_str(), tmp) || errno == ENOENT)
     {
-        static_cast<std::string&>(*this) = tmp;
+        static_cast<std::string&>(*this) = (errno == ENOENT ? data() : tmp);
         return true;
     }
     return false;

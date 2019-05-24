@@ -5,6 +5,7 @@
 #include "gpio.h"
 #include "event.h"
 #include <time.h>
+#include <fstream>
 
 using namespace aquabox;
 
@@ -18,6 +19,39 @@ Device::Device(const Device& src)
     : Device()
 {
     *this = src;
+}
+
+bool Device::parseFile(const std::string& file)
+{
+    std::ifstream is(file);
+
+    std::string content, line;
+    while(std::getline(is, line)) {
+        content += line;
+    }
+
+    nlohmann::json root = nlohmann::json::parse(content);
+
+    if(!parse(root)) {
+        LOG_ERROR << "Device from " << file << " can not be parsed!";
+        return false; 
+    }
+    return true;
+}
+
+bool Device::saveToFile(const std::string& file)
+{
+    std::ofstream os(file);
+    if(!os) {
+        LOG_ERROR << "Can't write to " << file << strerror(errno);
+        return false;
+    }
+    nlohmann::json data;
+    json(data);
+    os << data.dump(4);
+    os.flush();
+    os.close();
+    return true;
 }
 
 Device::Device(Device&& src)

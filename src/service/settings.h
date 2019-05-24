@@ -22,11 +22,9 @@ namespace aquabox
 
         static const std::string HTTP_PORT;
         static const std::string STREAM_PORT;
-        static const std::string SSID;
-        static const std::string WIFI_PASSWORD;
-        static const std::string WIFI_ENCRYPTION;
+        static const std::string AP_SSID;
+        static const std::string AP_PASSWORD;
 
-        static const std::string DEVICES;
         static const std::string USERS;
 
         static const std::string THREADS;

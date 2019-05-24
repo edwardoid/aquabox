@@ -3,18 +3,18 @@
 #include "settings.h"
 
 using namespace aquabox;
-std::unordered_map<std::string, std::shared_ptr<Device>> DeviceParser::parse()
+
+std::unordered_map<std::string, std::shared_ptr<Device>> DeviceParser::parse(Path& root)
 {
     std::unordered_map<std::string, std::shared_ptr<Device>> devices;
-    auto devs = Settings::array(Settings::DEVICES);
-    
-    LOG_INFO << "Loading " << devs.size() << " devices...";
-    for (auto d : devs)
+    for(Path p : root.children())
     {
+        if(p.isDirectory() || p.extension() != "json")
+            continue;
+        LOG_INFO << "Loading device: " << p.c_str();
         auto dev = std::make_shared<Device>();
-        if(dev->parse(d))
-            devices.insert({ dev->getId().Value, dev});
+        if(dev->parseFile(p))
+            devices.insert({ dev->getId(), dev });
     }
-
     return devices;
 }
