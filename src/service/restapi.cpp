@@ -118,6 +118,34 @@ nlohmann::json getStatusInfo(bool detailed)
         {"stream", Settings::integer(Settings::STREAM_PORT, Config::WS_PORT)}
     });
 
+    if (detailed) {
+        std::string wifiState = "unknown";
+        switch(AquaBox::i().networking().state())
+        {
+            case IoT::WiFi::State::InAPMode:
+            case IoT::WiFi::State::SwitchingToAP: {
+                wifiState = "ap";
+                break;
+            }
+
+            case IoT::WiFi::Disconnected: {
+                wifiState = "disconnected";
+                break;
+            }
+
+            case IoT::WiFi::Connected: {
+                wifiState = "connected";
+                break;
+            }
+
+            default: {}
+        } 
+        host["network"] = nlohmann::json({
+            { "ssid", AquaBox::i().networking().currentSSID() },
+            { "ip", AquaBox::i().networking().currentSSID() },
+            { "mode",  wifiState }});
+    }
+
     host["host"] = boost::asio::ip::host_name();
 
     nlohmann::json status({{"aquabox", host}});
@@ -526,7 +554,7 @@ DEFINE_API_IMPL(TurnOff)
     }
 }
 
-DEFINE_API_IMPL(WiFiNetworks)
+DEFINE_API_IMPL(ScanWiFiNetworks)
 {
     std::vector<nlohmann::json> nets;
     for (auto& net : AquaBox::i().availableNetworks())
@@ -546,4 +574,33 @@ DEFINE_API_IMPL(WiFiNetworks)
     }
 
     response->write(SimpleWeb::StatusCode::success_ok, (nlohmann::json({ {"networks", nets} })).dump(4));
+}
+
+DEFINE_API_IMPL(ConnectToWifi)
+{
+    nlohmann::json networkInfo;
+    try {
+        networkInfo = nlohmann::json::parse(request->content.string());
+    }
+    catch(...) {
+        response->write(SimpleWeb::StatusCode::client_error_bad_request, headers);
+        return;
+    }
+
+    auto ssid = networkInfo.find("ssid");
+    auto password = networkInfo.find("password");
+    if (ssid == networkInfo.end() || password == networkInfo.end() || !ssid->is_string() || !password->is_string()) {
+        response->write(SimpleWeb::StatusCode::client_error_bad_request, headers);
+        return;
+    }
+
+    std::string ssidStr = ssid->get<std::string>();
+    std::string passwordStr = password->get<std::string>();
+    if(ssidStr.empty() || passwordStr.size() < 8) {
+        response->write(SimpleWeb::StatusCode::client_error_bad_request, headers);
+        return;
+    }
+
+    AquaBox::i().networking().tryConnect(ssidStr, passwordStr);
+    response->write(SimpleWeb::StatusCode::success_ok, headers);
 }

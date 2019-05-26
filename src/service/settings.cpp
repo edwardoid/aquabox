@@ -12,6 +12,7 @@ const std::string Settings::WEB_ROOT = "webRoot";
 
 const std::string Settings::HTTP_PORT = "httpPort";
 const std::string Settings::STREAM_PORT = "streamPort";
+const std::string Settings::NETWORK = "network";
 const std::string Settings::AP_SSID = "ssid";
 const std::string Settings::AP_PASSWORD = "password";
 

@@ -14,7 +14,6 @@ using namespace aquabox;
 void StatusImage::display(std::string fbDevice)
 {
 #ifdef TARGET_DEVICE
-    LOG_DEBUG << "Draing...";
     IoT::FrameBuffer fb(fbDevice);
 
     const uint32_t margin = 5;
@@ -50,8 +49,6 @@ void StatusImage::display(std::string fbDevice)
     
     fb.clear(0xFFFFFF);
     uint32_t qrsize = fb.drawQRCode(qrcode, margin, margin, fb.height() - margin, 0x000000);
-
-    LOG_DEBUG << "QR size" << qrsize; 
 
     uint32_t widthRemain = fb.width() - qrsize - margin; 
     int FONT_SIZE = 8;

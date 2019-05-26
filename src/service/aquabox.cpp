@@ -104,7 +104,14 @@ int AquaBox::start(bool asService, bool doDraw)
 
 void AquaBox::networkStateChanged(IoT::WiFi::State state)
 {
-    // Do some stuff
+    if (state == IoT::WiFi::State::InAPMode) {
+        static bool firstTime = true;
+        std::string uuid = Settings::string(Settings::NETWORK, "");
+        if(firstTime && !uuid.empty()) {
+            m_wifi->connectToNetwork(uuid);
+            firstTime = false;
+        }
+    }
 }
 
 void AquaBox::readDevices(const Path& p)

@@ -22,6 +22,7 @@ namespace aquabox
 
         static const std::string HTTP_PORT;
         static const std::string STREAM_PORT;
+        static const std::string NETWORK;
         static const std::string AP_SSID;
         static const std::string AP_PASSWORD;
 

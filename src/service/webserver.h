@@ -43,7 +43,8 @@ namespace aquabox
         Route m_updateRule;
         Route m_rulesForDevice;
         Route m_repeatUnits;
-        Route m_wifi;
+        Route m_wifiScan;
+        Route m_wifiConnect;
 
         Route m_turnOn;
         Route m_turnOff;
