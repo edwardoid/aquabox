@@ -142,7 +142,7 @@ nlohmann::json getStatusInfo(bool detailed)
         } 
         host["network"] = nlohmann::json({
             { "ssid", AquaBox::i().networking().currentSSID() },
-            { "ip", AquaBox::i().networking().currentSSID() },
+            { "ip", AquaBox::i().networking().currentIP() },
             { "mode",  wifiState }});
     }
 
@@ -576,7 +576,7 @@ DEFINE_API_IMPL(ScanWiFiNetworks)
     response->write(SimpleWeb::StatusCode::success_ok, (nlohmann::json({ {"networks", nets} })).dump(4));
 }
 
-DEFINE_API_IMPL(ConnectToWifi)
+DEFINE_API_IMPL(ConnectToWiFi)
 {
     nlohmann::json networkInfo;
     try {

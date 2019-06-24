@@ -91,7 +91,7 @@ bool WebServer::bindApiCalls()
     REST.setup(m_http, "GET", m_rulesForDevice, &rest::API::DeviceRules);
     REST.setup(m_http, "GET", m_repeatUnits, &rest::API::SupportedRepeatTimeouts);
     REST.setup(m_http, "GET", m_wifiScan, &rest::API::ScanWiFiNetworks);
-    REST.setup(m_http, "POST", m_wifiConnect, &rest::API::ConnectToWifi);
+    REST.setup(m_http, "POST", m_wifiConnect, &rest::API::ConnectToWiFi);
     REST.setup(m_http, "PUT", m_turnOn, &rest::API::TurnOn);
     REST.setup(m_http, "PUT", m_turnOff, &rest::API::TurnOff);
 }

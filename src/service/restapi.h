@@ -54,7 +54,7 @@ namespace aquabox
         DECLARE_API_IMPL(DeviceRules);
         DECLARE_API_IMPL(WiFiQR);
         DECLARE_API_IMPL(ScanWiFiNetworks);
-        DECLARE_API_IMPL(ConnectToWifi)
+        DECLARE_API_IMPL(ConnectToWiFi)
         DECLARE_API_IMPL(SupportedRepeatTimeouts);
 
         DECLARE_API_IMPL(TurnOn);
@@ -74,7 +74,7 @@ namespace aquabox
           ENABLE_API(StatusQR)
           ENABLE_API(WiFiQR)
           ENABLE_API(ScanWiFiNetworks)
-          ENABLE_API(ConnectToWifi)
+          ENABLE_API(ConnectToWiFi)
           ENABLE_API(GetDevice)
           ENABLE_API(UpdateDevice)
           ENABLE_API(Devices)
