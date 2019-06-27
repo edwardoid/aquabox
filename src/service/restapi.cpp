@@ -6,6 +6,7 @@
 #include "aquabox.h"
 #include "rule.h"
 #include "device.h"
+#include "relay.h"
 #include "user.h"
 #include "repeattimeout.h"
 #include "enumerations.h"
@@ -273,7 +274,8 @@ DEFINE_API_IMPL(Devices)
     for (auto &dev : AquaBox::i().devices()) {
         nlohmann::json json;
         dev.second->json(json);
-        json["isOn"] = dev.second->turnedOn();
+        if (dev.second->getClass() == DeviceClass::Relay)
+            json["isOn"] = std::dynamic_pointer_cast<Relay>(dev.second)->turnedOn();
         all.push_back(json);
     }
     nlohmann::json res = nlohmann::json::object();
@@ -301,7 +303,9 @@ DEFINE_API_IMPL(GetDevice)
 
     nlohmann::json data;
     pos->second->json(data);
-    data["isOn"] = pos->second->turnedOn();
+    if (pos->second->getClass() == DeviceClass::Relay) {
+        data["isOn"] = std::dynamic_pointer_cast<Relay>(pos->second)->turnedOn();
+    }
 
     response->write(SimpleWeb::StatusCode::success_ok, data.dump(4), headers);
 }
@@ -348,7 +352,9 @@ DEFINE_API_IMPL(UpdateDevice)
     auto& device = pos->second;
     nlohmann::json before;
     device->json(before);
-    before["isOn"] = pos->second->turnedOn();
+    if (pos->second->getClass() == DeviceClass::Relay) {
+        before["isOn"] = std::dynamic_pointer_cast<Relay>(pos->second)->turnedOn();
+    }
 
     device->copyData(*d);
 
@@ -519,15 +525,23 @@ DEFINE_API_IMPL(TurnOn)
     auto pos = AquaBox::i().devices().find(dev);
     if (pos == AquaBox::i().devices().end()) {
         response->write(SimpleWeb::StatusCode::client_error_not_found, headers);
-    } else {
-        pos->second->turnOn();
-        nlohmann::json data;
-        pos->second->json(data);
-        data["isOn"] = pos->second->turnedOn();
-        AquaBox::i().postUpdate(std::make_shared<ManualStateChangedEvent>(pos->second));
-
-        response->write(SimpleWeb::StatusCode::success_ok, data.dump(4), headers);
+        return;
     }
+
+    if (pos->second->getClass() != DeviceClass::Relay) {
+        response->write(SimpleWeb::StatusCode::client_error_bad_request, headers);
+        return;
+    }
+
+    auto relay = std::dynamic_pointer_cast<Relay>(pos->second);
+
+    relay->turnOn();
+    nlohmann::json data;
+    relay->json(data);
+    data["isOn"] = relay->turnedOn();
+    AquaBox::i().postUpdate(std::make_shared<ManualStateChangedEvent>(relay));
+
+    response->write(SimpleWeb::StatusCode::success_ok, data.dump(4), headers);
 }
 
 DEFINE_API_IMPL(TurnOff)
@@ -542,16 +556,23 @@ DEFINE_API_IMPL(TurnOff)
     auto pos = AquaBox::i().devices().find(dev);
     if (pos == AquaBox::i().devices().end()) {
         response->write(SimpleWeb::StatusCode::client_error_not_found, headers);
-    } else {
-        pos->second->turnOff();
-        nlohmann::json data;
-        pos->second->json(data);
-        data["isOn"] = pos->second->turnedOn();
-
-        AquaBox::i().postUpdate(std::make_shared<ManualStateChangedEvent>(pos->second));
-
-        response->write(SimpleWeb::StatusCode::success_ok, data.dump(4), headers);
     }
+    
+    if (pos->second->getClass() != DeviceClass::Relay) {
+        response->write(SimpleWeb::StatusCode::client_error_bad_request, headers);
+        return;
+    }
+
+    auto relay = std::dynamic_pointer_cast<Relay>(pos->second);
+    
+    relay->turnOff();
+    nlohmann::json data;
+    relay->json(data);
+    data["isOn"] = relay->turnedOn();
+
+    AquaBox::i().postUpdate(std::make_shared<ManualStateChangedEvent>(relay));
+
+    response->write(SimpleWeb::StatusCode::success_ok, data.dump(4), headers);
 }
 
 DEFINE_API_IMPL(ScanWiFiNetworks)

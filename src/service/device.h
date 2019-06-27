@@ -13,7 +13,6 @@ namespace aquabox
 
     class Device: public ClassProperty
     {
-        static const uint64_t INVALID_PRIORITY = static_cast<uint64_t>(-1);
     public:
         Device();
         Device(const Device& src);
@@ -23,14 +22,6 @@ namespace aquabox
 
         bool parseFile(const std::string& file);
         bool saveToFile(const std::string& file);
-
-        bool turnedOn() const;
-
-        void turnOn();
-        void turnOff();
-
-        void addPendingAction(uint64_t priority, ActionType action);
-        bool performPendingAction();
 
         std::vector<std::shared_ptr<class Rule>> rules() const;
 
@@ -42,10 +33,6 @@ namespace aquabox
         property(Type, EnumProperty<DeviceType>)
         property(Class, EnumProperty<DeviceClass>)
         property(Meta, Metadata)
-
-    private:
-        uint64_t m_pendingActionPriority = INVALID_PRIORITY;
-        ActionType m_pendingAction;
     };
 }
 

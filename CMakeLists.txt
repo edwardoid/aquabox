@@ -44,6 +44,7 @@ add_subdirectory("${THREE_DP_DIR}/qrencode")
 add_subdirectory("${THREE_DP_DIR}/nlohmann")
 add_subdirectory("${THREE_DP_DIR}/iws")
 add_subdirectory("${THREE_DP_DIR}/libfb")
+add_subdirectory("${THREE_DP_DIR}/owt")
 
 execute_process(
   COMMAND git log -1 --format=%H
@@ -84,6 +85,7 @@ endif()
 target_link_libraries(${PROJECT_NAME} qrencode)
 target_link_libraries(${PROJECT_NAME} fb_static)
 target_link_libraries(${PROJECT_NAME} iotwifi_static)
+target_link_libraries(${PROJECT_NAME} w1temp_static)
 target_link_libraries(${PROJECT_NAME} ${Boost_LIBRARIES})
 #target_link_libraries(${PROJECT_NAME} ${OPENSSL_CRYPTO_LIBRARY})
 target_link_libraries(${PROJECT_NAME} ${PNG_LIBRARY})

@@ -1,11 +1,11 @@
 #include "updatevents.h"
-#include "device.h"
+#include "relay.h"
 #include "rule.h"
 #include "enumerations.h"
 
 using namespace aquabox;
 
-OnOffChangedEvent::OnOffChangedEvent(std::shared_ptr<Device> device, std::string reason)
+OnOffChangedEvent::OnOffChangedEvent(std::shared_ptr<Relay> device, std::string reason)
 {
     setSender(device->getId().Value, "device");
     setData({
@@ -19,12 +19,12 @@ OnOffChangedEvent::OnOffChangedEvent(std::shared_ptr<Device> device, std::string
     });
 }
 
-RuleTriggeredEvent::RuleTriggeredEvent(std::shared_ptr<Device> device)
+RuleTriggeredEvent::RuleTriggeredEvent(std::shared_ptr<Relay> device)
     : OnOffChangedEvent(device, "rule")
 {
 }
 
-ManualStateChangedEvent::ManualStateChangedEvent(std::shared_ptr<Device> device)
+ManualStateChangedEvent::ManualStateChangedEvent(std::shared_ptr<Relay> device)
     : OnOffChangedEvent(device, "manual")
 {
 }

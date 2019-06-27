@@ -8,19 +8,19 @@ namespace aquabox
     class OnOffChangedEvent: public Event
     {
     public:
-        OnOffChangedEvent(std::shared_ptr<class Device> device, std::string reason);
+        OnOffChangedEvent(std::shared_ptr<class Relay> device, std::string reason);
     };
 
     class RuleTriggeredEvent: public OnOffChangedEvent
     {
     public:
-        RuleTriggeredEvent(std::shared_ptr<class Device> device);
+        RuleTriggeredEvent(std::shared_ptr<class Relay> device);
     };
 
     class ManualStateChangedEvent: public OnOffChangedEvent
     {
     public:
-        ManualStateChangedEvent(std::shared_ptr<class Device> device);
+        ManualStateChangedEvent(std::shared_ptr<class Relay> device);
     };
 
     class RuleEnableChangedEvent: public Event

@@ -4,6 +4,7 @@
 #include "log.h"
 #include "enumerations.h"
 #include "device.h"
+#include "relay.h"
 #include "timedetails.h"
 #include <ctime>
 
@@ -19,7 +20,11 @@ void RuleExecutor::operator() ()
     const TimeDetails now(Timer::Clock::to_time_t(m_now));
 
     const RepeatUnit unit = m_rule->getRepeat().getUnit();
-    auto dev = m_rule->getDevice().resolve();
+    auto dev = std::dynamic_pointer_cast<Relay>(m_rule->getDevice().resolve());
+
+    if (dev == nullptr) {
+        return;
+    }
     
     for(const Action& act : *(m_rule->getActions()))
     {

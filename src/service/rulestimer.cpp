@@ -1,6 +1,6 @@
 #include "rulestimer.h"
 #include "rule.h"
-#include "device.h"
+#include "relay.h"
 #include "ruleexecutor.h"
 #include "aquabox.h"
 #include "event.h"
@@ -47,12 +47,16 @@ void RulesTimer::start()
 
             for(auto& dev : AquaBox::i().devices())
             {
-                bool isOn = dev.second->turnedOn();
-                if(dev.second->performPendingAction()) {
-                    LOG_DEBUG_IF_(1, true) << "Device" << dev.second->getName().Value << " changed to Turned " << (dev.second->turnedOn() ? "ON" : "OFF");
+                auto relay = std::dynamic_pointer_cast<Relay>(dev.second);
+                if (relay == nullptr) {
+                    continue;
                 }
-                if (isOn != dev.second->turnedOn()) {
-                    AquaBox::i().postUpdate(std::make_shared<RuleTriggeredEvent>(dev.second));
+                bool isOn = relay->turnedOn();
+                if(relay->performPendingAction()) {
+                    LOG_DEBUG_IF_(1, true) << "Device" << relay->getName().Value << " changed to Turned " << (relay->turnedOn() ? "ON" : "OFF");
+                }
+                if (isOn != relay->turnedOn()) {
+                    AquaBox::i().postUpdate(std::make_shared<RuleTriggeredEvent>(relay));
                 }
             }
         });

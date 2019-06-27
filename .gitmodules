@@ -28,3 +28,6 @@
 [submodule "3dp/iws"]
 	path = 3dp/iws
 	url = https://github.com/edwardoid/iot-wifi-setup.git
+[submodule "3dp/owt"]
+	path = 3dp/owt
+	url = https://github.com/edwardoid/1w-temp.git
