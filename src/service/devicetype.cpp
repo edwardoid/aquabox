@@ -22,9 +22,13 @@ Serializable<DeviceType>::Enum2StrMap Serializable<DeviceType>::val2Str({
     { DeviceType::Light , "light" },
     { DeviceType::AirPump, "air_pump" },
     { DeviceType::WaterPump, "water_pump" },
-    { DeviceType::Filter , "filter" },
+    { DeviceType::ExternalFilter , "external_filter" },
+    { DeviceType::InternalFilter , "internal_filter" },
+    { DeviceType::AirliftFilter, "airlift_filter" },
     { DeviceType::Heater , "heater" },
+    { DeviceType::Cooler , "cooler" },
     { DeviceType::Feeder , "feeder" },
+    { DeviceType::Dosator , "dosator" },
     { DeviceType::CO2 , "co2" },
     { DeviceType::UV , "uv" }
 });
@@ -35,9 +39,13 @@ Serializable<DeviceType>::Str2EnumMap Serializable<DeviceType>::str2Val({
     { "light" , DeviceType::Light },
     { "air_pump" , DeviceType::AirPump },
     { "water_pump" , DeviceType::WaterPump },
-    { "filter" , DeviceType::Filter },
+    { "external_filter", DeviceType::ExternalFilter },
+    { "internal_filter", DeviceType::InternalFilter },
+    { "airlift_filter", DeviceType::AirliftFilter },
     { "heater" , DeviceType::Heater },
+    { "cooler" , DeviceType::Cooler },
     { "feeder" , DeviceType::Feeder },
+    { "dosator" , DeviceType::Dosator },
     { "co2" , DeviceType::CO2 },
     { "uv" , DeviceType::UV }
 });

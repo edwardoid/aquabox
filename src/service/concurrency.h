@@ -5,6 +5,7 @@
 #include <thread_pool.hpp>
 #include <mutex>
 #include <thread>
+#include <functional>
 
 namespace aquabox
 {
