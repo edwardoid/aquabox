@@ -1,0 +1,13 @@
+{
+    "class": "relay",
+    "id": "dev2",
+    "index": 2,
+    "meta": {
+        "model": "pmax1256",
+        "vendor": "chihiros"
+    },
+    "name": "Light 1000lmqwewqewe",
+    "address": "PHY:GPIO:198",
+    "rulesEnabled": false,
+    "type": "external_filter"
+}

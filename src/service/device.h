@@ -27,7 +27,7 @@ namespace aquabox
 
         property(Id, StringProperty)
         property(Index, UnsignedNumberProperty)
-        property(Pin, UnsignedShortNumberProperty);
+        property(Address, StringProperty);
         property(RulesEnabled, BooleanProperty)
         property(Name, StringProperty)
         property(Type, EnumProperty<DeviceType>)

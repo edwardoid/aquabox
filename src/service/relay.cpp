@@ -6,24 +6,36 @@ using namespace aquabox;
 
 bool Relay::turnedOn() const
 {
-    auto gpio = GPIO::get(getPin().Value);
+    auto hw = Hardware::resolve(getAddress().Value);
+    if (hw == nullptr) {
+        LOG_ERROR << "Can't find device " << getAddress().Value;
+        return false;
+    }
+
+    auto gpio = std::dynamic_pointer_cast<GPIO>(hw);
+    if (gpio == nullptr) {
+        LOG_ERROR << "HW " << getAddress().Value << " is not GPIO";
+        return false;
+    }
+
     return !gpio->isHigh();
 }
 
 void Relay::turnOn()
 {
-    auto gpio = GPIO::get(getPin().Value);
-    if (gpio == nullptr) {
-        LOG_ERROR << "Can't find attached GPIO " << (int)getPin().Value;
+    auto hw = Hardware::resolve(getAddress().Value);
+    if (hw == nullptr) {
+        LOG_ERROR << "Can't find device " << getAddress().Value;
+        return;
     }
-
+    
     if (turnedOn()) {
         return;
     }
 
     static Bytes ON({ 0 });
-    if (ON.size() != gpio->send(ON, ON.size())) {
-        LOG_ERROR << "Can't write to GPIO " << (int)getPin().Value;
+    if (ON.size() != hw->send(ON, ON.size())) {
+        LOG_ERROR << "Can't write to HW " << getAddress().Value;
     }
 
     LOG_DEBUG << "Turned on";
@@ -31,9 +43,10 @@ void Relay::turnOn()
 
 void Relay::turnOff()
 {
-    auto gpio = GPIO::get(getPin().Value);
-    if (gpio == nullptr) {
-        LOG_ERROR << "Can't find attached GPIO " << (int)getPin().Value;
+    auto hw = Hardware::resolve(getAddress().Value);
+    if (hw == nullptr) {
+        LOG_ERROR << "Can't find device " << getAddress().Value;
+        return;
     }
 
     if (!turnedOn()) {
@@ -41,8 +54,8 @@ void Relay::turnOff()
     }
 
     static Bytes OFF({ 1 });
-    if (OFF.size() != gpio->send(OFF, OFF.size())) {
-        LOG_ERROR << "Can't write to GPIO " << (int)getPin().Value;
+    if (OFF.size() != hw->send(OFF, OFF.size())) {
+        LOG_ERROR << "Can't write to HW " << getAddress().Value;
     }
 
     LOG_DEBUG << "Turned off";

@@ -1,16 +1,16 @@
 #ifndef GPIO_H
 #define GPIO_H
 
-#include "protocol.h"
+#include "hardware.h"
 #include <memory>
 #include <string>
 
 namespace aquabox
 {
-    class GPIO: public Protocol
+    class GPIO: public Hardware
     {
     public:
-        GPIO(uint8_t pin);
+        GPIO(std::string pin);
         enum class Mode
         {
             Unknown,
@@ -22,7 +22,6 @@ namespace aquabox
         bool writeMode(Mode mode);
         bool exported() const;
     public:
-        static std::shared_ptr<GPIO> get(uint8_t pin);
         bool open() override;
         bool close() override;
         bool isHigh();
@@ -32,7 +31,7 @@ namespace aquabox
         static const std::string SysClassGpio;
         static const std::string SysClassGpioExport;
         static const std::string SysClassGpioUnexport;
-        uint8_t Pin;
+        std::string Pin;
         const std::string ValueFile;
         const std::string DirectionFile;
         Mode m_mode;

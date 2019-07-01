@@ -1,0 +1,13 @@
+{
+    "class": "sensor",
+    "id": "temp0",
+    "index": 0,
+    "meta": {
+        "model": "CristalProfi e401",
+        "vendor": "jbl"
+    },
+    "name": "Wired temperature meter",
+    "address": "PHY:1W:123",
+    "rulesEnabled": true,
+    "type": "filter"
+}

@@ -1,0 +1,13 @@
+{
+    "class": "relay",
+    "id": "dev3",
+    "index": 3,
+    "meta": {
+        "model": "100W",
+        "vendor": "juwel"
+    },
+    "name": "Heater",
+    "address": "PHY:GPIO:199",
+    "rulesEnabled": false,
+    "type": "heater"
+}

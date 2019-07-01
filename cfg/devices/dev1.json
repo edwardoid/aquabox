@@ -1,0 +1,13 @@
+{
+    "class": "relay",
+    "id": "dev1",
+    "index": 2,
+    "meta": {
+        "model": "classicLED_mod",
+        "vendor": "eheim"
+    },
+    "name": "Light 1000lm",
+    "address": "PHY:GPIO:18",
+    "rulesEnabled": false,
+    "type": "light"
+}

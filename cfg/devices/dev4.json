@@ -1,0 +1,13 @@
+{
+    "class": "relay",
+    "id": "dev4",
+    "index": 4,
+    "meta": {
+        "model": "",
+        "vendor": "other"
+    },
+    "name": "CO2",
+    "address": "PHY:GPIO:198",
+    "rulesEnabled": false,
+    "type": "co2"
+}

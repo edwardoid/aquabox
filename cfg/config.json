@@ -1,0 +1,18 @@
+{
+    "encryption": "WPA",
+    "http": "",
+    "httpPort": 8974,
+    "log": "VERBOSE",
+    "password": "azazello",
+    "ssid": "AquaBox",
+    "network": "8c229b02-185b-4792-b380-8d0cbd536add",
+    "streamPort": 1214,
+    "threads": 8,
+    "users": [
+        {
+            "password": "pass",
+            "user": "admin"
+        }
+    ],
+    "workingDirectory": "/home/edward/Programming/aquabox/bin/host"
+}

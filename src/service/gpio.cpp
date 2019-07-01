@@ -15,41 +15,11 @@ const std::string GPIO::SysClassGpio("/sys/class/gpio");
 const std::string GPIO::SysClassGpioExport("/sys/class/gpio/export");
 const std::string GPIO::SysClassGpioUnexport("/sys/class/gpio/unexport");
 #endif 
-std::shared_ptr<GPIO> GPIO::get(uint8_t pin)
-{
-    static std::map<uint8_t, std::shared_ptr<GPIO>> pins({
-        { 12, nullptr },
-        { 11, nullptr },
-        { 6, nullptr },
-        { 1, nullptr },
-        { 0, nullptr },
-        { 3, nullptr },
-        { 15, nullptr },
-        { 16, nullptr },
-        { 14, nullptr },
-        { 198, nullptr },
-        { 199, nullptr },
-        { 7, nullptr },
-        { 19, nullptr },
-        { 18, nullptr },
-        { 2, nullptr },
-        { 13, nullptr },
-        { 10, nullptr }
-    });
 
-    auto pos = pins.find(pin);
-    if (pos == pins.end())
-        return nullptr;
-    if (pos->second == nullptr)
-        pos->second = std::make_shared<GPIO>(pos->first);
-
-    return pos->second;
-}
-
-GPIO::GPIO(uint8_t pin)
+GPIO::GPIO(std::string pin)
     : Pin(pin)
-    , ValueFile(SysClassGpio + std::string("/gpio") + std::to_string(pin) + std::string("/value"))
-    , DirectionFile(SysClassGpio + std::string("/gpio") + std::to_string(pin) + std::string("/direction"))
+    , ValueFile(SysClassGpio + std::string("/gpio") + pin + std::string("/value"))
+    , DirectionFile(SysClassGpio + std::string("/gpio") + pin + std::string("/direction"))
     , m_mode(Mode::Unknown)
 {
     Bytes b;
@@ -115,18 +85,17 @@ bool GPIO::open()
         readMode();
         return true;
     }
-    LOG_DEBUG << "Opening " << SysClassGpioExport << " for " << (int)Pin;
+    LOG_DEBUG << "Opening " << SysClassGpioExport << " for " << Pin;
     auto fp = fopen(SysClassGpioExport.c_str(), "w");
     if (fp == nullptr) {
-        LOG_ERROR << "Can't open " << SysClassGpioExport << " errno:" << strerror(errno);
+        LOG_ERROR << "Can't open " << SysClassGpioExport << " errno: " << strerror(errno);
         return false;
     }
     
-    std::string num = std::to_string(Pin);
-    auto count = fwrite(num.c_str(), sizeof(std::string::value_type), num.size() + 1, fp);
+    auto count = fwrite(Pin.c_str(), sizeof(std::string::value_type), Pin.size() + 1, fp);
     fclose(fp);
 
-    return count == num.size() + 1 && readMode() != Mode::Unknown;
+    return count == Pin.size() + 1 && readMode() != Mode::Unknown;
 }
 
 bool GPIO::close()
@@ -135,21 +104,20 @@ bool GPIO::close()
         return true;
 
 
-    LOG_DEBUG << "Opening " << SysClassGpioUnexport << " for " << (int)Pin;
+    LOG_DEBUG << "Opening " << SysClassGpioUnexport << " for " << Pin;
 
     auto fp = fopen(SysClassGpioUnexport.c_str(), "w");
     if (fp == nullptr) {
-        LOG_ERROR << "Can't open " << SysClassGpioUnexport << " error:" << strerror(errno);
-        return false;
+        LOG_ERROR << "Can't open " << SysClassGpioUnexport << " error: " << strerror(errno);
+        return false; 
     }
     
-    std::string num = std::to_string(Pin);
-    auto count = fwrite(num.c_str(), sizeof(std::string::value_type), num.size() + 1, fp);
+    auto count = fwrite(Pin.c_str(), sizeof(std::string::value_type), Pin.size() + 1, fp);
     fflush(fp);
     fclose(fp);
 
     m_mode = Mode::Unknown;
-    return count == num.size() + 1;
+    return count == Pin.size() + 1;
 }
 
 bool GPIO::isHigh()

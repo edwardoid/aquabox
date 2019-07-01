@@ -1,5 +1,5 @@
-#ifndef RELAY_H
-#define RELAY_H
+#ifndef SENSOR_H
+#define SENSOR_H
 
 #include "device.h"
 
@@ -16,4 +16,4 @@ namespace aquabox
     };
 }
 
-#endif // RELAY_H
+#endif // SENSOR_H

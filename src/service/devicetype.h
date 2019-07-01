@@ -10,7 +10,8 @@ namespace aquabox
     {
         Unknown = 0,
         Relay,
-        AnalogRelay
+        AnalogRelay,
+        Sensor
     };
 
     enum class DeviceType: int

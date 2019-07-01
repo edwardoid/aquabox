@@ -1,13 +1,15 @@
-#ifndef PROTOCOL_H
-#define PROTOCOL_H
+#ifndef HARDWARE_H
+#define HARDWARE_H
 
 #include "types.h"
+#include <memory>
 
 namespace aquabox
 {
-    class Protocol
+    class Hardware
     {
-        public:
+    public:
+        static std::shared_ptr<Hardware> resolve(const std::string& address);
         virtual bool open() = 0;
         virtual bool close() = 0;
         virtual BytesCount send(const Bytes& data, const BytesCount count = 0) = 0;
@@ -15,4 +17,4 @@ namespace aquabox
     };
 }
 
-#endif // PROTOCOL
+#endif // HARDWARE_H

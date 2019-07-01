@@ -9,8 +9,8 @@
 using namespace aquabox;
 
 Device::Device()
-    : ClassProperty("-class Device", { &m_Id, &m_Index, &m_Pin, &m_RulesEnabled, &m_Name, &m_Type, &m_Class, &m_Meta })
-    , m_Id("id"), m_Index("index", false), m_Pin("pin"), m_RulesEnabled("rulesEnabled")
+    : ClassProperty("-class Device", { &m_Id, &m_Index, &m_Address, &m_RulesEnabled, &m_Name, &m_Type, &m_Class, &m_Meta })
+    , m_Id("id"), m_Index("index", false), m_Address("address"), m_RulesEnabled("rulesEnabled")
     , m_Name("name"), m_Type("type"), m_Class("class"), m_Meta("meta")
 {}
 
@@ -59,7 +59,7 @@ Device::Device(Device&& src)
     moveData(src);
     moveProperty(Id);
     moveProperty(Index);
-    moveProperty(Pin);
+    moveProperty(Address);
     moveProperty(RulesEnabled);
     moveProperty(Name);
     moveProperty(Type);
@@ -72,7 +72,7 @@ const Device& Device::operator = (const Device& src)
     copyData(src);
     copyProperty(Id);
     copyProperty(Index);
-    copyProperty(Pin);
+    copyProperty(Address);
     copyProperty(RulesEnabled);
     copyProperty(Name);
     copyProperty(Type);

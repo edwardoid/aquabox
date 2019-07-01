@@ -6,6 +6,7 @@ template<>
 Serializable<DeviceClass>::Enum2StrMap Serializable<DeviceClass>::val2Str({
     { DeviceClass::AnalogRelay , "analog_relay" },
     { DeviceClass::Relay, "relay" },
+    { DeviceClass::Sensor, "sensor" },
     { DeviceClass::Unknown, "unknown" }
 });
 
@@ -13,6 +14,7 @@ template<>
 Serializable<DeviceClass>::Str2EnumMap Serializable<DeviceClass>::str2Val({
     { "analog_relay" , DeviceClass::AnalogRelay },
     { "relay", DeviceClass::Relay},
+    { "sensor", DeviceClass::Sensor},
     { "unknown", DeviceClass::Unknown }
 });
 
