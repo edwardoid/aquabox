@@ -23,6 +23,7 @@ GPIO::GPIO(std::string pin)
     , m_mode(Mode::Unknown)
 {
     Bytes b;
+    open(static_cast<int>(Mode::Out));
     send(b, 0);
 }
 
@@ -79,7 +80,7 @@ bool GPIO::exported() const
            (stat (ValueFile.c_str(), &buffer) == 0); 
 }
 
-bool GPIO::open()
+bool GPIO::open(int flags)
 {
     if (exported()) {
         readMode();
@@ -95,14 +96,16 @@ bool GPIO::open()
     auto count = fwrite(Pin.c_str(), sizeof(std::string::value_type), Pin.size() + 1, fp);
     fclose(fp);
 
-    return count == Pin.size() + 1 && readMode() != Mode::Unknown;
+    writeMode(static_cast<Mode>(flags));
+
+    return count == Pin.size() + 1 && readMode() != static_cast<Mode>(flags);
 }
 
 bool GPIO::close()
 {
-    if (!exported())
+    if (!exported()) {
         return true;
-
+    }
 
     LOG_DEBUG << "Opening " << SysClassGpioUnexport << " for " << Pin;
 
@@ -120,34 +123,8 @@ bool GPIO::close()
     return count == Pin.size() + 1;
 }
 
-bool GPIO::isHigh()
-{
-    if (!exported()) {
-        return false;
-    }
-    auto fp = fopen(ValueFile.c_str(), "r");
-    if (fp != nullptr) {
-        char data[] = { 0, 0 };
-        auto count = fread(data, sizeof(char), 2, fp);
-        fclose(fp);
-        return count > 0 ? data[0] == '1' : false;
-    } else {
-        LOG_DEBUG << "Can't open " << ValueFile << " error: " << strerror(errno);
-    }
-    return false;
-}
-
 BytesCount GPIO::send(const Bytes& data, const BytesCount count)
 {
-    if (m_mode == Mode::Unknown) {
-        if (!open())
-            return 0;
-    }
-    if (m_mode != Mode::Out) {
-        if (!writeMode(Mode::Out))
-            return 0;
-    }
-
     auto fp = fopen(ValueFile.c_str(), "w");
     if (fp != nullptr) {
         if (count > 0)
@@ -168,16 +145,21 @@ BytesCount GPIO::send(const Bytes& data, const BytesCount count)
 BytesCount GPIO::read(Bytes& data, const Offset)
 {
     if (m_mode == Mode::Unknown) {
-        if (!open())
-            return 0;
-    }
-    if (m_mode != Mode::In) {
-        if (!writeMode(Mode::In))
-            return 0;
+        return 0;
     }
 
-    if (data.empty())
+    bool isHigh = false;
+    auto fp = fopen(ValueFile.c_str(), "r");
+    if (fp != nullptr) {
+        char data[] = { 0, 0 };
+        auto count = fread(data, sizeof(char), 2, fp);
+        fclose(fp);
+        isHigh = count > 0 ? data[0] == '1' : false;
+    } else {
+        LOG_DEBUG << "Can't open " << ValueFile << " error: " << strerror(errno);
         return 0;
-    data[0] = isHigh() ? 1 : 0;
+    }
+    
+    data[0] = isHigh ? 1 : 0;
     return 1;
 }

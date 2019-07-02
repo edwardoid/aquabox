@@ -12,13 +12,9 @@ bool Relay::turnedOn() const
         return false;
     }
 
-    auto gpio = std::dynamic_pointer_cast<GPIO>(hw);
-    if (gpio == nullptr) {
-        LOG_ERROR << "HW " << getAddress().Value << " is not GPIO";
-        return false;
-    }
+    static Bytes val({ 0 });
 
-    return !gpio->isHigh();
+    return hw->read(val, 0) == 1 && val[0] == 1;
 }
 
 void Relay::turnOn()

@@ -2,7 +2,6 @@
 #define GPIO_H
 
 #include "hardware.h"
-#include <memory>
 #include <string>
 
 namespace aquabox
@@ -13,18 +12,17 @@ namespace aquabox
         GPIO(std::string pin);
         enum class Mode
         {
-            Unknown,
-            In,
-            Out
+            Unknown = 0,
+            In = 1,
+            Out = 2
         };
     private:
         Mode readMode();
         bool writeMode(Mode mode);
         bool exported() const;
     public:
-        bool open() override;
+        bool open(int flags) override;
         bool close() override;
-        bool isHigh();
         BytesCount send(const Bytes& data, const BytesCount count = 0) override;
         BytesCount read(Bytes& data, const Offset = 0) override;
     private:
