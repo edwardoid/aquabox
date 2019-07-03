@@ -6,29 +6,22 @@ using namespace aquabox;
 
 bool Relay::turnedOn() const
 {
-    auto hw = Hardware::resolve(getAddress().Value);
-    if (hw == nullptr) {
-        LOG_ERROR << "Can't find device " << getAddress().Value;
-        return false;
-    }
-
-    static Bytes val({ 0 });
-
-    return hw->read(val, 0) == 1 && val[0] == 1;
+    auto data = read(1);
+    return data.size() > 0 && data[0] == 0;
 }
 
 void Relay::turnOn()
 {
+    if (turnedOn()) {
+        return;
+    }
+
     auto hw = Hardware::resolve(getAddress().Value);
     if (hw == nullptr) {
         LOG_ERROR << "Can't find device " << getAddress().Value;
         return;
     }
     
-    if (turnedOn()) {
-        return;
-    }
-
     static Bytes ON({ 0 });
     if (ON.size() != hw->send(ON, ON.size())) {
         LOG_ERROR << "Can't write to HW " << getAddress().Value;

@@ -1,5 +1,6 @@
 #include "physical1wbus.h"
 #include "onewiredevice.h"
+#include "log.h"
 
 using namespace aquabox;
 
@@ -18,5 +19,8 @@ std::shared_ptr<Hardware> PhysicalOneWireBus::hw(std::string hw)
     }
 
     auto pos = devices.find(hw);
+    if (pos == devices.end()) {
+        LOG_ERROR << "Can't find 1-Wire device with adress: " << hw;
+    }
     return pos == devices.end() ? nullptr : pos->second;
 }

@@ -3,6 +3,7 @@
 #include "rule.h"
 #include "log.h"
 #include "event.h"
+#include "hardware.h"
 #include <time.h>
 #include <fstream>
 
@@ -90,6 +91,20 @@ void Device::copyData(const Device& src)
     copyProperty(Type);
     copyProperty(Class);
     copyProperty(Meta);
+}
+
+Bytes Device::read(uint32_t len) const
+{
+    Bytes data(len, 0);
+    auto hw = Hardware::resolve(m_Address.Value);
+    if (hw == nullptr) {
+        return Bytes();
+    }
+
+    
+    auto got = hw->read(data);
+    data.resize(static_cast<uint32_t>(got));
+    return data;
 }
 
 std::vector<std::shared_ptr<Rule>> Device::rules() const

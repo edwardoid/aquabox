@@ -22,9 +22,9 @@ GPIO::GPIO(std::string pin)
     , DirectionFile(SysClassGpio + std::string("/gpio") + pin + std::string("/direction"))
     , m_mode(Mode::Unknown)
 {
-    Bytes b;
+    Bytes b({ 1 });
     open(static_cast<int>(Mode::Out));
-    send(b, 0);
+    send(b, b.size());
 }
 
 GPIO::Mode GPIO::readMode()
@@ -83,7 +83,7 @@ bool GPIO::exported() const
 bool GPIO::open(int flags)
 {
     if (exported()) {
-        readMode();
+        writeMode(static_cast<Mode>(flags));
         return true;
     }
     LOG_DEBUG << "Opening " << SysClassGpioExport << " for " << Pin;

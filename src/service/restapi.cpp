@@ -7,6 +7,7 @@
 #include "rule.h"
 #include "device.h"
 #include "relay.h"
+#include "sensor.h"
 #include "user.h"
 #include "repeattimeout.h"
 #include "enumerations.h"
@@ -274,8 +275,11 @@ DEFINE_API_IMPL(Devices)
     for (auto &dev : AquaBox::i().devices()) {
         nlohmann::json json;
         dev.second->json(json);
-        if (dev.second->getClass() == DeviceClass::Relay)
+        if (dev.second->getClass() == DeviceClass::Relay) {
             json["isOn"] = std::dynamic_pointer_cast<Relay>(dev.second)->turnedOn();
+        } else if(dev.second->getClass() == DeviceClass::Sensor){
+            json["value"] = std::dynamic_pointer_cast<Sensor>(dev.second)->value();
+        }
         all.push_back(json);
     }
     nlohmann::json res = nlohmann::json::object();
@@ -305,6 +309,8 @@ DEFINE_API_IMPL(GetDevice)
     pos->second->json(data);
     if (pos->second->getClass() == DeviceClass::Relay) {
         data["isOn"] = std::dynamic_pointer_cast<Relay>(pos->second)->turnedOn();
+    } else if(pos->second->getClass() == DeviceClass::Sensor){
+        data["value"] = std::dynamic_pointer_cast<Sensor>(pos->second)->value();
     }
 
     response->write(SimpleWeb::StatusCode::success_ok, data.dump(4), headers);
@@ -325,6 +331,11 @@ DEFINE_API_IMPL(UpdateDevice)
     if (pos == devices.end()) {
         LOG_ERROR << "No device " << dev << " found";
         response->write(SimpleWeb::StatusCode::client_error_not_found, headers);
+        return;
+    }
+
+    if (pos->second->getClass() != DeviceClass::Relay) {
+        response->write(SimpleWeb::StatusCode::client_error_bad_request, headers);
         return;
     }
 

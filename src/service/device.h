@@ -5,6 +5,7 @@
 #include "identifiable.h"
 #include "devicetype.h"
 #include "property.h"
+#include "hardware.h"
 #include <string>
 
 namespace aquabox
@@ -24,6 +25,8 @@ namespace aquabox
         bool saveToFile(const std::string& file);
 
         std::vector<std::shared_ptr<class Rule>> rules() const;
+
+        Bytes read(uint32_t len) const;
 
         property(Id, StringProperty)
         property(Index, UnsignedNumberProperty)
