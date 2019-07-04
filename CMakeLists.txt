@@ -57,7 +57,7 @@ execute_process(
   OUTPUT_STRIP_TRAILING_WHITESPACE
 )
 
-file(GLOB SOURCES "src/service/*.cpp")
+file(GLOB SOURCES "src/*.cpp")
 
 set(AB_V 1)
 set(AB_v 0)
