@@ -1,10 +1,10 @@
 set(CMAKE_SYSTEM_NAME Linux)
 set(CMAKE_SYSTEM_PROCESSOR arm)
 
-set(CMAKE_SYSROOT /home/esargsyan/ionictests/arm/sysroot)
+set(CMAKE_SYSROOT ${CMAKE_CURRENT_LIST_DIR}/../arm/sysroot)
 set(CMAKE_FIND_ROOT_PATH ${CMAKE_SYSROOT})
 
-set(tools /usr)
+set(tools ${CMAKE_CURRENT_LIST_DIR}/../arm/toolchain)
 set(CMAKE_C_COMPILER ${tools}/bin/arm-linux-gnueabihf-gcc)
 set(CMAKE_CXX_COMPILER ${tools}/bin/arm-linux-gnueabihf-g++)
 

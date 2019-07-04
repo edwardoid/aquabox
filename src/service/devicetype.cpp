@@ -32,7 +32,8 @@ Serializable<DeviceType>::Enum2StrMap Serializable<DeviceType>::val2Str({
     { DeviceType::Feeder , "feeder" },
     { DeviceType::Dosator , "dosator" },
     { DeviceType::CO2 , "co2" },
-    { DeviceType::UV , "uv" }
+    { DeviceType::UV , "uv" },
+    { DeviceType::Thermometer , "thermometer" }
 });
 
 template<>
@@ -49,5 +50,6 @@ Serializable<DeviceType>::Str2EnumMap Serializable<DeviceType>::str2Val({
     { "feeder" , DeviceType::Feeder },
     { "dosator" , DeviceType::Dosator },
     { "co2" , DeviceType::CO2 },
-    { "uv" , DeviceType::UV }
+    { "uv" , DeviceType::UV },
+    { "thermometer" , DeviceType::Thermometer }
 });

@@ -334,11 +334,6 @@ DEFINE_API_IMPL(UpdateDevice)
         return;
     }
 
-    if (pos->second->getClass() != DeviceClass::Relay) {
-        response->write(SimpleWeb::StatusCode::client_error_bad_request, headers);
-        return;
-    }
-
     nlohmann::json data;
     nlohmann::json deviceData;
     try

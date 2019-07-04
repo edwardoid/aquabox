@@ -29,6 +29,7 @@ namespace aquabox
         Dosator,
         CO2,
         UV,
+        Thermometer
     };
 }
 
