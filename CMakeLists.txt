@@ -1,12 +1,6 @@
 cmake_minimum_required(VERSION 3.5)
 project(aquabox)
 
-if (TARGET_DEVICE)
-  add_definitions(-DTARGET_DEVICE)
-  add_definitions(-DW1_BUS_ROOT=/sys/bus/w1/devices)
-  set(CMAKE_INSTALL_PREFIX "${CMAKE_SYSROOT}/aquabox")
-  set(CMAKE_TOOLCHAIN_FILE "${PROJECT_SOURCE_DIR}/arm-gcc-toolchain.cmake")
-endif()
 set(PKG_CONFIG_USE_CMAKE_PREFIX_PATH YES)
 set(THREE_DP_DIR "${PROJECT_SOURCE_DIR}/3dp")
 set(CMAKE_CXX_STANDARD 11)
@@ -25,6 +19,7 @@ set(HEADER_SEARCH_PATHS ${PROJECT_INCLUDE_DIR} ${PLOG_INCLUDE_DIR})
 
 option(BUILD_TESTING OFF)
 option(WITH_TESTS OFF)
+option(WITH_TOOLS OFF)
 option(FREETYPE ON)
 
 find_package(OpenSSL REQUIRED)
