@@ -1,5 +1,6 @@
 #include "updatevents.h"
 #include "relay.h"
+#include "sensor.h"
 #include "rule.h"
 #include "enumerations.h"
 
@@ -16,6 +17,19 @@ OnOffChangedEvent::OnOffChangedEvent(std::shared_ptr<Relay> device, std::string 
 
     setPropertiesUpdate({
         { "isOn", device->turnedOn() }
+    });
+}
+
+SensorChangedEvent::SensorChangedEvent(std::shared_ptr<Sensor> sensor, std::string reason)
+{
+    setSender(sensor->getId().Value, "device");
+    setData({
+        { "reason", reason },
+        { "sender_full", sensor->getName().Value },
+    });
+
+    setPropertiesUpdate({
+        { "value", sensor->value() }
     });
 }
 

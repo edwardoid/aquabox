@@ -23,12 +23,15 @@ namespace aquabox
         InternalFilter,
         ExternalFilter,
         AirliftFilter,
+        SUMP,
         Heater,
         Cooler,
         Feeder,
         Dosator,
         CO2,
         UV,
+        PHController,
+        PHMeter,
         Thermometer
     };
 }

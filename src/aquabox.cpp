@@ -6,6 +6,7 @@
 #include "restapi.h"
 #include "rule.h"
 #include "device.h"
+#include "sensor.h"
 #include "ruleparser.h"
 #include "deviceparser.h"
 #include "user.h"
@@ -92,6 +93,7 @@ int AquaBox::start(bool asService, bool doDraw)
     m_globalTimer.start([this, doDraw](const Timer::ClockTimePoint&){
         if (doDraw)
             StatusImage::display();
+        trackSensors();
     }, std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::seconds(10)));
 
     m_timer.start();
@@ -138,6 +140,33 @@ void AquaBox::readRules(const Path& p)
     m_rulesDir = p;
     m_rulesDir.append("rules");
     m_rules = RulesParser::parse(m_rulesDir);
+}
+
+void AquaBox::trackSensors()
+{
+    static std::unordered_map<std::string, double> values;
+    for (auto dev : m_devices) {
+        if (dev.second->getClass().Value != DeviceClass::Sensor)
+            continue;
+
+        auto sensor = std::dynamic_pointer_cast<Sensor>(dev.second);
+        if (sensor == nullptr) {
+            continue;
+        }
+        auto newValue = sensor->value();
+        if (values.find(sensor->getId().Value) != values.end()) {
+            if(values[sensor->getId().Value] == newValue) {
+                continue;
+            }
+
+            values[sensor->getId().Value] = newValue;
+        }
+        else {
+            values.insert( {sensor->getId().Value, newValue} );
+        }
+
+        postUpdate(std::make_shared<SensorChangedEvent>(sensor, "regular_check"));
+    }
 }
 
 std::shared_ptr<Device> AquaBox::findDevice(std::string id)

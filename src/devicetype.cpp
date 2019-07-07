@@ -27,12 +27,15 @@ Serializable<DeviceType>::Enum2StrMap Serializable<DeviceType>::val2Str({
     { DeviceType::ExternalFilter , "external_filter" },
     { DeviceType::InternalFilter , "internal_filter" },
     { DeviceType::AirliftFilter, "airlift_filter" },
+    { DeviceType::SUMP, "sump" },
     { DeviceType::Heater , "heater" },
     { DeviceType::Cooler , "cooler" },
     { DeviceType::Feeder , "feeder" },
     { DeviceType::Dosator , "dosator" },
     { DeviceType::CO2 , "co2" },
     { DeviceType::UV , "uv" },
+    { DeviceType::PHController, "ph_controller" },
+    { DeviceType::PHMeter, "ph_meter" },
     { DeviceType::Thermometer , "thermometer" }
 });
 
@@ -45,11 +48,14 @@ Serializable<DeviceType>::Str2EnumMap Serializable<DeviceType>::str2Val({
     { "external_filter", DeviceType::ExternalFilter },
     { "internal_filter", DeviceType::InternalFilter },
     { "airlift_filter", DeviceType::AirliftFilter },
+    { "sump", DeviceType::SUMP },
     { "heater" , DeviceType::Heater },
     { "cooler" , DeviceType::Cooler },
     { "feeder" , DeviceType::Feeder },
     { "dosator" , DeviceType::Dosator },
     { "co2" , DeviceType::CO2 },
     { "uv" , DeviceType::UV },
+    { "ph_controller", DeviceType::PHController },
+    { "ph_meter", DeviceType::PHMeter },
     { "thermometer" , DeviceType::Thermometer }
 });

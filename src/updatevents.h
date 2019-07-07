@@ -11,6 +11,12 @@ namespace aquabox
         OnOffChangedEvent(std::shared_ptr<class Relay> device, std::string reason);
     };
 
+    class SensorChangedEvent: public Event
+    {
+    public:
+        SensorChangedEvent(std::shared_ptr<class Sensor> sensor, std::string reason);
+    };
+
     class RuleTriggeredEvent: public OnOffChangedEvent
     {
     public:
