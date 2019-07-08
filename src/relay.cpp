@@ -60,7 +60,7 @@ void Relay::addPendingAction(uint64_t priority, ActionType action)
 
 bool Relay::performPendingAction()
 {
-    if (m_pendingActionPriority != INVALID_PRIORITY) {
+    if (m_pendingActionPriority != INVALID_PRIORITY && getRulesEnabled().Value) {
         switch(m_pendingAction)
         {
             case ActionType::TurnOn: {

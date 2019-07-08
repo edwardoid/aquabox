@@ -58,12 +58,16 @@ void StatusImage::display(std::string fbDevice)
     sprintf(temperatureString, "CPU: %.1f°C", temp);
 
     int textX = fb.width() - 5 - FONT_SIZE;
-    int textY = margin;
+    int textY = margin / 2;
     fb.drawText(font, FONT_SIZE, textX , textY, degree(-90.), temperatureString, 0xDDDD00);
     textX -= 5 + FONT_SIZE;
     std::string ssid = AquaBox::i().networking().currentSSID();
     if (ssid == "") {
         ssid = "Loading...";
+    } else {
+        ssid += " ";
+        ssid += std::to_string(AquaBox::i().networking().wifiSignal());
+        ssid += "%";
     }
     fb.drawText(font, FONT_SIZE, textX, margin, degree(-90.), ssid, 0xFF0000);
     textX -= 5 + FONT_SIZE;
