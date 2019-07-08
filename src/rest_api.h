@@ -1,5 +1,5 @@
-#ifndef RESTAPI_H
-#define RESTAPI_H
+#ifndef REST_API_H
+#define REST_API_H
 
 #include <string>
 #include <vector>
@@ -91,4 +91,4 @@ namespace aquabox
     }
 }
 
-#endif // RESTAPI_H
+#endif // REST_API_H

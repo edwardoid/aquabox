@@ -1,6 +1,6 @@
-#include "physicallayer.h"
-#include "physicalgpiobus.h"
-#include "physical1wbus.h"
+#include "physical_layer.h"
+#include "physical_gpio_bus.h"
+#include "physical_1_wire_bus.h"
 #include <unordered_map>
 
 using namespace aquabox;

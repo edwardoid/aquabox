@@ -2,7 +2,7 @@
 #define TIME_H
 
 #include "property.h"
-#include "timedetails.h"
+#include "time_details.h"
 
 namespace aquabox
 {

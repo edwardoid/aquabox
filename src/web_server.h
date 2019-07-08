@@ -5,8 +5,8 @@
 #include <server_http.hpp>
 #include <server_ws.hpp>
 #include "route.h"
-#include "restapi.h"
-#include "wsapi.h"
+#include "rest_api.h"
+#include "ws_api.h"
 
 class Event;
 

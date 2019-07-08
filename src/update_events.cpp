@@ -1,4 +1,4 @@
-#include "updatevents.h"
+#include "update_events.h"
 #include "relay.h"
 #include "sensor.h"
 #include "rule.h"
@@ -8,7 +8,7 @@ using namespace aquabox;
 
 OnOffChangedEvent::OnOffChangedEvent(std::shared_ptr<Relay> device, std::string reason)
 {
-    setSender(device->getId().Value, "device");
+    setSender(device->getId(), "device");
     setData({
         { "reason", reason },
         { "sender_full", device->getName().Value },
@@ -22,7 +22,7 @@ OnOffChangedEvent::OnOffChangedEvent(std::shared_ptr<Relay> device, std::string 
 
 SensorChangedEvent::SensorChangedEvent(std::shared_ptr<Sensor> sensor, std::string reason)
 {
-    setSender(sensor->getId().Value, "device");
+    setSender(sensor->getId(), "device");
     setData({
         { "reason", reason },
         { "sender_full", sensor->getName().Value },
@@ -45,7 +45,7 @@ ManualStateChangedEvent::ManualStateChangedEvent(std::shared_ptr<Relay> device)
 
 RuleEnableChangedEvent::RuleEnableChangedEvent(std::shared_ptr<Rule> rule)
 {
-    setSender(rule->getId().Value, "rule");
+    setSender(rule->getId(), "rule");
     setData({
         { "sender_full", rule->getName().Value },
         { "device", rule->getDevice().Value }
@@ -58,7 +58,7 @@ RuleEnableChangedEvent::RuleEnableChangedEvent(std::shared_ptr<Rule> rule)
 
 RuleCreatedEvent::RuleCreatedEvent(std::shared_ptr<Rule> rule)
 {
-    setSender(rule->getId().Value, "rule");
+    setSender(rule->getId(), "rule");
     setData({
         { "sender_full", rule->getName().Value },
         { "device", rule->getDevice().Value },
@@ -74,7 +74,7 @@ RuleCreatedEvent::RuleCreatedEvent(std::shared_ptr<Rule> rule)
 
 RuleUpdatedEvent::RuleUpdatedEvent(std::shared_ptr<Rule> rule, const nlohmann::json& before)
 {
-    setSender(rule->getId().Value, "rule");
+    setSender(rule->getId(), "rule");
     setData({
         { "sender_full", rule->getName().Value },
         { "device", rule->getDevice().Value },
@@ -99,7 +99,7 @@ RuleUpdatedEvent::RuleUpdatedEvent(std::shared_ptr<Rule> rule, const nlohmann::j
 
 RuleDeletedEvent::RuleDeletedEvent(std::shared_ptr<Rule> rule)
 {
-    setSender(rule->getId().Value, "rule");
+    setSender(rule->getId(), "rule");
     setData({
         { "sender_full", rule->getName().Value },
         { "device", rule->getDevice().Value },
@@ -109,7 +109,7 @@ RuleDeletedEvent::RuleDeletedEvent(std::shared_ptr<Rule> rule)
 
 DeviceRulesChangedEvent::DeviceRulesChangedEvent(std::shared_ptr<Device> device)
 {
-    setSender(device->getId().Value, "device");
+    setSender(device->getId(), "device");
     setData({
         { "sender_full", device->getName().Value },
     });
@@ -128,7 +128,7 @@ DeviceRulesChangedEvent::DeviceRulesChangedEvent(std::shared_ptr<Device> device)
 
 DeviceUpdatedEvent::DeviceUpdatedEvent(std::shared_ptr<Device> device, const nlohmann::json& before)
 {
-    setSender(device->getId().Value, "device");
+    setSender(device->getId(), "device");
     setData({
         { "sender_full", device->getName().Value },
         { "action", "updated"}

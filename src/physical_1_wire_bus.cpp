@@ -1,5 +1,5 @@
-#include "physical1wbus.h"
-#include "onewiredevice.h"
+#include "physical_1_wire_bus.h"
+#include "one_wire_device.h"
 #include "log.h"
 
 using namespace aquabox;

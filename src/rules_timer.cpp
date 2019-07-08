@@ -1,10 +1,10 @@
-#include "rulestimer.h"
+#include "rules_timer.h"
 #include "rule.h"
 #include "relay.h"
-#include "ruleexecutor.h"
+#include "rule_executor.h"
 #include "aquabox.h"
 #include "event.h"
-#include "updatevents.h"
+#include "update_events.h"
 #include <set>
 #include <plog/Log.h>
 #include <plog/Severity.h>
@@ -27,7 +27,7 @@ void RulesTimer::start()
             {
                 const Time at = rule.second->getRepeat().getDeleteAfter();
                 const RepeatUnit unit = rule.second->getRepeat().getUnit();
-                if(at.Value != 0 &&
+                if(at != 0 &&
                    at.getDetails().from(TimeDetails(Timer::Clock::to_time_t(when)),
                                         true, true, true, true) >=0)
                 {

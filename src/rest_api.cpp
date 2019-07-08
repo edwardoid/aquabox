@@ -1,4 +1,4 @@
-#include "restapi.h"
+#include "rest_api.h"
 #include "log.h"
 #include "qr.h"
 #include "settings.h"
@@ -9,10 +9,10 @@
 #include "relay.h"
 #include "sensor.h"
 #include "user.h"
-#include "repeattimeout.h"
+#include "repeat_timeout.h"
 #include "enumerations.h"
 #include "path.h"
-#include "updatevents.h"
+#include "update_events.h"
 #include <fstream>
 #include <nlohmann/json.hpp>
 #include <stdio.h>
@@ -275,9 +275,9 @@ DEFINE_API_IMPL(Devices)
     for (auto &dev : AquaBox::i().devices()) {
         nlohmann::json json;
         dev.second->json(json);
-        if (dev.second->getClass() == DeviceClass::Relay) {
+        if (dev.second->isRelay()) {
             json["isOn"] = std::dynamic_pointer_cast<Relay>(dev.second)->turnedOn();
-        } else if(dev.second->getClass() == DeviceClass::Sensor){
+        } else if(dev.second->isSensor()){
             json["value"] = std::dynamic_pointer_cast<Sensor>(dev.second)->value();
         }
         all.push_back(json);
@@ -307,9 +307,9 @@ DEFINE_API_IMPL(GetDevice)
 
     nlohmann::json data;
     pos->second->json(data);
-    if (pos->second->getClass() == DeviceClass::Relay) {
+    if (pos->second->isRelay()) {
         data["isOn"] = std::dynamic_pointer_cast<Relay>(pos->second)->turnedOn();
-    } else if(pos->second->getClass() == DeviceClass::Sensor){
+    } else if(pos->second->isSensor()){
         data["value"] = std::dynamic_pointer_cast<Sensor>(pos->second)->value();
     }
 
@@ -358,7 +358,7 @@ DEFINE_API_IMPL(UpdateDevice)
     auto& device = pos->second;
     nlohmann::json before;
     device->json(before);
-    if (pos->second->getClass() == DeviceClass::Relay) {
+    if (pos->second->isRelay()) {
         before["isOn"] = std::dynamic_pointer_cast<Relay>(pos->second)->turnedOn();
     }
 
@@ -534,7 +534,7 @@ DEFINE_API_IMPL(TurnOn)
         return;
     }
 
-    if (pos->second->getClass() != DeviceClass::Relay) {
+    if (!pos->second->isRelay()) {
         response->write(SimpleWeb::StatusCode::client_error_bad_request, headers);
         return;
     }
@@ -564,7 +564,7 @@ DEFINE_API_IMPL(TurnOff)
         response->write(SimpleWeb::StatusCode::client_error_not_found, headers);
     }
     
-    if (pos->second->getClass() != DeviceClass::Relay) {
+    if (!pos->second->isRelay()) {
         response->write(SimpleWeb::StatusCode::client_error_bad_request, headers);
         return;
     }

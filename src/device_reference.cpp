@@ -1,4 +1,4 @@
-#include "devicereference.h"
+#include "device_reference.h"
 #include "aquabox.h"
 #include "device.h"
 

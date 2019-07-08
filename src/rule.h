@@ -2,10 +2,10 @@
 #define RULE_H
 
 #include <string>
-#include "repeattimeout.h"
+#include "repeat_timeout.h"
 #include "action.h"
 #include "time.h"
-#include "devicereference.h"
+#include "device_reference.h"
 #include "enumerations.h"
 #include "property.h"
 

@@ -16,15 +16,15 @@ void Relay::turnOn()
         return;
     }
 
-    auto hw = Hardware::resolve(getAddress().Value);
+    auto hw = Hardware::resolve(getAddress());
     if (hw == nullptr) {
-        LOG_ERROR << "Can't find device " << getAddress().Value;
+        LOG_ERROR << "Can't find device " << getAddress();
         return;
     }
     
     static Bytes ON({ 0 });
     if (ON.size() != hw->send(ON, ON.size())) {
-        LOG_ERROR << "Can't write to HW " << getAddress().Value;
+        LOG_ERROR << "Can't write to HW " << getAddress();
     }
 
     LOG_DEBUG << "Turned on";
@@ -32,9 +32,9 @@ void Relay::turnOn()
 
 void Relay::turnOff()
 {
-    auto hw = Hardware::resolve(getAddress().Value);
+    auto hw = Hardware::resolve(getAddress());
     if (hw == nullptr) {
-        LOG_ERROR << "Can't find device " << getAddress().Value;
+        LOG_ERROR << "Can't find device " << (std::string)(getAddress());
         return;
     }
 
@@ -44,7 +44,7 @@ void Relay::turnOff()
 
     static Bytes OFF({ 1 });
     if (OFF.size() != hw->send(OFF, OFF.size())) {
-        LOG_ERROR << "Can't write to HW " << getAddress().Value;
+        LOG_ERROR << "Can't write to HW " << (std::string)(getAddress());
     }
 
     LOG_DEBUG << "Turned off";

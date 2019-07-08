@@ -1,4 +1,4 @@
-#include "statusimage.h"
+#include "status_image.h"
 #include "log.h"
 #include "settings.h"
 #include "config.h"

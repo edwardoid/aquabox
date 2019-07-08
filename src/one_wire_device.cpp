@@ -1,4 +1,4 @@
-#include "onewiredevice.h"
+#include "one_wire_device.h"
 
 using namespace aquabox;
 

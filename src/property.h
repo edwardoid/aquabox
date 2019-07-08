@@ -16,7 +16,7 @@
                                 {                                               \
                                     property_name(name) = value;                \
                                 }                                               \
-                                inline const type & get ## name () const        \
+                                inline const type& get ## name () const        \
                                 {                                               \
                                     return property_name(name);                 \
                                 }                                               \

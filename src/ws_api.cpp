@@ -1,4 +1,4 @@
-#include "wsapi.h"
+#include "ws_api.h"
 #include "event.h"
 
 using namespace aquabox::ws;

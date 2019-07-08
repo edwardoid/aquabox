@@ -1,17 +1,17 @@
 #include "aquabox.h"
 #include "config.h"
 #include "settings.h"
-#include "lockfile.h"
+#include "lock_file.h"
 #include "log.h"
-#include "restapi.h"
+#include "rest_api.h"
 #include "rule.h"
 #include "device.h"
-#include "sensor.h"
-#include "ruleparser.h"
-#include "deviceparser.h"
+#include "sensors_tracker.h"
+#include "rule_parser.h"
+#include "device_parser.h"
 #include "user.h"
-#include "updatevents.h"
-#include "statusimage.h"
+#include "update_events.h"
+#include "status_image.h"
 #include <exception>
 #include <chrono>
 #include <random>
@@ -91,9 +91,11 @@ int AquaBox::start(bool asService, bool doDraw)
 
     StatusImage::display();
     m_globalTimer.start([this, doDraw](const Timer::ClockTimePoint&){
-        if (doDraw)
+        if (doDraw) {
             StatusImage::display();
-        trackSensors();
+        }
+
+        SensorsTracker::processUpdates();
     }, std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::seconds(10)));
 
     m_timer.start();
@@ -126,12 +128,13 @@ void AquaBox::readDevices(const Path& p)
 void AquaBox::readUsers()
 {
     auto users = Settings::array(Settings::USERS);
-    
+
     LOG_INFO << "Loading " << users.size() << " users...";
     for (auto u : users) {
         auto usr = std::make_shared<User>();
-        if(usr->init(u))
+        if(usr->init(u)) {
             m_users.insert({usr->user(), usr});
+        }
     }
 }
 
@@ -142,46 +145,21 @@ void AquaBox::readRules(const Path& p)
     m_rules = RulesParser::parse(m_rulesDir);
 }
 
-void AquaBox::trackSensors()
-{
-    static std::unordered_map<std::string, double> values;
-    for (auto dev : m_devices) {
-        if (dev.second->getClass().Value != DeviceClass::Sensor)
-            continue;
-
-        auto sensor = std::dynamic_pointer_cast<Sensor>(dev.second);
-        if (sensor == nullptr) {
-            continue;
-        }
-        auto newValue = sensor->value();
-        if (values.find(sensor->getId().Value) != values.end()) {
-            if(values[sensor->getId().Value] == newValue) {
-                continue;
-            }
-
-            values[sensor->getId().Value] = newValue;
-        }
-        else {
-            values.insert( {sensor->getId().Value, newValue} );
-        }
-
-        postUpdate(std::make_shared<SensorChangedEvent>(sensor, "regular_check"));
-    }
-}
-
 std::shared_ptr<Device> AquaBox::findDevice(std::string id)
 {
     auto p = m_devices.find(id);
-    if (p == m_devices.end())
+    if (p == m_devices.end()) {
         return nullptr;
+    }
     return p->second;
 }
 
 std::shared_ptr<Rule> AquaBox::findRule(std::string id)
 {
     auto p = m_rules.find(id);
-    if (p == m_rules.end())
+    if (p == m_rules.end()) {
         return nullptr;
+    }
     return p->second;
 }
 
@@ -202,7 +180,7 @@ RulesMap& AquaBox::rules() const
 
 bool AquaBox::addRule(std::shared_ptr<Rule>& rule, bool replace)
 {
-    auto pos = m_rules.find(rule->getId().Value);
+    auto pos = m_rules.find(rule->getId());
     nlohmann::json beforeUpdate;
     if (pos != m_rules.end()) {
         if (!replace) {
@@ -213,14 +191,14 @@ bool AquaBox::addRule(std::shared_ptr<Rule>& rule, bool replace)
         pos->second = rule;
     }
     else {
-        m_rules.insert({ rule->getId().Value, rule });
+        m_rules.insert({ rule->getId(), rule });
     }
 
     Path p = m_rulesDir;
 
     auto device = rule->getDevice().resolve();
 
-    bool pathOk = p.append(rule->getId().Value + ".json");
+    bool pathOk = p.append((std::string)(rule->getId()) + ".json");
     if(!pathOk) {
         LOG_ERROR << "Can't form path for rule. Root: " << m_rulesDir.c_str() << " formed " << p.c_str() << " error " << strerror(errno);
         return false;
@@ -228,7 +206,7 @@ bool AquaBox::addRule(std::shared_ptr<Rule>& rule, bool replace)
 
     bool saved = rule->saveToFile(p);
     if (!saved) {
-        m_rules.erase(m_rules.find(rule->getId().Value));
+        m_rules.erase(m_rules.find(rule->getId()));
     }
 
     if (saved) {
@@ -245,15 +223,15 @@ bool AquaBox::addRule(std::shared_ptr<Rule>& rule, bool replace)
 
 bool AquaBox::removeRule(std::shared_ptr<Rule> rule)
 {
-    auto pos = m_rules.find(rule->getId().Value);
+    auto pos = m_rules.find(rule->getId());
     if (pos == m_rules.end()) {
         return false;
     }
 
     Path p = m_rulesDir;
-    p.append(rule->getId().Value + ".json");
+    p.append((std::string)(rule->getId()) + ".json");
     if (!p.exists()) {
-        LOG_ERROR << "Can't find rule " << rule->getId().Value << " tried: " << p.c_str();
+        LOG_ERROR << "Can't find rule " << rule->getId() << " tried: " << p.c_str();
         return false;
     }
     std::remove(p.c_str());

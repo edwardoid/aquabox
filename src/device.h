@@ -3,7 +3,7 @@
 
 #include <nlohmann/json.hpp>
 #include "identifiable.h"
-#include "devicetype.h"
+#include "device_type.h"
 #include "property.h"
 #include "hardware.h"
 #include <string>
@@ -23,6 +23,9 @@ namespace aquabox
 
         bool parseFile(const std::string& file);
         bool saveToFile(const std::string& file);
+
+        bool isRelay() const;
+        bool isSensor() const;
 
         std::vector<std::shared_ptr<class Rule>> rules() const;
 

@@ -96,7 +96,7 @@ void Device::copyData(const Device& src)
 Bytes Device::read(uint32_t len) const
 {
     Bytes data(len, 0);
-    auto hw = Hardware::resolve(m_Address.Value);
+    auto hw = Hardware::resolve(m_Address);
     if (hw == nullptr) {
         return Bytes();
     }
@@ -105,6 +105,16 @@ Bytes Device::read(uint32_t len) const
     auto got = hw->read(data);
     data.resize(static_cast<uint32_t>(got));
     return data;
+}
+
+bool Device::isRelay() const
+{
+    return getClass() == DeviceClass::Relay;
+}
+
+bool Device::isSensor() const
+{
+    return getClass() == DeviceClass::Sensor;
 }
 
 std::vector<std::shared_ptr<Rule>> Device::rules() const

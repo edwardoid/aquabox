@@ -1,4 +1,4 @@
-#include "timedetails.h"
+#include "time_details.h"
 
 using namespace aquabox;
 

@@ -1,4 +1,4 @@
-#include "lockfile.h"
+#include "lock_file.h"
 #include "log.h"
 #include "config.h"
 #include <unistd.h>

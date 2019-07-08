@@ -1,4 +1,4 @@
-#include "devicetype.h"
+#include "device_type.h"
 
 using namespace aquabox;
 
