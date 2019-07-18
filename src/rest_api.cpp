@@ -600,7 +600,7 @@ DEFINE_API_IMPL(ScanWiFiNetworks)
         ));
     }
 
-    response->write(SimpleWeb::StatusCode::success_ok, (nlohmann::json({ {"networks", nets} })).dump(4));
+    response->write(SimpleWeb::StatusCode::success_ok, (nlohmann::json({ {"networks", nets} })).dump(4), headers);
 }
 
 DEFINE_API_IMPL(ConnectToWiFi)
