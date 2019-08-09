@@ -10,6 +10,10 @@
 #include <memory>
 #include <unordered_map>
 
+#define LOG_FILE_SIZE_IN_MB 10
+#define BYTES_IN_MB 1000000
+#define MAX_LOG_FILES 50
+
 namespace aquabox
 {
     class Device;

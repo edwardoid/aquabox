@@ -1,6 +1,16 @@
 cmake_minimum_required(VERSION 3.5)
 project(aquabox)
 
+if (TARGET_DEVICE)
+  add_definitions(-DTARGET_DEVICE)
+  add_definitions(-DW1_BUS_ROOT="/sys/bus/w1/devices")
+  set(CMAKE_INSTALL_PREFIX "${CMAKE_SYSROOT}/aquabox")
+endif()
+
+
+MESSAGE(STATUS "AquaBox will be installed to ${CMAKE_INSTALL_PREFIX}")
+
+
 set(PKG_CONFIG_USE_CMAKE_PREFIX_PATH YES)
 set(THREE_DP_DIR "${PROJECT_SOURCE_DIR}/3dp")
 set(CMAKE_CXX_STANDARD 11)
@@ -93,4 +103,5 @@ target_link_libraries(${PROJECT_NAME} Boost::system)
 target_link_libraries(${PROJECT_NAME} ${NETWORKMANAGER_LIBRARIES})
 target_link_libraries(${PROJECT_NAME} ${FREETYPE_LIBRARIES})
 target_link_libraries(${PROJECT_NAME} OpenSSL::SSL)
+
 install(TARGETS ${PROJECT_NAME} DESTINATION bin)

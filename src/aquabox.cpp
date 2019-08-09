@@ -16,6 +16,10 @@
 #include <chrono>
 #include <random>
 
+#define LOG_FILE_SIZE_IN_MB 10
+#define BYTES_IN_MB 1000000
+#define MAX_LOG_FILES 50
+
 using namespace aquabox;
 
 AquaBox AquaBox::Instance;
@@ -27,7 +31,7 @@ AquaBox& AquaBox::i()
 }
 
 AquaBox::AquaBox()
-    : m_fileAppender("aquabox.log")
+    : m_fileAppender("./../log/aquabox.log", LOG_FILE_SIZE_IN_MB * BYTES_IN_MB, MAX_LOG_FILES)
     , m_globalTimer("GlobalRoutines")
 {}
 

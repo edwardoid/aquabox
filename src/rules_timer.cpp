@@ -12,7 +12,7 @@ using namespace aquabox;
 
 RulesTimer::RulesTimer()
     : m_timer("RulesTimer")
-    , m_rulesAppender("rules.log")
+    , m_rulesAppender("./../log/rules.log", BYTES_IN_MB, 3)
     , m_rulesLogger(plog::Severity::debug)
 {
     m_rulesLogger.addAppender(&m_rulesAppender);

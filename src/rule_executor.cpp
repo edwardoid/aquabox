@@ -16,7 +16,7 @@ RuleExecutor::RuleExecutor(std::shared_ptr<Rule>& rule, Timer::ClockTimePoint no
 
 void RuleExecutor::operator() ()
 {
-    LOG_INFO << "Processing rule \"" << m_rule->getId() << "\" on " << m_rule->getDevice();
+    LOG_DEBUG << "Processing rule \"" << m_rule->getId() << "\" on " << m_rule->getDevice();
     const TimeDetails now(Timer::Clock::to_time_t(m_now));
 
     const RepeatUnit unit = m_rule->getRepeat().getUnit();

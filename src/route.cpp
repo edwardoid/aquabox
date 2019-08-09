@@ -28,7 +28,7 @@ Route& Route::any(std::string name)
 Route& Route::string(std::string name)
 {
     m_component2Indx.insert({ name, m_components.size() });
-    m_components.push_back("([\\w]+)");
+    m_components.push_back("([\\w.+-]+)");
 
     return *this;
 }
