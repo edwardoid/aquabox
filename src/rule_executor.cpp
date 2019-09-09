@@ -25,6 +25,10 @@ void RuleExecutor::operator() ()
     if (dev == nullptr) {
         return;
     }
+
+    if (!dev->getRulesEnabled().Value) {
+        return;
+    }
     
     for(const Action& act : *(m_rule->getActions()))
     {

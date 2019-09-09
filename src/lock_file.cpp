@@ -18,34 +18,34 @@ using namespace aquabox;
 #define _O(mode) ((mode) << 6 ) // Owner
 
 
-#define LOCK_FILE_MODE  _O(_RW) | _G(_R) | _A(_R)
+#define LOCK_FILE_MODE  (S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH)
 
 Lockfile::Lockfile()
 {
-    m_fd = open(Config::LOCK_FILE.c_str(), O_CREAT, LOCK_FILE_MODE);
-    if (m_fd != -1)
-    {
-        int res = flock(m_fd, LOCK_EX);
-        if (res != 0)
-        {
-            close(m_fd);
-            m_fd = -1;
-        }
-    }
 }
 
-bool Lockfile::exists()
+bool Lockfile::create()
 {
-    return m_fd == -1;
+    if (m_fd > 0)
+        remove();
+
+    m_fd = open(Config::LOCK_FILE.c_str(), O_CREAT | O_WRONLY | O_EXCL, LOCK_FILE_MODE);
+    return m_fd > 0;
+}
+
+void Lockfile::remove()
+{
+    if (m_fd > -1) {
+        close(m_fd);        
+    }
+
+    int ret = ::remove(Config::LOCK_FILE.c_str());
+    LOG_FATAL_IF(ret != 0) << "Can't delete lock file " << Config::LOCK_FILE;
+
+    m_fd = -1;
 }
 
 Lockfile::~Lockfile()
 {
-    if (m_fd != -1)
-    {
-        int res = flock(m_fd, LOCK_UN);
-        close(m_fd);
-        int ret = remove(Config::LOCK_FILE.c_str());
-        LOG_FATAL_IF(ret != 0) << "Can't delete lock file " << Config::LOCK_FILE;
-    }
+    remove();
 }

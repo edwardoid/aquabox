@@ -12,6 +12,7 @@
 #include "user.h"
 #include "update_events.h"
 #include "status_image.h"
+#include "options.h"
 #include <exception>
 #include <chrono>
 #include <random>
@@ -35,22 +36,24 @@ AquaBox::AquaBox()
     , m_globalTimer("GlobalRoutines")
 {}
 
-int AquaBox::start(bool asService, bool doDraw)
+int AquaBox::start()
 {
     Lockfile lock;
 
     plog::init( plog::severityFromString(Settings::string(Settings::LOG_LEVEL, plog::severityToString(plog::Severity::info)).c_str()),
                 &m_consoleAppender);
     
-    if (asService) {
+    if (Options::Service) {
         plog::init( plog::severityFromString(Settings::string(Settings::LOG_LEVEL, plog::severityToString(plog::Severity::info)).c_str()),
                 &m_fileAppender);
     }
 
     LOG_INFO << "Starting " << Config::APPLICATION << " ver. " << std::hex << Config::VERSION_MAJOR << "." << Config::VERSION_MINOR;
-    if(lock.exists()) {
-        LOG_FATAL << "Another instance of " << Config::APPLICATION << " is running...";
-        std::exit(EXIT_FAILURE);
+    if(Options::Lock) {
+        if (!lock.create()) {
+            LOG_FATAL << "Another instance of " << Config::APPLICATION << " is running...";
+            std::exit(EXIT_FAILURE);
+        }
     }
 
     srand(time(NULL));
@@ -87,15 +90,18 @@ int AquaBox::start(bool asService, bool doDraw)
         networkStateChanged(state);
     });
 
-    m_wifi->init("", Settings::string(Settings::AP_SSID, Config::AP_SSID), Settings::string(Settings::AP_PASSWORD, Config::AP_PASSWORD));
+    m_wifi->init("",
+                 Settings::string(Settings::AP_SSID, Config::AP_SSID),
+                 Settings::string(Settings::AP_PASSWORD, Config::AP_PASSWORD),
+                 Options::AccessPoint);
 
     readDevices(m_wd);
     readRules(m_wd);
     readUsers();
 
     StatusImage::display();
-    m_globalTimer.start([this, doDraw](const Timer::ClockTimePoint&){
-        if (doDraw) {
+    m_globalTimer.start([this](const Timer::ClockTimePoint&){
+        if (Options::Render) {
             StatusImage::display();
         }
 

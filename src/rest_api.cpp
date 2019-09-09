@@ -13,6 +13,7 @@
 #include "enumerations.h"
 #include "path.h"
 #include "update_events.h"
+#include "command_executor.h"
 #include <fstream>
 #include <nlohmann/json.hpp>
 #include <stdio.h>
@@ -20,6 +21,44 @@
 
 using namespace aquabox::rest;
 using namespace aquabox;
+
+Command createCommand(Operation operation, Request request, bool body, std::unordered_map<std::string, std::string> params = {})
+{
+    Command command;
+    command.setOperation(operation);
+    command.setParameters(params);
+    if (body) {
+        command.setBody(request->content.string());
+    }
+    return command;
+}
+
+void execCommand(Command& cmd, Response response, Headers headers)
+{
+    CommandExecutor exec;
+    if(!exec.exec(cmd)) {
+        LOG_ERROR << "Can't execute command! " << (int)(cmd.operation());
+    } else {
+        LOG_DEBUG << "Command " << (int)(cmd.operation()) << " finished with " << (int)(cmd.result()) << " data: " << cmd.response();
+    }
+    SimpleWeb::StatusCode code = SimpleWeb::StatusCode::server_error_not_implemented;
+    switch (cmd.result())
+    {
+    case Result::BadCommand: { code =  SimpleWeb::StatusCode::client_error_bad_request; break; }
+    case Result::AccessDenied: { code =  SimpleWeb::StatusCode::client_error_forbidden; break; }
+    case Result::NotFound: { code =  SimpleWeb::StatusCode::client_error_not_found; break; }
+    case Result::ServerError: { code =  SimpleWeb::StatusCode::server_error_internal_server_error; break; }
+    case Result::Ok: { code =  SimpleWeb::StatusCode::success_ok; break; }
+    
+    default:
+        code =  SimpleWeb::StatusCode::success_ok;
+    }
+
+    if (cmd.response().empty())
+        response->write(code, headers);
+    else
+        response->write(code, cmd.response(), headers);
+}
 
 
 void API::init(HttpServerImpl& server)
@@ -237,7 +276,8 @@ DEFINE_API_IMPL(Login)
 
 DEFINE_API_IMPL(Status)
 {
-    response->write(SimpleWeb::StatusCode::success_ok, getStatusInfo(true).dump(4), headers);
+    auto cmd = createCommand(Operation::GetStatus, request, true);
+    execCommand(cmd, response, headers);
 }
 
 DEFINE_API_IMPL(WiFiQR)
@@ -271,363 +311,80 @@ DEFINE_API_IMPL(WiFiQR)
 
 DEFINE_API_IMPL(Devices)
 {
-    std::vector<nlohmann::json> all;
-    for (auto &dev : AquaBox::i().devices()) {
-        nlohmann::json json;
-        dev.second->json(json);
-        if (dev.second->isRelay()) {
-            json["isOn"] = std::dynamic_pointer_cast<Relay>(dev.second)->turnedOn();
-        } else if(dev.second->isSensor()){
-            json["value"] = std::dynamic_pointer_cast<Sensor>(dev.second)->value();
-        }
-        all.push_back(json);
-    }
-    nlohmann::json res = nlohmann::json::object();
-    res["devices"] = all;
-    response->write(SimpleWeb::StatusCode::success_ok, res.dump(4), headers);
+    auto cmd = createCommand(Operation::GetDevices, request, false);
+    execCommand(cmd, response, headers);
 }
 
 DEFINE_API_IMPL(GetDevice)
 {
-    auto params = route.extract(request->path);
-    if (params.count(":dev") == 0) {
-        LOG_ERROR << "No device id parameter in URL";
-        response->write(SimpleWeb::StatusCode::client_error_bad_request, headers);
-        return;
-    }
-    std::string dev = params[":dev"];
-    
-    auto& devices = AquaBox::i().devices();
-    auto pos = devices.find(dev);
-    if (pos == devices.end()) {
-        LOG_ERROR << "No device " << dev << " not found";
-        response->write(SimpleWeb::StatusCode::client_error_not_found, headers);
-        return;
-    }
-
-    nlohmann::json data;
-    pos->second->json(data);
-    if (pos->second->isRelay()) {
-        data["isOn"] = std::dynamic_pointer_cast<Relay>(pos->second)->turnedOn();
-    } else if(pos->second->isSensor()){
-        data["value"] = std::dynamic_pointer_cast<Sensor>(pos->second)->value();
-    }
-
-    response->write(SimpleWeb::StatusCode::success_ok, data.dump(4), headers);
+    auto cmd = createCommand(Operation::GetDevice, request, false, route.extract(request->path));
+    execCommand(cmd, response, headers);
 }
 
 DEFINE_API_IMPL(UpdateDevice)
 {
-    auto params = route.extract(request->path);
-    if (params.count(":dev") == 0) {
-        LOG_ERROR << "No device id parameter in URL";
-        response->write(SimpleWeb::StatusCode::client_error_bad_request, headers);
-        return;
-    }
-    std::string dev = params[":dev"];
-    
-    auto& devices = AquaBox::i().devices();
-    auto pos = devices.find(dev);
-    if (pos == devices.end()) {
-        LOG_ERROR << "No device " << dev << " found";
-        response->write(SimpleWeb::StatusCode::client_error_not_found, headers);
-        return;
-    }
-
-    nlohmann::json data;
-    nlohmann::json deviceData;
-    try
-    {
-        deviceData = nlohmann::json::parse(request->content.string());
-    }
-    catch (nlohmann::detail::parse_error &e)
-    {
-        data["data"] = request->content.string();
-        data["error"] = e.what();
-        data["cause"] = "Parse Error";
-        response->write(SimpleWeb::StatusCode::client_error_bad_request, data.dump(4), headers);
-        return;
-    }
-
-    std::shared_ptr<Device> d = std::make_shared<Device>();
-    if (!d->parse(deviceData)) {
-        response->write(SimpleWeb::StatusCode::client_error_bad_request, data.dump(4), headers);
-        return;
-    }
-
-    auto& device = pos->second;
-    nlohmann::json before;
-    device->json(before);
-    if (pos->second->isRelay()) {
-        before["isOn"] = std::dynamic_pointer_cast<Relay>(pos->second)->turnedOn();
-    }
-
-    device->copyData(*d);
-
-    AquaBox::i().updateDevice(dev);
-    AquaBox::i().postUpdate(std::make_shared<DeviceUpdatedEvent>(device, before));
-
-    response->write(SimpleWeb::StatusCode::success_ok, headers);
+    auto cmd = createCommand(Operation::UpdateDevice, request, false, route.extract(request->path));
+    execCommand(cmd, response, headers);
 }
 
 DEFINE_API_IMPL(Rules)
 {
-    std::vector<nlohmann::json> all;
-    for (auto &rule : AquaBox::i().rules()) {
-        nlohmann::json data;
-        rule.second->json(data);
-        all.push_back(data);
-    }
-    nlohmann::json res = nlohmann::json::object();
-    res["rules"] = all;
-    response->write(SimpleWeb::StatusCode::success_ok, res.dump(4), headers);
+    auto cmd = createCommand(Operation::GetRules, request, false);
+    execCommand(cmd, response, headers);
 }
 
 DEFINE_API_IMPL(GetRule)
 {
-    auto params = route.extract(request->path);
-    if (params.count(":rule") == 0) {
-        LOG_ERROR << "No rule id parameter in URL";
-        response->write(SimpleWeb::StatusCode::client_error_bad_request, headers);
-        return;
-    }
-    std::string rule = params[":rule"];
-
-    auto all = AquaBox::i().rules();
-    auto pos = all.find(rule);
-
-    if (pos == all.end()) {
-        response->write(SimpleWeb::StatusCode::client_error_not_found, headers);
-    } else {
-        nlohmann::json data;
-        pos->second->json(data);
-        response->write(SimpleWeb::StatusCode::success_ok, data.dump(4), headers);
-    }
+    auto cmd = createCommand(Operation::GetRules, request, false, route.extract(request->path));
+    execCommand(cmd, response, headers);
 }
 
 DEFINE_API_IMPL(CreateRule)
 {
-    auto params = route.extract(request->path);
-    if (params.count(":dev") == 0) {
-        LOG_ERROR << "No device id parameter in URL";
-        nlohmann::json badurl({
-            { "cause", "Bad url" }
-        });
-        response->write(SimpleWeb::StatusCode::client_error_bad_request, badurl.dump(4), headers);
-        return;
-    }
-    std::string dev = params[":dev"];
-    nlohmann::json data;
-    nlohmann::json ruleData;
-    try
-    {
-        ruleData = nlohmann::json::parse(request->content.string());
-    }
-    catch (nlohmann::detail::parse_error &e)
-    {
-        data["data"] = request->content.string();
-        data["error"] = e.what();
-        data["cause"] = "Parse Error";
-        response->write(SimpleWeb::StatusCode::client_error_bad_request, data.dump(4), headers);
-        return;
-    }
-
-    std::shared_ptr<Rule> r = std::make_shared<Rule>();
-    if (!r->parse(ruleData)) {
-        response->write(SimpleWeb::StatusCode::client_error_bad_request, data.dump(4), headers);
-        return;
-    }
-
-    auto device = r->getDevice().resolve(); 
-
-    if (device == nullptr) {
-        data["data"] = request->content.string();
-        data["error"] = "Can't find device";
-        response->write(SimpleWeb::StatusCode::client_error_bad_request, data.dump(4), headers);
-        return;
-    }
-
-    if (!AquaBox::i().addRule(r, request->method == "POST")) {
-        data["cause"] = "Wrong method or internal data";
-        response->write(SimpleWeb::StatusCode::client_error_bad_request, data.dump(4), headers);
-        return;
-    }
-
-    data["rule"] = ruleData;
-    data["cause"] = "ok";
-    response->write(SimpleWeb::StatusCode::success_created, data.dump(4), headers);
+    auto cmd = createCommand(request->method == "PUT"
+                    ? Operation::CreateRule
+                    : Operation::UpdateRule, request, true, route.extract(request->path));
+    execCommand(cmd, response, headers);
 }
 
 DEFINE_API_IMPL(DeleteRule)
 {
-    auto params = route.extract(request->path);
-    if (params.count(":rule") == 0) {
-        LOG_ERROR << "No rule id parameter in URL";
-        response->write(SimpleWeb::StatusCode::client_error_bad_request, headers);
-        return;
-    }
-    std::string rule = params[":rule"];
-
-    auto& all = AquaBox::i().rules();
-    auto pos = all.find(rule);
-
-    if (pos == all.end()) {
-        LOG_DEBUG << "Requested to delete unexisting rule " << rule;
-        response->write(SimpleWeb::StatusCode::client_error_not_found, headers);
-        return;
-    }
-
-    if (AquaBox::i().removeRule(pos->second)) {
-        LOG_DEBUG << "Rule " << rule << " removed";
-        response->write(SimpleWeb::StatusCode::success_no_content, headers);
-    } else {
-        LOG_ERROR << "Rule " << rule << " removal failed";
-        response->write(SimpleWeb::StatusCode::server_error_internal_server_error, headers);
-    }
+    auto cmd = createCommand(Operation::DeleteRule, request, false, route.extract(request->path));
+    execCommand(cmd, response, headers);
 }
 
 DEFINE_API_IMPL(DeviceRules)
 {
-    auto params = route.extract(request->path);
-    if (params.count(":dev") == 0) {
-        LOG_ERROR << "No dev id parameter in URL";
-        response->write(SimpleWeb::StatusCode::client_error_bad_request, headers);
-        return;
-    }
-    std::string dev = params[":dev"];
-    std::vector<nlohmann::json> all;
-    for (auto &rule : AquaBox::i().rules()) {
-        if (((std::string)rule.second->getDevice().Value) == dev) {
-            nlohmann::json data;
-            rule.second->json(data);
-            all.push_back(data);
-        }
-    }
-    nlohmann::json res({{"rules", all},
-                        {"device", dev}});
-    response->write(SimpleWeb::StatusCode::success_ok, res.dump(4), headers);
+    auto cmd = createCommand(Operation::DeviceRules, request, false, route.extract(request->path));
+    execCommand(cmd, response, headers);
 }
 
 DEFINE_API_IMPL(SupportedRepeatTimeouts)
 {
-    std::vector<RepeatUnit> units;
-    for (auto u : Serializable<RepeatUnit>::val2Str) {
-        units.push_back(u.first);
-    }
-    nlohmann::json res;
-    res["units"] = Serializable<RepeatUnit>::val2Str;
-    response->write(SimpleWeb::StatusCode::success_ok, res.dump(4), headers);
+    auto cmd = createCommand(Operation::SupportedRepeatTimeouts, request, false);
+    execCommand(cmd, response, headers);
 }
 
 DEFINE_API_IMPL(TurnOn)
 {
-    auto params = route.extract(request->path);
-    if (params.count(":dev") == 0) {
-        LOG_ERROR << "No dev id parameter in URL";
-        response->write(SimpleWeb::StatusCode::client_error_bad_request, headers);
-        return;
-    }
-    std::string dev = params[":dev"];
-    auto pos = AquaBox::i().devices().find(dev);
-    if (pos == AquaBox::i().devices().end()) {
-        response->write(SimpleWeb::StatusCode::client_error_not_found, headers);
-        return;
-    }
-
-    if (!pos->second->isRelay()) {
-        response->write(SimpleWeb::StatusCode::client_error_bad_request, headers);
-        return;
-    }
-
-    auto relay = std::dynamic_pointer_cast<Relay>(pos->second);
-
-    relay->turnOn();
-    nlohmann::json data;
-    relay->json(data);
-    data["isOn"] = relay->turnedOn();
-    AquaBox::i().postUpdate(std::make_shared<ManualStateChangedEvent>(relay));
-
-    response->write(SimpleWeb::StatusCode::success_ok, data.dump(4), headers);
+    auto cmd = createCommand(Operation::TurnOn, request, false, route.extract(request->path));
+    execCommand(cmd, response, headers);
 }
 
 DEFINE_API_IMPL(TurnOff)
 {
-    auto params = route.extract(request->path);
-    if (params.count(":dev") == 0) {
-        LOG_ERROR << "No dev id parameter in URL";
-        response->write(SimpleWeb::StatusCode::client_error_bad_request, headers);
-        return;
-    }
-    std::string dev = params[":dev"];
-    auto pos = AquaBox::i().devices().find(dev);
-    if (pos == AquaBox::i().devices().end()) {
-        response->write(SimpleWeb::StatusCode::client_error_not_found, headers);
-    }
-    
-    if (!pos->second->isRelay()) {
-        response->write(SimpleWeb::StatusCode::client_error_bad_request, headers);
-        return;
-    }
-
-    auto relay = std::dynamic_pointer_cast<Relay>(pos->second);
-    
-    relay->turnOff();
-    nlohmann::json data;
-    relay->json(data);
-    data["isOn"] = relay->turnedOn();
-
-    AquaBox::i().postUpdate(std::make_shared<ManualStateChangedEvent>(relay));
-
-    response->write(SimpleWeb::StatusCode::success_ok, data.dump(4), headers);
+    auto cmd = createCommand(Operation::TurnOff, request, false, route.extract(request->path));
+    execCommand(cmd, response, headers);
 }
 
 DEFINE_API_IMPL(ScanWiFiNetworks)
 {
-    std::vector<nlohmann::json> nets;
-    for (auto& net : AquaBox::i().availableNetworks())
-    {
-        nets.emplace_back(nlohmann::json(
-            {
-                { "ssid" , net.ssid },
-                { "auth" , (net.auth == IoT::Authentication::WEP ? "wep" :
-                           (net.auth == IoT::Authentication::WPA ? "wpa" :
-                           (net.auth == IoT::Authentication::WPA2? "wpa2":
-                           (net.auth == IoT::Authentication::None? "none": 
-                           (net.auth == IoT::Authentication::Enterprise ? "enterprize" : "unknown"))))) },
-                { "encrypted", net.encrypted },
-                { "signal", net.signal }
-            }
-        ));
-    }
-
-    response->write(SimpleWeb::StatusCode::success_ok, (nlohmann::json({ {"networks", nets} })).dump(4), headers);
+    auto cmd = createCommand(Operation::ScanWiFiNetworks, request, false);
+    execCommand(cmd, response, headers);
 }
 
 DEFINE_API_IMPL(ConnectToWiFi)
 {
-    nlohmann::json networkInfo;
-    try {
-        networkInfo = nlohmann::json::parse(request->content.string());
-    }
-    catch(...) {
-        response->write(SimpleWeb::StatusCode::client_error_bad_request, headers);
-        return;
-    }
-
-    auto ssid = networkInfo.find("ssid");
-    auto password = networkInfo.find("password");
-    if (ssid == networkInfo.end() || password == networkInfo.end() || !ssid->is_string() || !password->is_string()) {
-        response->write(SimpleWeb::StatusCode::client_error_bad_request, headers);
-        return;
-    }
-
-    std::string ssidStr = ssid->get<std::string>();
-    std::string passwordStr = password->get<std::string>();
-    if(ssidStr.empty() || passwordStr.size() < 8) {
-        response->write(SimpleWeb::StatusCode::client_error_bad_request, headers);
-        return;
-    }
-
-    AquaBox::i().networking().tryConnect(ssidStr, passwordStr);
-    response->write(SimpleWeb::StatusCode::success_ok, headers);
+    Command cmd = createCommand(Operation::ConnectToWiFi, request, true);
+    execCommand(cmd, response, headers);
 }

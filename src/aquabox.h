@@ -34,7 +34,7 @@ namespace aquabox
         static AquaBox Instance;
     public:
         static AquaBox& i();
-        int start(bool isService = false, bool doDraw = true);
+        int start();
         ~AquaBox() = default;
         std::shared_ptr<Device> findDevice(std::string id);
         std::shared_ptr<Rule> findRule(std::string id);

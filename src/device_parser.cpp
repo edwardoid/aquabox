@@ -53,7 +53,6 @@ std::unordered_map<std::string, std::shared_ptr<Device>> DeviceParser::parse(Pat
                 dev = std::make_shared<Sensor>();
                 break;
             }
-
             default: {
                 LOG_ERROR << "Unknown device type in " << p.c_str();
             }

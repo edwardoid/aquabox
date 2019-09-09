@@ -21,7 +21,7 @@ bool WebServer::start()
         m_ws.config.port = Settings::integer(Settings::STREAM_PORT, Config::WS_PORT);
         LOG_INFO << "Starting websocket server" << m_ws.config.address << ":" << m_ws.config.port;
 
-        WS.Ping(m_ws, m_updates);
+        WS.Updates(m_ws, m_updates);
 
         m_ws.start();
     });

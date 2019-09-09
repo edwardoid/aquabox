@@ -48,8 +48,7 @@ void Timer::stop()
 
 void Timer::run()
 {
-    if (State::Starting != m_state)
-    {
+    if (State::Starting != m_state) {
         return;
     }
 
@@ -57,11 +56,10 @@ void Timer::run()
 
     uint64_t tick = 0;
     ClockTimePoint startPoint = Clock::now();
-    while(m_state.load() == State::Running)
-    {
+    while(m_state.load() == State::Running) {
         ClockTimePoint next = (startPoint + m_timeout * ++tick);
 
-        try{
+        try {
             ClockTimePoint now = Clock::now();
             m_callback(now);
         }

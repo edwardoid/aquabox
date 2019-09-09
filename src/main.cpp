@@ -1,11 +1,16 @@
 #include "aquabox.h"
+#include "options.h"
+#include "lock_file.h"
 #include <stdio.h>
 #include <execinfo.h>
 #include <signal.h>
 #include <stdlib.h>
 #include <unistd.h>
+#include <iostream>
 
 void handler(int sig) {
+  aquabox::Lockfile lock;
+  lock.remove();
   void *array[20];
   size_t size;
 
@@ -25,10 +30,22 @@ int main(int argc, char** argv)
   for(int i = 1; i < argc; ++i)
   {
     if(strcmp(argv[i], "--service") == 0)
-      asService = true;
-    if(strcmp(argv[i], "--nodraw") == 0)
-      noDraw = true;
+      aquabox::Options::Service = true;
+    else if(strcmp(argv[i], "--nodraw") == 0)
+      aquabox::Options::Render = false;
+    else if(strcmp(argv[i], "--ignore-lock") == 0)
+      aquabox::Options::Lock = false;
+    else if(strcmp(argv[i], "--disable-access-point") == 0)
+      aquabox::Options::AccessPoint = false;
+    else if(strcmp(argv[i], "--help") == 0) {
+      std::cout << "aquabox [OPTIONS]\n"
+                << " --service                Applications will be runned as part of Linux service\n"
+                << " --ignore-lock            Do not create lock/runfiles\n"
+                << " --disable-access-point   Do nto switch to AP mode if there is no internet connection\n"
+                << " --help                   Show this help"
+                << std::endl;
+    }
   }
   signal(SIGSEGV, handler);
-  return aquabox::AquaBox::i().start(asService, !noDraw);
+  return aquabox::AquaBox::i().start();
 }

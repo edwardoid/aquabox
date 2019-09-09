@@ -21,32 +21,27 @@ RulesTimer::RulesTimer()
 void RulesTimer::start()
 {
     m_timer.start([this](const Timer::ClockTimePoint& when){
-        AquaBox::i().doLater([this, when](){
+        AquaBox::i().doLater([this, when]() {
             RulesMap rulesToDelete;
-            for(auto rule : AquaBox::i().rules())
-            {
+            for(auto rule : AquaBox::i().rules()) {
                 const Time at = rule.second->getRepeat().getDeleteAfter();
                 const RepeatUnit unit = rule.second->getRepeat().getUnit();
                 if(at != 0 &&
                    at.getDetails().from(TimeDetails(Timer::Clock::to_time_t(when)),
-                                        true, true, true, true) >=0)
-                {
+                                        true, true, true, true) >=0) {
                     rulesToDelete.insert({ rule.first, rule.second });
                 }
-                else if(rule.second->getEnabled().Value)
-                {
+                else if(rule.second->getEnabled().Value) {
                     RuleExecutor re(rule.second, when);
                     re();
                 }
             }
 
-            for(auto rule : rulesToDelete)
-            {
+            for(auto rule : rulesToDelete) {
                 AquaBox::i().removeRule(rule.second);
             }
 
-            for(auto& dev : AquaBox::i().devices())
-            {
+            for(auto& dev : AquaBox::i().devices()) {
                 auto relay = std::dynamic_pointer_cast<Relay>(dev.second);
                 if (relay == nullptr) {
                     continue;

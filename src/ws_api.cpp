@@ -3,19 +3,31 @@
 
 using namespace aquabox::ws;
 
-void API::onOpen(Connection connection)
+void API::onOpen(const std::string& route, Connection connection)
 {
     std::lock_guard<std::mutex> guard(m_lock);
-    m_connections.push_back(connection);
+
+    auto connections = m_connections.find(route);
+    if (connections == m_connections.end()) {
+        m_connections.insert({ route, std::vector<Connection>({ connection })});
+    } else  {
+        connections->second.push_back(connection);
+    }
 }
-void API::onClose(Connection connection, Status status, const std::string& reason) 
+void API::onClose(const std::string& route, Connection connection, Status status, const std::string& reason) 
 {
     std::lock_guard<std::mutex> guard(m_lock);
-    for(auto i = m_connections.begin(); i != m_connections.end(); ++i)
+
+    auto connections = m_connections.find(route);
+    if (connections == m_connections.end()) {
+        return;
+    }
+
+    for(auto i = connections->second.begin(); i != connections->second.end(); ++i)
     {
         if(i->get() == connection.get())
         {
-            m_connections.erase(i);
+            connections->second.erase(i);
             break;
         }
     }
@@ -25,13 +37,19 @@ void API::postEvent(Event event)
 {
     std::lock_guard<std::mutex> guard(m_lock);
     auto data = event->serialize().dump(4);
-    for(auto& connection : m_connections)
+
+    auto connections = m_connections.find(UpdatesUrl);
+    if (connections == m_connections.end()) {
+        return;
+    }
+
+    for(auto& connection : connections->second)
     {
         connection->send(data);
     }
 }
 
-DEFINE_WS_API_IMPL(Ping)
+DEFINE_WS_API_IMPL(Updates)
 {
-    connection->send("msg");
+    connection->send("Updates");
 }
