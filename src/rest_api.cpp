@@ -323,7 +323,7 @@ DEFINE_API_IMPL(GetDevice)
 
 DEFINE_API_IMPL(UpdateDevice)
 {
-    auto cmd = createCommand(Operation::UpdateDevice, request, false, route.extract(request->path));
+    auto cmd = createCommand(Operation::UpdateDevice, request, true, route.extract(request->path));
     execCommand(cmd, response, headers);
 }
 

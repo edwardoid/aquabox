@@ -44,6 +44,7 @@ int main(int argc, char** argv)
                 << " --disable-access-point   Do nto switch to AP mode if there is no internet connection\n"
                 << " --help                   Show this help"
                 << std::endl;
+      return 0;
     }
   }
   signal(SIGSEGV, handler);

@@ -1,6 +1,45 @@
 #include "command.h"
+#include "enumerations.h"
 
 using namespace aquabox;
+
+template<>
+Serializable<Operation>::Enum2StrMap Serializable<Operation>::val2Str({
+    { Operation::GetStatus, "get_status" },
+    { Operation::GetDevices, "get_all_devices" },
+    { Operation::GetDevice, "get_device" },
+    { Operation::UpdateDevice, "update_device" },
+    { Operation::GetRules, "get_rules" },
+    { Operation::GetRule, "get_rule" },
+    { Operation::CreateRule, "create_rule" },
+    { Operation::UpdateRule, "update_rule" },
+    { Operation::DeleteRule, "delete_rule" },
+    { Operation::DeviceRules, "get_device_rules" },
+    { Operation::ScanWiFiNetworks, "scan" },
+    { Operation::ConnectToWiFi, "connect" },
+    { Operation::SupportedRepeatTimeouts, "repeat_units" },
+    { Operation::TurnOn, "turn_on" },
+    { Operation::TurnOff, "turn_off" }
+});
+
+template<>
+Serializable<Operation>::Str2EnumMap Serializable<Operation>::str2Val({
+    { "get_status", Operation::GetStatus },
+    { "get_all_devices", Operation::GetDevices },
+    { "get_device", Operation::GetDevice },
+    { "update_device", Operation::UpdateDevice },
+    { "get_rules", Operation::GetRules },
+    { "get_rule", Operation::GetRule },
+    { "create_rule", Operation::CreateRule },
+    { "update_rule", Operation::UpdateRule },
+    { "delete_rule", Operation::DeleteRule },
+    { "get_device_rules", Operation::DeviceRules },
+    { "scan", Operation::ScanWiFiNetworks },
+    { "connect", Operation::ConnectToWiFi },
+    { "repeat_units", Operation::SupportedRepeatTimeouts },
+    { "turn_on", Operation::TurnOn },
+    { "turn_off", Operation::TurnOff }
+});
 
 void Command::setBody(std::string body)
 {

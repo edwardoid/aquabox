@@ -22,6 +22,7 @@ bool WebServer::start()
         LOG_INFO << "Starting websocket server" << m_ws.config.address << ":" << m_ws.config.port;
 
         WS.Updates(m_ws, m_updates);
+        WS.Commands(m_ws, m_rpc);
 
         m_ws.start();
     });
@@ -71,6 +72,8 @@ void WebServer::setupRoutes()
     m_wifiConnect = base.sub().word("wifi").word("connect");
 
     m_updates = base.sub().word("updates");
+
+    m_rpc = base.sub().word("rpc");
 }
 
 bool WebServer::bindApiCalls()

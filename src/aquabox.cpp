@@ -33,6 +33,7 @@ AquaBox& AquaBox::i()
 
 AquaBox::AquaBox()
     : m_fileAppender("./../log/aquabox.log", LOG_FILE_SIZE_IN_MB * BYTES_IN_MB, MAX_LOG_FILES)
+    , m_logAppender("./static/logs/aquabox.csv", LOG_FILE_SIZE_IN_MB * BYTES_IN_MB, 1)
     , m_globalTimer("GlobalRoutines")
 {}
 
@@ -42,6 +43,9 @@ int AquaBox::start()
 
     plog::init( plog::severityFromString(Settings::string(Settings::LOG_LEVEL, plog::severityToString(plog::Severity::info)).c_str()),
                 &m_consoleAppender);
+
+    plog::init( plog::severityFromString(Settings::string(Settings::LOG_LEVEL, plog::severityToString(plog::Severity::info)).c_str()),
+                &m_logAppender);
     
     if (Options::Service) {
         plog::init( plog::severityFromString(Settings::string(Settings::LOG_LEVEL, plog::severityToString(plog::Severity::info)).c_str()),
@@ -105,6 +109,7 @@ int AquaBox::start()
             StatusImage::display();
         }
 
+        //m_cloud.heartheat();
         SensorsTracker::processUpdates();
     }, std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::seconds(10)));
 
@@ -120,10 +125,12 @@ void AquaBox::networkStateChanged(IoT::WiFi::State state)
 {
     if (state == IoT::WiFi::State::InAPMode) {
         static bool firstTime = true;
+        static std::time_t last = 0;
+        std::time_t now = std::time(nullptr);
+        bool reconnect = (now - last) > 60 * 60; 
         std::string uuid = Settings::string(Settings::NETWORK, "");
-        if(firstTime && !uuid.empty()) {
+        if(reconnect && !uuid.empty()) {
             m_wifi->connectToNetwork(uuid);
-            firstTime = false;
         }
     }
 }

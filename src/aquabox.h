@@ -6,6 +6,7 @@
 #include "rules_timer.h"
 #include "web_server.h"
 #include "path.h"
+#include "cloud.h"
 #include <wifi_setup.h>
 #include <memory>
 #include <unordered_map>
@@ -58,12 +59,14 @@ namespace aquabox
     private:
         std::unique_ptr<IoT::WiFi> m_wifi;
         plog::ColorConsoleAppender<plog::TxtFormatter> m_consoleAppender;
+        plog::RollingFileAppender<plog::CsvFormatter> m_logAppender;
         plog::RollingFileAppender<plog::TxtFormatter> m_fileAppender;
         tp::ThreadPoolOptions m_poolOptions;
         std::unique_ptr<tp::ThreadPool> m_pool;
         mutable DevicesMap m_devices;
         mutable UsersMap m_users;
         mutable RulesMap m_rules;
+        mutable Cloud m_cloud;
         Path m_wd;
         Path m_devicesDir;
         Path m_rulesDir;

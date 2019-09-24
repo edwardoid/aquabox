@@ -29,6 +29,7 @@ namespace aquabox
         rest::API REST;
         ws::API WS;
         Route m_updates;
+        Route m_rpc;
         Route m_static;
         Route m_login;
         Route m_status;

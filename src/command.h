@@ -15,23 +15,24 @@ namespace aquabox
         Ok = 200
     };
 
-    enum class Operation
+    enum class Operation: int
     {
-        GetStatus = 0,
-        GetDevices = 1,
-        GetDevice = 2,
-        UpdateDevice = 3,
-        GetRules = 4,
-        GetRule = 5,
-        CreateRule = 6,
-        UpdateRule = 7,
-        DeleteRule = 8,
-        DeviceRules = 9,
-        ScanWiFiNetworks = 10,
-        ConnectToWiFi = 11,
-        SupportedRepeatTimeouts = 12,
-        TurnOn = 13,
-        TurnOff = 14
+        Unknown = 0,
+        GetStatus = 1,
+        GetDevices = 2,
+        GetDevice = 3,
+        UpdateDevice = 4,
+        GetRules = 5,
+        GetRule = 6,
+        CreateRule = 7,
+        UpdateRule = 8,
+        DeleteRule = 9,
+        DeviceRules = 10,
+        ScanWiFiNetworks = 11,
+        ConnectToWiFi = 12,
+        SupportedRepeatTimeouts = 13,
+        TurnOn = 14,
+        TurnOff = 15
     };
 
     class Command
