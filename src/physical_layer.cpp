@@ -1,5 +1,6 @@
 #include "physical_layer.h"
 #include "physical_gpio_bus.h"
+#include "mock_gpio_bus.h"
 #include "physical_1_wire_bus.h"
 #include <unordered_map>
 
@@ -9,6 +10,7 @@ std::shared_ptr<Bus> Physical::bus(std::string bus)
 {
     static std::unordered_map<std::string, std::shared_ptr<Bus> > availableBuses({
         { "GPIO", std::make_shared<PhysicalGPIOBus>() },
+        { "MOCK_GPIO", std::make_shared<MockGPIOBus>() },
         { "1W", std::make_shared<PhysicalOneWireBus>() }
     });
 
