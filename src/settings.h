@@ -29,6 +29,7 @@ namespace aquabox
         static const std::string USERS;
 
         static const std::string THREADS;
+        static const std::string CLOUD_URL;
 
         static void set(std::string key, bool value);
         static void set(std::string key, int value);

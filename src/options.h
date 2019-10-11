@@ -9,6 +9,7 @@ namespace aquabox
         static bool Lock;
         static bool Render;
         static bool AccessPoint;
+        static bool EnableCloud;
     };
 }
 

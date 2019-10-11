@@ -15,10 +15,9 @@ const std::string Settings::STREAM_PORT = "streamPort";
 const std::string Settings::NETWORK = "network";
 const std::string Settings::AP_SSID = "ssid";
 const std::string Settings::AP_PASSWORD = "password";
-
 const std::string Settings::USERS = "users";
-
 const std::string Settings::THREADS = "threads";
+const std::string Settings::CLOUD_URL = "cloudUrl";
 
 bool Settings::dataToWrite = false;
 bool Settings::ready = false;

@@ -1,18 +1,33 @@
 #include "cloud.h"
 #include "log.h"
 #include "aquabox.h"
+#include "serial.h"
+#include "settings.h"
+#include "commands_stream.h"
 #include <nlohmann/json.hpp>
 
-using namespace aquabox;
 
-#define CLOUD_WS std::string("ws://edwardoid.redirectme.net:5555")
-#define CLOUD_HTTP std::string("edwardoid.redirectme.net:4444")
+#define SERIAL_NUMBER "dfb1e54e863a175d0832615844d1e9bb08d8a9cd"
+
+#define AUTH_URL "/hw/" SERIAL_NUMBER "/auth"
+
+using namespace aquabox;
 
 void Cloud::connect()
 {
     for(auto s : m_streams)
     {
-        s.second->connect();
+        try
+        {
+            if (!s.second->isAttached()) {
+                s.second->attach();
+            }
+        }
+        catch (std::exception& e) {
+            LOG_ERROR << "Can't connect to stream " << s.first << ": " << e.what();
+        } catch(...) {
+            LOG_ERROR << "Can't connect to stream " << s.first;
+        }
     }
 }
 
@@ -22,8 +37,11 @@ void Cloud::disconnect()
 
 bool Cloud::isRegistered()
 {
-    LOG_INFO << "Checking if device is registered on " << CLOUD_HTTP;
-    HttpClient client(CLOUD_HTTP);
+    const std::string cloudBaseUrl = Settings::string(Settings::CLOUD_URL, "edwardoid.redirectme.net");
+    const std::string cloudHttpUrl = cloudBaseUrl + ":4444";
+    const std::string cloudWSUrl =  std::string("") + cloudBaseUrl + ":4444";
+    LOG_INFO << "Checking if device is registered on " << cloudHttpUrl;
+    HttpClient client(cloudHttpUrl);
 
     nlohmann::json authData(
         {
@@ -33,25 +51,38 @@ bool Cloud::isRegistered()
     );
 
     try {
-        auto response = client.request("POST", "/hw/auth", authData.dump(4));
+        auto response = client.request("POST", AUTH_URL, authData.dump(4));
         if (response->status_code == "200 OK") {
             nlohmann::json resp = nlohmann::json::parse(response->content);
             auto streamsAvailable = resp.find("streams");
-            
-            for(auto s : m_streams)
-            {
-                if(s.second != nullptr)
-                    s.second->disconnect();
-            }
-
 
             if (streamsAvailable->is_array()) {
                 for (size_t i = 0; i < streamsAvailable.value().size(); ++i) {
                     auto stream = streamsAvailable.value().at(i);
                     if (stream.is_string()) {
                         auto name  = stream.get<std::string>();
-                        LOG_INFO << "Stream " << name << " is available.";
-                        m_streams.insert({ name, std::make_shared<CloudStream>(name) });
+                        std::string url = cloudWSUrl;
+                        url += "/stream/";
+                        url += SERIAL_NUMBER;
+                        url += "/";
+                        url += name;
+                        bool insert = true;
+                        if (m_streams.find(name) != m_streams.end()) {
+                            insert = m_streams[name]->isAttached();
+                        }
+
+                        std::shared_ptr<CloudStream> stream;
+                        
+                        if (insert) {
+                            if (name == "commands") {
+                                stream = std::make_shared<CommandsStream>(url);
+                            } else {
+                                stream = std::make_shared<CloudStream>(url);
+                            }
+                            m_streams.insert({ name, stream});
+                        }
+
+                        LOG_INFO << "Stream " << name << " is available" << (m_streams[name]->isAttached() ? " and is already attached.": ".");
                     }
                 }
             }
@@ -64,7 +95,12 @@ bool Cloud::isRegistered()
         }
     }
     catch(std::exception& e) {
-        LOG_ERROR << e.what();
+        LOG_ERROR << e.what() << " was connected to " << m_streams.size() << " streams";
+        for (auto i : m_streams) {
+            LOG_ERROR << "Trying to detach from " << i.first;
+            i.second->detach();
+        }
+        m_streams.clear();
         return false;
     }
 }

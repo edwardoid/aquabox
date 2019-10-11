@@ -109,7 +109,8 @@ int AquaBox::start()
             StatusImage::display();
         }
 
-        //m_cloud.heartheat();
+        if (Options::EnableCloud)
+            m_cloud.heartheat();
         SensorsTracker::processUpdates();
     }, std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::seconds(10)));
 
