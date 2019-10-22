@@ -29,8 +29,11 @@ CommandsStream::CommandsStream(std::string url)
 void CommandsStream::onMessage(std::shared_ptr<class Connection> connection, std::shared_ptr<class InMessage> message)
 {
     try {
+        nlohmann::json json = nlohmann::json::parse(message->string());
+
+
         connection->send(message->string());
     } catch (nlohmann::json::parse_error err) {
-        LOG_ERROR << "Can't parse command: " << err.what();
+        connection->send(nlohmann::json({ "error", err.what()}).dump(4));
     }
 }

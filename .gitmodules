@@ -31,3 +31,6 @@
 [submodule "3dp/owt"]
 	path = 3dp/owt
 	url = https://github.com/edwardoid/1w-temp.git
+[submodule "3dp/json-schema-validator"]
+	path = 3dp/json-schema-validator
+	url = https://github.com/pboettch/json-schema-validator.git
