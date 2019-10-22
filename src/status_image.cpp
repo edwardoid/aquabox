@@ -32,8 +32,8 @@ void StatusImage::display(std::string fbDevice)
     }
 
     nlohmann::json host({
-        {"rest", Settings::integer(Settings::HTTP_PORT, Config::REST_PORT)},
-        {"stream", Settings::integer(Settings::STREAM_PORT, Config::WS_PORT)}
+        {"rest", Settings::integer(Settings::Keys::HTTP_PORT, Settings::Defaults::REST_PORT)},
+        {"stream", Settings::integer(Settings::Keys::STREAM_PORT, Settings::Defaults::WS_PORT)}
     });
 
     host["host"] = boost::asio::ip::host_name();

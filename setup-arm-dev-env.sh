@@ -111,8 +111,8 @@ export PKG_CONFIG_PATH
 
 export CPPFLAGS="-I${SYSROOT_DIR}/usr/include -I${SYSROOT_DIR}/usr/include/arm-linux-gnueabihf -I${SYSROOT_DIR}/opt/vc/include/ -I${SYSROOT_DIR}/opt/vc/include/interface/vcos/pthreads -I${SYSROOT_DIR}/opt/vc/include/interface/vmcs_host/linux ${AM_CPPFLAGS_OMX}"
 
-export CXXFLAGS="$CPPFLAGS -g -O4"
-export CFLAGS="-g -O4"
+export CXXFLAGS="$CPPFLAGS -O4"
+export CFLAGS="-O4"
 
 echo "************* R E A D Y *************"
 
