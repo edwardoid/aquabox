@@ -1,6 +1,5 @@
 #include "web_server.h"
 #include "settings.h"
-#include "config.h"
 
 using namespace aquabox;
 
@@ -10,7 +9,7 @@ bool WebServer::start()
     setupRoutes();
 
     m_rest = std::thread([this]() {
-        m_http.config.port = Settings::integer(Settings::HTTP_PORT, Config::REST_PORT);
+        m_http.config.port = Settings::integer(Settings::Keys::HTTP_PORT, Settings::Defaults::REST_PORT);
         LOG_INFO << "Starting web server on " << m_http.config.address << ":" << m_http.config.port;
         bindApiCalls();
 
@@ -18,7 +17,7 @@ bool WebServer::start()
     });
 
     m_stream = std::thread([this]() {
-        m_ws.config.port = Settings::integer(Settings::STREAM_PORT, Config::WS_PORT);
+        m_ws.config.port = Settings::integer(Settings::Keys::STREAM_PORT, Settings::Defaults::WS_PORT);
         LOG_INFO << "Starting websocket server" << m_ws.config.address << ":" << m_ws.config.port;
 
         WS.Updates(m_ws, m_updates);

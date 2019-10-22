@@ -37,7 +37,7 @@ void Cloud::disconnect()
 
 bool Cloud::isRegistered()
 {
-    const std::string cloudBaseUrl = Settings::string(Settings::CLOUD_URL, "edwardoid.redirectme.net");
+    const std::string cloudBaseUrl = Settings::string(Settings::Keys::CLOUD_URL, Settings::Defaults::CLOUD_URL);
     const std::string cloudHttpUrl = cloudBaseUrl + ":4444";
     const std::string cloudWSUrl =  std::string("") + cloudBaseUrl + ":4444";
     LOG_INFO << "Checking if device is registered on " << cloudHttpUrl;

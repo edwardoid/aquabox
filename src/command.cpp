@@ -41,6 +41,17 @@ Serializable<Operation>::Str2EnumMap Serializable<Operation>::str2Val({
     { "turn_off", Operation::TurnOff }
 });
 
+void Command::setSeqNum(int num)
+{
+    m_seqNum = num;
+}
+
+
+int Command::seqNum() const
+{
+    return m_seqNum;
+}
+
 void Command::setBody(std::string body)
 {
     m_body = body;

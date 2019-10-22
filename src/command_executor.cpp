@@ -1,7 +1,6 @@
 #include "command_executor.h"
 #include "aquabox.h"
 #include "settings.h"
-#include "config.h"
 #include "relay.h"
 #include "sensor.h"
 #include "rule.h"
@@ -87,8 +86,8 @@ bool CommandExecutor::exec(const Command& cmd)
 bool CommandExecutor::GetStatus()
 {
     nlohmann::json host({
-        {"rest", Settings::integer(Settings::HTTP_PORT, Config::REST_PORT)},
-        {"stream", Settings::integer(Settings::STREAM_PORT, Config::WS_PORT)}
+        {"rest", Settings::integer(Settings::Keys::HTTP_PORT, Settings::Defaults::REST_PORT)},
+        {"stream", Settings::integer(Settings::Keys::STREAM_PORT, Settings::Defaults::WS_PORT)}
     });
 
     std::string wifiState = "unknown";

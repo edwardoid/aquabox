@@ -42,6 +42,7 @@ int main(int argc, char** argv)
     else if(strcmp(argv[i], "--help") == 0) {
       std::cout << "aquabox [OPTIONS]\n"
                 << " --service                Applications will be runned as part of Linux service\n"
+                << " --nodraw                 Applications will not render on display\n"
                 << " --ignore-lock            Do not create lock/runfiles\n"
                 << " --disable-access-point   Do not switch to AP mode if there is no internet connection\n"
                 << " --standalone             Do not connect to remote service\n"

@@ -1,23 +1,39 @@
 #include "settings.h"
-#include "config.h"
 #include <fstream>
 #include <thread>
 
 using namespace aquabox;
 
-const std::string Settings::LOG_LEVEL = "log";
+const std::string Settings::Keys::LOG_LEVEL = "log";
 
-const std::string Settings::WORKING_DIRECTORY = "workingDirectory";
-const std::string Settings::WEB_ROOT = "webRoot";
+const std::string Settings::Keys::WORKING_DIRECTORY = "workingDirectory";
+const std::string Settings::Keys::WEB_ROOT = "webRoot";
 
-const std::string Settings::HTTP_PORT = "httpPort";
-const std::string Settings::STREAM_PORT = "streamPort";
-const std::string Settings::NETWORK = "network";
-const std::string Settings::AP_SSID = "ssid";
-const std::string Settings::AP_PASSWORD = "password";
-const std::string Settings::USERS = "users";
-const std::string Settings::THREADS = "threads";
-const std::string Settings::CLOUD_URL = "cloudUrl";
+const std::string Settings::Keys::HTTP_PORT = "httpPort";
+const std::string Settings::Keys::STREAM_PORT = "streamPort";
+const std::string Settings::Keys::NETWORK = "network";
+const std::string Settings::Keys::AP_SSID = "ssid";
+const std::string Settings::Keys::AP_PASSWORD = "password";
+const std::string Settings::Keys::USERS = "users";
+const std::string Settings::Keys::THREADS = "threads";
+const std::string Settings::Keys::CLOUD_URL = "cloudUrl";
+
+const std::string Settings::Defaults::GIT_HASH = AB_GIT_HASH ;
+const std::string Settings::Defaults::APPLICATION = "GoAqua";
+const std::string Settings::Defaults::DESCRIPTION = "Some kind of smart aquarium controller";
+const std::string Settings::Defaults::VERSION = AB_VERSION;
+const uint16_t Settings::Defaults::VERSION_MAJOR = AB_VERSION_MAJOR;
+const uint16_t Settings::Defaults::VERSION_MINOR = AB_VERSION_MINOR;
+const std::string Settings::Defaults::LOCK_FILE = "/tmp/" + Settings::Defaults::APPLICATION + ".lock";
+const std::string Settings::Defaults::AUTHOR = "Edward Sargsyan";
+const std::string Settings::Defaults::EMAIL = "edward.sarkisyan@gmail.com";
+const std::string Settings::Defaults::ConfigurationFile = "config.json";
+const std::string Settings::Defaults::CLOUD_URL = "edwardoid.redirectme.net";
+int Settings::Defaults::REST_PORT = 1213;
+int Settings::Defaults::WS_PORT = 1214;
+const std::string Settings::Defaults::AP_SSID = "AquaBox";
+const std::string Settings::Defaults::AP_PASSWORD = "aquabox";
+
 
 bool Settings::dataToWrite = false;
 bool Settings::ready = false;
@@ -28,7 +44,7 @@ void Settings::read()
 {
     std::lock_guard<std::recursive_mutex> lock(mx);
 
-    std::ifstream is(Config::ConfigurationFile);
+    std::ifstream is(Defaults::ConfigurationFile);
     std::string content;
     std::string line; 
     while(std::getline(is, line))
@@ -44,7 +60,7 @@ void Settings::write()
 
     if (!dataToWrite)
         return;
-    std::ofstream os(Config::ConfigurationFile);
+    std::ofstream os(Settings::Defaults::ConfigurationFile);
     os << json.dump(4);
     dataToWrite = false;
 }

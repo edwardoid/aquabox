@@ -38,6 +38,8 @@ namespace aquabox
     class Command
     {
     public:
+        void setSeqNum(int num);
+        int seqNum() const;
         void setBody(std::string body);
         const std::string& body() const;
         void setParameters(const std::unordered_map<std::string, std::string>& params);
@@ -51,6 +53,7 @@ namespace aquabox
         const std::string& response() const;
         Result result() const;
     private:
+        int m_seqNum = 0;
         std::unordered_map<std::string, std::string> m_params;
         std::string m_body;
         std::string m_data;

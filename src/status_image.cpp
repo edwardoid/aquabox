@@ -1,7 +1,6 @@
 #include "status_image.h"
 #include "log.h"
 #include "settings.h"
-#include "config.h"
 #include <nlohmann/json.hpp>
 #include <pstream.h>
 #include <framebuffer.h>

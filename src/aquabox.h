@@ -53,6 +53,7 @@ namespace aquabox
     private:
         void networkStateChanged(IoT::WiFi::State state);
         void trackSensors();
+        void reconnectIfNeeded();
         void readDevices(const Path& root);
         void readUsers();
         void readRules(const Path& root);

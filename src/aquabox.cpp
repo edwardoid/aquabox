@@ -1,5 +1,4 @@
 #include "aquabox.h"
-#include "config.h"
 #include "settings.h"
 #include "lock_file.h"
 #include "log.h"
@@ -41,21 +40,21 @@ int AquaBox::start()
 {
     Lockfile lock;
 
-    plog::init( plog::severityFromString(Settings::string(Settings::LOG_LEVEL, plog::severityToString(plog::Severity::info)).c_str()),
+    plog::init( plog::severityFromString(Settings::string(Settings::Keys::LOG_LEVEL, plog::severityToString(plog::Severity::info)).c_str()),
                 &m_consoleAppender);
 
-    plog::init( plog::severityFromString(Settings::string(Settings::LOG_LEVEL, plog::severityToString(plog::Severity::info)).c_str()),
+    plog::init( plog::severityFromString(Settings::string(Settings::Keys::LOG_LEVEL, plog::severityToString(plog::Severity::info)).c_str()),
                 &m_logAppender);
     
     if (Options::Service) {
-        plog::init( plog::severityFromString(Settings::string(Settings::LOG_LEVEL, plog::severityToString(plog::Severity::info)).c_str()),
+        plog::init( plog::severityFromString(Settings::string(Settings::Keys::LOG_LEVEL, plog::severityToString(plog::Severity::info)).c_str()),
                 &m_fileAppender);
     }
 
-    LOG_INFO << "Starting " << Config::APPLICATION << " ver. " << std::hex << Config::VERSION_MAJOR << "." << Config::VERSION_MINOR;
+    LOG_INFO << "Starting " << Settings::Defaults::APPLICATION << " ver. " << std::hex << Settings::Defaults::VERSION_MAJOR << "." << Settings::Defaults::VERSION_MINOR;
     if(Options::Lock) {
         if (!lock.create()) {
-            LOG_FATAL << "Another instance of " << Config::APPLICATION << " is running...";
+            LOG_FATAL << "Another instance of " << Settings::Defaults::APPLICATION << " is running...";
             std::exit(EXIT_FAILURE);
         }
     }
@@ -73,18 +72,18 @@ int AquaBox::start()
         cwd[bytes] = '\0';
     }
 
-    m_wd = Settings::string(Settings::WORKING_DIRECTORY, cwd);
+    m_wd = Settings::string(Settings::Keys::WORKING_DIRECTORY, cwd);
     if (!m_wd.normalize()) {
         LOG_ERROR << "Bad working directory path " << m_wd;
     } else {
         if(0 != chdir(m_wd.c_str())) {
             LOG_ERROR << "Can't change working directory to " << m_wd << " errno: " << errno << " : " << strerror(errno);
         } else {
-            LOG_INFO << "Changed workign direcotry to " << m_wd;
+            LOG_INFO << "Changed working direcotry to " << m_wd;
         }
     }
 
-    m_poolOptions.setQueueSize(Settings::integer(Settings::THREADS, std::thread::hardware_concurrency()));
+    m_poolOptions.setQueueSize(Settings::integer(Settings::Keys::THREADS, std::thread::hardware_concurrency()));
     m_poolOptions.setQueueSize(1024);
 
     m_pool.reset(new tp::ThreadPool(m_poolOptions));
@@ -95,8 +94,8 @@ int AquaBox::start()
     });
 
     m_wifi->init("",
-                 Settings::string(Settings::AP_SSID, Config::AP_SSID),
-                 Settings::string(Settings::AP_PASSWORD, Config::AP_PASSWORD),
+                 Settings::string(Settings::Keys::AP_SSID, Settings::Defaults::AP_SSID),
+                 Settings::string(Settings::Keys::AP_PASSWORD, Settings::Defaults::AP_PASSWORD),
                  Options::AccessPoint);
 
     readDevices(m_wd);
@@ -108,10 +107,12 @@ int AquaBox::start()
         if (Options::Render) {
             StatusImage::display();
         }
-
-        if (Options::EnableCloud)
+        if (Options::EnableCloud) {
             m_cloud.heartheat();
+        }
         SensorsTracker::processUpdates();
+
+        reconnectIfNeeded();
     }, std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::seconds(10)));
 
     m_timer.start();
@@ -129,10 +130,25 @@ void AquaBox::networkStateChanged(IoT::WiFi::State state)
         static std::time_t last = 0;
         std::time_t now = std::time(nullptr);
         bool reconnect = (now - last) > 60 * 60; 
-        std::string uuid = Settings::string(Settings::NETWORK, "");
+        std::string uuid = Settings::string(Settings::Keys::NETWORK, "");
         if(reconnect && !uuid.empty()) {
             m_wifi->connectToNetwork(uuid);
         }
+    }
+}
+
+void AquaBox::reconnectIfNeeded()
+{
+    static std::time_t last = 0;
+    std::time_t now = std::time(nullptr);
+    bool reconnect = (now - last) > 60; 
+    if (m_wifi->state() != IoT::WiFi::State::Disconnected && reconnect) {
+        return;
+    }
+    std::string uuid = Settings::string(Settings::Keys::NETWORK, "");
+    if(!uuid.empty()) {
+        LOG_INFO << "Network is down, trying to connect to " << uuid;
+        m_wifi->connectToNetwork(uuid);
     }
 }
 
@@ -145,7 +161,7 @@ void AquaBox::readDevices(const Path& p)
 
 void AquaBox::readUsers()
 {
-    auto users = Settings::array(Settings::USERS);
+    auto users = Settings::array(Settings::Keys::USERS);
 
     LOG_INFO << "Loading " << users.size() << " users...";
     for (auto u : users) {
