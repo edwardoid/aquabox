@@ -64,7 +64,11 @@
 			"complex": "cpp",
 			"future": "cpp",
 			"typeindex": "cpp",
-			"csetjmp": "cpp"
+			"csetjmp": "cpp",
+			"algorithm": "cpp",
+			"cfenv": "cpp",
+			"regex": "cpp",
+			"string": "cpp"
 		}
 	}
 }
