@@ -43,6 +43,8 @@ set(IWS_INCLUDE_DIR "${PROJECT_SOURCE_DIR}/3dp/iws/include")
 set(OWT_INCLUDE_DIR "${PROJECT_SOURCE_DIR}/3dp/owt/include")
 set(HEADER_SEARCH_PATHS ${PROJECT_INCLUDE_DIR} ${PLOG_INCLUDE_DIR})
 set(NLOHMANN_JSON_DIR ${NLOHMANN_INCLUDE_DIR})
+add_library(json-hpp INTERFACE)
+set(NLOHMANN_JSON_DIR ${NLOHMANN_INCLUDE_DIR}/nlohmann)
 
 option(BUILD_TESTING OFF)
 option(WITH_TESTS OFF)
@@ -70,10 +72,15 @@ add_subdirectory("${THREE_DP_DIR}/swshttp")
 add_subdirectory("${THREE_DP_DIR}/swsws")
 add_subdirectory("${THREE_DP_DIR}/qrencode")
 add_subdirectory("${THREE_DP_DIR}/nlohmann")
-add_subdirectory("${THREE_DP_DIR}/json-schema-validator")
 add_subdirectory("${THREE_DP_DIR}/iws")
 add_subdirectory("${THREE_DP_DIR}/libfb")
 add_subdirectory("${THREE_DP_DIR}/owt")
+
+add_library(json-hpp INTERFACE)
+target_include_directories(json-hpp
+    INTERFACE
+        ${NLOHMANN_INCLUDE_DIR})
+add_subdirectory("${THREE_DP_DIR}/json-schema-validator")
 
 execute_process(
   COMMAND git log -1 --format=%H

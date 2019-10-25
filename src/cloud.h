@@ -37,6 +37,7 @@ namespace aquabox
         bool isRegistered();
         void doRegister();
         void heartheat();
+        std::shared_ptr<CloudStream> stream(std::string name);
     private:
         bool isConnected();
     private:

@@ -20,6 +20,7 @@
 #define CLOUD_STREAM_H
 
 #include <client_ws.hpp>
+#include <thread>
 
 namespace aquabox
 {
@@ -30,6 +31,7 @@ namespace aquabox
         void attach();
         bool isAttached() const;
         void detach();
+        void send(std::string data);
         ~CloudStream();
     protected:
         virtual void onOpen(std::shared_ptr<class Connection> connection);
@@ -37,6 +39,8 @@ namespace aquabox
         virtual void onClose(std::shared_ptr<class Connection> connection, int, const std::string &);
         virtual void onError(std::shared_ptr<class Connection>, const SimpleWeb::error_code &);
     private:
+        std::shared_ptr<CloudStream::Connection> m_connection;
+        std::thread m_thread;
         std::string m_url;
         bool m_attached;
     };

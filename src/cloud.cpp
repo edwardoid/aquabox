@@ -9,7 +9,7 @@
 
 #define SERIAL_NUMBER "dfb1e54e863a175d0832615844d1e9bb08d8a9cd"
 
-#define AUTH_URL "/hw/" SERIAL_NUMBER "/auth"
+#define AUTH_URL "/hw/api/v1/register"
 
 using namespace aquabox;
 
@@ -38,7 +38,7 @@ void Cloud::disconnect()
 bool Cloud::isRegistered()
 {
     const std::string cloudBaseUrl = Settings::string(Settings::Keys::CLOUD_URL, Settings::Defaults::CLOUD_URL);
-    const std::string cloudHttpUrl = cloudBaseUrl + ":4444";
+    const std::string cloudHttpUrl = cloudBaseUrl + ":5555";
     const std::string cloudWSUrl =  std::string("") + cloudBaseUrl + ":4444";
     LOG_INFO << "Checking if device is registered on " << cloudHttpUrl;
     HttpClient client(cloudHttpUrl);
@@ -46,14 +46,18 @@ bool Cloud::isRegistered()
     nlohmann::json authData(
         {
             { "type", "box" },
-            { "serial", "some-generated-uuid" }
+            { "id", SERIAL_NUMBER }
         }
     );
 
     try {
         auto response = client.request("POST", AUTH_URL, authData.dump(4));
-        if (response->status_code == "200 OK") {
-            nlohmann::json resp = nlohmann::json::parse(response->content);
+        auto lenPos = response->header.find("Content-Length");
+        if (response->status_code == "202 Accepted" && lenPos != response->header.end()) {
+
+            int len = std::stoi(lenPos->second);
+            std::string data = response->content.string().substr(0, len);
+            nlohmann::json resp = nlohmann::json::parse(data);
             auto streamsAvailable = resp.find("streams");
 
             if (streamsAvailable->is_array()) {
@@ -62,18 +66,17 @@ bool Cloud::isRegistered()
                     if (stream.is_string()) {
                         auto name  = stream.get<std::string>();
                         std::string url = cloudWSUrl;
-                        url += "/stream/";
+                        url += "/hw/api/v1/stream/";
                         url += SERIAL_NUMBER;
                         url += "/";
                         url += name;
                         bool insert = true;
                         if (m_streams.find(name) != m_streams.end()) {
-                            insert = m_streams[name]->isAttached();
+                            insert = !m_streams[name]->isAttached();
                         }
-
-                        std::shared_ptr<CloudStream> stream;
                         
                         if (insert) {
+                            std::shared_ptr<CloudStream> stream;
                             if (name == "commands") {
                                 stream = std::make_shared<CommandsStream>(url);
                             } else {
@@ -82,7 +85,11 @@ bool Cloud::isRegistered()
                             m_streams.insert({ name, stream});
                         }
 
-                        LOG_INFO << "Stream " << name << " is available" << (m_streams[name]->isAttached() ? " and is already attached.": ".");
+                        if (m_streams[name]->isAttached()) {
+                            LOG_VERBOSE << "Stream " << name << " is available and is already attached.";
+                        } else {
+                            LOG_INFO << "Stream " << name << " is available.";
+                        }
                     }
                 }
             }
@@ -142,4 +149,13 @@ void Cloud::heartheat()
 
         working = false;
     });
+}
+
+std::shared_ptr<CloudStream> Cloud::stream(std::string name)
+{
+    auto p = m_streams.find(name);
+    if (p == m_streams.end() || !p->second->isAttached()) {
+        return nullptr;
+    }
+    return p->second;
 }

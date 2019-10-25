@@ -46,6 +46,11 @@ int AquaBox::start()
     plog::init( plog::severityFromString(Settings::string(Settings::Keys::LOG_LEVEL, plog::severityToString(plog::Severity::info)).c_str()),
                 &m_logAppender);
     
+    if (Options::EnableCloud) {
+        plog::init( plog::severityFromString(Settings::string(Settings::Keys::LOG_LEVEL, plog::severityToString(plog::Severity::info)).c_str()),
+                &m_cloudAppender);
+    }
+
     if (Options::Service) {
         plog::init( plog::severityFromString(Settings::string(Settings::Keys::LOG_LEVEL, plog::severityToString(plog::Severity::info)).c_str()),
                 &m_fileAppender);
@@ -320,6 +325,11 @@ std::vector<IoT::WifiNetwork> AquaBox::availableNetworks()
 IoT::WiFi& AquaBox::networking()
 {
     return *m_wifi;
+}
+
+Cloud& AquaBox::cloud()
+{
+    return m_cloud;
 }
 
 void AquaBox::postUpdate(std::shared_ptr<Event> event)
