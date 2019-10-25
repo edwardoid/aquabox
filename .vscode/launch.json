@@ -10,7 +10,7 @@
             "type": "cppdbg",
             "request": "launch",
             "program": "${workspaceFolder}/bin/host/aquabox",
-            "args": [ "--service", "--ignore-lock"],
+            "args": [ "--service", "--disable-access-point", "--ignore-lock"],
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}/bin/host",
             "externalConsole": true,
