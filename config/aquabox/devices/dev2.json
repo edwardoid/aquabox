@@ -1,0 +1,13 @@
+{
+    "address": "PHY:GPIO:1",
+    "class": "relay",
+    "id": "dev2",
+    "index": 2,
+    "meta": {
+        "model": "1 dps",
+        "vendor": "dennerle"
+    },
+    "name": "Quantrum 300",
+    "rulesEnabled": true,
+    "type": "co2"
+}

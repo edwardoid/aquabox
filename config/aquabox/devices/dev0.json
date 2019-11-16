@@ -1,0 +1,13 @@
+{
+    "address": "PHY:GPIO:19",
+    "class": "relay",
+    "id": "dev0",
+    "index": 0,
+    "meta": {
+        "model": "100W",
+        "vendor": "juwel"
+    },
+    "name": "AquaHeat 100",
+    "rulesEnabled": true,
+    "type": "heater"
+}

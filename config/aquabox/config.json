@@ -1,0 +1,19 @@
+{
+    "cloudUrl": "edwardoid.redirectme.net",
+    "encryption": "WPA",
+    "http": "",
+    "httpPort": 8974,
+    "log": "INFO",
+    "network": "725bbc7c-8e2b-4225-abec-111d35c6f4f9",
+    "password": "azazello",
+    "ssid": "AquaBox",
+    "streamPort": 1214,
+    "threads": 8,
+    "users": [
+        {
+            "password": "pass",
+            "user": "admin"
+        }
+    ],
+    "workingDirectory": "/aquabox/bin"
+}
