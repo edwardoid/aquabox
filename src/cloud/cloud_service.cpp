@@ -1,4 +1,5 @@
 #include "cloud_service.h"
+#include "applications_api.h"
 #include "boxes_manager.h"
 #include "database.h"
 
@@ -28,6 +29,6 @@ bool CloudService::start()
     plog::init( plog::Severity::debug, &m_logAppender);
 
     LOG_INFO << "Starting Aquabox Cloud Service...";
-
+    ApplicationsApi::start();
     return BoxesManager::start();
 }

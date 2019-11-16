@@ -19,7 +19,7 @@
 #ifndef ACTION_H
 #define ACTION_H
 
-#include "enumerations.h"
+#include "action_type.h"
 #include "property.h"
 #include "time.h"
 

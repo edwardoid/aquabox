@@ -68,7 +68,18 @@
 			"algorithm": "cpp",
 			"cfenv": "cpp",
 			"regex": "cpp",
-			"string": "cpp"
+			"string": "cpp",
+			"cuchar": "cpp",
+			"iterator": "cpp",
+			"map": "cpp",
+			"memory_resource": "cpp",
+			"optional": "cpp",
+			"random": "cpp",
+			"set": "cpp",
+			"rope": "cpp",
+			"slist": "cpp",
+			"scoped_allocator": "cpp",
+			"shared_mutex": "cpp"
 		}
 	}
 }

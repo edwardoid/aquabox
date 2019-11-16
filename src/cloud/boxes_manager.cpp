@@ -18,8 +18,8 @@ bool BoxesManager::start()
 
     self.setupRoutes();
 
-    static std::thread managerThread([&self](){
-       self.m_ws.config.port = 4444;
+    static std::thread managerThread([](){
+       BoxesManager::self.m_ws.config.port = 4444;
        LOG_INFO << "Starting Websocket server on " << self.m_ws.config.port;
        self.m_ws.start();
     });
@@ -86,7 +86,7 @@ void BoxesManager::setupRoutes()
         if (status == REJECTED) {
             return;
         }
-        LOG_INFO << "Connection from " << connection->remote_endpoint().address().to_string() << " to " << connection->path << " closed.";
+        LOG_INFO << "Connection from " << connection->remote_endpoint.address().to_string() << " to " << connection->path << " closed.";
         const auto id = m_log.extract(connection->path)[":id"];
         auto ref = m_connections.find(id);
         if (ref == m_connections.end()) {
@@ -100,7 +100,7 @@ void BoxesManager::setupRoutes()
 
     m_ws.endpoint[m_log.url()].on_error = [this](std::shared_ptr<WSServer::Connection> connection,
                                                  SimpleWeb::error_code) {
-        LOG_INFO << "Connection from " << connection->remote_endpoint().address().to_string() << " to " << connection->path << " closed due error.";
+        LOG_INFO << "Connection from " << connection->remote_endpoint.address().to_string() << " to " << connection->path << " closed due error.";
         const auto id = m_log.extract(connection->path)[":id"];
         auto ref = m_connections.find(id);
         if (ref == m_connections.end()) {
@@ -129,7 +129,7 @@ void BoxesManager::setupRoutes()
         if (status == REJECTED) {
             return;
         }
-        LOG_INFO << "Connection from " << connection->remote_endpoint().address().to_string() << " to " << connection->path << " closed.";
+        LOG_INFO << "Connection from " << connection->remote_endpoint.address().to_string() << " to " << connection->path << " closed.";
         const auto id = m_events.extract(connection->path)[":id"];
         auto ref = m_connections.find(id);
         if (ref == m_connections.end()) {
@@ -143,7 +143,7 @@ void BoxesManager::setupRoutes()
 
     m_ws.endpoint[m_events.url()].on_error = [this](std::shared_ptr<WSServer::Connection> connection,
                                                  SimpleWeb::error_code) {
-        LOG_INFO << "Connection from " << connection->remote_endpoint().address().to_string() << " to " << connection->path << " closed due error.";
+        LOG_INFO << "Connection from " << connection->remote_endpoint.address().to_string() << " to " << connection->path << " closed due error.";
         const auto id = m_events.extract(connection->path)[":id"];
         auto ref = m_connections.find(id);
         if (ref == m_connections.end()) {
@@ -172,7 +172,7 @@ void BoxesManager::setupRoutes()
         if (status == REJECTED) {
             return;
         }
-        LOG_INFO << "Connection from " << connection->remote_endpoint().address().to_string() << " to " << connection->path << " closed.";
+        LOG_INFO << "Connection from " << connection->remote_endpoint.address().to_string() << " to " << connection->path << " closed.";
         const auto id = m_commands.extract(connection->path)[":id"];
         auto ref = m_connections.find(id);
         if (ref == m_connections.end()) {
@@ -186,7 +186,7 @@ void BoxesManager::setupRoutes()
 
     m_ws.endpoint[m_commands.url()].on_error = [this](std::shared_ptr<WSServer::Connection> connection,
                                                       SimpleWeb::error_code) {
-        LOG_INFO << "Connection from " << connection->remote_endpoint().address().to_string() << " to " << connection->path << " closed due error.";
+        LOG_INFO << "Connection from " << connection->remote_endpoint.address().to_string() << " to " << connection->path << " closed due error.";
         const auto id = m_commands.extract(connection->path)[":id"];
         auto ref = m_connections.find(id);
         if (ref == m_connections.end()) {
@@ -218,10 +218,10 @@ bool BoxesManager::isConnected(std::string id)
 
 bool BoxesManager::acceptConnectionFromHW(std::string id, std::shared_ptr<WSServer::Connection> connection)
 {
-    LOG_INFO << "Got connection from " << connection->remote_endpoint().address().to_string()
+    LOG_INFO << "Got connection from " << connection->remote_endpoint.address().to_string()
              << " to stream 'log' for " << id << " to " << connection->path;
     if (!Database::i().wasProduced(id)) {
-        LOG_WARNING << "Rejecting connection from " << connection->remote_endpoint().address().to_string() << " to stream for " << id;
+        LOG_WARNING << "Rejecting connection from " << connection->remote_endpoint.address().to_string() << " to stream for " << id;
         connection->send_close(REJECTED);
         return false;
     }

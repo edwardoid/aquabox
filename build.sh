@@ -18,8 +18,8 @@
 
 
 echo "Required CMAKE is 3.7.2"
-#export CMAKE=$HOME/cmake-3.7.2/bin/cmake
-export CMAKE=cmake
+export CMAKE=$HOME/cmake-3.7.2/bin/cmake
+#export CMAKE=cmake
 export SRC_DIR=$PWD/../..
 echo "Toolchain should be installed in /usr"
 source $SRC_DIR/setup-arm-dev-env.sh

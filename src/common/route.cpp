@@ -56,7 +56,7 @@ Route Route::sub() const
     return *this;
 }
 
-std::string Route::url()
+std::string Route::url() const
 {
     std::stringstream ss;
     ss << '^';

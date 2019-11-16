@@ -35,7 +35,7 @@ namespace aquabox
 
         Route sub() const;
 
-        std::string url();
+        std::string url() const;
 
         std::vector<std::string> parse(std::string& url) const;
         std::unordered_map<std::string, std::string> extract(std::string& url) const;

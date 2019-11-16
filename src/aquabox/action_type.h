@@ -16,19 +16,15 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "cloud_appender.h"
-#include "aquabox.h"
-#include <thread>
+#ifndef ACTION_TYPE_H
+#define ACTION_TYPE_H
 
-using namespace aquabox;
-
-void CloudAppender::write(const plog::Record& record)
+namespace aquabox
 {
-    std::lock_guard<std::mutex> guard(m_mx);
-    auto stream = AquaBox::i().cloud().stream("log");
-    if (!stream) {
-        return;
-    }
-
-    stream->send(record.getMessage());
+    enum class ActionType : int {
+        TurnOn = 0,
+        TurnOff
+    };
 }
+
+#endif // ACTION_TYPE_H

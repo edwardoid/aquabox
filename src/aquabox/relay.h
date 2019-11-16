@@ -20,6 +20,7 @@
 #define RELAY_H
 
 #include "device.h"
+#include "action_type.h"
 
 namespace aquabox
 {

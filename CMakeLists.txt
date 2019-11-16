@@ -47,6 +47,7 @@ option(WITH_TOOLS OFF)
 option(FREETYPE ON)
 
 find_package(OpenSSL REQUIRED)
+find_package (Threads)
 
 include_directories(${PLOG_INCLUDE_DIR})
 include_directories(${QRENDOCE_INCLUDE_DIR})
@@ -59,7 +60,6 @@ include_directories(${PSTREAMS_INCLUDE_DIR})
 include_directories(${FB_INCLUDE_DIR})
 include_directories(${IWS_INCLUDE_DIR})
 include_directories(${OWT_INCLUDE_DIR})
-include_directories(${PNG_INCLUDE_DIR})
 include_directories(${PNG_INCLUDE_DIR})
 
 add_subdirectory("${THREE_DP_DIR}/plog")
@@ -84,8 +84,6 @@ find_package(PNG REQUIRED)
 find_package(Boost REQUIRED COMPONENTS system)
 find_package(Freetype REQUIRED)
 find_package(OpenSSL)
-
-#set(CMAKE_C_FLAGS ${NETWORKMANAGER_CFLAGS})
 
 link_directories(${Boost_LIBRARY_DIRS})
 link_directories(${NETWORKMANAGER_LIBRARY_DIRS})

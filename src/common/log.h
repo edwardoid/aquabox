@@ -16,21 +16,8 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef CLOUD_APPENDER_H
-#define CLOUD_APPENDER_H
-
-#include "plog/Appenders/IAppender.h"
-#include <mutex>
-
-namespace aquabox
-{
-    class CloudAppender: public plog::IAppender
-    {
-    public:
-        virtual void write(const plog::Record& record) override;
-    private:
-        std::mutex m_mx;
-    };
-}
-
-#endif // CLOUD_APPENDER_H
+#ifndef AQUABOX_LOG_H
+#define AQUABOX_LOG_H
+#include "plog/Log.h"
+#include "plog/Appenders/ColorConsoleAppender.h"
+#endif // LOG_H

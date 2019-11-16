@@ -18,6 +18,8 @@
 
 #include "command.h"
 #include "enumerations.h"
+#include "command_schema.h"
+#include "validation_error_handler.h"
 
 using namespace aquabox;
 
@@ -58,6 +60,13 @@ Serializable<Operation>::Str2EnumMap Serializable<Operation>::str2Val({
     { "turn_on", Operation::TurnOn },
     { "turn_off", Operation::TurnOff }
 });
+
+bool Command::validate(const nlohmann::json& obj)
+{
+    ValidationErrorHandler handler;
+    CommandValidator::validator().validate(obj, handler);
+    return handler.error().empty();
+}
 
 void Command::setSeqNum(int num)
 {

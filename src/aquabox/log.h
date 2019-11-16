@@ -16,5 +16,4 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "plog/Log.h"
-#include "plog/Appenders/ColorConsoleAppender.h"
+#include "./../common/log.h"

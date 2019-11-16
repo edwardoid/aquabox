@@ -52,11 +52,6 @@ namespace aquabox
         }
         static std::string convert(EnumClass value) { auto pos = val2Str.find(value); return pos->second; }
     };
-
-    enum class ActionType : int {
-        TurnOn = 0,
-        TurnOff
-    };
 }
 
 #endif // ENUMERRATIONS_H

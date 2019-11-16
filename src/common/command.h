@@ -56,6 +56,7 @@ namespace aquabox
     class Command
     {
     public:
+        static bool validate(const nlohmann::json& obj);
         void setSeqNum(int num);
         int seqNum() const;
         void setBody(std::string body);

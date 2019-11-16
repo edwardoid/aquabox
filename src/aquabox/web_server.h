@@ -40,33 +40,14 @@ namespace aquabox
     private:
         using WsServer = SimpleWeb::SocketServer<SimpleWeb::WS>;
 
-        SimpleWeb::Server<SimpleWeb::HTTP> m_http;
+        std::shared_ptr<v1::API::HttpServer> m_http;
         WsServer m_ws;
         std::thread m_rest;
         std::thread m_stream;
-        rest::API REST;
+        v1::REST RESTApi;
         ws::API WS;
         Route m_updates;
         Route m_rpc;
-        Route m_static;
-        Route m_login;
-        Route m_status;
-        Route m_statusQR;
-        Route m_allDevices;
-        Route m_deviceById;
-        Route m_updateDeviceById;
-        Route m_allRules;
-        Route m_ruleById;
-        Route m_createRule;
-        Route m_deleteRule;
-        Route m_updateRule;
-        Route m_rulesForDevice;
-        Route m_repeatUnits;
-        Route m_wifiScan;
-        Route m_wifiConnect;
-
-        Route m_turnOn;
-        Route m_turnOff;
     };
 }
 

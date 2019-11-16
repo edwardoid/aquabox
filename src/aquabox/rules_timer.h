@@ -20,7 +20,9 @@
 #define RULES_TIMER_H
 
 #include "timer.h"
-#include "log.h"
+
+#include "plog/Log.h"
+#include "plog/Appenders/ColorConsoleAppender.h"
 
 namespace aquabox
 {

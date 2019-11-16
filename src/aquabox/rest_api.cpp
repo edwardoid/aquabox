@@ -36,10 +36,10 @@
 #include <stdio.h>
 #include <random>
 
-using namespace aquabox::rest;
+using namespace aquabox::v1;
 using namespace aquabox;
 
-Command createCommand(Operation operation, Request request, bool body, std::unordered_map<std::string, std::string> params = {})
+Command createCommand(Operation operation, API::Request request, bool body, std::unordered_map<std::string, std::string> params = {})
 {
     Command command;
     command.setOperation(operation);
@@ -50,7 +50,7 @@ Command createCommand(Operation operation, Request request, bool body, std::unor
     return command;
 }
 
-void execCommand(Command& cmd, Response response, Headers headers)
+void execCommand(Command& cmd, API::Response response, API::Headers headers)
 {
     CommandExecutor exec;
     if(!exec.exec(cmd)) {
@@ -77,27 +77,7 @@ void execCommand(Command& cmd, Response response, Headers headers)
         response->write(code, cmd.response(), headers);
 }
 
-
-void API::init(HttpServerImpl& server)
-{
-    static aquabox::Route route;
-    server.default_resource["OPTIONS"] = std::bind(&API::OptionsOK, this, route, std::placeholders::_1, std::placeholders::_2);
-    server.default_resource["GET"] = std::bind(&API::OptionsOK, this, route, std::placeholders::_1, std::placeholders::_2);
-    server.default_resource["POST"] = std::bind(&API::OptionsOK, this, route, std::placeholders::_1, std::placeholders::_2);
-    server.default_resource["PUT"] = std::bind(&API::OptionsOK, this, route, std::placeholders::_1, std::placeholders::_2);
-    server.default_resource["DELETE"] = std::bind(&API::OptionsOK, this, route, std::placeholders::_1, std::placeholders::_2);
-}
-
-void API::setup(HttpServerImpl& server,
-                std::string method,
-                Route& route,
-                void (API::* Callback)(const aquabox::Route&, aquabox::rest::Response, aquabox::rest::Request))
-{
-    server.resource[route.url()][method] = std::bind(Callback, this, route, std::placeholders::_1, std::placeholders::_2);
-    server.resource[route.url()]["OPTIONS"] = std::bind(&API::OptionsOK, this, route, std::placeholders::_1, std::placeholders::_2);
-}
-
-void serveStream(Response response, Path path, std::shared_ptr<std::ifstream> ifs, size_t length, bool removeWhenFinished)
+void serveStream(API::Response response, Path path, std::shared_ptr<std::ifstream> ifs, size_t length, bool removeWhenFinished)
 {
     std::vector<char> buffer(131072); // Safe when server is running on one thread
     std::streamsize read_length;
@@ -119,7 +99,7 @@ void serveStream(Response response, Path path, std::shared_ptr<std::ifstream> if
     }
 }
 
-void serveFile(Response response, Path path, Headers& headers, bool removeWhenFinished)
+void serveFile(API::Response response, Path path, API::Headers& headers, bool removeWhenFinished)
 {
     static const std::unordered_map<std::string, std::string> ext2ContentType({
         { "js", "application/javascript" },
@@ -211,18 +191,15 @@ nlohmann::json getStatusInfo(bool detailed)
     return status;
 }
 
-DEFINE_API_IMPL(OptionsOK)
+void REST::init(std::shared_ptr<HttpServer> http, Route base)
 {
-    if (headers.count(Access_Control_Allow_Origin) == 0)
-        headers.emplace(Access_Control_Allow_Origin, "*");
-    if (headers.count(Access_Control_Allow_Headers) == 0)
-        headers.emplace(Access_Control_Allow_Headers, "Origin, X-Requested-With, Content-Type, Accept");
-    if (headers.count(Access_Control_Allow_Methods) == 0)
-        headers.emplace(Access_Control_Allow_Methods, "POST, GET, PUT, PATCH, DELETE, OPTIONS");
-    response->write(SimpleWeb::StatusCode::success_ok, headers);
-}
+    API::init(http, base);
 
-DEFINE_API_IMPL(StaticFiles)
+    m_statusQR = base.sub().word("status").word("qr");
+    setup("PUT", m_statusQR, apiCallback<REST>(&REST::StatusQR));
+}
+/*
+void REST::StaticFiles(const Route& route, API::Request& request, API::Response& response, Headers& headers)
 {
     Path p = AquaBox::i().workingDirectory();
     p.append(request->path);
@@ -244,9 +221,9 @@ DEFINE_API_IMPL(StaticFiles)
     }
 
     serveFile(response, p, headers, false);
-}
+}*/
 
-DEFINE_API_IMPL(StatusQR)
+void REST::StatusQR(const Route& route, API::Request& request, API::Response& response, Headers& headers)
 {
     std::string path = "./whoami_qr_" + std::to_string(std::rand()) + ".png";
     double factor = 0.;
@@ -277,86 +254,72 @@ DEFINE_API_IMPL(StatusQR)
     serveFile(response, path, headers, true);
 }
 
-DEFINE_API_IMPL(Login)
-{
-    auto raw = request->content.string();
-    for (auto user : AquaBox::i().users()) {
-        LOG_DEBUG << "Existing user " << user.second->token() << " comparing with " << raw;
-        if (user.second->token() == raw) {
-            response->write(SimpleWeb::StatusCode::success_ok, headers);
-            return;
-        }
-    }
-
-    response->write(SimpleWeb::StatusCode::client_error_forbidden, headers);
-}
-
-DEFINE_API_IMPL(Status)
+void REST::Status(const Route& route, API::Request& request, API::Response& response, Headers& headers)
 {
     auto cmd = createCommand(Operation::GetStatus, request, true);
     execCommand(cmd, response, headers);
 }
 
-DEFINE_API_IMPL(WiFiQR)
-{
-    std::string path = "wifi_qr_" + std::to_string(std::rand()) + ".png";
-    double factor = 0.;
+// void REST::WiFiQR(const Route& route, API::Request& request, API::Response& response, Headers& headers)
+// {
+//     std::string path = "wifi_qr_" + std::to_string(std::rand()) + ".png";
+//     double factor = 0.;
 
-    auto query = request->parse_query_string();
-    if (query.count("factor") > 0) {
-        std::string factorString = query.find("factor")->second;
-        try
-        {
-            factor = std::stod(factorString);
-        }
-        catch (const std::invalid_argument &)
-        {
-            LOG_ERROR << "Bad zoom factor value \"" << factorString << "\"";
-            factor = 0;
-        }
-    }
+//     auto query = request->parse_query_string();
+//     if (query.count("factor") > 0) {
+//         std::string factorString = query.find("factor")->second;
+//         try
+//         {
+//             factor = std::stod(factorString);
+//         }
+//         catch (const std::invalid_argument &)
+//         {
+//             LOG_ERROR << "Bad zoom factor value \"" << factorString << "\"";
+//             factor = 0;
+//         }
+//     }
 
-    if (factor < 1.) {
-        factor = 1;
-    }
+//     if (factor < 1.) {
+//         factor = 1;
+//     }
 
-    LOG_DEBUG << "Generating QR with zoom factor " << factor;
-    qr::Qr::create("asdasda", path, factor);
+//     LOG_DEBUG << "Generating QR with zoom factor " << factor;
+//     qr::Qr::create("asdasda", path, factor);
 
-    serveFile(response, path, headers, true);
-}
+//     serveFile(response, path, headers, true);
+// }
 
-DEFINE_API_IMPL(Devices)
+void REST::Devices(const Route& route, API::Request& request, API::Response& response, Headers& headers)
 {
     auto cmd = createCommand(Operation::GetDevices, request, false);
     execCommand(cmd, response, headers);
 }
 
-DEFINE_API_IMPL(GetDevice)
+void REST::GetDevice(const Route& route, API::Request& request, API::Response& response, Headers& headers)
 {
     auto cmd = createCommand(Operation::GetDevice, request, false, route.extract(request->path));
     execCommand(cmd, response, headers);
 }
 
-DEFINE_API_IMPL(UpdateDevice)
+void REST::UpdateDevice(const Route& route, API::Request& request, API::Response& response, Headers& headers)
 {
     auto cmd = createCommand(Operation::UpdateDevice, request, true, route.extract(request->path));
     execCommand(cmd, response, headers);
 }
 
-DEFINE_API_IMPL(Rules)
+void REST::Rules(const Route& route, API::Request& request, API::Response& response, Headers& headers)
 {
     auto cmd = createCommand(Operation::GetRules, request, false);
     execCommand(cmd, response, headers);
 }
 
-DEFINE_API_IMPL(GetRule)
+void REST::GetRule(const Route& route, API::Request& request, API::Response& response, Headers& headers)
 {
     auto cmd = createCommand(Operation::GetRules, request, false, route.extract(request->path));
     execCommand(cmd, response, headers);
 }
 
-DEFINE_API_IMPL(CreateRule)
+void REST::CreateRule(const Route& route, API::Request& request, API::Response& response, Headers& headers)
 {
     auto cmd = createCommand(request->method == "PUT"
                     ? Operation::CreateRule
@@ -364,43 +327,43 @@ DEFINE_API_IMPL(CreateRule)
     execCommand(cmd, response, headers);
 }
 
-DEFINE_API_IMPL(DeleteRule)
+void REST::DeleteRule(const Route& route, API::Request& request, API::Response& response, Headers& headers)
 {
     auto cmd = createCommand(Operation::DeleteRule, request, false, route.extract(request->path));
     execCommand(cmd, response, headers);
 }
 
-DEFINE_API_IMPL(DeviceRules)
+void REST::DeviceRules(const Route& route, API::Request& request, API::Response& response, Headers& headers)
 {
     auto cmd = createCommand(Operation::DeviceRules, request, false, route.extract(request->path));
     execCommand(cmd, response, headers);
 }
 
-DEFINE_API_IMPL(SupportedRepeatTimeouts)
+void REST::SupportedRepeatTimeouts(const Route& route, API::Request& request, API::Response& response, Headers& headers)
 {
     auto cmd = createCommand(Operation::SupportedRepeatTimeouts, request, false);
     execCommand(cmd, response, headers);
 }
 
-DEFINE_API_IMPL(TurnOn)
+void REST::TurnOn(const Route& route, API::Request& request, API::Response& response, Headers& headers)
 {
     auto cmd = createCommand(Operation::TurnOn, request, false, route.extract(request->path));
     execCommand(cmd, response, headers);
 }
 
-DEFINE_API_IMPL(TurnOff)
+void REST::TurnOff(const Route& route, API::Request& request, API::Response& response, Headers& headers)
 {
     auto cmd = createCommand(Operation::TurnOff, request, false, route.extract(request->path));
     execCommand(cmd, response, headers);
 }
 
-DEFINE_API_IMPL(ScanWiFiNetworks)
+void REST::ScanWiFiNetworks(const Route& route, API::Request& request, API::Response& response, Headers& headers)
 {
     auto cmd = createCommand(Operation::ScanWiFiNetworks, request, false);
     execCommand(cmd, response, headers);
 }
 
-DEFINE_API_IMPL(ConnectToWiFi)
+void REST::ConnectToWiFi(const Route& route, API::Request& request, API::Response& response, Headers& headers)
 {
     Command cmd = createCommand(Operation::ConnectToWiFi, request, true);
     execCommand(cmd, response, headers);
