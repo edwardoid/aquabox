@@ -1,0 +1,11 @@
+project(aquabox-common)
+
+file(GLOB SOURCES "*.cpp")
+
+set(COMMON_LIB_SHARED ${PROJECT_NAME}_shared)
+set(COMMON_LIB_STATIC ${PROJECT_NAME}_static)
+
+add_library(${PROJECT_NAME} OBJECT ${SOURCES})
+set_property(TARGET ${PROJECT_NAME} PROPERTY POSITION_INDEPENDENT_CODE 1)
+add_library(${PROJECT_NAME}_static STATIC $<TARGET_OBJECTS:${PROJECT_NAME}>)
+set_target_properties(${PROJECT_NAME}_static PROPERTIES OUTPUT_NAME "${PROJECT_NAME}")

@@ -1,0 +1,13 @@
+{
+    "address": "PHY:MOCK_GPIO:19",
+    "class": "relay",
+    "id": "vdev0",
+    "index": 0,
+    "meta": {
+        "model": "100W",
+        "vendor": "atman"
+    },
+    "name": "VIRTUAL",
+    "rulesEnabled": true,
+    "type": "heater"
+}

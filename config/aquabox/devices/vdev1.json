@@ -1,0 +1,13 @@
+{
+    "address": "PHY:MOCK_GPIO:18",
+    "class": "relay",
+    "id": "vdev1",
+    "index": 0,
+    "meta": {
+        "model": "100W",
+        "vendor": "ada"
+    },
+    "name": "virtual 2",
+    "rulesEnabled": false,
+    "type": "heater"
+}
