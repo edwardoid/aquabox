@@ -19,7 +19,7 @@ include_directories(${PNG_INCLUDE_DIR})
 include_directories(${LIBMONGOCXX_INCLUDE_DIRS})
 
 file(GLOB AQUABOX_CLOUD_SOURCES "*.cpp")
-
+include_directories(${AQUABOX_COMMON_PATH})
 add_executable(${PROJECT_NAME} ${AQUABOX_CLOUD_SOURCES})
 
 target_link_libraries(${PROJECT_NAME} aquabox-common_static)
@@ -31,6 +31,7 @@ target_link_libraries(${PROJECT_NAME} Boost::system)
 target_link_libraries(${PROJECT_NAME} OpenSSL::SSL)
 target_link_libraries(${PROJECT_NAME} ${LIBMONGOCXX_LIBRARIES})
 target_link_libraries (${PROJECT_NAME} ${CMAKE_THREAD_LIBS_INIT})
+target_link_libraries(${PROJECT_NAME} json-schema-validator)
 
 
 install(TARGETS ${PROJECT_NAME} DESTINATION bin)
