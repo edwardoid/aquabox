@@ -71,6 +71,8 @@ namespace aquabox
         void response(Result result);
         const std::string& response() const;
         Result result() const;
+        nlohmann::json toJSON() const;
+        bool fromJSON(const nlohmann::json& obj);
     private:
         int m_seqNum = 0;
         std::unordered_map<std::string, std::string> m_params;

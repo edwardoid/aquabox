@@ -61,6 +61,24 @@ Serializable<Operation>::Str2EnumMap Serializable<Operation>::str2Val({
     { "turn_off", Operation::TurnOff }
 });
 
+template<>
+Serializable<Result>::Enum2StrMap Serializable<Result>::val2Str({
+    { Result::BadCommand, "bad_command" },
+    { Result::AccessDenied, "access_denied" },
+    { Result::NotFound, "not_found" },
+    { Result::ServerError, "server_error" },
+    { Result::Ok, "ok" }
+});
+
+template<>
+Serializable<Result>::Str2EnumMap Serializable<Result>::str2Val({
+    { "bad_command", Result::BadCommand },
+    { "access_denied", Result::AccessDenied },
+    { "not_found", Result::NotFound },
+    { "server_error", Result::ServerError },
+    { "ok", Result::Ok }
+});
+
 bool Command::validate(const nlohmann::json& obj)
 {
     ValidationErrorHandler handler;
@@ -144,4 +162,41 @@ const std::string& Command::response() const
 Result Command::result() const
 {
     return m_result;
+}
+
+nlohmann::json Command::toJSON() const
+{
+    nlohmann::json obj({});
+
+    obj["seqNum"] = m_seqNum;
+    obj["params"] = m_params;
+    obj["operation"] = Serializable<Operation>::convert(m_operation);
+    obj["result"] = Serializable<Result>::convert(m_result);
+    obj["body"] = m_body;
+
+    return obj;
+}
+
+bool Command::fromJSON(const nlohmann::json& obj)
+{
+    m_seqNum = obj["seqNum"];
+    m_operation = Serializable<Operation>::convert(obj["operation"].get<std::string>());
+    if (obj.find("result") != obj.cend()) {
+        m_result = Serializable<Result>::convert(obj["result"].get<std::string>());
+    }
+
+    if (obj.find("body") != obj.cend()) {
+        m_body = obj["body"].get<std::string>();
+    }
+
+
+    if (obj.find("params") != obj.cend()) {
+        for(const auto entry : obj["params"].items()) {
+            std::string key = (std::string)(entry.key());
+            std::string value = (std::string)(entry.value());
+            m_params.insert(std::pair<std::string, std::string>(key, value ));
+        }
+    }
+
+    return true;
 }
