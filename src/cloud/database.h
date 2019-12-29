@@ -18,6 +18,7 @@ namespace aquabox
         Database(Database&&) = delete;
         Database& operator = (const Database) = delete;
         Database& operator = (Database&&) = delete;
+        bool isApplicationAuthorized(std::string app, std::string box);
 
         bool connect();
     private:

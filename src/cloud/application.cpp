@@ -1,9 +1,19 @@
 #include "application.h"
 #include "database.h"
+#include "boxes_manager.h"
 
 using namespace aquabox;
 
-std::string Application::create(std::string name, std::string author)
+bool Application::isAuthorized(std::string boxId)
 {
-    return "";
+}
+
+Command& Application::runCommand(std::string boxId, Command& command)
+{
+    auto box = BoxesManager::get(boxId);
+    if (box == nullptr) {
+        command.response(Result::NotFound);
+        return command;
+    }
+    return command;
 }

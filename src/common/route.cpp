@@ -77,7 +77,8 @@ std::vector<std::string> Route::parse(std::string& url) const
         component = "^" + component;
         std::regex rx(component, std::regex_constants::icase);
         std::cmatch match;
-        if (!std::regex_search(url.c_str() + offset, match, rx))
+        const char* ptr = url.c_str() + offset;
+        if (!std::regex_search(ptr, match, rx))
         {
             tokens.clear();
             break;

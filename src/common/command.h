@@ -56,12 +56,16 @@ namespace aquabox
     class Command
     {
     public:
+        Command() = default;
+        Command(const Command& src);
+        const Command& operator = (const Command& src);
         static bool validate(const nlohmann::json& obj);
         void setSeqNum(int num);
         int seqNum() const;
         void setBody(std::string body);
         const std::string& body() const;
         void setParameters(const std::unordered_map<std::string, std::string>& params);
+        const std::unordered_map<std::string, std::string>& parameters() const;
         void setParameter(std::string name, std::string value);
         bool hasParameter(std::string name) const;
         std::string getParameter(std::string name) const;
@@ -72,13 +76,15 @@ namespace aquabox
         const std::string& response() const;
         Result result() const;
         nlohmann::json toJSON() const;
+        nlohmann::json toResultJSON() const;
         bool fromJSON(const nlohmann::json& obj);
     private:
         int m_seqNum = 0;
         std::unordered_map<std::string, std::string> m_params;
         std::string m_body;
         std::string m_data;
-        Result m_result;
+        nlohmann::json m_dataJson;
+        Result m_result = Result::Ok;
         Operation m_operation;
     };
 }

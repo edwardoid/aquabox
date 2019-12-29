@@ -4,15 +4,33 @@
     // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
     "version": "0.2.0",
     "configurations": [
-
         {
-            "name": "(gdb) Launch",
+            "name": "(gdb) Launch Aquabox Cloud",
             "type": "cppdbg",
             "request": "launch",
-            "program": "${workspaceFolder}/bin/host/aquabox",
+            "program": "${workspaceFolder}/build/aquabox-service",
             "args": [ "--service", "--disable-access-point", "--ignore-lock"],
             "stopAtEntry": false,
-            "cwd": "${workspaceFolder}/bin/host",
+            "cwd": "${workspaceFolder}/build",
+            "externalConsole": true,
+            "MIMode": "gdb",
+            "setupCommands": [
+                {
+                    "description": "Enable pretty-printing for gdb",
+                    "text": "-enable-pretty-printing",
+                    "ignoreFailures": true
+                }
+            ],
+            "additionalSOLibSearchPath": "${workspaceFolder}/lib"
+        },
+        {
+            "name": "(gdb) Launch Aquabox",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "${workspaceFolder}/build/aquabox",
+            "args": [ "--service", "--disable-access-point", "--ignore-lock"],
+            "stopAtEntry": false,
+            "cwd": "${workspaceFolder}/build",
             "externalConsole": true,
             "MIMode": "gdb",
             "setupCommands": [

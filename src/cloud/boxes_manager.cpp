@@ -200,7 +200,16 @@ void BoxesManager::setupRoutes()
 
     m_ws.endpoint[m_commands.url()].on_message = [this](std::shared_ptr<WSServer::Connection> connection,
                                                         std::shared_ptr<WSServer::InMessage> in_message) {
-        LOG_DEBUG << "On " << connection->path << " got:\n\t\t" << in_message->string();
+
+        LOG_DEBUG << "On " << connection->path << " got some data";
+        
+        auto id = m_commands.extract(connection->path)[":id"];
+        auto ref = m_connections.find(id);
+        if (ref == m_connections.end()) {
+            return;
+        }
+
+        ref->second->ready(in_message->string());
     };
 }
 
@@ -226,7 +235,7 @@ bool BoxesManager::acceptConnectionFromHW(std::string id, std::shared_ptr<WSServ
         return false;
     }
     if (m_connections.find(id) == m_connections.end()) {
-        m_connections.insert({id, std::make_shared<BoxConnection>()});
+        m_connections.insert({id, std::make_shared<BoxConnection>(m_results)});
     }
     return true;
 }

@@ -18,6 +18,8 @@
 
 #include "commands_stream.h"
 #include "log.h"
+#include "command.h"
+#include "command_executor.h"
 #include <nlohmann/json.hpp>
 
 using namespace aquabox;
@@ -31,8 +33,14 @@ void CommandsStream::onMessage(std::shared_ptr<class Connection> connection, std
     try {
         nlohmann::json json = nlohmann::json::parse(message->string());
 
+        Command cmd;
+        cmd.fromJSON(json);
 
-        connection->send(message->string());
+        CommandExecutor exe;
+        if(exe.exec(cmd)) {
+        }
+
+        connection->send(cmd.toResultJSON().dump());
     } catch (nlohmann::json::parse_error err) {
         connection->send(nlohmann::json({ "error", err.what()}).dump(4));
     }

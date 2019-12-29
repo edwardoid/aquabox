@@ -52,7 +52,7 @@ bool CloudStream::isAttached() const
 void CloudStream::detach()
 {
     LOG_DEBUG << "Dettaching from " << m_url;
-    SimpleWeb::SocketClient<SimpleWeb::WS>::stop();
+    //SimpleWeb::SocketClient<SimpleWeb::WS>::stop();
 }
 
 CloudStream::~CloudStream()

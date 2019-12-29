@@ -3,6 +3,7 @@
 
 #include <server_http.hpp>
 #include <server_ws.hpp>
+#include "rest_api.h"
 
 namespace aquabox
 {
@@ -13,11 +14,12 @@ namespace aquabox
     public:
         static void start();
     private:
-        static void startServer();
+        void startServer();
     private:
         static ApplicationsApi m_instance;
     private:
-        HttpServer m_http;
+        std::shared_ptr<HttpServer> m_http;
+        v1::REST RESTApi;
         WSServer m_ws;
     };
 }

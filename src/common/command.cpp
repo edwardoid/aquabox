@@ -79,6 +79,30 @@ Serializable<Result>::Str2EnumMap Serializable<Result>::str2Val({
     { "ok", Result::Ok }
 });
 
+Command::Command(const Command& src)
+    : m_seqNum(src.m_seqNum)
+    , m_params(src.m_params)
+    , m_body(src.m_body)
+    , m_data(src.m_data)
+    , m_dataJson(src.m_dataJson)
+    , m_result(src.m_result)
+    , m_operation(src.m_operation)
+{
+}
+
+const Command& Command::operator=(const Command& src)
+{
+    m_seqNum = src.m_seqNum;
+    m_params = src.m_params;
+    m_body = src.m_body;
+    m_data = src.m_data;
+    m_dataJson = src.m_dataJson;
+    m_result = src.m_result;
+    m_operation = src.m_operation;
+
+    return *this;
+}
+
 bool Command::validate(const nlohmann::json& obj)
 {
     ValidationErrorHandler handler;
@@ -109,7 +133,14 @@ const std::string& Command::body() const
 
 void Command::setParameters(const std::unordered_map<std::string, std::string>& params)
 {
-    m_params = params;
+    for(auto p : params) {
+        m_params.insert({ p.first, p.second});
+    }
+}
+
+const std::unordered_map<std::string, std::string>& Command::parameters() const
+{
+    return m_params;
 }
 
 void Command::setParameter(std::string name, std::string value)
@@ -145,6 +176,7 @@ Operation Command::operation() const
 void Command::response(const nlohmann::json data, Result result)
 {
     m_data = data.dump(4);
+    m_dataJson = data;
     m_result = result;
 }
 
@@ -172,8 +204,22 @@ nlohmann::json Command::toJSON() const
     obj["params"] = m_params;
     obj["operation"] = Serializable<Operation>::convert(m_operation);
     obj["result"] = Serializable<Result>::convert(m_result);
-    obj["body"] = m_body;
+    if (m_dataJson.empty())
+        obj["body"] = m_body;
+    else
+        obj["body"] = m_dataJson;
+    return obj;
+}
 
+nlohmann::json Command::toResultJSON() const
+{
+    nlohmann::json obj({});
+
+    obj["seqNum"] = m_seqNum;
+    obj["params"] = m_params;
+    obj["operation"] = Serializable<Operation>::convert(m_operation);
+    obj["result"] = Serializable<Result>::convert(m_result);
+    obj["data"] = m_dataJson;
     return obj;
 }
 
@@ -187,6 +233,16 @@ bool Command::fromJSON(const nlohmann::json& obj)
 
     if (obj.find("body") != obj.cend()) {
         m_body = obj["body"].get<std::string>();
+    }
+
+    if (obj.find("data") != obj.cend()) {
+        if (obj["data"].is_string()) {
+            m_data = obj["data"].get<std::string>();
+        }
+        else {
+            m_dataJson = obj["data"];
+            m_data = m_dataJson.dump();
+        }
     }
 
 

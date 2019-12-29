@@ -7,6 +7,8 @@
 #include <server_http.hpp>
 #include <server_ws.hpp>
 #include "route.h"
+#include "results_map.h"
+#include "command.h"
 
 namespace aquabox
 {
@@ -31,6 +33,7 @@ namespace aquabox
         void setupRoutes();
     private:
         static BoxesManager self;
+        ResultsMap<Command> m_results;
         HttpServer m_http;
         WSServer m_ws;
         Route m_register;
