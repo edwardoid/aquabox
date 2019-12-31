@@ -20,6 +20,22 @@
 #include <fstream>
 #include <thread>
 
+#ifndef AB_GIT_HASH
+#define AB_GIT_HASH "0x"
+#endif
+
+#ifndef AB_VERSION_MAJOR
+#define AB_VERSION_MAJOR 1
+#endif
+
+#ifndef AB_VERSION_MINOR
+#define AB_VERSION_MINOR 0
+#endif
+
+#ifndef AB_VERSION
+#define AB_VERSION "1.0"
+#endif
+
 using namespace aquabox;
 
 const std::string Settings::Keys::LOG_LEVEL = "log";
@@ -35,6 +51,7 @@ const std::string Settings::Keys::AP_PASSWORD = "password";
 const std::string Settings::Keys::USERS = "users";
 const std::string Settings::Keys::THREADS = "threads";
 const std::string Settings::Keys::CLOUD_URL = "cloudUrl";
+const std::string Settings::Keys::CLOUD_PORT = "cloudPort";
 
 const std::string Settings::Defaults::GIT_HASH = AB_GIT_HASH ;
 const std::string Settings::Defaults::APPLICATION = "GoAqua";
@@ -47,6 +64,7 @@ const std::string Settings::Defaults::AUTHOR = "Edward Sargsyan";
 const std::string Settings::Defaults::EMAIL = "edward.sarkisyan@gmail.com";
 const std::string Settings::Defaults::ConfigurationFile = "config.json";
 const std::string Settings::Defaults::CLOUD_URL = "edwardoid.redirectme.net";
+const uint16_t Settings::Defaults::CLOUD_PORT = 5555;
 int Settings::Defaults::REST_PORT = 1213;
 int Settings::Defaults::WS_PORT = 1214;
 const std::string Settings::Defaults::AP_SSID = "AquaBox";

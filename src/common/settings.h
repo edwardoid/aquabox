@@ -49,6 +49,7 @@ namespace aquabox
 
             static const std::string THREADS;
             static const std::string CLOUD_URL;
+            static const std::string CLOUD_PORT;
         };
 
         struct Defaults {
@@ -65,6 +66,7 @@ namespace aquabox
             static const std::string AP_SSID;
             static const std::string AP_PASSWORD;
             static const std::string CLOUD_URL;
+            static const uint16_t CLOUD_PORT;
 
             static int REST_PORT;
             static int WS_PORT;

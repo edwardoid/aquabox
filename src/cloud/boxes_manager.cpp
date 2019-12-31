@@ -2,6 +2,7 @@
 #include "box_connection.h"
 #include "database.h"
 #include "log.h"
+#include "settings.h"
 
 #include <thread>
 #include <nlohmann/json.hpp>
@@ -19,11 +20,11 @@ bool BoxesManager::start()
     self.setupRoutes();
 
     static std::thread managerThread([](){
-       BoxesManager::self.m_ws.config.port = 4444;
+       BoxesManager::self.m_ws.config.port = Settings::integer(Settings::Keys::CLOUD_PORT, Settings::Defaults::CLOUD_PORT) + 1;
        LOG_INFO << "Starting Websocket server on " << self.m_ws.config.port;
        self.m_ws.start();
     });
-    self.m_http.config.port = 5555;
+    self.m_http.config.port = Settings::integer(Settings::Keys::CLOUD_PORT, Settings::Defaults::CLOUD_PORT);
     LOG_INFO << "Starting HTTP server on " << self.m_http.config.port;
     self.m_http.start();
     return true;

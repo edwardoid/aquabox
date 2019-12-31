@@ -37,9 +37,10 @@ void Cloud::disconnect()
 
 bool Cloud::isRegistered()
 {
-    const std::string cloudBaseUrl = Settings::string(Settings::Keys::CLOUD_URL, Settings::Defaults::CLOUD_URL);
-    const std::string cloudHttpUrl = cloudBaseUrl + ":5555";
-    const std::string cloudWSUrl =  std::string("") + cloudBaseUrl + ":4444";
+    const auto cloudBaseUrl = Settings::string(Settings::Keys::CLOUD_URL, Settings::Defaults::CLOUD_URL);
+    const auto cloudPort = Settings::integer(Settings::Keys::CLOUD_PORT, Settings::Defaults::CLOUD_PORT);
+    const std::string cloudHttpUrl = cloudBaseUrl + ":" + std::to_string(cloudPort);
+    const std::string cloudWSUrl =  std::string("") + ":" + std::to_string(cloudPort + 1);
     LOG_INFO << "Checking if device is registered on " << cloudHttpUrl;
     HttpClient client(cloudHttpUrl);
 
@@ -70,25 +71,28 @@ bool Cloud::isRegistered()
                         url += SERIAL_NUMBER;
                         url += "/";
                         url += name;
-                        bool insert = true;
+                        std::shared_ptr<CloudStream> existingStream = nullptr;
                         if (m_streams.find(name) != m_streams.end()) {
-                            insert = !m_streams[name]->isAttached();
+                            existingStream = m_streams[name];
                         }
                         
-                        if (insert) {
+                        if (existingStream) {
+                            LOG_DEBUG << "Stream " << name << " exists";
+                            if (!existingStream->isAttached())
+                            {
+                                LOG_DEBUG << "Stream " << name << " exists but not attached. Reattaching...";
+                                existingStream->attach();
+                            }
+                        }
+                        else {
                             std::shared_ptr<CloudStream> stream;
+                            LOG_DEBUG << "Creating stream" << name;
                             if (name == "commands") {
                                 stream = std::make_shared<CommandsStream>(url);
                             } else {
                                 stream = std::make_shared<CloudStream>(url);
                             }
                             m_streams.insert({ name, stream});
-                        }
-
-                        if (m_streams[name]->isAttached()) {
-                            LOG_VERBOSE << "Stream " << name << " is available and is already attached.";
-                        } else {
-                            LOG_INFO << "Stream " << name << " is available.";
                         }
                     }
                 }
@@ -103,11 +107,6 @@ bool Cloud::isRegistered()
     }
     catch(std::exception& e) {
         LOG_ERROR << e.what() << " was connected to " << m_streams.size() << " streams";
-        for (auto i : m_streams) {
-            LOG_ERROR << "Trying to detach from " << i.first;
-            i.second->detach();
-        }
-        m_streams.clear();
         return false;
     }
 }

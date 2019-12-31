@@ -30,7 +30,6 @@ namespace aquabox
         CloudStream(std::string url);
         void attach();
         bool isAttached() const;
-        void detach();
         void send(std::string data);
         ~CloudStream();
     protected:
@@ -41,6 +40,7 @@ namespace aquabox
     private:
         std::shared_ptr<CloudStream::Connection> m_connection;
         std::thread m_thread;
+        bool m_reattach;
         std::string m_url;
         bool m_attached;
     };

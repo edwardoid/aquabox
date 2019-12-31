@@ -34,14 +34,22 @@ CloudStream::CloudStream(std::string url)
     on_close = [this](std::shared_ptr<CloudStream::Connection> connection, int status, const std::string & reason) { onClose(connection, status, reason); };
 
     on_error = [this](std::shared_ptr<CloudStream::Connection> connection, const SimpleWeb::error_code & code) { onError(connection, code); };
+
+    m_thread = std::thread([this]{
+        while(true) {
+            if(m_reattach) {
+                m_reattach = false;
+                SimpleWeb::SocketClient<SimpleWeb::WS>::start();
+            }
+            else
+                std::this_thread::sleep_for(std::chrono::seconds(1));
+        }
+    });
 }
 
 void CloudStream::attach()
 {
-    m_thread = std::thread([this]{
-        LOG_DEBUG << "Attaching to " << m_url;
-        SimpleWeb::SocketClient<SimpleWeb::WS>::start();
-    });
+    m_reattach = true;
 }
 
 bool CloudStream::isAttached() const
@@ -49,20 +57,13 @@ bool CloudStream::isAttached() const
     return m_attached;
 }
 
-void CloudStream::detach()
-{
-    LOG_DEBUG << "Dettaching from " << m_url;
-    //SimpleWeb::SocketClient<SimpleWeb::WS>::stop();
-}
-
 CloudStream::~CloudStream()
-{
-    detach();
-}
+{}
 
 void CloudStream::onOpen(std::shared_ptr<CloudStream::Connection> connection)
 {
     m_connection = connection;
+    LOG_DEBUG << "Atatched to stream " << m_url;
     m_attached = true;
 }
 
@@ -74,9 +75,6 @@ void CloudStream::onMessage(std::shared_ptr<CloudStream::Connection> connection,
 void CloudStream::onClose(std::shared_ptr<CloudStream::Connection> connection, int status, const std::string &reason)
 {
     LOG_INFO << "Closed connection to " << m_url << " because: " << reason << "(" << status << ")";
-    if (m_attached) {
-        detach();
-    }
     m_attached = false;
     m_connection = nullptr;
 }
@@ -84,11 +82,10 @@ void CloudStream::onClose(std::shared_ptr<CloudStream::Connection> connection, i
 void CloudStream::onError(std::shared_ptr<CloudStream::Connection>, const SimpleWeb::error_code &code)
 {
     LOG_INFO << "Error occured in connection to " << m_url << " error code " << code.message();
-    if (m_attached) {
-        detach();
-    }
     m_attached = false;
     m_connection = nullptr;
+    SimpleWeb::SocketClient<SimpleWeb::WS>::stop();
+    handler_runner->stop();
 }
 
 void CloudStream::send(std::string data)

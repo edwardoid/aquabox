@@ -2,6 +2,7 @@
 #include "applications_api.h"
 #include "boxes_manager.h"
 #include "database.h"
+#include "settings.h"
 
 #define LOG_FILE_SIZE_IN_MB 10
 #define BYTES_IN_MB 1000000
