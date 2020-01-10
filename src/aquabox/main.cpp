@@ -19,32 +19,13 @@
 #include "aquabox.h"
 #include "options.h"
 #include "settings.h"
-#include "lock_file.h"
-#include <stdio.h>
-#include <execinfo.h>
-#include <signal.h>
-#include <stdlib.h>
-#include <unistd.h>
+#include "backward.hpp"
 #include <iostream>
-
-void handler(int sig) {
-  aquabox::Lockfile lock;
-  lock.remove();
-  void *array[20];
-  size_t size;
-
-  // get void*'s for all entries on the stack
-  size = backtrace(array, 20);
-
-  // print out all the frames to stderr
-  fprintf(stderr, "Error: signal %d:\n", sig);
-  backtrace_symbols_fd(array, size, STDERR_FILENO);
-  exit(1);
-}
 
 int main(int argc, char** argv)
 {
   aquabox::Settings::setDomain("aquabox");
+  backward::SignalHandling sh;
   bool asService = false;
   bool noDraw = false;
   for(int i = 1; i < argc; ++i)
@@ -71,6 +52,5 @@ int main(int argc, char** argv)
       return 0;
     }
   }
-  signal(SIGSEGV, handler);
   return aquabox::AquaBox::i().start();
 }

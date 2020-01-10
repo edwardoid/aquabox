@@ -34,6 +34,6 @@ target_link_libraries(${PROJECT_NAME} OpenSSL::SSL)
 target_link_libraries(${PROJECT_NAME} ${LIBMONGOCXX_LIBRARIES})
 target_link_libraries (${PROJECT_NAME} ${CMAKE_THREAD_LIBS_INIT})
 target_link_libraries(${PROJECT_NAME} json-schema-validator)
-
+add_backward(${PROJECT_NAME})
 
 install(TARGETS ${PROJECT_NAME} DESTINATION bin)

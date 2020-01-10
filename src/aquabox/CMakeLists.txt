@@ -53,5 +53,6 @@ target_link_libraries(${PROJECT_NAME} Boost::system)
 target_link_libraries(${PROJECT_NAME} ${NETWORKMANAGER_LIBRARIES})
 target_link_libraries(${PROJECT_NAME} ${FREETYPE_LIBRARIES})
 target_link_libraries(${PROJECT_NAME} OpenSSL::SSL)
+add_backward(${PROJECT_NAME})
 
 install(TARGETS ${PROJECT_NAME} DESTINATION bin)

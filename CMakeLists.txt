@@ -71,6 +71,7 @@ add_subdirectory("${THREE_DP_DIR}/iws")
 add_subdirectory("${THREE_DP_DIR}/libfb")
 add_subdirectory("${THREE_DP_DIR}/owt")
 add_subdirectory("${THREE_DP_DIR}/json-schema-validator")
+add_subdirectory("${THREE_DP_DIR}/backward-cpp")
 
 execute_process(
   COMMAND git log -1 --format=%H
