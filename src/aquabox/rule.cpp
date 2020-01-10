@@ -82,12 +82,17 @@ bool Rule::parseFile(const std::string& file)
         content += line;
     }
 
-    nlohmann::json root = nlohmann::json::parse(content);
+    try {
+        nlohmann::json root = nlohmann::json::parse(content);
 
-    if(!parse(root))
-    {
-        LOG_ERROR << "Rule from " << file << " can not be parsed!";
-        return false; 
+        if(!parse(root))
+        {
+            LOG_ERROR << "Rule from " << file << " can not be parsed!";
+            return false; 
+        }
+    }
+    catch (nlohmann::detail::parse_error &e) {
+        LOG_ERROR << "Can't parse rule file because " << e.what();
     }
 
     if(nullptr == m_Device.resolve())

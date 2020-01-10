@@ -27,6 +27,7 @@ CloudStream::CloudStream(std::string url)
     , m_url(url)
     , m_attached(false)
 {
+    LOG_DEBUG << "Creating stream for " << url;
     on_open = [this](std::shared_ptr<Connection> conenction) { onOpen(connection); };
 
     on_message = [this](std::shared_ptr<Connection> connection, std::shared_ptr<InMessage> message) { onMessage(connection, message); };
@@ -36,20 +37,21 @@ CloudStream::CloudStream(std::string url)
     on_error = [this](std::shared_ptr<CloudStream::Connection> connection, const SimpleWeb::error_code & code) { onError(connection, code); };
 
     m_thread = std::thread([this]{
+        bool canStart = true;
         while(true) {
-            if(m_reattach) {
-                m_reattach = false;
+            if(m_reattach.compare_exchange_weak(canStart, false)) {
                 SimpleWeb::SocketClient<SimpleWeb::WS>::start();
             }
-            else
+            else {
                 std::this_thread::sleep_for(std::chrono::seconds(1));
+            }
         }
     });
 }
 
 void CloudStream::attach()
 {
-    m_reattach = true;
+    m_reattach.exchange(true);
 }
 
 bool CloudStream::isAttached() const

@@ -106,8 +106,9 @@ RuleUpdatedEvent::RuleUpdatedEvent(std::shared_ptr<Rule> rule, const nlohmann::j
     for(auto i : json.items()) {
         auto p = before.find(i.key());
         if (p != before.end()) {
-           if (p.value() == i.value())
+           if (p.value() == i.value()) {
                continue;
+           }
         }
         res[i.key()] = i.value();
     }

@@ -72,14 +72,12 @@ std::vector<std::string> Route::parse(std::string& url) const
 {
     std::vector<std::string> tokens;
     size_t offset = 1;
-    for (auto component : m_components)
-    {
+    for (auto component : m_components) {
         component = "^" + component;
         std::regex rx(component, std::regex_constants::icase);
         std::cmatch match;
         const char* ptr = url.c_str() + offset;
-        if (!std::regex_search(ptr, match, rx))
-        {
+        if (!std::regex_search(ptr, match, rx)) {
             tokens.clear();
             break;
         }
@@ -95,10 +93,10 @@ std::unordered_map<std::string, std::string> Route::extract(std::string& url) co
     std::vector<std::string> c = parse(url);
     std::unordered_map<std::string, std::string> extracted;
 
-    for(auto& pv : m_component2Indx)
-    {
-        if (pv.second < c.size())
+    for(auto& pv : m_component2Indx) {
+        if (pv.second < c.size()) {
             extracted.insert({ pv.first, c[pv.second] });
+        }
     }
 
     return extracted;

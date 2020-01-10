@@ -18,6 +18,7 @@
 
 #include "aquabox.h"
 #include "options.h"
+#include "settings.h"
 #include "lock_file.h"
 #include <stdio.h>
 #include <execinfo.h>
@@ -43,6 +44,7 @@ void handler(int sig) {
 
 int main(int argc, char** argv)
 {
+  aquabox::Settings::setDomain("aquabox");
   bool asService = false;
   bool noDraw = false;
   for(int i = 1; i < argc; ++i)

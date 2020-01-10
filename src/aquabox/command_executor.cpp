@@ -206,12 +206,10 @@ bool CommandExecutor::UpdateDevice()
 
     nlohmann::json data;
     nlohmann::json deviceData;
-    try
-    {
+    try {
         deviceData = nlohmann::json::parse(m_cmd.body());
     }
-    catch (nlohmann::detail::parse_error &e)
-    {
+    catch (nlohmann::detail::parse_error &e) {
         data["data"] = m_cmd.body();
         data["error"] = e.what();
         data["cause"] = "Parse Error";
@@ -289,9 +287,7 @@ bool CommandExecutor::CreateOrUpdateRule(bool update)
     try
     {
         ruleData = nlohmann::json::parse(m_cmd.body());
-    }
-    catch (nlohmann::detail::parse_error &e)
-    {
+    } catch (nlohmann::detail::parse_error &e) {
         data["data"] = m_cmd.body();
         data["error"] = e.what();
         data["cause"] = "Parse Error";
@@ -300,7 +296,13 @@ bool CommandExecutor::CreateOrUpdateRule(bool update)
     }
 
     std::shared_ptr<Rule> r = std::make_shared<Rule>();
-    if (!r->parse(ruleData)) {
+    try {
+        if (!r->parse(ruleData)) {
+            m_cmd.response(data, Result::BadCommand);
+            return true;
+        }
+    } catch (nlohmann::detail::parse_error &e) {
+        LOG_ERROR << "Rule can not be parsed because: " << e.what();
         m_cmd.response(data, Result::BadCommand);
         return true;
     }
@@ -333,7 +335,7 @@ bool CommandExecutor::DeleteRule()
         m_cmd.response(Result::BadCommand);
         return true;
     }
-    std::string rule = m_cmd.getParameter(":rule");
+    auto rule = m_cmd.getParameter(":rule");
 
     auto& all = AquaBox::i().rules();
     auto pos = all.find(rule);

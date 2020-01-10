@@ -31,6 +31,7 @@ namespace aquabox
 
         static void read();
         static void write();
+        static nlohmann::json::json_pointer pointer(const std::string& key);
     public:
 
         struct Keys {
@@ -85,11 +86,16 @@ namespace aquabox
         static bool has(std::string key);
 
         static std::vector<nlohmann::json> array(std::string key);
+
+        static void setDomain(std::string domainName) {
+            domain = domainName;
+        }
     private:
         static bool dataToWrite;
         static bool ready;
         static std::recursive_mutex mx;
         static nlohmann::json json;
+        static std::string domain;
     };
 }
 

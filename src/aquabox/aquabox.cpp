@@ -108,7 +108,7 @@ int AquaBox::start()
     readUsers();
 
     StatusImage::display();
-    m_globalTimer.start([this](const Timer::ClockTimePoint&){
+    m_globalTimer.start([this](const Timer::ClockTimePoint&) {
         if (Options::Render) {
             StatusImage::display();
         }

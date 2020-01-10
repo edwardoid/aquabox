@@ -78,12 +78,10 @@ DEFINE_WS_API_IMPL(Updates)
 DEFINE_WS_API_IMPL(Commands)
 {
     nlohmann::json request;
-    try
-    {
+    try {
         request = nlohmann::json::parse(response->string());      
     }
-    catch(nlohmann::json::parse_error& e)
-    {
+    catch(nlohmann::json::parse_error& e) {
         LOG_ERROR << "Can't parse command: " << e.what();
         return;
     }

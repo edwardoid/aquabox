@@ -43,5 +43,9 @@ void CommandsStream::onMessage(std::shared_ptr<class Connection> connection, std
         connection->send(cmd.toResultJSON().dump());
     } catch (nlohmann::json::parse_error err) {
         connection->send(nlohmann::json({ "error", err.what()}).dump(4));
+    } catch (std::exception err) {
+        connection->send(nlohmann::json({ "error", err.what()}).dump(4));
+    } catch (...) {
+        connection->send(nlohmann::json({ "error", "Something went wrong"}).dump(4));
     }
 }

@@ -17,27 +17,29 @@
  */
 
 #include "settings.h"
+#include "log.h"
 #include <fstream>
 #include <thread>
 
 #ifndef AB_GIT_HASH
 #define AB_GIT_HASH "0x"
-#endif
+#endif // AB_GIT_HASH
 
 #ifndef AB_VERSION_MAJOR
 #define AB_VERSION_MAJOR 1
-#endif
+#endif // AB_VERSION_MAJOR
 
 #ifndef AB_VERSION_MINOR
 #define AB_VERSION_MINOR 0
-#endif
+#endif // AB_VERSION_MINOR
 
 #ifndef AB_VERSION
 #define AB_VERSION "1.0"
-#endif
+#endif // AB_VERSION
 
 using namespace aquabox;
 
+std::string Settings::domain = "";
 const std::string Settings::Keys::LOG_LEVEL = "log";
 
 const std::string Settings::Keys::WORKING_DIRECTORY = "workingDirectory";
@@ -70,7 +72,6 @@ int Settings::Defaults::WS_PORT = 1214;
 const std::string Settings::Defaults::AP_SSID = "AquaBox";
 const std::string Settings::Defaults::AP_PASSWORD = "aquabox";
 
-
 bool Settings::dataToWrite = false;
 bool Settings::ready = false;
 std::recursive_mutex Settings::mx;
@@ -83,10 +84,16 @@ void Settings::read()
     std::ifstream is(Defaults::ConfigurationFile);
     std::string content;
     std::string line; 
-    while(std::getline(is, line))
+    while(std::getline(is, line)) {
         content += line + "\n";
-    if(!content.empty())
-        json = json.parse(content);
+    }
+    if(!content.empty()) {
+        try {
+            json = json.parse(content);
+        } catch (nlohmann::detail::parse_error &e) {
+            LOG_ERROR << "Can't parse settings " << e.what();
+        }
+    }
     ready = true;
 }
 
@@ -94,11 +101,28 @@ void Settings::write()
 {
     std::lock_guard<std::recursive_mutex> lock(mx);
 
+    if (!ready) {
+        read();
+    }
+
     if (!dataToWrite)
         return;
     std::ofstream os(Settings::Defaults::ConfigurationFile);
     os << json.dump(4);
     dataToWrite = false;
+}
+
+nlohmann::json::json_pointer Settings::pointer(const std::string& key)
+{
+    nlohmann::json::json_pointer p;
+    if (domain != "") {
+        p.push_back(domain);
+    }
+    if (key != "") {
+        p.push_back(key);
+    }
+
+    return p;
 }
 
 void Settings::set(std::string key, bool value)
@@ -124,7 +148,11 @@ void Settings::set(std::string key, std::string value)
 void Settings::set(std::string key, nlohmann::json value)
 {
     std::lock_guard<std::recursive_mutex> lock(mx);
-    json[key] = value;
+    nlohmann::json::json_pointer p = pointer(key);
+    if (!json.contains(domain)) {
+        json[domain] = nlohmann::json::object();
+    }
+    json[p] = value;
     dataToWrite = true;
     write();
 }
@@ -132,69 +160,84 @@ void Settings::set(std::string key, nlohmann::json value)
 bool Settings::boolean(std::string key, bool def)
 {
     std::lock_guard<std::recursive_mutex> lock(mx);
-    auto pos = json.find(key);
-    if (pos != json.end())
+    nlohmann::json::json_pointer p = pointer(key);
+    if (json.contains(p))
     {
-        if (pos->is_boolean())
-            return pos->get<bool>();
+        auto pos = json[p];
+        if (json[p].is_boolean()) {
+            return pos.get<bool>();
+        }
     }
+    set (key, def);
+    return def;
 }
 
 int Settings::integer(std::string key, int def)
 {
     std::lock_guard<std::recursive_mutex> lock(mx);
-    if (!ready)
-        read();
-    auto pos = json.find(key);
-    if (pos != json.end())
+    nlohmann::json::json_pointer p = pointer(key);
+    if (json.contains(p))
     {
-        if (pos->is_number())
-            return pos->get<int>();
+        auto pos = json[p];
+        if (json[p].is_number_integer()) {
+            return pos.get<int>();
+        }
     }
-
-    set(key, def);
+    set (key, def);
     return def;
 }
 
-double Settings::floating(std::string key, double value)
+double Settings::floating(std::string key, double def)
 {
     std::lock_guard<std::recursive_mutex> lock(mx);
+    nlohmann::json::json_pointer p = pointer(key);
+
+    if (json.contains(p))
+    {
+        auto pos = json[p];
+        if (json[p].is_number_float()) {
+            return pos.get<double>();
+        }
+    }
+    set (key, def);
+    return def;
 }
 
 std::string Settings::string(std::string key, std::string def)
 {
     std::lock_guard<std::recursive_mutex> lock(mx);
-    if (!ready)
-        read();
-    auto pos = json.find(key.c_str());
-    if (pos != json.end())
-    {
-        if (pos->is_string())
-            return pos->get<std::string>();
-    }
+    nlohmann::json::json_pointer p = pointer(key);
 
-    set(key, def);
+    if (json.contains(p))
+    {
+        auto pos = json[p];
+        if (json[p].is_string()) {
+            return pos.get<std::string>();
+        }
+    }
+    set (key, def);
     return def;
 }
 
 std::vector<nlohmann::json> Settings::array(std::string key)
 {
     std::lock_guard<std::recursive_mutex> lock(mx);
-    if (!ready)
-        read();
-    auto pos = json.find(key.c_str());
-    if (pos != json.end())
+    nlohmann::json::json_pointer p = pointer(key);
+
+    if (json.contains(p))
     {
-        if (pos->is_array())
-            return pos->get<std::vector<nlohmann::json>>();
+        auto pos = json[p];
+        if (json[p].is_array()) {
+            return pos.get<std::vector<nlohmann::json>>();
+        }
     }
 
-    set(key, nlohmann::json::array());
     return {};
-
 }
 
 bool Settings::has(std::string key)
 {
     std::lock_guard<std::recursive_mutex> lock(mx);
+
+    return json.contains(pointer(key));
 }

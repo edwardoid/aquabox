@@ -245,7 +245,6 @@ bool Command::fromJSON(const nlohmann::json& obj)
         }
     }
 
-
     if (obj.find("params") != obj.cend()) {
         for(const auto entry : obj["params"].items()) {
             std::string key = (std::string)(entry.key());

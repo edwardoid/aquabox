@@ -32,8 +32,9 @@ std::unordered_map<std::string, std::shared_ptr<Rule>> RulesParser::parse(Path& 
             continue;
         LOG_INFO << "Loading rule: " << p.c_str();
         auto rule = std::make_shared<Rule>();
-        if(rule->parseFile(p))
+        if(rule->parseFile(p)) {
             rules.insert({ rule->getId(), rule });
+        }
     }
     return rules;
 }
