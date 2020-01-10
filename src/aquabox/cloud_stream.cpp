@@ -42,9 +42,8 @@ CloudStream::CloudStream(std::string url)
             if(m_reattach.compare_exchange_weak(canStart, false)) {
                 SimpleWeb::SocketClient<SimpleWeb::WS>::start();
             }
-            else {
-                std::this_thread::sleep_for(std::chrono::seconds(1));
-            }
+            
+            std::this_thread::sleep_for(std::chrono::seconds(10));
         }
     });
 }
@@ -79,6 +78,7 @@ void CloudStream::onClose(std::shared_ptr<CloudStream::Connection> connection, i
     LOG_INFO << "Closed connection to " << m_url << " because: " << reason << "(" << status << ")";
     m_attached = false;
     m_connection = nullptr;
+    SimpleWeb::SocketClient<SimpleWeb::WS>::stop();
 }
 
 void CloudStream::onError(std::shared_ptr<CloudStream::Connection>, const SimpleWeb::error_code &code)
@@ -87,7 +87,7 @@ void CloudStream::onError(std::shared_ptr<CloudStream::Connection>, const Simple
     m_attached = false;
     m_connection = nullptr;
     SimpleWeb::SocketClient<SimpleWeb::WS>::stop();
-    handler_runner->stop();
+    //handler_runner->stop();
 }
 
 void CloudStream::send(std::string data)

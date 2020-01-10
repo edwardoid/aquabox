@@ -70,5 +70,10 @@ bool Database::connect()
 }
 
 bool Database::wasProduced(std::string id) {
-    return (bool)(m_aquabox[Settings::string(Settings::Keys::HW_COLLECTION_NAME, Settings::Defaults::HW_COLLECTION_NAME)].find_one(bsoncxx::builder::stream::document{} << "serial" << id << bsoncxx::builder::stream::finalize));
+    LOG_DEBUG << "Trying to determine was box " << id << " produced or not...";
+    bool res = (bool)(m_aquabox[Settings::string(Settings::Keys::HW_COLLECTION_NAME, Settings::Defaults::HW_COLLECTION_NAME)].find_one(bsoncxx::builder::stream::document{} << "serial" << id << bsoncxx::builder::stream::finalize));
+    if (!res) {
+        LOG_DEBUG << "Box " << id << " was not produced!";
+    }
+    return res;
 }

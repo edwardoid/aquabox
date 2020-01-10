@@ -56,12 +56,15 @@ void BoxesManager::setupRoutes()
             }
         }
         catch (nlohmann::json::exception& err) {
+            LOG_ERROR << "Box registrarion failed: " << err.what();
             response->write(SimpleWeb::StatusCode::client_error_bad_request, nlohmann::json({ { "error", err.what() } }).dump(4));
         }
         catch (std::exception& err) {
+            LOG_ERROR << "Box registrarion failed: " << err.what();
             response->write(SimpleWeb::StatusCode::server_error_internal_server_error, nlohmann::json({ { "error", err.what() } }).dump(4));
         }
         catch (...) {
+            LOG_ERROR << "Box registrarion failed with unknown issue";
             response->write(SimpleWeb::StatusCode::server_error_internal_server_error);
         }
     };
@@ -74,10 +77,9 @@ void BoxesManager::setupRoutes()
     m_events = base.sub().word("stream").string(":id").word("events");
     m_commands = base.sub().word("stream").string(":id").word("commands");
 
-
     m_ws.endpoint[m_log.url()].on_open = [this](std::shared_ptr<WSServer::Connection> connection) {
         const auto id = m_log.extract(connection->path)[":id"];
-        if(acceptConnectionFromHW(id, connection)) {
+        if (acceptConnectionFromHW(id, connection)) {
             m_connections[id]->logs = connection; 
         }
     };
@@ -229,7 +231,7 @@ bool BoxesManager::isConnected(std::string id)
 bool BoxesManager::acceptConnectionFromHW(std::string id, std::shared_ptr<WSServer::Connection> connection)
 {
     LOG_INFO << "Got connection from " << connection->remote_endpoint.address().to_string()
-             << " to stream 'log' for " << id << " to " << connection->path;
+             << " for " << id << " to " << connection->path;
     if (!Database::i().wasProduced(id)) {
         LOG_WARNING << "Rejecting connection from " << connection->remote_endpoint.address().to_string() << " to stream for " << id;
         connection->send_close(REJECTED);
