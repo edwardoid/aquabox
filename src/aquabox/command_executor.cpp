@@ -148,7 +148,7 @@ bool CommandExecutor::GetDevices()
         dev.second->json(json);
         if (dev.second->isRelay()) {
             json["isOn"] = std::dynamic_pointer_cast<Relay>(dev.second)->turnedOn();
-        } else if(dev.second->isSensor()){
+        } else if(dev.second->isSensor()) {
             json["value"] = std::dynamic_pointer_cast<Sensor>(dev.second)->value();
         }
         all.push_back(json);
@@ -179,7 +179,7 @@ bool CommandExecutor::GetDevice()
     pos->second->json(data);
     if (pos->second->isRelay()) {
         data["isOn"] = std::dynamic_pointer_cast<Relay>(pos->second)->turnedOn();
-    } else if(pos->second->isSensor()){
+    } else if(pos->second->isSensor()) {
         data["value"] = std::dynamic_pointer_cast<Sensor>(pos->second)->value();
     }
 
@@ -284,8 +284,7 @@ bool CommandExecutor::CreateOrUpdateRule(bool update)
     std::string dev = m_cmd.getParameter(":dev");
     nlohmann::json data;
     nlohmann::json ruleData;
-    try
-    {
+    try {
         ruleData = nlohmann::json::parse(m_cmd.body());
     } catch (nlohmann::detail::parse_error &e) {
         data["data"] = m_cmd.body();
@@ -295,7 +294,7 @@ bool CommandExecutor::CreateOrUpdateRule(bool update)
         return true;
     }
 
-    std::shared_ptr<Rule> r = std::make_shared<Rule>();
+    auto r = std::make_shared<Rule>();
     try {
         if (!r->parse(ruleData)) {
             m_cmd.response(data, Result::BadCommand);

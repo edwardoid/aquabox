@@ -38,9 +38,8 @@ void Cloud::disconnect()
 bool Cloud::isRegistered()
 {
     const auto cloudBaseUrl = Settings::string(Settings::Keys::CLOUD_URL, Settings::Defaults::CLOUD_URL);
-    const auto cloudPort = Settings::integer(Settings::Keys::CLOUD_PORT, Settings::Defaults::CLOUD_PORT);
-    const std::string cloudHttpUrl = cloudBaseUrl + ":" + std::to_string(cloudPort);
-    const std::string cloudWSUrl =  std::string("") + ":" + std::to_string(cloudPort + 1);
+    const std::string cloudHttpUrl = cloudBaseUrl + ":" + std::to_string(Settings::integer(Settings::Keys::CLOUD_PORT, Settings::Defaults::CLOUD_PORT));
+    const std::string cloudWSUrl =  std::string("") + ":" + std::to_string(Settings::integer(Settings::Keys::CLOUD_WS_PORT, Settings::Defaults::CLOUD_WS_PORT));
     LOG_INFO << "Checking if device is registered on " << cloudHttpUrl;
     HttpClient client(cloudHttpUrl);
 

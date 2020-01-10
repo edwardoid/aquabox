@@ -77,16 +77,14 @@ bool Rule::parseFile(const std::string& file)
     std::ifstream is(file);
 
     std::string content, line;
-    while(std::getline(is, line))
-    {
+    while(std::getline(is, line)) {
         content += line;
     }
 
     try {
         nlohmann::json root = nlohmann::json::parse(content);
 
-        if(!parse(root))
-        {
+        if(!parse(root)) {
             LOG_ERROR << "Rule from " << file << " can not be parsed!";
             return false; 
         }
@@ -95,9 +93,8 @@ bool Rule::parseFile(const std::string& file)
         LOG_ERROR << "Can't parse rule file because " << e.what();
     }
 
-    if(nullptr == m_Device.resolve())
-    {
-        LOG_ERROR << "Device " << m_Device.Value << " can not be found";
+    if(nullptr == m_Device.resolve()) {
+        LOG_ERROR << "Device " << (std::string) m_Device << " can not be found";
         return false;
     }
     return true;

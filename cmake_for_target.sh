@@ -25,7 +25,7 @@ cmake $PWD/../../ \
 			-DCMAKE_SYSTEM_PREFIX_PATH=$SYSROOT_DIR \
 			-DCMAKE_SOURCE_DIR=$PWD/../src/service/ \
 			-DTARGET_DEVICE=YES \
-			-DCMAKE_BUILD_TYPE=Release \
+			-DCMAKE_BUILD_TYPE=RelWithDebInfo \
 			-DCMAKE_LIBRARY_PATH=$SYSROOT_DIR/usr/lib/arm-linux-gnueabihf \
 			-DFREETYPE_INCLUDE_DIR_ft2build=$SYSROOT_DIR/usr/include/freetype2 \
 			-DFREETYPE_INCLUDE_DIR_freetype2=$SYSROOT_DIR/usr/include/freetype2

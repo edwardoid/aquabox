@@ -1,4 +1,5 @@
 #include "database.h"
+#include "settings.h"
 #include <mongocxx/uri.hpp>
 #include <mongocxx/logger.hpp>
 #include <mongocxx/instance.hpp>
@@ -46,7 +47,7 @@ Database& Database::i()
 bool Database::connect()
 {
     try {
-        const auto uri = mongocxx::uri("mongodb://aquabox:azazello@edwardoid.redirectme.net");
+        const auto uri = mongocxx::uri(Settings::string(Settings::Keys::DATABASE_URI, Settings::Defaults::DATABASE_URI));
 
         mongocxx::options::client client_options;
         if (uri.ssl()) {
@@ -59,7 +60,7 @@ bool Database::connect()
         if (!m_client) {
             return false;
         }
-        m_aquabox = m_client["aquabox"];
+        m_aquabox = m_client[Settings::string(Settings::Keys::DATABASE_NAME, Settings::Defaults::DATABASE_NAME)];
         return (bool)m_client;
     }
     catch(mongocxx::exception& e) {
@@ -69,5 +70,5 @@ bool Database::connect()
 }
 
 bool Database::wasProduced(std::string id) {
-    return (bool)(m_aquabox["hw"].find_one(bsoncxx::builder::stream::document{} << "serial" << id << bsoncxx::builder::stream::finalize));
+    return (bool)(m_aquabox[Settings::string(Settings::Keys::HW_COLLECTION_NAME, Settings::Defaults::HW_COLLECTION_NAME)].find_one(bsoncxx::builder::stream::document{} << "serial" << id << bsoncxx::builder::stream::finalize));
 }

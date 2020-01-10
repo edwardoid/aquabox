@@ -44,12 +44,11 @@ void RuleExecutor::operator() ()
         return;
     }
 
-    if (!dev->getRulesEnabled().Value) {
+    if (!(bool)(dev->getRulesEnabled())) {
         return;
     }
     
-    for(const Action& act : *(m_rule->getActions()))
-    {
+    for(const Action& act : *(m_rule->getActions())) {
         const TimeDetails at = act.getAt().getDetails();
 
         int64_t priority = at.from(now, true, unit >= RepeatUnit::Hour, unit >= RepeatUnit::Day, unit >= RepeatUnit::Month);

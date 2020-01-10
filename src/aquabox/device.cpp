@@ -140,7 +140,7 @@ std::vector<std::shared_ptr<Rule>> Device::rules() const
     RulesMap rules = AquaBox::i().rules();
     std::vector<std::shared_ptr<Rule>> res;
     for(auto r : rules) {
-        if (r.second->getDevice().Value == m_Id.Value) {
+        if (r.second->getDevice() == m_Id) {
             res.push_back(r.second);
         }
     }

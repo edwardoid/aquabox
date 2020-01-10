@@ -44,7 +44,6 @@ const std::string Settings::Keys::LOG_LEVEL = "log";
 
 const std::string Settings::Keys::WORKING_DIRECTORY = "workingDirectory";
 const std::string Settings::Keys::WEB_ROOT = "webRoot";
-
 const std::string Settings::Keys::HTTP_PORT = "httpPort";
 const std::string Settings::Keys::STREAM_PORT = "streamPort";
 const std::string Settings::Keys::NETWORK = "network";
@@ -54,9 +53,14 @@ const std::string Settings::Keys::USERS = "users";
 const std::string Settings::Keys::THREADS = "threads";
 const std::string Settings::Keys::CLOUD_URL = "cloudUrl";
 const std::string Settings::Keys::CLOUD_PORT = "cloudPort";
+const std::string Settings::Keys::CLOUD_WS_PORT = "cloudWSPort";
+const std::string Settings::Keys::DATABASE_URI = "databaseURI";
+const std::string Settings::Keys::DATABASE_NAME = "database";
+const std::string Settings::Keys::HW_COLLECTION_NAME = "hardwareCollection";
+const std::string Settings::Keys::APP_COLLECTION_NAME = "applicationsCollection";
 
 const std::string Settings::Defaults::GIT_HASH = AB_GIT_HASH ;
-const std::string Settings::Defaults::APPLICATION = "GoAqua";
+const std::string Settings::Defaults::APPLICATION = "Aquabox";
 const std::string Settings::Defaults::DESCRIPTION = "Some kind of smart aquarium controller";
 const std::string Settings::Defaults::VERSION = AB_VERSION;
 const uint16_t Settings::Defaults::VERSION_MAJOR = AB_VERSION_MAJOR;
@@ -67,10 +71,15 @@ const std::string Settings::Defaults::EMAIL = "edward.sarkisyan@gmail.com";
 const std::string Settings::Defaults::ConfigurationFile = "config.json";
 const std::string Settings::Defaults::CLOUD_URL = "edwardoid.redirectme.net";
 const uint16_t Settings::Defaults::CLOUD_PORT = 5555;
-int Settings::Defaults::REST_PORT = 1213;
-int Settings::Defaults::WS_PORT = 1214;
+const uint16_t Settings::Defaults::CLOUD_WS_PORT = 5556;
+const int Settings::Defaults::REST_PORT = 1213;
+const int Settings::Defaults::WS_PORT = 1214;
 const std::string Settings::Defaults::AP_SSID = "AquaBox";
 const std::string Settings::Defaults::AP_PASSWORD = "aquabox";
+const std::string Settings::Defaults::DATABASE_URI = "mongodb://aquabox:azazello@edwardoid.redirectme.net";
+const std::string Settings::Defaults::DATABASE_NAME = "aquabox";
+const std::string Settings::Defaults::HW_COLLECTION_NAME = "hw";
+const std::string Settings::Defaults::APP_COLLECTION_NAME = "app";
 
 bool Settings::dataToWrite = false;
 bool Settings::ready = false;

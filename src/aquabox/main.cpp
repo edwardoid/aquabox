@@ -26,20 +26,28 @@ int main(int argc, char** argv)
 {
   aquabox::Settings::setDomain("aquabox");
   backward::SignalHandling sh;
-  bool asService = false;
-  bool noDraw = false;
   for(int i = 1; i < argc; ++i)
   {
-    if(strcmp(argv[i], "--service") == 0)
+    if(strcmp(argv[i], "--service") == 0) {
       aquabox::Options::Service = true;
-    else if(strcmp(argv[i], "--nodraw") == 0)
+    } else if(strcmp(argv[i], "--nodraw") == 0) {
       aquabox::Options::Render = false;
-    else if(strcmp(argv[i], "--ignore-lock") == 0)
+    }
+    else if(strcmp(argv[i], "--ignore-lock") == 0) {
       aquabox::Options::Lock = false;
-    else if(strcmp(argv[i], "--disable-access-point") == 0)
+    }
+    else if(strcmp(argv[i], "--disable-access-point") == 0) {
       aquabox::Options::AccessPoint = false;
-    else if(strcmp(argv[i], "--standalone") == 0)
+    }
+    else if(strcmp(argv[i], "--standalone") == 0) {
       aquabox::Options::EnableCloud = false;
+    }
+    else if(strcmp(argv[i], "--debug") == 0) {
+      aquabox::Options::Render = false;
+      aquabox::Options::Lock = false;
+      aquabox::Options::AccessPoint = false;
+      break;
+    }
     else if(strcmp(argv[i], "--help") == 0) {
       std::cout << "aquabox [OPTIONS]\n"
                 << " --service                Applications will be runned as part of Linux service\n"

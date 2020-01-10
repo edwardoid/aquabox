@@ -51,6 +51,11 @@ namespace aquabox
             static const std::string THREADS;
             static const std::string CLOUD_URL;
             static const std::string CLOUD_PORT;
+            static const std::string CLOUD_WS_PORT;
+            static const std::string DATABASE_URI;
+            static const std::string DATABASE_NAME;
+            static const std::string HW_COLLECTION_NAME;
+            static const std::string APP_COLLECTION_NAME;
         };
 
         struct Defaults {
@@ -68,9 +73,14 @@ namespace aquabox
             static const std::string AP_PASSWORD;
             static const std::string CLOUD_URL;
             static const uint16_t CLOUD_PORT;
+            static const uint16_t CLOUD_WS_PORT;
+            static const std::string DATABASE_URI;
+            static const std::string DATABASE_NAME;
+            static const std::string HW_COLLECTION_NAME;
+            static const std::string APP_COLLECTION_NAME;
 
-            static int REST_PORT;
-            static int WS_PORT;
+            static const int REST_PORT;
+            static const int WS_PORT;
         };
 
         static void set(std::string key, bool value);
