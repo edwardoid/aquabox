@@ -99,6 +99,7 @@ namespace aquabox
 
         static void setDomain(std::string domainName) {
             domain = domainName;
+            read();
         }
     private:
         static bool dataToWrite;

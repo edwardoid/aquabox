@@ -76,7 +76,48 @@ void StatusImage::display(std::string fbDevice)
 
     int textX = fb.width() - 5 - FONT_SIZE;
     int textY = margin / 2;
-    fb.drawText(font, FONT_SIZE, textX , textY, degree(-90.), temperatureString, 0xDDDD00);
+
+    std::string state = "NM: Uknown";
+    switch(AquaBox::i().networking().state())
+    {
+        case IoT::WiFi::State::Uninitialized:
+        {
+            state = "NM: Uninitilized";
+            break;
+        }
+        case IoT::WiFi::State::CheckingConnectivity:
+        {
+            state = "NM: Checking";
+            break;
+        }
+        case IoT::WiFi::State::InAPMode:
+        {
+            state = "NM: Access Point";
+            break;
+        }
+        case IoT::WiFi::State::SwitchingToAP:
+        {
+            state = "NM: Switching to AP";
+            break;
+        }
+        case IoT::WiFi::State::TryingToConnect:
+        {
+            state = "Connecting";
+            break;
+        }
+        case IoT::WiFi::State::Connected:
+        {
+            state = "NM: OK";
+            break;
+        }
+        default: {
+            state = "NM: Err";
+            break;
+        }
+    }
+
+
+    fb.drawText(font, FONT_SIZE, textX , textY, degree(-90.), state, 0x0000FF);
     textX -= 5 + FONT_SIZE;
     std::string ssid = AquaBox::i().networking().currentSSID();
     if (ssid == "") {
