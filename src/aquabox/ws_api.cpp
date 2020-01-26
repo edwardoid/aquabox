@@ -64,8 +64,7 @@ void API::postEvent(Event event)
         return;
     }
 
-    for(auto& connection : connections->second)
-    {
+    for(auto& connection : connections->second) {
         connection->send(data);
     }
 }
@@ -144,8 +143,7 @@ DEFINE_WS_API_IMPL(Commands)
     resp["rpid"] = rqid->get<unsigned int>();
     resp["result"] = (int)command.result();
 
-    try
-    {
+    try {
         nlohmann::json resultData = nlohmann::json::parse(command.response());
         resp["data"] = resultData;
     } catch(...) {}
