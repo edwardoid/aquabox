@@ -4,7 +4,10 @@ set(AB_v 0)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
 set(AQUABOX_COMMON_PATH ${CMAKE_CURRENT_LIST_DIR}/common)
 add_subdirectory(common)
-add_subdirectory(aquabox)
+
+if (NOT CLOUD_ONLY)
+  add_subdirectory(aquabox)
+endif()
 
 if (NOT TARGET_DEVICE)
   add_subdirectory(cloud)
