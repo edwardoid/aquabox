@@ -1,6 +1,8 @@
 #ifndef AQUABOX_H
 #define AQUABOX_H
 
+#define SERIAL_NUMBER "dfb1e54e863a175d0832615844d1e9bb08d8a9cd"
+
 #include "identifiable.h"
 #include <thread_pool.hpp>
 #include "rules_timer.h"

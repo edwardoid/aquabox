@@ -81,7 +81,8 @@ nlohmann::json getStatusInfo(bool detailed)
 {
     nlohmann::json host({
         {"rest", Settings::integer(Settings::Keys::HTTP_PORT, Settings::Defaults::REST_PORT)},
-        {"stream", Settings::integer(Settings::Keys::STREAM_PORT, Settings::Defaults::WS_PORT)}
+        {"stream", Settings::integer(Settings::Keys::STREAM_PORT, Settings::Defaults::WS_PORT)},
+        {"serial", SERIAL_NUMBER}
     });
 
     if (detailed) {

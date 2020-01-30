@@ -6,9 +6,6 @@
 #include "commands_stream.h"
 #include <nlohmann/json.hpp>
 
-
-#define SERIAL_NUMBER "dfb1e54e863a175d0832615844d1e9bb08d8a9cd"
-
 #define AUTH_URL "/hw/api/v1/register"
 
 using namespace aquabox;
@@ -39,7 +36,7 @@ bool Cloud::isRegistered()
 {
     const auto cloudBaseUrl = Settings::string(Settings::Keys::CLOUD_URL, Settings::Defaults::CLOUD_URL);
     const std::string cloudHttpUrl = cloudBaseUrl + ":" + std::to_string(Settings::integer(Settings::Keys::CLOUD_PORT, Settings::Defaults::CLOUD_PORT));
-    const std::string cloudWSUrl =  std::string("") + ":" + std::to_string(Settings::integer(Settings::Keys::CLOUD_WS_PORT, Settings::Defaults::CLOUD_WS_PORT));
+    const std::string cloudWSUrl =  cloudBaseUrl + ":" + std::to_string(Settings::integer(Settings::Keys::CLOUD_WS_PORT, Settings::Defaults::CLOUD_WS_PORT));
     LOG_INFO << "Checking if device is registered on " << cloudHttpUrl;
     HttpClient client(cloudHttpUrl);
 

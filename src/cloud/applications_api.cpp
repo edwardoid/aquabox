@@ -18,7 +18,7 @@ void ApplicationsApi::startServer()
     m_http = std::make_shared<v1::API::HttpServer>();
     m_http->config.port = Settings::integer(Settings::Keys::HTTP_PORT, Settings::Defaults::REST_PORT);
     LOG_INFO << "Starting web server on " << m_http->config.address << ":" << m_http->config.port;
-    const Route base = Route().word("api").word("v1").word("app").string(":appId");
+    const Route base = Route().word("api").word("v1");
     RESTApi.init(m_http, base);
     
     m_http->start();
