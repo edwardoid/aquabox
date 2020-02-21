@@ -1,0 +1,24 @@
+#ifndef BOX_H
+#define BOX_H
+
+#include "box_connection.h"
+#include "event.h"
+#include <s2s.h>
+
+namespace aquabox
+{
+    class ApplicationConnection;
+
+    class Box: public BoxConnection
+    {
+    public:
+        Box(ResultsMap<Command>& results);
+        SignalSlot::Signal<std::shared_ptr<Event>> UpdateReceived;
+        void addConnection(std::shared_ptr<ApplicationConnection> connection) {}
+        void removeConnection(ApplicationConnection* connection) {}
+    private:
+        std::vector<std::shared_ptr<ApplicationConnection>> m_applications;
+    };
+}
+
+#endif // BOX_H

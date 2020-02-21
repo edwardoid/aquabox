@@ -15,7 +15,7 @@ include_directories(${FB_INCLUDE_DIR})
 include_directories(${IWS_INCLUDE_DIR})
 include_directories(${OWT_INCLUDE_DIR})
 include_directories(${PNG_INCLUDE_DIR})
-include_directories(${PNG_INCLUDE_DIR})
+include_directories(${S2S_INCLUDE_DIR})
 include_directories(${LIBMONGOCXX_INCLUDE_DIRS})
 include_directories(${AQUABOX_COMMON_PATH})
 

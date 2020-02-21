@@ -78,7 +78,7 @@ DEFINE_WS_API_IMPL(Commands)
 {
     nlohmann::json request;
     try {
-        request = nlohmann::json::parse(response->string());      
+        request = nlohmann::json::parse(response->string());
     }
     catch(nlohmann::json::parse_error& e) {
         LOG_ERROR << "Can't parse command: " << e.what();
