@@ -1,6 +1,3 @@
-#ifndef BUS_H
-#define BUS_H
-
 /*
  * AquaBox
  * Copyright (C) 2019  Eduard Sargsyan
@@ -18,6 +15,9 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
+#ifndef BUS_H
+#define BUS_H
 
 #include <memory>
 #include "hardware.h"

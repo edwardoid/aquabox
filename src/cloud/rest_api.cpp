@@ -20,7 +20,7 @@
 #include "log.h"
 #include "command.h"
 #include "boxes_manager.h"
-#include "box_connection.h"
+#include "box.h"
 #include <random>
 
 using namespace aquabox::v1;

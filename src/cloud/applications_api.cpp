@@ -11,6 +11,8 @@ void ApplicationsApi::start()
     static std::thread routine([]() {
         m_instance.startServer();
     });
+
+    m_ws.s
 }
 
 void ApplicationsApi::startServer()
