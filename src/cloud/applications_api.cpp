@@ -39,7 +39,7 @@ void ApplicationsApi::startStreamServer()
     m_ws->config.port = Settings::integer(Settings::Keys::STREAM_PORT, Settings::Defaults::WS_PORT);
     LOG_INFO << "Starting websocket server" << m_ws->config.address << ":" << m_ws->config.port;
 
-    auto updates = m_base.sub().word("updates").string(":boxId").string(":appId");
+    auto updates = m_base.sub().string(":boxId").string(":appId").word("updates");
 
     m_ws->endpoint[updates.url()].on_open = [this, updates](std::shared_ptr<WSServer::Connection> connection) {
         auto params = updates.extract(connection->path);

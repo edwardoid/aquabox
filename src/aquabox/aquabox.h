@@ -27,7 +27,6 @@
 #include "web_server.h"
 #include "path.h"
 #include "cloud.h"
-#include "cloud_appender.h"
 #include <wifi_setup.h>
 #include <memory>
 #include <unordered_map>
@@ -81,7 +80,6 @@ namespace aquabox
         void readRules(const Path& root);
     private:
         std::unique_ptr<IoT::WiFi> m_wifi;
-        CloudAppender m_cloudAppender;
         plog::ColorConsoleAppender<plog::TxtFormatter> m_consoleAppender;
         plog::RollingFileAppender<plog::CsvFormatter> m_logAppender;
         plog::RollingFileAppender<plog::TxtFormatter> m_fileAppender;
