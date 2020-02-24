@@ -91,14 +91,14 @@ void API::defaultHandler(const Route& route, Request& request, Response& respons
 
 }
 
-void API::CORSOptions(API::Request request, API::Response response)
+void API::CORSOptions(Web::Request request, Web::Response response)
 {
     Headers headers;
     addCORSHeaders(headers);
     response->write(SimpleWeb::StatusCode::success_ok, headers);
 }
 
-void API::addCORSHeaders(API::Headers& headers)
+void API::addCORSHeaders(Web::Headers& headers)
 {
     headers.emplace("Content-Type", "application/json");
     headers.emplace(Access_Control_Allow_Origin, "*");

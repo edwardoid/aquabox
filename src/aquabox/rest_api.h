@@ -23,6 +23,7 @@
 
 namespace aquabox
 {
+    using namespace Web;
     namespace v1
     {
         class REST: public API

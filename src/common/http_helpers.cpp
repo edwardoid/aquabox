@@ -20,9 +20,8 @@
 #include "log.h"
 
 using namespace aquabox;
-using namespace v1;
 
-void HttpHelpers::serveStream(API::Response response, Path path, std::shared_ptr<std::ifstream> ifs, size_t length, bool removeWhenFinished)
+void HttpHelpers::serveStream(Web::Response response, Path path, std::shared_ptr<std::ifstream> ifs, size_t length, bool removeWhenFinished)
 {
     std::vector<char> buffer(131072); // Safe when server is running on one thread
     std::streamsize read_length;
@@ -44,7 +43,7 @@ void HttpHelpers::serveStream(API::Response response, Path path, std::shared_ptr
     }
 }
 
-void HttpHelpers::serveFile(API::Response response, Path path, API::Headers& headers, bool removeWhenFinished)
+void HttpHelpers::serveFile(Web::Response response, Path path, Web::Headers& headers, bool removeWhenFinished)
 {
     static const std::unordered_map<std::string, std::string> ext2ContentType({
         { "js", "application/javascript" },

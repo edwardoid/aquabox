@@ -19,19 +19,13 @@
 #ifndef HARDWARE_API_H
 #define HARDWARE_API_H
 
-#include <string>
-#include <memory>
-#include <server_http.hpp>
-#include <server_ws.hpp>
 #include "route.h"
+#include "iot_definitions.h"
 
 namespace aquabox
 {
     class HardwareApi
     {
-        using HttpServer = SimpleWeb::Server<SimpleWeb::HTTP>;
-        using WSServer = SimpleWeb::SocketServer<SimpleWeb::WS>;
-
         HardwareApi() {};
         HardwareApi(const HardwareApi&) = delete;
         HardwareApi(HardwareApi&&) = delete;
@@ -40,12 +34,12 @@ namespace aquabox
     public:
         static bool start();
     private:
-        bool acceptConnectionFromHW(std::string id, std::shared_ptr<WSServer::Connection> connection);
+        bool acceptConnectionFromHW(std::string id, std::shared_ptr<Web::WSConnection> connection);
         void setupRoutes();
     private:
         static HardwareApi self;
-        HttpServer m_http;
-        WSServer m_ws;
+        Web::HttpServer m_http;
+        Web::WSServer m_ws;
         Route m_register;
         Route m_login;
         Route m_events;

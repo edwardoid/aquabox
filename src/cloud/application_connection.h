@@ -1,21 +1,21 @@
 #ifndef APPLICATION_CONNECTION_H
 #define APPLICATION_CONNECTION_H
 
-#include <server_ws.hpp>
+#include "iot_definitions.h"
 
 namespace aquabox
 {
     class Box;
     class ApplicationConnection
     {
-        using WSServer = SimpleWeb::SocketServer<SimpleWeb::WS>;
-    private:
-        ApplicationConnection(Box& box, std::shared_ptr<WSServer::Connection> connection);
+    public:
+        ApplicationConnection(Box& box, std::shared_ptr<Web::WSConnection> connection);
         ~ApplicationConnection();
+        bool operator == (const std::shared_ptr<Web::WSConnection> connection) const;
     private:
         int m_updateConnection = -1;
         Box& m_box;
-        std::shared_ptr<WSServer::Connection> m_connection;
+        std::shared_ptr<Web::WSConnection> m_connection;
     };
 }
 

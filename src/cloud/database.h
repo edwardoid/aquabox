@@ -30,13 +30,14 @@ namespace aquabox
     public:
         static Database& i();
         bool wasProduced(const std::string id);
+        bool isApplicationAuthorized(std::string app, std::string box) { return true; }
+
     protected:
         Database();
         Database(const Database&) = delete;
         Database(Database&&) = delete;
         Database& operator = (const Database) = delete;
         Database& operator = (Database&&) = delete;
-        bool isApplicationAuthorized(std::string app, std::string box);
 
         bool connect();
     private:

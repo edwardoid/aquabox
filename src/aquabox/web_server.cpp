@@ -27,7 +27,7 @@ bool WebServer::start()
     const Route base = Route().word("api").word("v1");
 
     m_rest = std::thread([this, base]() {
-        m_http = std::make_shared<v1::API::HttpServer>();
+        m_http = std::make_shared<Web::HttpServer>();
         m_http->config.port = Settings::integer(Settings::Keys::HTTP_PORT, Settings::Defaults::REST_PORT);
         LOG_INFO << "Starting web server on " << m_http->config.address << ":" << m_http->config.port;
         RESTApi.init(m_http, base);

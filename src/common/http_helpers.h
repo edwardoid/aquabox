@@ -20,7 +20,7 @@
 #define HTTP_HELPERS_H
 
 #include <fstream>
-#include "api.h"
+#include "iot_definitions.h"
 #include "path.h"
 
 namespace aquabox
@@ -28,8 +28,8 @@ namespace aquabox
     class HttpHelpers
     {
     public:
-    static void serveFile(v1::API::Response response, Path path, v1::API::Headers& headers, bool removeWhenFinished);
-    static void serveStream(v1::API::Response response, Path path, std::shared_ptr<std::ifstream> ifs, size_t length, bool removeWhenFinished);
+    static void serveFile(Web::Response response, Path path, Web::Headers& headers, bool removeWhenFinished);
+    static void serveStream(Web::Response response, Path path, std::shared_ptr<std::ifstream> ifs, size_t length, bool removeWhenFinished);
     };
 }
 

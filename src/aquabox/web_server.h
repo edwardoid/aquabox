@@ -38,10 +38,9 @@ namespace aquabox
         bool bindApiCalls();
         void postUpdate(std::shared_ptr<Event> event);
     private:
-        using WsServer = SimpleWeb::SocketServer<SimpleWeb::WS>;
 
-        std::shared_ptr<v1::API::HttpServer> m_http;
-        WsServer m_ws;
+        std::shared_ptr<Web::HttpServer> m_http;
+        Web::WSServer m_ws;
         std::thread m_rest;
         std::thread m_stream;
         v1::REST RESTApi;

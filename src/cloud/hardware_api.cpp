@@ -28,8 +28,6 @@
 
 using namespace aquabox;
 
-#define REJECTED 0XDEAD
-
 HardwareApi HardwareApi::self;
 
 bool HardwareApi::start()
@@ -56,7 +54,7 @@ void HardwareApi::setupRoutes()
     m_login = base.sub().word("login");
 
 
-    m_http.resource[m_register.url()]["POST"] = [this](std::shared_ptr<HttpServer::Response> response, std::shared_ptr<HttpServer::Request> request) {
+    m_http.resource[m_register.url()]["POST"] = [this](Web::Response response, Web::Request request) {
         try {
             auto registerData = nlohmann::json::parse(request->content.string());
             if (!registerData.contains("id")) {
@@ -88,23 +86,23 @@ void HardwareApi::setupRoutes()
         }
     };
 
-    m_http.resource[m_login.url()]["POST"] = [this](std::shared_ptr<HttpServer::Response> response, std::shared_ptr<HttpServer::Request> request) {
+    m_http.resource[m_login.url()]["POST"] = [this](Web::Response response, Web::Request request) {
 
     };
 
     m_events = base.sub().word("stream").string(":id").word("events");
     m_commands = base.sub().word("stream").string(":id").word("commands");
 
-    m_ws.endpoint[m_events.url()].on_open = [this](std::shared_ptr<WSServer::Connection> connection) {
+    m_ws.endpoint[m_events.url()].on_open = [this](std::shared_ptr<Web::WSConnection> connection) {
         const auto id = m_events.extract(connection->path)[":id"];
         if(acceptConnectionFromHW(id, connection)) {
             BoxesManager::get(id)->events = connection; 
         }
     };
 
-    m_ws.endpoint[m_events.url()].on_close = [this](std::shared_ptr<WSServer::Connection> connection,
+    m_ws.endpoint[m_events.url()].on_close = [this](std::shared_ptr<Web::WSConnection> connection,
                                                     int status, const std::string & reason) {
-        if (status == REJECTED) {
+        if (status == STREAM_CONNECTION_REJECTED) {
             return;
         }
         LOG_INFO << "Connection from " << connection->remote_endpoint_address() << " to " << connection->path << " closed.";
@@ -113,7 +111,7 @@ void HardwareApi::setupRoutes()
         BoxesManager::eraseIfNeed(id);
     };
 
-    m_ws.endpoint[m_events.url()].on_error = [this](std::shared_ptr<WSServer::Connection> connection,
+    m_ws.endpoint[m_events.url()].on_error = [this](std::shared_ptr<Web::WSConnection> connection,
                                                  SimpleWeb::error_code) {
         LOG_INFO << "Connection from " << connection->remote_endpoint_address() << " to " << connection->path << " closed due error.";
         const auto id = m_events.extract(connection->path)[":id"];
@@ -121,21 +119,21 @@ void HardwareApi::setupRoutes()
         BoxesManager::eraseIfNeed(id);
     };
 
-    m_ws.endpoint[m_events.url()].on_message = [this](std::shared_ptr<WSServer::Connection> connection,
-                                                      std::shared_ptr<WSServer::InMessage> in_message) {
+    m_ws.endpoint[m_events.url()].on_message = [this](std::shared_ptr<Web::WSConnection> connection,
+                                                      std::shared_ptr<Web::Message> in_message) {
         LOG_DEBUG << "On " << connection->path << " got:\n\t\t" << in_message->string();
     };
 
-    m_ws.endpoint[m_commands.url()].on_open = [this](std::shared_ptr<WSServer::Connection> connection) {
+    m_ws.endpoint[m_commands.url()].on_open = [this](std::shared_ptr<Web::WSConnection> connection) {
         const auto id = m_commands.extract(connection->path)[":id"];
         if(acceptConnectionFromHW(id, connection)) {
             BoxesManager::get(id)->commands = connection; 
         }
     };
 
-    m_ws.endpoint[m_commands.url()].on_close = [this](std::shared_ptr<WSServer::Connection> connection,
+    m_ws.endpoint[m_commands.url()].on_close = [this](std::shared_ptr<Web::WSConnection> connection,
                                                       int status, const std::string & reason) {
-        if (status == REJECTED) {
+        if (status == STREAM_CONNECTION_REJECTED) {
             return;
         }
         LOG_INFO << "Connection from " << connection->remote_endpoint_address() << " to " << connection->path << " closed.";
@@ -144,7 +142,7 @@ void HardwareApi::setupRoutes()
         BoxesManager::eraseIfNeed(id);
     };
 
-    m_ws.endpoint[m_commands.url()].on_error = [this](std::shared_ptr<WSServer::Connection> connection,
+    m_ws.endpoint[m_commands.url()].on_error = [this](std::shared_ptr<Web::WSConnection> connection,
                                                       SimpleWeb::error_code) {
         LOG_INFO << "Connection from " << connection->remote_endpoint_address() << " to " << connection->path << " closed due error.";
         const auto id = m_commands.extract(connection->path)[":id"];
@@ -152,8 +150,8 @@ void HardwareApi::setupRoutes()
         BoxesManager::eraseIfNeed(id);
     };
 
-    m_ws.endpoint[m_commands.url()].on_message = [this](std::shared_ptr<WSServer::Connection> connection,
-                                                        std::shared_ptr<WSServer::InMessage> in_message) {
+    m_ws.endpoint[m_commands.url()].on_message = [this](std::shared_ptr<Web::WSConnection> connection,
+                                                        std::shared_ptr<Web::Message> in_message) {
 
         LOG_DEBUG << "On " << connection->path << " got some data";
         
@@ -167,13 +165,13 @@ void HardwareApi::setupRoutes()
     };
 }
 
-bool HardwareApi::acceptConnectionFromHW(std::string id, std::shared_ptr<WSServer::Connection> connection)
+bool HardwareApi::acceptConnectionFromHW(std::string id, std::shared_ptr<Web::WSConnection> connection)
 {
     LOG_INFO << "Got connection from " << connection->remote_endpoint_address()
              << " for " << id << " to " << connection->path;
     if (!Database::i().wasProduced(id)) {
         LOG_WARNING << "Rejecting connection from " << connection->remote_endpoint_address() << " to stream for " << id;
-        connection->send_close(REJECTED);
+        connection->send_close(STREAM_CONNECTION_REJECTED);
         return false;
     }
     return (BoxesManager::get(id, true) != nullptr) ? true : false;

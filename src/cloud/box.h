@@ -14,8 +14,9 @@ namespace aquabox
     public:
         Box(ResultsMap<Command>& results);
         SignalSlot::Signal<std::shared_ptr<Event>> UpdateReceived;
-        void addConnection(std::shared_ptr<ApplicationConnection> connection) {}
-        void removeConnection(ApplicationConnection* connection) {}
+        void addConnection(std::shared_ptr<ApplicationConnection> connection);
+        void removeConnection(std::shared_ptr<ApplicationConnection> connection);
+        std::vector<std::shared_ptr<ApplicationConnection>> connections() const;
     private:
         std::vector<std::shared_ptr<ApplicationConnection>> m_applications;
     };

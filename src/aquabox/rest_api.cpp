@@ -39,7 +39,7 @@
 using namespace aquabox::v1;
 using namespace aquabox;
 
-Command createCommand(Operation operation, API::Request request, bool body, std::unordered_map<std::string, std::string> params = {})
+Command createCommand(Operation operation, Web::Request request, bool body, std::unordered_map<std::string, std::string> params = {})
 {
     Command command;
     command.setOperation(operation);
@@ -50,7 +50,7 @@ Command createCommand(Operation operation, API::Request request, bool body, std:
     return command;
 }
 
-void execCommand(Command& cmd, API::Response response, API::Headers headers)
+void execCommand(Command& cmd, Web::Response response, Web::Headers headers)
 {
     CommandExecutor exec;
     if(!exec.exec(cmd)) {
@@ -128,7 +128,7 @@ void REST::init(std::shared_ptr<HttpServer> http, Route base)
     setup("PUT", m_statusQR, apiCallback<REST>(&REST::StatusQR));
 }
 /*
-void REST::StaticFiles(const Route& route, API::Request& request, API::Response& response, Headers& headers)
+void REST::StaticFiles(const Route& route, Web::Request& request, Web::Response& response, Headers& headers)
 {
     Path p = AquaBox::i().workingDirectory();
     p.append(request->path);
@@ -152,7 +152,7 @@ void REST::StaticFiles(const Route& route, API::Request& request, API::Response&
     serveFile(response, p, headers, false);
 }*/
 
-void REST::StatusQR(const Route& route, API::Request& request, API::Response& response, Headers& headers)
+void REST::StatusQR(const Route& route, Web::Request& request, Web::Response& response, Web::Headers& headers)
 {
     std::string path = "./whoami_qr_" + std::to_string(std::rand()) + ".png";
     double factor = 0.;
@@ -183,13 +183,13 @@ void REST::StatusQR(const Route& route, API::Request& request, API::Response& re
     HttpHelpers::serveFile(response, path, headers, true);
 }
 
-void REST::Status(const Route& route, API::Request& request, API::Response& response, Headers& headers)
+void REST::Status(const Route& route, Web::Request& request, Web::Response& response, Web::Headers& headers)
 {
     auto cmd = createCommand(Operation::GetStatus, request, true);
     execCommand(cmd, response, headers);
 }
 
-// void REST::WiFiQR(const Route& route, API::Request& request, API::Response& response, Headers& headers)
+// void REST::WiFiQR(const Route& route, Web::Request& request, Web::Response& response, Headers& headers)
 // {
 //     std::string path = "wifi_qr_" + std::to_string(std::rand()) + ".png";
 //     double factor = 0.;
@@ -218,37 +218,37 @@ void REST::Status(const Route& route, API::Request& request, API::Response& resp
 //     serveFile(response, path, headers, true);
 // }
 
-void REST::Devices(const Route& route, API::Request& request, API::Response& response, Headers& headers)
+void REST::Devices(const Route& route, Web::Request& request, Web::Response& response, Web::Headers& headers)
 {
     auto cmd = createCommand(Operation::GetDevices, request, false);
     execCommand(cmd, response, headers);
 }
 
-void REST::GetDevice(const Route& route, API::Request& request, API::Response& response, Headers& headers)
+void REST::GetDevice(const Route& route, Web::Request& request, Web::Response& response, Web::Headers& headers)
 {
     auto cmd = createCommand(Operation::GetDevice, request, false, route.extract(request->path));
     execCommand(cmd, response, headers);
 }
 
-void REST::UpdateDevice(const Route& route, API::Request& request, API::Response& response, Headers& headers)
+void REST::UpdateDevice(const Route& route, Web::Request& request, Web::Response& response, Web::Headers& headers)
 {
     auto cmd = createCommand(Operation::UpdateDevice, request, true, route.extract(request->path));
     execCommand(cmd, response, headers);
 }
 
-void REST::Rules(const Route& route, API::Request& request, API::Response& response, Headers& headers)
+void REST::Rules(const Route& route, Web::Request& request, Web::Response& response, Web::Headers& headers)
 {
     auto cmd = createCommand(Operation::GetRules, request, false);
     execCommand(cmd, response, headers);
 }
 
-void REST::GetRule(const Route& route, API::Request& request, API::Response& response, Headers& headers)
+void REST::GetRule(const Route& route, Web::Request& request, Web::Response& response, Web::Headers& headers)
 {
     auto cmd = createCommand(Operation::GetRules, request, false, route.extract(request->path));
     execCommand(cmd, response, headers);
 }
 
-void REST::CreateRule(const Route& route, API::Request& request, API::Response& response, Headers& headers)
+void REST::CreateRule(const Route& route, Web::Request& request, Web::Response& response, Web::Headers& headers)
 {
     auto cmd = createCommand(request->method == "PUT"
                     ? Operation::CreateRule
@@ -256,43 +256,43 @@ void REST::CreateRule(const Route& route, API::Request& request, API::Response& 
     execCommand(cmd, response, headers);
 }
 
-void REST::DeleteRule(const Route& route, API::Request& request, API::Response& response, Headers& headers)
+void REST::DeleteRule(const Route& route, Web::Request& request, Web::Response& response, Web::Headers& headers)
 {
     auto cmd = createCommand(Operation::DeleteRule, request, false, route.extract(request->path));
     execCommand(cmd, response, headers);
 }
 
-void REST::DeviceRules(const Route& route, API::Request& request, API::Response& response, Headers& headers)
+void REST::DeviceRules(const Route& route, Web::Request& request, Web::Response& response, Headers& headers)
 {
     auto cmd = createCommand(Operation::DeviceRules, request, false, route.extract(request->path));
     execCommand(cmd, response, headers);
 }
 
-void REST::SupportedRepeatTimeouts(const Route& route, API::Request& request, API::Response& response, Headers& headers)
+void REST::SupportedRepeatTimeouts(const Route& route, Web::Request& request, Web::Response& response, Headers& headers)
 {
     auto cmd = createCommand(Operation::SupportedRepeatTimeouts, request, false);
     execCommand(cmd, response, headers);
 }
 
-void REST::TurnOn(const Route& route, API::Request& request, API::Response& response, Headers& headers)
+void REST::TurnOn(const Route& route, Web::Request& request, Web::Response& response, Headers& headers)
 {
     auto cmd = createCommand(Operation::TurnOn, request, false, route.extract(request->path));
     execCommand(cmd, response, headers);
 }
 
-void REST::TurnOff(const Route& route, API::Request& request, API::Response& response, Headers& headers)
+void REST::TurnOff(const Route& route, Web::Request& request, Web::Response& response, Headers& headers)
 {
     auto cmd = createCommand(Operation::TurnOff, request, false, route.extract(request->path));
     execCommand(cmd, response, headers);
 }
 
-void REST::ScanWiFiNetworks(const Route& route, API::Request& request, API::Response& response, Headers& headers)
+void REST::ScanWiFiNetworks(const Route& route, Web::Request& request, Web::Response& response, Headers& headers)
 {
     auto cmd = createCommand(Operation::ScanWiFiNetworks, request, false);
     execCommand(cmd, response, headers);
 }
 
-void REST::ConnectToWiFi(const Route& route, API::Request& request, API::Response& response, Headers& headers)
+void REST::ConnectToWiFi(const Route& route, Web::Request& request, Web::Response& response, Headers& headers)
 {
     Command cmd = createCommand(Operation::ConnectToWiFi, request, true);
     execCommand(cmd, response, headers);

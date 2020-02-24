@@ -21,20 +21,16 @@
 
 #include "route.h"
 #include "log.h"
-#include <memory>
-#include <server_http.hpp>
+#include "iot_definitions.h"
 
 namespace aquabox
 {
+    using namespace Web;
     namespace v1
     {
         class API
         {
         public:
-            using HttpServer = SimpleWeb::Server<SimpleWeb::HTTP>;
-            using Request = std::shared_ptr<HttpServer::Request>; 
-            using Response = std::shared_ptr<HttpServer::Response>;
-            using Headers = SimpleWeb::CaseInsensitiveMultimap;
 
             virtual void init(std::shared_ptr<HttpServer> http, Route base);
             void enableCORS(bool enable);
