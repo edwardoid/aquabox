@@ -102,8 +102,8 @@ void API::addCORSHeaders(Web::Headers& headers)
 {
     headers.emplace("Content-Type", "application/json");
     headers.emplace(Access_Control_Allow_Origin, "*");
-    headers.emplace(Access_Control_Allow_Headers, "Origin, X-Requested-With, Content-Type, Accept");
-    headers.emplace(Access_Control_Allow_Methods, "POST, GET, PUT, PATCH, DELETE, OPTIONS");                         
+    headers.emplace(Access_Control_Allow_Headers, "Origin, X-Requested-With, Content-Type, Accept, boxId, appId");
+    headers.emplace(Access_Control_Allow_Methods, "POST, GET, PUT, PATCH, DELETE, OPTIONS");
 }
 
 void API::enableCORS(bool enable)
