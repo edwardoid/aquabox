@@ -21,6 +21,7 @@
 
 #include "device.h"
 #include "action_type.h"
+#include <map>
 
 namespace aquabox
 {
@@ -40,8 +41,7 @@ namespace aquabox
         void addPendingAction(uint64_t priority, ActionType action);
         bool performPendingAction();
     private:
-        uint64_t m_pendingActionPriority = INVALID_PRIORITY;
-        ActionType m_pendingAction;
+        std::map<int64_t, ActionType> m_pendingActions;
     };
 }
 

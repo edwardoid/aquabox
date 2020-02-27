@@ -17,7 +17,6 @@
  */
 
 #include "relay.h"
-
 #include "gpio.h"
 
 using namespace aquabox;
@@ -70,29 +69,38 @@ void Relay::turnOff()
 
 void Relay::addPendingAction(uint64_t priority, ActionType action)
 {
-    if (m_pendingActionPriority == INVALID_PRIORITY || m_pendingActionPriority >= priority) {
-        m_pendingAction = action;
-        m_pendingActionPriority = priority;
-    }
+    m_pendingActions.insert({priority, action});
 }
 
 bool Relay::performPendingAction()
 {
-    if (m_pendingActionPriority != INVALID_PRIORITY && getRulesEnabled().Value) {
-        switch(m_pendingAction)
-        {
-            case ActionType::TurnOn: {
-                turnOn();
-                break;
-            }
-            case ActionType::TurnOff: {
-                turnOff();
-                break;
-            }
-        }
-        m_pendingActionPriority = INVALID_PRIORITY;
-        return true;
+    if (m_pendingActions.empty()) {
+        return false;
     }
 
-    return false;
+    auto lb = m_pendingActions.lower_bound(0);
+
+    ActionType actionToPerform = ActionType::TurnOn;
+    if (lb == m_pendingActions.begin()) {
+        actionToPerform = m_pendingActions.rbegin()->second;
+    } else {
+        if (lb->first != 0) {
+            --lb;
+        }
+        actionToPerform = lb->second;
+    }
+
+    m_pendingActions.clear();
+    switch(actionToPerform)
+    {
+        case ActionType::TurnOn: {
+            turnOn();
+            break;
+        }
+        case ActionType::TurnOff: {
+            turnOff();
+            break;
+        }
+    }
+    return true;
 }

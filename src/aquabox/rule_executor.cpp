@@ -34,7 +34,6 @@ RuleExecutor::RuleExecutor(std::shared_ptr<Rule>& rule, Timer::ClockTimePoint no
 
 void RuleExecutor::operator() ()
 {
-    LOG_DEBUG << "Processing rule \"" << m_rule->getId() << "\" on " << m_rule->getDevice();
     const TimeDetails now(Timer::Clock::to_time_t(m_now));
 
     const RepeatUnit unit = m_rule->getRepeat().getUnit();
@@ -51,11 +50,8 @@ void RuleExecutor::operator() ()
     for(const Action& act : *(m_rule->getActions())) {
         const TimeDetails at = act.getAt().getDetails();
 
-        int64_t priority = at.from(now, true, unit >= RepeatUnit::Hour, unit >= RepeatUnit::Day, unit >= RepeatUnit::Month);
+        int64_t priority = now.from(at, true, unit >= RepeatUnit::Hour, unit >= RepeatUnit::Day, unit >= RepeatUnit::Month);
         
-        if (priority >= 0) {
-            LOG_DEBUG << "Triggering action " << Serializable<ActionType>::convert(act.getType()) << " for " << at.to_string();
-            dev->addPendingAction(priority, act.getType());
-        }
+        dev->addPendingAction(priority, act.getType());
     }
 }

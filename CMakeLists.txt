@@ -106,3 +106,7 @@ endif()
 link_directories(${Boost_LIBRARY_DIRS})
 
 add_subdirectory("src")
+
+if (NOT TARGET_DEVICE)
+  add_subdirectory("tests")
+endif()

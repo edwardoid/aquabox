@@ -1,0 +1,22 @@
+#IncludeRegexLine: ^[ 	]*[#%][ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+/home/esargsyan/ionictests/aquabox/tests/main.cpp
+test.h
+/home/esargsyan/ionictests/aquabox/tests/test.h
+
+/home/esargsyan/ionictests/aquabox/tests/test.h
+vector
+-
+string
+-
+memory
+-
+iostream
+-
+
