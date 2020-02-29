@@ -64,7 +64,7 @@ void HardwareApi::setupRoutes()
             auto id = registerData["id"].get<std::string>();
             if (Database::i().wasProduced(id)) {
                 response->write(SimpleWeb::StatusCode::success_accepted, nlohmann::json({
-                                                                                            { "streams", { "log", "events", "commands"}},
+                                                                                            { "streams", { "events", "commands"}},
                                                                                             { "id", id }
                                                                                         }).dump(4),
                                 {{ "Content-Type", "application/json" }});
