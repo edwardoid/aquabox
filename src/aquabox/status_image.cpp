@@ -51,14 +51,15 @@ void StatusImage::display(std::string fbDevice)
 
     nlohmann::json host({
         {"rest", Settings::integer(Settings::Keys::HTTP_PORT, Settings::Defaults::REST_PORT)},
-        {"stream", Settings::integer(Settings::Keys::STREAM_PORT, Settings::Defaults::WS_PORT)}
+        {"stream", Settings::integer(Settings::Keys::STREAM_PORT, Settings::Defaults::WS_PORT)},
+        {"serial", SERIAL_NUMBER}
     });
 
     host["host"] = boost::asio::ip::host_name();
 
     nlohmann::json statusJson({{"aquabox", host}});
     
-    QRcode *qrcode = QRcode_encodeString(statusJson.dump(0).c_str(), 0, QR_ECLEVEL_L, QR_MODE_8, 1);
+    QRcode *qrcode = QRcode_encodeString(statusJson.dump(0).c_str(), 0, QR_ECLEVEL_L, QR_MODE_AN, 1);
 	if (qrcode == nullptr) {
         LOG_ERROR << "Can't encode status";
         return;

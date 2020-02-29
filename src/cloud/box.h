@@ -13,7 +13,7 @@ namespace aquabox
     {
     public:
         Box(ResultsMap<Command>& results);
-        SignalSlot::Signal<std::shared_ptr<Event>> UpdateReceived;
+        SignalSlot::Signal<const nlohmann::json&> UpdateReceived;
         void addConnection(std::shared_ptr<ApplicationConnection> connection);
         void removeConnection(std::shared_ptr<ApplicationConnection> connection);
         std::vector<std::shared_ptr<ApplicationConnection>> connections() const;

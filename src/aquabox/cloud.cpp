@@ -21,6 +21,7 @@
 #include "aquabox.h"
 #include "serial.h"
 #include "settings.h"
+#include "event.h"
 #include "commands_stream.h"
 #include <nlohmann/json.hpp>
 
@@ -162,6 +163,16 @@ void Cloud::heartheat()
 
         working = false;
     });
+}
+
+void Cloud::postUpdate(std::shared_ptr<Event> event)
+{
+    auto str = stream("events");
+    if (str) {
+        str->send(event->serialize().dump(4));
+    } else {
+        LOG_WARNING << "Can't post update becase stream is not avaialable";
+    }
 }
 
 std::shared_ptr<CloudStream> Cloud::stream(std::string name)

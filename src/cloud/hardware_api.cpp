@@ -121,7 +121,15 @@ void HardwareApi::setupRoutes()
 
     m_ws.endpoint[m_events.url()].on_message = [this](std::shared_ptr<Web::WSConnection> connection,
                                                       std::shared_ptr<Web::Message> in_message) {
-        LOG_DEBUG << "On " << connection->path << " got:\n\t\t" << in_message->string();
+        LOG_DEBUG << "On " << connection->path << " got event.";
+        try {
+            nlohmann::json data = nlohmann::json::parse(in_message->string());
+            const auto id = m_events.extract(connection->path)[":id"];
+            BoxesManager::get(id)->UpdateReceived(data);
+        }
+        catch (...) {
+            LOG_ERROR << "Can't parse event data";
+        }
     };
 
     m_ws.endpoint[m_commands.url()].on_open = [this](std::shared_ptr<Web::WSConnection> connection) {

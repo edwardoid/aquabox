@@ -348,4 +348,8 @@ Cloud& AquaBox::cloud()
 void AquaBox::postUpdate(std::shared_ptr<Event> event)
 {
     m_server.postUpdate(event);
+
+    if (Options::EnableCloud) {
+        m_cloud.postUpdate(event);
+    }
 }
