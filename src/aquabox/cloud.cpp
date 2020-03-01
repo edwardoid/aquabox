@@ -142,8 +142,8 @@ void Cloud::heartheat()
     if (working) {
         return;
     }
-    working = true;
-    AquaBox::i().doLater([this, &working](){
+    m_working = true;
+    AquaBox::i().doLater([this](){
         do {
             if (isConnected()) {
                 break;
@@ -161,7 +161,7 @@ void Cloud::heartheat()
         }
         while(false);
 
-        working = false;
+        m_working = false;
     });
 }
 

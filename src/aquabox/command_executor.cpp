@@ -118,12 +118,12 @@ bool CommandExecutor::GetStatus()
             break;
         }
 
-        case IoT::WiFi::Disconnected: {
+        case IoT::WiFi::State::Disconnected: {
             wifiState = "disconnected";
             break;
         }
 
-        case IoT::WiFi::Connected: {
+        case IoT::WiFi::State::Connected: {
             wifiState = "connected";
             break;
         }

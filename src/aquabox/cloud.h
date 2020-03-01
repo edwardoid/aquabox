@@ -22,6 +22,7 @@
 #include <client_http.hpp>
 #include <unordered_map>
 #include <memory>
+#include <atomic>
 #include "cloud_stream.h"
 
 using WsClient = SimpleWeb::SocketClient<SimpleWeb::WS>;
@@ -42,6 +43,7 @@ namespace aquabox
     private:
         bool isConnected();
     private:
+        std::atomic_bool m_working;
         std::unordered_map<std::string, std::shared_ptr<CloudStream>> m_streams;
     };
 }

@@ -20,7 +20,6 @@
 #define DEVICE_H
 
 #include <nlohmann/json.hpp>
-#include "identifiable.h"
 #include "device_type.h"
 #include "property.h"
 #include "hardware.h"
