@@ -23,6 +23,7 @@
 #include "sensor.h"
 #include "rule.h"
 #include "update_events.h"
+#include "network_manager.h"
 #include <boost/asio/ip/host_name.hpp>
 
 using namespace aquabox;
@@ -109,31 +110,10 @@ bool CommandExecutor::GetStatus()
         {"serial", SERIAL_NUMBER}
     });
 
-    std::string wifiState = "unknown";
-    switch(AquaBox::i().networking().state())
-    {
-        case IoT::WiFi::State::InAPMode:
-        case IoT::WiFi::State::SwitchingToAP: {
-            wifiState = "ap";
-            break;
-        }
-
-        case IoT::WiFi::State::Disconnected: {
-            wifiState = "disconnected";
-            break;
-        }
-
-        case IoT::WiFi::State::Connected: {
-            wifiState = "connected";
-            break;
-        }
-
-        default: {}
-    } 
     host["network"] = nlohmann::json({
-        { "ssid", AquaBox::i().networking().currentSSID() },
-        { "ip", AquaBox::i().networking().currentIP() },
-        { "mode",  wifiState }});
+        { "ssid", NetworkManager::i().currentNetwork.value.ssid },
+        { "ip", NetworkManager::i().currentNetwork.value.ip },
+        { "internet",  NetworkManager::i().connectedToInternet() }});
 
     host["host"] = boost::asio::ip::host_name();
 
@@ -457,16 +437,17 @@ bool CommandExecutor::TurnOff()
 bool CommandExecutor::ScanWiFiNetworks()
 {
     std::vector<nlohmann::json> nets;
-    for (auto& net : AquaBox::i().availableNetworks())
+    NetworkManager::i().requestScan();
+    for (auto& net : NetworkManager::i().networks())
     {
         nets.emplace_back(nlohmann::json(
             {
                 { "ssid" , net.ssid },
-                { "auth" , (net.auth == IoT::Authentication::WEP ? "wep" :
-                           (net.auth == IoT::Authentication::WPA ? "wpa" :
-                           (net.auth == IoT::Authentication::WPA2? "wpa2":
-                           (net.auth == IoT::Authentication::None? "none": 
-                           (net.auth == IoT::Authentication::Enterprise ? "enterprize" : "unknown"))))) },
+                { "auth" , (net.auth == Authentication::WEP ? "wep" :
+                           (net.auth == Authentication::WPA ? "wpa" :
+                           (net.auth == Authentication::WPA2? "wpa2":
+                           (net.auth == Authentication::None? "none": 
+                           (net.auth == Authentication::Enterprise ? "enterprize" : "unknown"))))) },
                 { "encrypted", net.encrypted },
                 { "signal", net.signal }
             }
@@ -494,14 +475,14 @@ bool CommandExecutor::ConnectToWiFi()
         return true;
     }
 
-    std::string ssidStr = ssid->get<std::string>();
-    std::string passwordStr = password->get<std::string>();
-    if(ssidStr.empty() || passwordStr.size() < 8) {
+    WifiNetwork wifi;
+    wifi.ssid = ssid->get<std::string>();
+    wifi.password = password->get<std::string>();
+    if(wifi.ssid.empty() || wifi.password.size() < 8) {
         m_cmd.response(Result::BadCommand);
         return true;
     }
 
-    AquaBox::i().networking().tryConnect(ssidStr, passwordStr);
-    m_cmd.response(Result::Ok);
+    m_cmd.response(NetworkManager::i().connect(wifi) ? Result::Ok : Result::BadCommand);
     return true;
 }

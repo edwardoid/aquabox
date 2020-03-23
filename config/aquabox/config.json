@@ -4,7 +4,7 @@
         "cloudUrl": "edwardoid.redirectme.net",
         "cloudWSPort": 5556,
         "httpPort": 1218,
-        "log": "INFO",
+        "log": "DEBUG",
         "password": "aquabox",
         "ssid": "AquaBox",
         "streamPort": 1214,

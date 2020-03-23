@@ -24,8 +24,8 @@
 #include "rules_timer.h"
 #include "web_server.h"
 #include "path.h"
+#include "network_manager.h"
 #include "cloud.h"
-#include <wifi_setup.h>
 #include <memory>
 #include <unordered_map>
 
@@ -66,18 +66,13 @@ namespace aquabox
         bool updateDevice(std::string id);
         void doLater(std::function<void(void)>&& task);
         void postUpdate(std::shared_ptr<Event> event);
-        std::vector<IoT::WifiNetwork> availableNetworks();
-        IoT::WiFi& networking();
         Cloud& cloud();
     private:
-        void networkStateChanged(IoT::WiFi::State state);
         void trackSensors();
-        void reconnectIfNeeded();
         void readDevices(const Path& root);
         void readUsers();
         void readRules(const Path& root);
     private:
-        std::unique_ptr<IoT::WiFi> m_wifi;
         plog::ColorConsoleAppender<plog::TxtFormatter> m_consoleAppender;
         plog::RollingFileAppender<plog::CsvFormatter> m_logAppender;
         plog::RollingFileAppender<plog::TxtFormatter> m_fileAppender;

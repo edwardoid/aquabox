@@ -24,6 +24,8 @@ endif()
 
 file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/rules)
 
+include_directories(${GLIB_INCLUDE_DIRS})
+include_directories(${NETWORKMANAGER_INCLUDE_DIRS})
 include_directories(${AQUABOX_COMMON_PATH})
 file(GLOB AQUABOX_SOURCES "*.cpp")
 
@@ -41,7 +43,6 @@ endif()
 
 target_link_libraries(${PROJECT_NAME} qrencode)
 target_link_libraries(${PROJECT_NAME} fb_static)
-target_link_libraries(${PROJECT_NAME} iotwifi_static)
 target_link_libraries(${PROJECT_NAME} w1temp_static)
 target_link_libraries(${PROJECT_NAME} aquabox-common_static)
 target_link_libraries(${PROJECT_NAME} json-schema-validator)

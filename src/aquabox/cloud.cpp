@@ -23,6 +23,7 @@
 #include "settings.h"
 #include "event.h"
 #include "commands_stream.h"
+#include "network_manager.h"
 #include <nlohmann/json.hpp>
 
 #define AUTH_URL "/hw/api/v1/register"
@@ -148,8 +149,7 @@ void Cloud::heartheat()
             if (isConnected()) {
                 break;
             }
-            if (AquaBox::i().networking().state() != IoT::WiFi::State::Connected &&
-                AquaBox::i().networking().state() != IoT::WiFi::State::InAPMode) {
+            if (NetworkManager::i().connectedToInternet()) {
                 break;
             }
 

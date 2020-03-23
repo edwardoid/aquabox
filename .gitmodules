@@ -37,3 +37,6 @@
 [submodule "3dp/backward-cpp"]
 	path = 3dp/backward-cpp
 	url = https://github.com/bombela/backward-cpp.git
+[submodule "3dp/s2s"]
+	path = 3dp/s2s
+	url = https://github.com/edwardoid/s2s.git

@@ -22,7 +22,6 @@
 #include <nlohmann/json.hpp>
 #include <pstream.h>
 #include <framebuffer.h>
-#include <wifi_setup.h>
 #include "aquabox.h"
 using namespace aquabox;
 
@@ -41,10 +40,10 @@ void StatusImage::display(std::string fbDevice)
     statusQrData += SERIAL_NUMBER;
     statusQrData += ";";
 
-    statusQrData += AquaBox::i().networking().currentIP();
+    statusQrData += NetworkManager::i().currentNetwork.value.ip;
     statusQrData += ";";
 
-    statusQrData += std::to_string((int) AquaBox::i().networking().state());
+    statusQrData += NetworkManager::i().currentNetwork.value.ssid;
     IoT::FrameBuffer fb(fbDevice);
 
     const uint32_t margin = 5;
@@ -81,7 +80,7 @@ void StatusImage::display(std::string fbDevice)
     int textX = fb.width() - 5 - FONT_SIZE;
     int textY = margin / 2;
 
-    std::string state = "NM: Uknown";
+    std::string state = "NM: Uknown";/*
     switch(AquaBox::i().networking().state())
     {
         case IoT::WiFi::State::Uninitialized:
@@ -118,22 +117,22 @@ void StatusImage::display(std::string fbDevice)
             state = "NM: Err";
             break;
         }
-    }
+    } */
 
 
     fb.drawText(font, FONT_SIZE, textX , textY, degree(-90.), state, 0x0000FF);
     textX -= 5 + FONT_SIZE;
-    std::string ssid = AquaBox::i().networking().currentSSID();
+    std::string ssid = NetworkManager::i().currentNetwork.value.ssid;
     if (ssid == "") {
         ssid = "Loading...";
     } else {
         ssid += " ";
-        ssid += std::to_string(AquaBox::i().networking().wifiSignal());
+        ssid += std::to_string(NetworkManager::i().currentNetwork.value.signal);
         ssid += "%";
     }
     fb.drawText(font, FONT_SIZE, textX, margin, degree(-90.), ssid, 0xFF0000);
     textX -= 5 + FONT_SIZE;
-    std::string ip = AquaBox::i().networking().currentIP();
+    std::string ip = NetworkManager::i().currentNetwork.value.ip;
     if (ip == "") {
         ip = "Loading...";
     }

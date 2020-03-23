@@ -53,7 +53,6 @@ void HardwareApi::setupRoutes()
     m_register = base.sub().word("register");
     m_login = base.sub().word("login");
 
-
     m_http.resource[m_register.url()]["POST"] = [this](Web::Response response, Web::Request request) {
         try {
             auto registerData = nlohmann::json::parse(request->content.string());

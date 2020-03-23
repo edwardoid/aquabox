@@ -86,31 +86,10 @@ nlohmann::json getStatusInfo(bool detailed)
     });
 
     if (detailed) {
-        std::string wifiState = "unknown";
-        switch(AquaBox::i().networking().state())
-        {
-            case IoT::WiFi::State::InAPMode:
-            case IoT::WiFi::State::SwitchingToAP: {
-                wifiState = "ap";
-                break;
-            }
-
-            case IoT::WiFi::State::Disconnected: {
-                wifiState = "disconnected";
-                break;
-            }
-
-            case IoT::WiFi::State::Connected: {
-                wifiState = "connected";
-                break;
-            }
-
-            default: {}
-        } 
         host["network"] = nlohmann::json({
-            { "ssid", AquaBox::i().networking().currentSSID() },
-            { "ip", AquaBox::i().networking().currentIP() },
-            { "mode",  wifiState }});
+                    { "ssid", NetworkManager::i().currentNetwork.value.ssid },
+                    { "ip", NetworkManager::i().currentNetwork.value.ip },
+                    { "internet",  NetworkManager::i().connectedToInternet() }});
     }
 
     host["host"] = boost::asio::ip::host_name();

@@ -69,6 +69,9 @@ int AquaBox::start()
                 &m_fileAppender);
     }
 
+    NetworkManager::i().setInterface("wlan0");
+    NetworkManager::i().updateCurrentNetwork();
+
     LOG_INFO << "Starting " << Settings::Defaults::APPLICATION << " ver. " << std::hex << Settings::Defaults::VERSION_MAJOR << "." << Settings::Defaults::VERSION_MINOR;
     if(Options::Lock) {
         if (!lock.create()) {
@@ -105,16 +108,6 @@ int AquaBox::start()
     m_poolOptions.setQueueSize(1024);
 
     m_pool.reset(new tp::ThreadPool(m_poolOptions));
-    
-    m_wifi.reset(new IoT::WiFi());
-    m_wifi->onStateChanged([this](IoT::WiFi::State state) {
-        networkStateChanged(state);
-    });
-
-    m_wifi->init("",
-                 Settings::string(Settings::Keys::AP_SSID, Settings::Defaults::AP_SSID),
-                 Settings::string(Settings::Keys::AP_PASSWORD, Settings::Defaults::AP_PASSWORD),
-                 Options::AccessPoint);
 
     readDevices(m_wd);
     readRules(m_wd);
@@ -122,6 +115,7 @@ int AquaBox::start()
 
     StatusImage::display();
     m_globalTimer.start([this](const Timer::ClockTimePoint&) {
+        NetworkManager::i().updateCurrentNetwork();
         if (Options::Render) {
             StatusImage::display();
         }
@@ -130,7 +124,6 @@ int AquaBox::start()
         }
         SensorsTracker::processUpdates();
 
-        reconnectIfNeeded();
     }, std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::seconds(10)));
 
     m_timer.start();
@@ -139,35 +132,6 @@ int AquaBox::start()
     std::getchar();
 
     return EXIT_SUCCESS;
-}
-
-void AquaBox::networkStateChanged(IoT::WiFi::State state)
-{
-    if (state == IoT::WiFi::State::InAPMode) {
-        static bool firstTime = true;
-        static std::time_t last = 0;
-        std::time_t now = std::time(nullptr);
-        bool reconnect = (now - last) > 60 * 60; 
-        std::string uuid = Settings::string(Settings::Keys::NETWORK, "");
-        if(reconnect && !uuid.empty()) {
-            m_wifi->connectToNetwork(uuid);
-        }
-    }
-}
-
-void AquaBox::reconnectIfNeeded()
-{
-    static std::time_t last = 0;
-    std::time_t now = std::time(nullptr);
-    bool reconnect = (now - last) > 60; 
-    if (m_wifi->state() != IoT::WiFi::State::Disconnected && reconnect) {
-        return;
-    }
-    std::string uuid = Settings::string(Settings::Keys::NETWORK, "");
-    if(!uuid.empty()) {
-        LOG_INFO << "Network is down, trying to connect to " << uuid;
-        m_wifi->connectToNetwork(uuid);
-    }
 }
 
 void AquaBox::readDevices(const Path& p)
@@ -328,16 +292,6 @@ void AquaBox::doLater(std::function<void(void)>&& task)
     if(!m_pool->tryPost(task)) {
         LOG_ERROR << "Can't schedule a new task";
     }
-}
-
-std::vector<IoT::WifiNetwork> AquaBox::availableNetworks()
-{
-    return std::move(m_wifi->availableNetworks());
-}
-
-IoT::WiFi& AquaBox::networking()
-{
-    return *m_wifi;
 }
 
 Cloud& AquaBox::cloud()

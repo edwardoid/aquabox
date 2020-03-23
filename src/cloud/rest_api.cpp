@@ -22,13 +22,16 @@
 #include "boxes_manager.h"
 #include "box.h"
 #include <random>
+#include <atomic>
 
 using namespace aquabox::v1;
 using namespace aquabox;
 
 Command createCommand(Operation operation, Web::Request request, bool body, std::unordered_map<std::string, std::string> params = {})
 {
+    static std::atomic_int seqNum;
     Command command;
+    command.setSeqNum(seqNum.fetch_add(1));
     command.setOperation(operation);
     auto boxId = request->header.find("boxId");
     if (boxId != request->header.end()) {
@@ -50,7 +53,7 @@ void execCommand(Command& cmd, Web::Response response, Web::Headers headers)
 
     auto box = BoxesManager::get(cmd.getParameter("boxId"));
     if (box == nullptr || box->empty()) {
-        response->write(SimpleWeb::StatusCode::client_error_not_found, "SPecified box is not available");
+        response->write(SimpleWeb::StatusCode::client_error_not_found, "Specified box is not available");
         return; 
     }
 
