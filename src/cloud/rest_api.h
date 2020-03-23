@@ -30,6 +30,7 @@ namespace aquabox
         public:
             virtual void Status(const Route& route, Request& request, Response& response, Headers& headers) override;
             virtual void ScanWiFiNetworks(const Route& route, Request& request, Response& response, Headers& headers) override;
+            virtual void ListNetworks(const Route& route, Web::Request& request, Web::Response& response, Web::Headers& headers) override;
             virtual void ConnectToWiFi(const Route& route, Request& request, Response& response, Headers& headers) override;
             virtual void GetDevice(const Route& route, Request& request, Response& response, Headers& headers) override;
             virtual void UpdateDevice(const Route& route, Request& request, Response& response, Headers& headers) override;

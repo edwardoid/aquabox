@@ -37,6 +37,7 @@ Serializable<Operation>::Enum2StrMap Serializable<Operation>::val2Str({
     { Operation::DeviceRules, "get_device_rules" },
     { Operation::ScanWiFiNetworks, "scan" },
     { Operation::ConnectToWiFi, "connect" },
+    { Operation::WiFiNetworks, "networks" },
     { Operation::SupportedRepeatTimeouts, "repeat_units" },
     { Operation::TurnOn, "turn_on" },
     { Operation::TurnOff, "turn_off" }
@@ -55,6 +56,7 @@ Serializable<Operation>::Str2EnumMap Serializable<Operation>::str2Val({
     { "delete_rule", Operation::DeleteRule },
     { "get_device_rules", Operation::DeviceRules },
     { "scan", Operation::ScanWiFiNetworks },
+    { "networks", Operation::WiFiNetworks },
     { "connect", Operation::ConnectToWiFi },
     { "repeat_units", Operation::SupportedRepeatTimeouts },
     { "turn_on", Operation::TurnOn },

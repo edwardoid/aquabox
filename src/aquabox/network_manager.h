@@ -46,7 +46,7 @@ namespace aquabox
         static NetworkManager& i();
         bool connectedToInternet() { return false; }
         void setInterface(std::string interface);
-        bool requestScan();
+        bool requestScan(bool force = true);
         SignalSlot::Property<WifiNetwork> currentNetwork;
         std::vector<WifiNetwork> networks();
         bool connect(WifiNetwork network);

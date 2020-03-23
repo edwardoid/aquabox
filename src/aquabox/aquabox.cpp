@@ -69,7 +69,7 @@ int AquaBox::start()
                 &m_fileAppender);
     }
 
-    NetworkManager::i().setInterface("wlan0");
+    NetworkManager::i().setInterface(Settings::string(Settings::Keys::INTERFACE, Settings::Defaults::INTERFACE));
     NetworkManager::i().updateCurrentNetwork();
 
     LOG_INFO << "Starting " << Settings::Defaults::APPLICATION << " ver. " << std::hex << Settings::Defaults::VERSION_MAJOR << "." << Settings::Defaults::VERSION_MINOR;

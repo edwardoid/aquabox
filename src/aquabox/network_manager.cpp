@@ -2,6 +2,7 @@
 #include <NetworkManager.h>
 #include "log.h"
 #include <mutex>
+#include <thread>
 
 namespace aquabox
 {
@@ -10,8 +11,6 @@ namespace aquabox
         NMClient* Client;
         std::string Interface;  
         bool requestScanResult;
-        bool waitForScanResult;
-        std::mutex requestScanMx;
         std::vector<WifiNetwork> networks;
         SignalSlot::Signal<size_t>* NetworksChanged;
     };
@@ -124,10 +123,6 @@ void request_rescan_cb (GObject *object, GAsyncResult *result, gpointer user_dat
     }
 
     updateList(data);
-
-    //if (data->waitForScanResult) {
-    //    data->requestScanMx.unlock();
-    //}
 }
 
 NetworkManager::NetworkManager()
@@ -135,10 +130,20 @@ NetworkManager::NetworkManager()
 {
     m_data->Client = nm_client_new(NULL, NULL);
     m_data->NetworksChanged = & this->NetworksChanged;
+
+    static std::thread loopThread([this]() {
+        g_main_loop_run(g_main_loop_new(NULL, FALSE));
+    });
+    loopThread.detach();
 }
 
 NetworkManager::~NetworkManager()
 {
+    if (m_data->Client)
+    {
+        g_object_unref(m_data->Client);
+    }
+
     delete m_data;
 }
 
@@ -152,25 +157,10 @@ void NetworkManager::setInterface(std::string interface)
 {
     m_data->Interface = interface; 
 
-    if (m_data->Client == NULL || m_data->Interface.empty()) {
-        return;
-    }
-    NMDevice *dev = nm_client_get_device_by_iface(m_data->Client, m_data->Interface.c_str());
-    if (dev == NULL) {
-        LOG_ERROR << "Can't find device " << m_data->Interface;
-        return;
-    }
-
-    if (!NM_IS_DEVICE_WIFI(dev)) {
-        LOG_ERROR << "Interface " << m_data->Interface << " is not WiFi device";
-        return;
-    }
-
-    m_data->waitForScanResult = false;
-    nm_device_wifi_request_scan_async(NM_DEVICE_WIFI(dev), NULL, request_rescan_cb, m_data);
+    requestScan();
 }
 
-bool NetworkManager::requestScan()
+bool NetworkManager::requestScan(bool force)
 {
     if (m_data->Client == NULL || m_data->Interface.empty()) {
         return false;
@@ -186,14 +176,15 @@ bool NetworkManager::requestScan()
         return false;
     }
 
-    m_data->waitForScanResult = true;
-    m_data->requestScanResult = false;
-    //m_data->requestScanMx.lock();
+    if (force) {
+        std::string forceScanCommand = "iwlist ";
+        forceScanCommand += m_data->Interface;
+        forceScanCommand += " scan";
+        system(forceScanCommand.c_str());
+    }
+
     nm_device_wifi_request_scan_async(NM_DEVICE_WIFI(dev), NULL, request_rescan_cb, m_data);
     
-    //m_data->requestScanMx.lock();
-
-    //m_data->requestScanMx.unlock();
     return m_data->requestScanResult;
 }
 

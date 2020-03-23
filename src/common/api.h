@@ -39,6 +39,7 @@ namespace aquabox
             
             virtual void Status(const Route& route, Request& request, Response& response, Headers& headers) = 0;
             virtual void ScanWiFiNetworks(const Route& route, Request& request, Response& response, Headers& headers) = 0;
+            virtual void ListNetworks(const Route& route, Request& request, Response& response, Headers& headers) = 0;
             virtual void ConnectToWiFi(const Route& route, Request& request, Response& response, Headers& headers) = 0;
             virtual void GetDevice(const Route& route, Request& request, Response& response, Headers& headers) = 0;
             virtual void UpdateDevice(const Route& route, Request& request, Response& response, Headers& headers) = 0;
@@ -81,6 +82,7 @@ namespace aquabox
             bool m_allowCORS = true;
             Route m_status;
             Route m_wifiScan;
+            Route m_wifiNetworks;
             Route m_wifiConnect;
 
             Route m_updates;

@@ -57,6 +57,8 @@ void API::init(std::shared_ptr<HttpServer> http, Route base)
 
     m_wifiScan = base.sub().word("wifi").word("scan");
 
+    m_wifiNetworks = base.sub().word("wifi").word("networks");
+
     m_wifiConnect = base.sub().word("wifi").word("connect");
 
     m_updates = base.sub().word("updates");
@@ -80,6 +82,7 @@ void API::init(std::shared_ptr<HttpServer> http, Route base)
     setup("POST", m_updateRule, &API::CreateRule);
     setup("GET", m_rulesForDevice, &API::DeviceRules);
     setup("GET", m_repeatUnits, &API::SupportedRepeatTimeouts);
+    setup("GET", m_wifiNetworks, &API::ListNetworks);
     setup("GET", m_wifiScan, &API::ScanWiFiNetworks);
     setup("POST", m_wifiConnect, &API::ConnectToWiFi);
     setup("PUT", m_turnOn, &API::TurnOn);

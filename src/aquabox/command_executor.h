@@ -41,6 +41,7 @@ namespace aquabox
         bool TurnOn();
         bool TurnOff();
         bool ScanWiFiNetworks();
+        bool ListNetworks();
         bool ConnectToWiFi();
     private:
         Command m_cmd;

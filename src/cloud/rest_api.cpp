@@ -168,6 +168,12 @@ void REST::ScanWiFiNetworks(const Route& route, Web::Request& request, Web::Resp
     execCommand(cmd, response, headers);
 }
 
+void REST::ListNetworks(const Route& route, Web::Request& request, Web::Response& response, Web::Headers& headers)
+{
+    auto cmd = createCommand(Operation::WiFiNetworks, request, false);
+    execCommand(cmd, response, headers);
+}
+
 void REST::ConnectToWiFi(const Route& route, Web::Request& request, Web::Response& response, Web::Headers& headers)
 {
     Command cmd = createCommand(Operation::ConnectToWiFi, request, true);

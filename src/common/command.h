@@ -47,10 +47,11 @@ namespace aquabox
         DeleteRule = 9,
         DeviceRules = 10,
         ScanWiFiNetworks = 11,
-        ConnectToWiFi = 12,
-        SupportedRepeatTimeouts = 13,
-        TurnOn = 14,
-        TurnOff = 15
+        WiFiNetworks = 12,
+        ConnectToWiFi = 13,
+        SupportedRepeatTimeouts = 14,
+        TurnOn = 15,
+        TurnOff = 16
     };
 
     class Command

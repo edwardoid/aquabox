@@ -90,6 +90,10 @@ bool CommandExecutor::exec(const Command& cmd)
             ok = ScanWiFiNetworks();
             break;
         }
+        case Operation::WiFiNetworks: {
+            ok = ListNetworks();
+            break;
+        }
         case Operation::ConnectToWiFi: {
             ok = ConnectToWiFi();
             break;
@@ -436,8 +440,14 @@ bool CommandExecutor::TurnOff()
 
 bool CommandExecutor::ScanWiFiNetworks()
 {
+    bool res = NetworkManager::i().requestScan();
+    m_cmd.response(nlohmann::json({{"requestResult", res}}), Result::Ok);
+    return true;
+}
+
+bool CommandExecutor::ListNetworks()
+{
     std::vector<nlohmann::json> nets;
-    NetworkManager::i().requestScan();
     for (auto& net : NetworkManager::i().networks())
     {
         nets.emplace_back(nlohmann::json(
@@ -454,7 +464,11 @@ bool CommandExecutor::ScanWiFiNetworks()
         ));
     }
 
-    m_cmd.response(nlohmann::json({ {"networks", nets} }), Result::Ok);
+    m_cmd.response(nlohmann::json({
+        {"networks", nets},
+        {"count", nets.size()}
+    }), Result::Ok);
+    return true;
 }
 
 bool CommandExecutor::ConnectToWiFi()

@@ -58,6 +58,7 @@ const std::string Settings::Keys::DATABASE_URI = "databaseURI";
 const std::string Settings::Keys::DATABASE_NAME = "database";
 const std::string Settings::Keys::HW_COLLECTION_NAME = "hardwareCollection";
 const std::string Settings::Keys::APP_COLLECTION_NAME = "applicationsCollection";
+const std::string Settings::Keys::INTERFACE = "interface";
 
 const std::string Settings::Defaults::GIT_HASH = AB_GIT_HASH ;
 const std::string Settings::Defaults::APPLICATION = "Aquabox";
@@ -80,6 +81,7 @@ const std::string Settings::Defaults::DATABASE_URI = "mongodb://aquabox:azazello
 const std::string Settings::Defaults::DATABASE_NAME = "aquabox";
 const std::string Settings::Defaults::HW_COLLECTION_NAME = "hw";
 const std::string Settings::Defaults::APP_COLLECTION_NAME = "app";
+const std::string Settings::Defaults::INTERFACE = "wlan0";
 
 bool Settings::dataToWrite = false;
 bool Settings::ready = false;
