@@ -142,7 +142,7 @@ void HardwareApi::setupRoutes()
         if (status == STREAM_CONNECTION_REJECTED) {
             return;
         }
-        LOG_INFO << "Connection from " << connection->remote_endpoint_address() << " to " << connection->path << " closed.";
+        LOG_INFO << "Connection from " << connection->remote_endpoint().address().to_string() << " to " << connection->path << " closed.";
         const auto id = m_events.extract(connection->path)[":id"];
         BoxesManager::get(id)->events.reset();
         BoxesManager::eraseIfNeed(id);
@@ -150,7 +150,7 @@ void HardwareApi::setupRoutes()
 
     m_ws.endpoint[m_events.url()].on_error = [this](std::shared_ptr<Web::WSConnection> connection,
                                                  SimpleWeb::error_code) {
-        LOG_INFO << "Connection from " << connection->remote_endpoint_address() << " to " << connection->path << " closed due error.";
+        LOG_INFO << "Connection from " << connection->remote_endpoint().address().to_string() << " to " << connection->path << " closed due error.";
         const auto id = m_events.extract(connection->path)[":id"];
         BoxesManager::get(id)->events.reset();
         BoxesManager::eraseIfNeed(id);
@@ -181,7 +181,7 @@ void HardwareApi::setupRoutes()
         if (status == STREAM_CONNECTION_REJECTED) {
             return;
         }
-        LOG_INFO << "Connection from " << connection->remote_endpoint_address() << " to " << connection->path << " closed.";
+        LOG_INFO << "Connection from " << connection->remote_endpoint().address().to_string() << " to " << connection->path << " closed.";
         const auto id = m_commands.extract(connection->path)[":id"];
         BoxesManager::get(id)->commands.reset();
         BoxesManager::eraseIfNeed(id);
@@ -189,7 +189,7 @@ void HardwareApi::setupRoutes()
 
     m_ws.endpoint[m_commands.url()].on_error = [this](std::shared_ptr<Web::WSConnection> connection,
                                                       SimpleWeb::error_code) {
-        LOG_INFO << "Connection from " << connection->remote_endpoint_address() << " to " << connection->path << " closed due error.";
+        LOG_INFO << "Connection from " << connection->remote_endpoint().address().to_string() << " to " << connection->path << " closed due error.";
         const auto id = m_commands.extract(connection->path)[":id"];
         BoxesManager::get(id)->commands.reset();
         BoxesManager::eraseIfNeed(id);
@@ -212,10 +212,10 @@ void HardwareApi::setupRoutes()
 
 bool HardwareApi::acceptConnectionFromHW(std::string id, std::shared_ptr<Web::WSConnection> connection)
 {
-    LOG_INFO << "Got connection from " << connection->remote_endpoint_address()
+    LOG_INFO << "Got connection from " << connection->remote_endpoint().address().to_string()
              << " for " << id << " to " << connection->path;
     if (!Database::i().wasProduced(id)) {
-        LOG_WARNING << "Rejecting connection from " << connection->remote_endpoint_address() << " to stream for " << id;
+        LOG_WARNING << "Rejecting connection from " << connection->remote_endpoint().address().to_string() << " to stream for " << id;
         connection->send_close(STREAM_CONNECTION_REJECTED);
         return false;
     }

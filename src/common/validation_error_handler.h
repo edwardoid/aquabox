@@ -19,7 +19,8 @@
 #ifndef VALIDATION_ERROR_HANDLER_H
 #define VALIDATION_ERROR_HANDLER_H
 
-#include <json-schema.hpp>
+#include <nlohmann/json-schema.hpp>
+
 namespace aquabox
 {  
     class ValidationErrorHandler : public nlohmann::json_schema::basic_error_handler

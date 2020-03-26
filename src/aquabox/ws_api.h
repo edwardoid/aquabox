@@ -26,28 +26,28 @@
 #define DEFINE_WS_API_IMPL(Name) void API:: Name ## Impl (const Route& route, Connection& connection, Message& response)
                                  
 
-#define ENABLE_WS_API(Name)                                                                                                                  \
-                std::string Name ## Url;                                                                                                     \
-                void Name (WsServer& server, Route& route) {                                                                                 \
-                Name ## Url = route.url();                                                                                                   \
-                auto& endpoint = server.endpoint[route.url()];                                                                               \
-                endpoint.on_open = [this](Connection connection) {                                                                           \
-                    LOG_DEBUG << "Opened connection from " << connection->remote_endpoint_address(); this->onOpen(Name ## Url, connection);  \
-                };                                                                                                                           \
-                endpoint.on_close = [this](Connection connection, Status status, const std::string & reason) {                               \
-                    LOG_DEBUG << "Connection " << connection->remote_endpoint_address()                                                      \
-                              << " Status: " << status << " Reason: " << reason;                                                             \
-                    this->onClose(Name ## Url, connection, status, reason);                                                                  \
-                };                                                                                                                           \
-                endpoint.on_error = [](Connection connection, const Error &ec) {                                                             \
-                    LOG_DEBUG << "Error occured in connection with " << connection->remote_endpoint_address() << " "                         \
-                              << "Error code: " << ec.category().name() << ":" << ec.value() << " " << ec.message();                         \
-                };                                                                                                                           \
-                endpoint.on_message = [&route](Connection connection, Message message) {                                                     \
-                    LOG_DEBUG << "Got message " << message->string() << " from " << connection->remote_endpoint_address();                   \
-                    API:: Name ## Impl (route, connection, message);                                                                         \
-                };                                                                                                                           \
-            }                                                                                                                                \
+#define ENABLE_WS_API(Name)                                                                                                                                 \
+                std::string Name ## Url;                                                                                                                    \
+                void Name (WsServer& server, Route& route) {                                                                                                \
+                Name ## Url = route.url();                                                                                                                  \
+                auto& endpoint = server.endpoint[route.url()];                                                                                              \
+                endpoint.on_open = [this](Connection connection) {                                                                                          \
+                    LOG_DEBUG << "Opened connection from " << connection->remote_endpoint().address().to_string(); this->onOpen(Name ## Url, connection);   \
+                };                                                                                                                                          \
+                endpoint.on_close = [this](Connection connection, Status status, const std::string & reason) {                                              \
+                    LOG_DEBUG << "Connection " << connection->remote_endpoint().address().to_string()                                                       \
+                              << " Status: " << status << " Reason: " << reason;                                                                            \
+                    this->onClose(Name ## Url, connection, status, reason);                                                                                 \
+                };                                                                                                                                          \
+                endpoint.on_error = [](Connection connection, const Error &ec) {                                                                            \
+                    LOG_DEBUG << "Error occured in connection with " << connection->remote_endpoint().address().to_string() << " "                          \
+                              << "Error code: " << ec.category().name() << ":" << ec.value() << " " << ec.message();                                        \
+                };                                                                                                                                          \
+                endpoint.on_message = [&route](Connection connection, Message message) {                                                                    \
+                    LOG_DEBUG << "Got message " << message->string() << " from " << connection->remote_endpoint().address().to_string();                    \
+                    API:: Name ## Impl (route, connection, message);                                                                                        \
+                };                                                                                                                                          \
+            }                                                                                                                                               \
             static void Name ## Impl (const Route& route, Connection& connection, Message& response);
 
 namespace aquabox

@@ -19,7 +19,7 @@
 #ifndef COMMAND_VALIDATOR_H
 #define COMMAND_VALIDATOR_H
 
-#include <json-schema.hpp>
+#include <nlohmann/json-schema.hpp>
 
 namespace aquabox
 {

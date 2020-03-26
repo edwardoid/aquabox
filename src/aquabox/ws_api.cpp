@@ -113,7 +113,6 @@ DEFINE_WS_API_IMPL(Commands)
         return;
     }
 
-
     auto body = request.find("data");
 
     Command command;
@@ -126,7 +125,7 @@ DEFINE_WS_API_IMPL(Commands)
     auto params = request.find("params");
     if (params != request.end() && params->is_object())
     {
-        for(auto& x : nlohmann::json::iterator_wrapper(params.value())) {
+        for(auto& x : params.value().items()) {
             command.setParameter(x.key(), x.value());
         }
     }

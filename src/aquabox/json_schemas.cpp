@@ -18,7 +18,7 @@
 
 #include "json_schemas.h"
 
-#include <json-schema.hpp>
+#include <nlohmann/json-schema.hpp>
 
 using namespace aquabox;
 using nlohmann::json;

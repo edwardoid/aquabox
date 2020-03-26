@@ -448,11 +448,13 @@ bool CommandExecutor::ScanWiFiNetworks()
 bool CommandExecutor::ListNetworks()
 {
     std::vector<nlohmann::json> nets;
+    auto currentNetwork = NetworkManager::i().currentNetwork.value;
     for (auto& net : NetworkManager::i().networks())
     {
         nets.emplace_back(nlohmann::json(
             {
                 { "ssid" , net.ssid },
+                { "ip", ( net.ssid == currentNetwork.ssid ? currentNetwork.ip : "" ) },
                 { "auth" , (net.auth == Authentication::WEP ? "wep" :
                            (net.auth == Authentication::WPA ? "wpa" :
                            (net.auth == Authentication::WPA2? "wpa2":

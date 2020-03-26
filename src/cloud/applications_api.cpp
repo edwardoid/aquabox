@@ -45,7 +45,7 @@ void ApplicationsApi::startStreamServer()
         auto params = updates.extract(connection->path);
         auto boxId = params[":boxId"];
         auto appId = params[":appId"];
-        LOG_INFO << "Connection opened from " << connection->remote_endpoint_address()
+        LOG_INFO << "Connection opened from " << connection->remote_endpoint().address().to_string()
                  << " to box " << boxId << " by application " << params["appId"];
         if (!Database::i().isApplicationAuthorized(appId, boxId)) {
             connection->send_close(STREAM_CONNECTION_REJECTED);
@@ -58,7 +58,7 @@ void ApplicationsApi::startStreamServer()
 
     m_ws->endpoint[updates.url()].on_close = [this, updates](std::shared_ptr<WSServer::Connection> connection,
                                                              int status, const std::string & reason) {
-        LOG_INFO << "Closed connection from " << connection->remote_endpoint_address();
+        LOG_INFO << "Closed connection from " << connection->remote_endpoint().address().to_string();
         auto params = updates.extract(connection->path);
         auto boxId = params[":boxId"];
         removeConnection(boxId, connection);
@@ -66,7 +66,7 @@ void ApplicationsApi::startStreamServer()
 
     m_ws->endpoint[updates.url()].on_error = [this, updates](std::shared_ptr<WSServer::Connection> connection,
                                                              SimpleWeb::error_code) {
-        LOG_INFO << "Connection from " << connection->remote_endpoint_address() << " to " << connection->path << " closed due error.";
+        LOG_INFO << "Connection from " << connection->remote_endpoint().address().to_string() << " to " << connection->path << " closed due error.";
         auto params = updates.extract(connection->path);
         auto boxId = params[":boxId"];
         removeConnection(boxId, connection);
