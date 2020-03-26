@@ -16,32 +16,25 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef CONCURRENCY_H
-#define CONCURRENCY_H
+#include "repetive_task.h"
 
-#include "log.h"
-#include <thread_pool.hpp>
-#include <mutex>
-#include <thread>
-#include <functional>
+using namespace aquabox;
 
-namespace aquabox
+RepetiveTask::RepetiveTask(RepetiveTask::Resolution timeout,
+                           std::function<void(void)> task)
+    : m_timeout(timeout), m_task(task), m_last(Clock::now())
+{}
+
+void RepetiveTask::setTask(std::function<void(void)> task)
 {
-
-    using Task = std::function<void(void)>;
-
-    class Concurrency
-    {
-        private:
-        Concurrency() = delete;
-        Concurrency(Concurrency&&) = delete;
-        Concurrency(const Concurrency&) = delete;
-        const Concurrency& operator = (const Concurrency) = delete;
-        public:
-            void doLater(Task&& task);
-        private:
-            static tp::ThreadPool m_pool; 
-    };
+    m_task = task;
 }
 
-#endif // CONCURRENCY_H
+void RepetiveTask::operator() ()
+{
+    Resolution elapsed = std::chrono::duration_cast<Resolution>(Clock::now() - m_last);
+    if (elapsed > m_timeout) {
+        m_task();
+        m_last = Clock::now();
+    }
+}

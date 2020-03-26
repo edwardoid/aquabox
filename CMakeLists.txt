@@ -82,6 +82,7 @@ if (NOT CLOUD_ONLY)
   add_subdirectory("${THREE_DP_DIR}/qrencode")
   add_subdirectory("${THREE_DP_DIR}/libfb")
   add_subdirectory("${THREE_DP_DIR}/owt")
+  find_package (NetworkManager REQUIRED)
 endif()
 
 execute_process(

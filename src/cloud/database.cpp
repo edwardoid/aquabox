@@ -95,3 +95,30 @@ bool Database::wasProduced(std::string id) {
     }
     return res;
 }
+
+void Database::setConnectedApps(std::string id, std::vector<std::string> appIds)
+{
+    auto applications = bsoncxx::builder::basic::array{};
+
+    for (const auto& app : appIds) {
+        applications.append(app);
+    }
+    m_aquabox[Settings::string(Settings::Keys::HW_COLLECTION_NAME, Settings::Defaults::HW_COLLECTION_NAME)]
+    .update_one(bsoncxx::builder::stream::document{} << "serial" << id << bsoncxx::builder::stream::finalize,
+                bsoncxx::builder::stream::document{} << "$set" << bsoncxx::builder::stream::open_document <<
+                        "activeApps" << applications << bsoncxx::builder::stream::close_document << bsoncxx::builder::stream::finalize);
+}
+
+void Database::setStreamAvailable(std::string id, std::string stream, bool available)
+{
+    m_aquabox[Settings::string(Settings::Keys::HW_COLLECTION_NAME, Settings::Defaults::HW_COLLECTION_NAME)]
+    .update_one(bsoncxx::builder::stream::document{} << "serial" << id << bsoncxx::builder::stream::finalize,
+                bsoncxx::builder::stream::document{} << "$set" << bsoncxx::builder::stream::open_document <<
+                        stream << available << bsoncxx::builder::stream::close_document << bsoncxx::builder::stream::finalize);
+}
+
+nlohmann::json Database::firmwareVersions(std::string version)
+{
+    nlohmann::json versions({{ "current", version }});
+    return versions;
+}

@@ -28,9 +28,11 @@
 #include "device_parser.h"
 #include "user.h"
 #include "update_events.h"
-#include "status_image.h"
+#include "screen_manager.h"
 #include "options.h"
+#include "repetive_task.h"
 #include <exception>
+#include <pstream.h>
 #include <chrono>
 #include <random>
 
@@ -50,7 +52,6 @@ AquaBox& AquaBox::i()
 
 AquaBox::AquaBox()
     : m_fileAppender("./../log/aquabox.log", LOG_FILE_SIZE_IN_MB * BYTES_IN_MB, MAX_LOG_FILES)
-    , m_logAppender("./static/logs/aquabox.csv", LOG_FILE_SIZE_IN_MB * BYTES_IN_MB, 1)
     , m_globalTimer("GlobalRoutines")
 {}
 
@@ -61,10 +62,7 @@ int AquaBox::start()
     plog::init( plog::severityFromString(Settings::string(Settings::Keys::LOG_LEVEL, plog::severityToString(plog::Severity::info)).c_str()),
                 &m_consoleAppender);
 
-    plog::init( plog::severityFromString(Settings::string(Settings::Keys::LOG_LEVEL, plog::severityToString(plog::Severity::info)).c_str()),
-                &m_logAppender);
-
-    if (Options::Service) {
+    if (!Options::Service) {
         plog::init( plog::severityFromString(Settings::string(Settings::Keys::LOG_LEVEL, plog::severityToString(plog::Severity::info)).c_str()),
                 &m_fileAppender);
     }
@@ -104,7 +102,7 @@ int AquaBox::start()
         }
     }
 
-    m_poolOptions.setQueueSize(Settings::integer(Settings::Keys::THREADS, std::thread::hardware_concurrency()));
+    m_poolOptions.setThreadCount(Settings::integer(Settings::Keys::THREADS, std::thread::hardware_concurrency()));
     m_poolOptions.setQueueSize(1024);
 
     m_pool.reset(new tp::ThreadPool(m_poolOptions));
@@ -113,11 +111,10 @@ int AquaBox::start()
     readRules(m_wd);
     readUsers();
 
-    StatusImage::display();
     m_globalTimer.start([this](const Timer::ClockTimePoint&) {
         NetworkManager::i().updateCurrentNetwork();
         if (Options::Render) {
-            StatusImage::display();
+            m_screen.show();
         }
         if (Options::EnableCloud) {
             m_cloud.heartheat();
@@ -306,4 +303,17 @@ void AquaBox::postUpdate(std::shared_ptr<Event> event)
     if (Options::EnableCloud) {
         m_cloud.postUpdate(event);
     }
+}
+
+double AquaBox::systemTemperature() const
+{
+    double temp = 0;
+#ifdef TARGET_DEVICE
+    redi::ipstream tempCmd("cat /sys/devices/virtual/thermal/thermal_zone0/temp");
+    tempCmd >> temp;
+    temp /= 1000.;
+#else
+    temp = 65.89;
+#endif
+    return temp;
 }

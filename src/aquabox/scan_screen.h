@@ -16,15 +16,20 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "concurrency.h"
-#include "log.h"
+#ifndef SCAN_SCREEN_H
+#define SCAN_SCREEN_H
 
-using namespace aquabox;
+#include "status_bar_screen.h"
+#include <string>
 
-tp::ThreadPool Concurrency::m_pool;
-
-void Concurrency::doLater(Task&& task)
+namespace aquabox
 {
-    LOG_DEBUG << "Adding new task to global thread pool";
-    m_pool.tryPost(task);
+    class ScanScreen: public StatusBarScreen
+    {
+    public:
+        ScanScreen(std::string dev): StatusBarScreen(dev) {}
+        virtual void draw() override;
+    };
 }
+
+#endif // SCAN_SCREEN_H

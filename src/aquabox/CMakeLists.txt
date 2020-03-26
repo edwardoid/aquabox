@@ -7,7 +7,6 @@ if (TARGET_DEVICE)
     set(CMAKE_INSTALL_PREFIX "${CMAKE_SYSROOT}/aquabox")
     configure_file(${AQUABOX_ROOT_DIR}/config/aquabox/config.json ${CMAKE_BINARY_DIR}/config.json COPYONLY)
     configure_file(${AQUABOX_ROOT_DIR}/config/aquabox/startup.sh ${CMAKE_BINARY_DIR}/startup.sh COPYONLY)
-    configure_file(${AQUABOX_ROOT_DIR}/config/aquabox/DroidSansMono.ttf ${CMAKE_BINARY_DIR}/DroidSansMono.ttf COPYONLY)
     configure_file(${AQUABOX_ROOT_DIR}/config/aquabox/devices/dev0.json ${CMAKE_BINARY_DIR}/devices/dev0.json COPYONLY)
     configure_file(${AQUABOX_ROOT_DIR}/config/aquabox/devices/dev2.json ${CMAKE_BINARY_DIR}/devices/dev2.json COPYONLY)
     configure_file(${AQUABOX_ROOT_DIR}/config/aquabox/devices/dev3.json ${CMAKE_BINARY_DIR}/devices/dev3.json COPYONLY)
@@ -21,6 +20,9 @@ else()
     configure_file(${AQUABOX_ROOT_DIR}/config/aquabox/devices/vdev0.json ${CMAKE_BINARY_DIR}/devices/vdev0.json COPYONLY)
     configure_file(${AQUABOX_ROOT_DIR}/config/aquabox/devices/vdev1.json ${CMAKE_BINARY_DIR}/devices/vdev1.json COPYONLY)
 endif()
+
+
+file(COPY ${AQUABOX_ROOT_DIR}/config/aquabox/assets DESTINATION ${CMAKE_BINARY_DIR})
 
 file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/rules)
 
@@ -57,3 +59,6 @@ target_link_libraries(${PROJECT_NAME} OpenSSL::SSL)
 add_backward(${PROJECT_NAME})
 
 install(TARGETS ${PROJECT_NAME} DESTINATION bin)
+
+file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/install)
+file(COPY ${AQUABOX_ROOT_DIR}/config/aquabox/assets DESTINATION ${CMAKE_BINARY_DIR})

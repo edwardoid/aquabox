@@ -42,6 +42,7 @@ namespace aquabox
         Web::WSServer m_ws;
         Route m_register;
         Route m_login;
+        Route m_firmware;
         Route m_events;
         Route m_commands;
     };

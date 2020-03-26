@@ -34,6 +34,7 @@ namespace aquabox
         void stop();
     private:
         plog::RollingFileAppender<plog::CsvFormatter> m_rulesAppender;
+        plog::ColorConsoleAppender<plog::TxtFormatter> m_consoleAppender;
         plog::Logger<1> m_rulesLogger;
 
         Timer m_timer;

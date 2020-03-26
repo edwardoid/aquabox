@@ -23,7 +23,7 @@ namespace aquabox
         std::string ip;
         Authentication auth;
         bool encrypted = 0;
-        int signal = 100;
+        int signal = 0;
 
         const bool operator == (const WifiNetwork& wifi)
         {

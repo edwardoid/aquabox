@@ -26,6 +26,7 @@
 #include "path.h"
 #include "network_manager.h"
 #include "cloud.h"
+#include "screen_manager.h"
 #include <memory>
 #include <unordered_map>
 
@@ -67,6 +68,8 @@ namespace aquabox
         void doLater(std::function<void(void)>&& task);
         void postUpdate(std::shared_ptr<Event> event);
         Cloud& cloud();
+        bool assistantIsConnected() const { return false; }
+        double systemTemperature() const;
     private:
         void trackSensors();
         void readDevices(const Path& root);
@@ -74,7 +77,6 @@ namespace aquabox
         void readRules(const Path& root);
     private:
         plog::ColorConsoleAppender<plog::TxtFormatter> m_consoleAppender;
-        plog::RollingFileAppender<plog::CsvFormatter> m_logAppender;
         plog::RollingFileAppender<plog::TxtFormatter> m_fileAppender;
         tp::ThreadPoolOptions m_poolOptions;
         std::unique_ptr<tp::ThreadPool> m_pool;
@@ -88,6 +90,7 @@ namespace aquabox
         RulesTimer m_timer;
         WebServer m_server;
         Timer m_globalTimer;
+        ScreenManager m_screen;
     };
 }
 

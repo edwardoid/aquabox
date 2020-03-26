@@ -23,6 +23,7 @@
 #include "aquabox.h"
 #include "event.h"
 #include "update_events.h"
+#include "options.h"
 #include <set>
 #include <plog/Log.h>
 #include <plog/Severity.h>
@@ -33,7 +34,10 @@ RulesTimer::RulesTimer()
     , m_rulesAppender("./../log/rules.log", BYTES_IN_MB, 3)
     , m_rulesLogger(plog::Severity::debug)
 {
-    m_rulesLogger.addAppender(&m_rulesAppender);
+    if (!Options::Service)
+        m_rulesLogger.addAppender(&m_rulesAppender);
+    else
+        m_rulesLogger.addAppender(&m_consoleAppender);
 }
 
 void RulesTimer::start()

@@ -22,6 +22,7 @@
 #include <mongocxx/client.hpp>
 #include <mongocxx/database.hpp>
 #include <string>
+#include <nlohmann/json.hpp>
 
 namespace aquabox
 {
@@ -31,7 +32,9 @@ namespace aquabox
         static Database& i();
         bool wasProduced(const std::string id);
         bool isApplicationAuthorized(std::string app, std::string box) { return true; }
-
+        void setConnectedApps(std::string id, std::vector<std::string> appId);
+        void setStreamAvailable(std::string id, std::string stream, bool available);
+        nlohmann::json firmwareVersions(std::string version);
     protected:
         Database();
         Database(const Database&) = delete;

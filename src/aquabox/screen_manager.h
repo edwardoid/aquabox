@@ -16,19 +16,23 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef STATUS_IMAGE_H
-#define STATUS_IMAGE_H
+#ifndef SCREEN_MANAGER_H
+#define SCREEN_MANAGER_H
 
-#include <stdint.h>
-#include <string>
+#include "scan_screen.h"
+#include "main_screen.h"
 
 namespace aquabox
 {
-    class StatusImage
+    class ScreenManager
     {
     public:
-        static void display(std::string fbDevice = "/dev/fb0");
+        ScreenManager();
+        void show();
+    private:
+        MainScreen m_main;
+        ScanScreen m_scan;
     };
 }
 
-#endif // STATUS_IMAGE_H
+#endif // SCREEN_MANAGER_H

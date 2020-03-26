@@ -52,12 +52,13 @@ void HardwareApi::setupRoutes()
     const Route base = Route().word("hw").word("api").word("v1");
     m_register = base.sub().word("register");
     m_login = base.sub().word("login");
+    m_firmware = base.sub().word("firmware");
 
     m_http.resource[m_register.url()]["POST"] = [this](Web::Response response, Web::Request request) {
         try {
             auto registerData = nlohmann::json::parse(request->content.string());
             if (!registerData.contains("id")) {
-                response->write(SimpleWeb::StatusCode::client_error_bad_request, nlohmann::json({ { "error", "Box id is missing"} }).dump(4));
+                response->write(SimpleWeb::StatusCode::client_error_bad_request, nlohmann::json({ { "error", "Box id is missed"} }).dump(4));
                 return;
             }
             auto id = registerData["id"].get<std::string>();
@@ -77,6 +78,43 @@ void HardwareApi::setupRoutes()
         }
         catch (std::exception& err) {
             LOG_ERROR << "Box registrarion failed: " << err.what();
+            response->write(SimpleWeb::StatusCode::server_error_internal_server_error, nlohmann::json({ { "error", err.what() } }).dump(4));
+        }
+        catch (...) {
+            LOG_ERROR << "Box registrarion failed with unknown issue";
+            response->write(SimpleWeb::StatusCode::server_error_internal_server_error);
+        }
+    };
+
+    m_http.resource[m_register.url()]["POST"] = [this](Web::Response response, Web::Request request) {
+        try {
+            auto registerData = nlohmann::json::parse(request->content.string());
+            if (!registerData.contains("id")) {
+                response->write(SimpleWeb::StatusCode::client_error_bad_request, nlohmann::json({ { "error", "Box id is missed"} }).dump(4));
+                return;
+            }
+
+            if (!registerData.contains("version")) {
+                response->write(SimpleWeb::StatusCode::client_error_bad_request, nlohmann::json({ { "error", "Version is missed"} }).dump(4));
+                return;
+            }
+            
+            auto id = registerData["id"].get<std::string>();
+            if (!Database::i().wasProduced(id)) {
+                response->write(SimpleWeb::StatusCode::client_error_bad_request);
+                return;
+            }
+
+            auto version = registerData["version"].get<std::string>();
+            auto followingVersions = Database::i().firmwareVersions(version);
+            response->write(followingVersions.dump());
+        }
+        catch (nlohmann::json::exception& err) {
+            LOG_ERROR << "Box firmware version update check failed: " << err.what();
+            response->write(SimpleWeb::StatusCode::client_error_bad_request, nlohmann::json({ { "error", err.what() } }).dump(4));
+        }
+        catch (std::exception& err) {
+            LOG_ERROR << "Box firmware version update check failed: " << err.what();
             response->write(SimpleWeb::StatusCode::server_error_internal_server_error, nlohmann::json({ { "error", err.what() } }).dump(4));
         }
         catch (...) {
