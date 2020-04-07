@@ -56,7 +56,9 @@ namespace aquabox
             static const std::string DATABASE_NAME;
             static const std::string HW_COLLECTION_NAME;
             static const std::string APP_COLLECTION_NAME;
-            static const std::string INTERFACE;
+            static const std::string CLIENT_INTERFACE;
+            static const std::string AP_INTERFACE;
+            static const std::string SERIAL;
         };
 
         struct Defaults {
@@ -79,7 +81,9 @@ namespace aquabox
             static const std::string DATABASE_NAME;
             static const std::string HW_COLLECTION_NAME;
             static const std::string APP_COLLECTION_NAME;
-            static const std::string INTERFACE;
+            static const std::string CLIENT_INTERFACE;
+            static const std::string AP_INTERFACE;
+            static const std::string SERIAL;
 
             static const int REST_PORT;
             static const int WS_PORT;

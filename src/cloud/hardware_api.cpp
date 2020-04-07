@@ -107,7 +107,7 @@ void HardwareApi::setupRoutes()
 
             auto version = registerData["version"].get<std::string>();
             auto followingVersions = Database::i().firmwareVersions(version);
-            response->write(followingVersions.dump());
+            response->write(SimpleWeb::StatusCode::success_accepted, followingVersions.dump());
         }
         catch (nlohmann::json::exception& err) {
             LOG_ERROR << "Box firmware version update check failed: " << err.what();

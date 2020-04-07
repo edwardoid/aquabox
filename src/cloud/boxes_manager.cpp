@@ -1,5 +1,6 @@
 #include "boxes_manager.h"
 #include "box.h"
+#include "database.h"
 
 using namespace aquabox;
 
@@ -12,7 +13,7 @@ std::shared_ptr<Box> BoxesManager::get(std::string id, bool createIfNotExists)
     auto p = self.m_connections.find(id);
     auto box = p == self.m_connections.end() ? nullptr : p->second;
 
-    if (box == nullptr) {
+    if (box == nullptr && Database::i().wasProduced(id)) {
         box = std::make_shared<Box>(self.m_results);
         self.m_connections.insert({id, box});
     }

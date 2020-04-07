@@ -63,7 +63,8 @@ bool Cloud::isRegistered()
     nlohmann::json authData(
         {
             { "type", "box" },
-            { "id", SERIAL_NUMBER }
+            { "id", SERIAL_NUMBER },
+            { "version", "1.0"}
         }
     );
 
@@ -117,7 +118,7 @@ bool Cloud::isRegistered()
             return true;
         } else {
             disconnect();
-            LOG_ERROR << "Device is not registered. " << response->status_code;
+            LOG_ERROR << "Device is not registered. " << response->status_code << " cause: " << response->content.string();
             return false;
         }
     }

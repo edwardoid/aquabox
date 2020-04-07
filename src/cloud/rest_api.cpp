@@ -51,10 +51,15 @@ void execCommand(Command& cmd, Web::Response response, Web::Headers headers)
         return;
     }
 
-    auto box = BoxesManager::get(cmd.getParameter("boxId"));
-    if (box == nullptr || box->empty()) {
+    auto box = BoxesManager::get(cmd.getParameter("boxId"), true);
+    if (box == nullptr) {
         response->write(SimpleWeb::StatusCode::client_error_not_found, "Specified box is not available");
         return; 
+    }
+
+    if (box->empty()) {
+        response->write(nlohmann::json({ { "online", false } }).dump());
+        return;
     }
 
     box->runCommand(cmd);

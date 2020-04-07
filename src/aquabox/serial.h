@@ -19,8 +19,10 @@
 #ifndef SERIAL_H
 #define SERIAL_H
 
+#include "settings.h"
+
 #ifndef SERIAL_NUMBER
-#define SERIAL_NUMBER "dfb1e54e863a175d0832615844d1e9bb08d8a9cd"
+#define SERIAL_NUMBER aquabox::Settings::string(Settings::Keys::SERIAL, Settings::Defaults::SERIAL)
 #endif // SERIAL_NUMBER
 
 #endif // SERIAL_H

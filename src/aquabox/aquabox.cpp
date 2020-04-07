@@ -67,7 +67,7 @@ int AquaBox::start()
                 &m_fileAppender);
     }
 
-    NetworkManager::i().setInterface(Settings::string(Settings::Keys::INTERFACE, Settings::Defaults::INTERFACE));
+    NetworkManager::i().setInterface(Settings::string(Settings::Keys::CLIENT_INTERFACE, Settings::Defaults::CLIENT_INTERFACE));
     NetworkManager::i().updateCurrentNetwork();
 
     LOG_INFO << "Starting " << Settings::Defaults::APPLICATION << " ver. " << std::hex << Settings::Defaults::VERSION_MAJOR << "." << Settings::Defaults::VERSION_MINOR;
