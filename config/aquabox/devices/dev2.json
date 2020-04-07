@@ -1,13 +1,13 @@
 {
-    "address": "PHY:GPIO:1",
+    "address": "PHY:GPIO:19",
     "class": "relay",
     "id": "dev2",
     "index": 2,
     "meta": {
-        "model": "1 dps",
-        "vendor": "dennerle"
+        "model": "1000lm",
+        "vendor": "eheim"
     },
-    "name": "Quantrum 300",
+    "name": "classicLED",
     "rulesEnabled": true,
-    "type": "co2"
+    "type": "light"
 }

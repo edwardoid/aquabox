@@ -16,16 +16,14 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+source $1/scripts/target_build_config.sh $1 $2
 
-echo "Required CMAKE is 3.7.2"
-export CMAKE=$HOME/cmake-3.7.2/bin/cmake
-#export CMAKE=cmake
-export SRC_DIR=$PWD/../..
-echo "Toolchain should be installed in /usr"
-source $SRC_DIR/setup-arm-dev-env.sh
-#rm -rf *
-$CMAKE $SRC_DIR -DCMAKE_BUILD_TYPE=Release -DTARGET_DEVICE=YES -DCMAKE_TOOLCHAIN_FILE=$SRC_DIR/arm-gcc-toolchain.cmake
-make -j8
-#cp -r $SRC_DIR/cfg $PWD/devices
-#cp $SRC_DIR/config.json $PWD/config.json
-#cp startup.sh $PWD/startup.sh
+source $AQUABOX_ROOT/scripts/cleanup.sh
+
+export SYSROOT_DIR=$AQUABOX_ROOT/target/rootfs
+
+sudo ln -s $SYSROOT_DIR/lib/arm-linux-gnueabihf /lib/arm-linux-gnueabihf
+sudo ln -s $SYSROOT_DIR/usr/lib/arm-linux-gnueabihf /usr/lib/arm-linux-gnueabihf
+
+source $AQUABOX_ROOT/scripts/set_tools.sh
+source $AQUABOX_ROOT/scripts/cmake_for_target.sh

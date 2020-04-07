@@ -1,0 +1,13 @@
+{
+    "address": "PHY:GPIO:7",
+    "class": "relay",
+    "id": "dev1",
+    "index": 0,
+    "meta": {
+        "model": "300W",
+        "vendor": "jbl"
+    },
+    "name": "ProHeat e300s",
+    "rulesEnabled": true,
+    "type": "heater"
+}

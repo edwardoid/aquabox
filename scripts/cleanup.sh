@@ -1,3 +1,5 @@
+#/bin/bash
+
 # AquaBox
 # Copyright (C) 2019  Eduard Sargsyan
 #
@@ -14,18 +16,17 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+sudo unlink /usr/lib/arm-linux-gnueabihf > /dev/null
+sudo unlink /lib/arm-linux-gnueabihf > /dev/null
 
-set(CMAKE_SYSTEM_NAME Linux)
-set(CMAKE_SYSTEM_PROCESSOR arm)
+sudo unlink /usr/lib/arm-linux-gnueabihf/arm-linux-gnueabihf > /dev/null
+sudo unlink /lib/arm-linux-gnueabihf/arm-linux-gnueabihf > /dev/null
 
-set(CMAKE_SYSROOT ${CMAKE_CURRENT_LIST_DIR}/../arm/sysroot)
-set(CMAKE_FIND_ROOT_PATH ${CMAKE_SYSROOT})
+sudo fusermount -u /usr/lib/arm-linux-gnueabihf > /dev/null
+sudo fusermount -u /lib/arm-linux-gnueabihf > /dev/null
 
-set(tools /usr)
-set(CMAKE_C_COMPILER ${tools}/bin/arm-linux-gnueabihf-gcc)
-set(CMAKE_CXX_COMPILER ${tools}/bin/arm-linux-gnueabihf-g++)
+sudo fusermount -u /usr/lib/arm-linux-gnueabihf/arm-linux-gnueabihf > /dev/null
+sudo fusermount -u /lib/arm-linux-gnueabihf/arm-linux-gnueabihf > /dev/null
 
-set(CMAKE_FIND_ROOT_PATH /usr/arm-linux-gnueabihf)
-set(CMAKE_FIND_ROOT_PATH_MODE_PROGRAM NEVER)
-set(CMAKE_FIND_ROOT_PATH_MODE_LIBRARY ONLY)
-set(CMAKE_FIND_ROOT_PATH_MODE_INCLUDE ONLY)
+sudo rm -d /usr/lib/arm-linux-gnueabihf > /dev/null
+sudo rm -d /lib/arm-linux-gnueabihf > /dev/null

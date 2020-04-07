@@ -16,11 +16,8 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
-export HOST=edwardoid.servebeer.com
-export USER=root
-
-export ROOTFS=$PWD/rootfs
-
-rsync -rlvp --safe-links --delete-after $USER@$HOST:/{lib,usr,etc,opt} $ROOTFS
-
+$CMAKE	$AQUABOX_ROOT														\
+		-DCMAKE_BUILD_TYPE=$BUILD_TYPE										\
+		-DCMAKE_MODULE_PATH=$AQUABOX_ROOT/cmake 							\
+		-DTARGET_DEVICE=YES													\
+		-DCMAKE_TOOLCHAIN_FILE=$AQUABOX_ROOT/cmake/arm-gcc-toolchain.cmake

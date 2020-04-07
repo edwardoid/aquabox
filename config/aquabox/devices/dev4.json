@@ -1,13 +1,13 @@
 {
-    "address": "PHY:GPIO:18",
+    "address": "PHY:GPIO:0",
     "class": "relay",
     "id": "dev4",
     "index": 4,
     "meta": {
-        "model": "1000lm",
-        "vendor": "eheim"
+        "model": "1dps",
+        "vendor": "dennerle"
     },
-    "name": "classicLED",
+    "name": "CO2",
     "rulesEnabled": true,
-    "type": "light"
+    "type": "co2"
 }

@@ -1,0 +1,78 @@
+Here is onboard client->host communocation via USART protocol definition
+
+package is
+
+[seq_number][data len][type][command][data][crc]
+seq_num = 4 byte unique number
+data_len = Length of data stored in pdata 
+
+Sequence diagram
+
+void AquaBox::sendCommand(int command, vector<uint8_t> data)
+{
+	Command cmd(command, data);
+	m_serialBus()->send(cmd.packet());
+	while(!elapsed(5s) && !m_serialBus()->delivered())
+	{
+		wait();
+	}
+}
+
+
+Commands:
+	PING
+		Request: OkState - 1 byte
+		Response: OkState - 1 byte
+	NEW_SLAVE
+		Request: UUID - 16bytes
+				 Type - Device type
+		Response: Ok - accepted
+	SLAVE_INFO:
+		Request: UUID - 16 bytes
+		Response: UUID
+				  Type
+				  OkState
+
+	SET_VALUE
+		Request: UUID - 16 bytes
+				 ValueType:	1 - 4 byte number
+				 			2 - char
+				 			3 - string
+				 			4 - array of bytes
+				 			5 - float
+		Response: UUID
+				  OkState
+	GET_VALUE
+		Request: UUID
+		Response: ValueType
+
+	WIFI_SETUP
+		Request:
+				SSID - string
+				PASSWORD - string
+		Response: OkSate
+
+def execCommand():
+	Packet cmd(serial.readData())
+	cmd.parse()
+	serial.delivered(OK);
+	callHandler(cmd);
+
+def serial()
+	if (serial.availabe())
+		getCommand()
+
+
+
+
+ (Head unit)	(Hub)
+    |             |
+    +--{Command}->|
+    |             |
+    |        {Handling}
+    |<------------+
+    |             |
+    |             |
+{Handling}		  |
+    |			  |
+ {IDLE}			
