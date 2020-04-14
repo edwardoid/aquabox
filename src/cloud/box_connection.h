@@ -15,7 +15,7 @@ namespace aquabox
     public:
         BoxConnection(ResultsMap<Command>& results);
         using WSServer = SimpleWeb::SocketServer<SimpleWeb::WS>;
-        bool empty() const { return false; }
+        bool empty() const;
         void ready(std::string data);
         void runCommand(Command& cmd);
         ResultsMap<Command>& results;

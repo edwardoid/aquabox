@@ -111,7 +111,7 @@ bool CommandExecutor::GetStatus()
     nlohmann::json host({
         {"rest", Settings::integer(Settings::Keys::HTTP_PORT, Settings::Defaults::REST_PORT)},
         {"stream", Settings::integer(Settings::Keys::STREAM_PORT, Settings::Defaults::WS_PORT)},
-        {"serial", SERIAL_NUMBER}
+        {"serial", Settings::string(Settings::Keys::SERIAL, Settings::Defaults::SERIAL )}
     });
 
     host["network"] = nlohmann::json({
@@ -121,7 +121,7 @@ bool CommandExecutor::GetStatus()
 
     host["host"] = boost::asio::ip::host_name();
 
-    m_cmd.response(nlohmann::json({{"aquabox", host}}), Result::Ok);
+    m_cmd.response(nlohmann::json({{"aquabox", host}, {"status" , "online"}}), Result::Ok);
     return true;
 }
 
@@ -499,6 +499,8 @@ bool CommandExecutor::ConnectToWiFi()
         return true;
     }
 
-    m_cmd.response(NetworkManager::i().connect(wifi) ? Result::Ok : Result::BadCommand);
+    m_cmd.response(NetworkManager::i().connect(
+        Settings::string(Settings::Keys::CLIENT_INTERFACE, Settings::Defaults::CLIENT_INTERFACE),
+        wifi) ? Result::Ok : Result::BadCommand);
     return true;
 }

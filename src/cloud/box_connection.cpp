@@ -42,3 +42,8 @@ void BoxConnection::runCommand(Command& cmd)
         cmd.response(Result::AccessDenied);
     }
 }
+
+bool BoxConnection::empty() const
+{
+    return events == nullptr || commands == nullptr;
+}

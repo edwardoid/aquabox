@@ -49,7 +49,8 @@ namespace aquabox
         bool requestScan(bool force = true);
         SignalSlot::Property<WifiNetwork> currentNetwork;
         std::vector<WifiNetwork> networks();
-        bool connect(WifiNetwork network);
+        bool connect(const std::string& iface, WifiNetwork network);
+        bool activateConnection(std::string uuid, bool async = false);
         SignalSlot::Signal<size_t> NetworksChanged;
         void updateCurrentNetwork();
     private:

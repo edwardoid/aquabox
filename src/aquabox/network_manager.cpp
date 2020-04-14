@@ -1,129 +1,11 @@
 #include "network_manager.h"
 #include <NetworkManager.h>
 #include "log.h"
+#include "network_manager_internal.h"
 #include <mutex>
 #include <thread>
 
-namespace aquabox
-{
-    struct Data
-    {
-        NMClient* Client;
-        std::string Interface;  
-        bool requestScanResult;
-        std::vector<WifiNetwork> networks;
-        SignalSlot::Signal<size_t>* NetworksChanged;
-    };
-}
-
 using namespace aquabox;
-
-WifiNetwork getWifiNetworkInfo(NMAccessPoint* ap, bool& ok)
-{
-    ok = false;
-    WifiNetwork wifi;
-    GBytes *ssid = nm_access_point_get_ssid(ap);
-    if (ssid == NULL) {
-        return wifi;
-    }
-    wifi.ssid = std::string((const char *)g_bytes_get_data(ssid, NULL), g_bytes_get_size(ssid));
-    wifi.signal = nm_access_point_get_strength(ap);
-
-    auto flags = nm_access_point_get_flags(ap);
-    auto wpa_flags = nm_access_point_get_wpa_flags(ap);
-    auto rsn_flags = nm_access_point_get_rsn_flags(ap);
-
-    wifi.encrypted = !(flags & NM_802_11_AP_FLAGS_PRIVACY) && (wpa_flags != NM_802_11_AP_SEC_NONE) && (rsn_flags != NM_802_11_AP_SEC_NONE);
-
-    wifi.auth = Authentication::None;
-    if ((flags & NM_802_11_AP_FLAGS_PRIVACY) && (wpa_flags == NM_802_11_AP_SEC_NONE) && (rsn_flags == NM_802_11_AP_SEC_NONE)) {
-        wifi.auth = Authentication::WEP;
-    }
-
-    if (wpa_flags != NM_802_11_AP_SEC_NONE) {
-        wifi.auth = Authentication::WPA;
-    }
-
-    if (rsn_flags != NM_802_11_AP_SEC_NONE) {
-        wifi.auth = Authentication::WPA2;
-    }
-
-    if ((wpa_flags & NM_802_11_AP_SEC_KEY_MGMT_802_1X) || (rsn_flags & NM_802_11_AP_SEC_KEY_MGMT_802_1X)) {
-        wifi.auth = Authentication::Enterprise;
-    }
-    ok = true;
-    return wifi;
-}
-
-bool sameList(std::vector<WifiNetwork> left, std::vector<WifiNetwork> right)
-{
-    if (left.size() != right.size()) {
-        return false;
-    }
-
-    for (auto l : left) {
-        if (std::find(right.begin(), right.end(), l) == right.end()) {
-            return false;
-        }
-    }
-    return true;
-}
-
-std::vector<WifiNetwork> updateList(Data* data)
-{
-    std::vector<WifiNetwork> nets;
-    NMDevice *dev = nm_client_get_device_by_iface(data->Client, data->Interface.c_str());
-    if (dev == NULL) {
-        LOG_ERROR << "Can't find device " << data->Interface;
-        return nets;
-    }
-
-    if (!NM_IS_DEVICE_WIFI(dev)) {
-        LOG_ERROR << "Interface " << data->Interface << " is not WiFi device";
-        return nets;
-    }
-
-    const GPtrArray *aps = aps = nm_device_wifi_get_access_points(NM_DEVICE_WIFI(dev));
-    
-    for (int i = 0; i < aps->len; i++) {
-        NMAccessPoint *ap = NM_ACCESS_POINT(g_ptr_array_index(aps, i));
-        if (!ap) {
-            continue;
-        }
-
-        bool ok = false;
-        WifiNetwork wifi = getWifiNetworkInfo(ap, ok);
-        if (ok) {
-            nets.push_back(wifi);
-        }
-    }
-    std::sort(nets.begin(), nets.end());
-    
-    if (!sameList(data->networks, nets)) {
-        data->NetworksChanged->emit(nets.size());
-    }
-
-    data->networks = nets;
-    return nets;
-}
-
-void request_rescan_cb (GObject *object, GAsyncResult *result, gpointer user_data)
-{
-	Data *data = (Data *) user_data;
-	GError *error = NULL;
-
-	nm_device_wifi_request_scan_finish (NM_DEVICE_WIFI (object), result, &error);
-	if (error) {
-        LOG_ERROR << error->message;
-		g_error_free (error);
-        data->requestScanResult = false;
-	}
-    else {
-        data->requestScanResult = true;
-    }
-
-    updateList(data);
-}
 
 NetworkManager::NetworkManager()
     : m_data(new Data())
@@ -183,7 +65,7 @@ bool NetworkManager::requestScan(bool force)
         system(forceScanCommand.c_str());
     }
 
-    nm_device_wifi_request_scan_async(NM_DEVICE_WIFI(dev), NULL, request_rescan_cb, m_data);
+    nm_device_wifi_request_scan_async(NM_DEVICE_WIFI(dev), NULL, RequestRescan, m_data);
     
     return m_data->requestScanResult;
 }
@@ -203,7 +85,7 @@ void NetworkManager::updateCurrentNetwork()
         return;
     }
     bool ok;
-    network = getWifiNetworkInfo(ap, ok);
+    network = GetWifiNetworksInfo(ap, ok);
     if (!ok) {
         currentNetwork = network;
         return;
@@ -237,10 +119,169 @@ void NetworkManager::updateCurrentNetwork()
 
 std::vector<WifiNetwork> NetworkManager::networks()
 {
-    return updateList(m_data);
+    return GetAvailableWifiNetworks(m_data);
 }
 
-bool NetworkManager::connect(WifiNetwork network)
+bool NetworkManager::connect(const std::string& iface, WifiNetwork authData)
 {
-    return false;
+    int count = 0;
+    NMDevice *device = nm_client_get_device_by_iface(m_data->Client, iface.c_str());
+    if (!NM_IS_DEVICE_WIFI(device)) {
+        return false;
+    }
+
+    GError *error = NULL;
+
+    NMActiveConnection *activeConnection = nm_device_get_active_connection(device);
+    if (activeConnection != NULL) {
+        NMRemoteConnection *remote = nm_active_connection_get_connection(activeConnection);
+        if (remote == NULL) {
+            return false;
+        }
+
+        NMSettingWireless *s = nm_connection_get_setting_wireless(NM_CONNECTION(remote));
+        if (s == NULL) {
+            return false;
+        }
+    }
+
+    NMAccessPoint *ap = GetAccessPoint(m_data->Client, iface, authData.ssid);
+
+    if (ap == NULL) {
+        LOG_ERROR << "Network not found";
+        return false;
+    }
+
+    bool ok = true;
+    WifiNetwork network = GetWifiNetworksInfo(ap, ok);
+    if (!ok) {
+        LOG_ERROR << "Can't get required info!";
+        return false;
+    }
+
+    network.password = authData.password;
+
+
+    LOG_DEBUG << "Network found, connecting...";
+
+    NMConnection *connection = nm_simple_connection_new();
+
+    NMSettingConnection *settingConnection = (NMSettingConnection *)nm_setting_connection_new();
+    char *uuid = nm_utils_uuid_generate();
+    g_object_set(G_OBJECT(settingConnection),
+                 NM_SETTING_CONNECTION_UUID, uuid,
+                 NM_SETTING_CONNECTION_ID, network.ssid.c_str(),
+                 NM_SETTING_CONNECTION_TYPE, NM_SETTING_WIRELESS_SETTING_NAME,
+                 NM_SETTING_CONNECTION_AUTOCONNECT, TRUE,
+                 NULL);
+    nm_connection_add_setting(connection, NM_SETTING(settingConnection));
+
+    auto bssid = nm_access_point_get_bssid(ap);
+
+    /* Build up the 'wired' Setting */
+    NMSettingWireless *wireless = (NMSettingWireless *)nm_setting_wireless_new();
+    g_object_set(G_OBJECT(wireless),
+                 NM_SETTING_WIRELESS_SSID, nm_access_point_get_ssid(ap),
+                 NM_SETTING_WIRELESS_BSSID, nm_access_point_get_bssid(ap),
+                 NM_SETTING_WIRELESS_MODE, NM_SETTING_WIRELESS_MODE_INFRA,
+                 NM_SETTING_WIRELESS_BAND, "bg",
+                 NULL);
+
+    nm_connection_add_setting(connection, NM_SETTING(wireless));
+
+    if (network.auth == Authentication::Enterprise) {
+        g_free(uuid);
+        return false;
+    }
+
+    NMSettingWirelessSecurity *security = NULL;
+    if (network.auth == Authentication::WEP)
+    {
+        security = (NMSettingWirelessSecurity *)nm_setting_wireless_security_new();
+        g_object_set(G_OBJECT(security),
+                     NM_SETTING_WIRELESS_SECURITY_KEY_MGMT, "none",
+                     NM_SETTING_WIRELESS_SECURITY_WEP_TX_KEYIDX, 0,
+                     NM_SETTING_WIRELESS_SECURITY_WEP_KEY_TYPE, 1,
+                     NM_SETTING_WIRELESS_SECURITY_WEP_KEY0, network.password.c_str(),
+                     NULL);
+        if (network.password.size() == 32) {
+            g_object_set(G_OBJECT(security),
+                         NM_SETTING_WIRELESS_SECURITY_WEP_KEY_TYPE, 2,
+                         NULL);
+        }
+    }
+    else if (network.auth == Authentication::WPA || network.auth == Authentication::WPA2) {
+        security = (NMSettingWirelessSecurity *)nm_setting_wireless_security_new();
+        g_object_set(G_OBJECT(security),
+                     NM_SETTING_WIRELESS_SECURITY_KEY_MGMT, "wpa-psk",
+                     NM_SETTING_WIRELESS_SECURITY_PSK, network.password.c_str(),
+                     NULL);
+    }
+
+    if (security != NULL) {
+        nm_connection_add_setting(connection, NM_SETTING(security));
+    }
+
+    NMSettingIP4Config *ip4 = (NMSettingIP4Config *)nm_setting_ip4_config_new();
+    g_object_set(G_OBJECT(ip4),
+                 NM_SETTING_IP_CONFIG_METHOD, NM_SETTING_IP4_CONFIG_METHOD_AUTO,
+                 NULL);
+    nm_connection_add_setting(connection, NM_SETTING(ip4));
+
+    if (nm_connection_verify(connection, &error) == FALSE) {
+        LOG_ERROR << "Verification failed: " << error->message;
+        g_free(uuid);
+        return false;
+    }
+
+    if (nm_access_point_connection_valid(ap, connection) == FALSE) {
+        LOG_ERROR << "Access point is not valid and can't be used";
+        g_free(uuid);
+        return false;
+    }
+
+    AddConnectionData addOptions;
+    addOptions.Client = m_data->Client;
+
+    nm_client_add_connection_async(m_data->Client, connection, true, NULL, OnAddedNewConnection, &addOptions);
+
+    // TODO: Wait for activation
+    addOptions.waitForResult();
+
+    if (addOptions.Result) {
+        ActivateConnectionData activateOptions;
+        if(!activateConnection(uuid)) {
+            LOG_ERROR << "Activation failed!";
+            addOptions.Result = false;
+        }
+    } else {
+        LOG_INFO << "Created connection: " << uuid;
+    }
+
+    g_free(uuid);
+    g_object_unref(connection);
+    return addOptions.Result;
+}
+
+bool NetworkManager::activateConnection(std::string uuid, bool async)
+{
+    NMRemoteConnection *conn = nm_client_get_connection_by_uuid(m_data->Client, uuid.c_str());
+    if (conn == NULL) {
+        return false;
+    }
+
+    ActivateConnectionData data;
+    data.Client = m_data->Client;
+    data.Result = async;
+    if (async) {
+        nm_client_activate_connection_async(m_data->Client, NM_CONNECTION(conn),
+                                        NULL, NULL, NULL, NULL, NULL);
+    } else {
+        nm_client_activate_connection_async(m_data->Client, NM_CONNECTION(conn),
+                                            NULL, NULL, NULL,
+                                            OnConnectionActivated, &data);
+        data.waitForResult();
+    }
+
+    return data.Result;
 }
