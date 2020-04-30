@@ -121,6 +121,8 @@ bool CommandExecutor::GetStatus()
 
     host["host"] = boost::asio::ip::host_name();
 
+    host["config"] = AquaBox::i().configurationData();
+
     m_cmd.response(nlohmann::json({{"aquabox", host}, {"status" , "online"}}), Result::Ok);
     return true;
 }

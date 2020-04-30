@@ -32,6 +32,7 @@
 #include "update_events.h"
 #include "command_executor.h"
 #include "http_helpers.h"
+#include "network_manager.h"
 #include <nlohmann/json.hpp>
 #include <stdio.h>
 #include <random>

@@ -36,22 +36,8 @@ using namespace aquabox;
 void ScanScreen::draw()
 {
     StatusBarScreen::draw();
-    std::string statusQrData;
-    statusQrData += std::to_string(Settings::integer(Settings::Keys::HTTP_PORT, Settings::Defaults::REST_PORT));
-    statusQrData += ";";
-
-    statusQrData += std::to_string(Settings::integer(Settings::Keys::STREAM_PORT, Settings::Defaults::WS_PORT));
-    statusQrData += ";";
-
-    statusQrData += SERIAL_NUMBER;
-    statusQrData += ";";
-
-    statusQrData += NetworkManager::i().currentNetwork.value.ip;
-    statusQrData += ";";
-
-    statusQrData += std::to_string((int)AquaBox::i().systemTemperature());
     
-    QRcode *qrcode = QRcode_encodeString(statusQrData.c_str(), 0, QR_ECLEVEL_L, QR_MODE_8, 1);
+    QRcode *qrcode = QRcode_encodeString(AquaBox::i().configurationData().c_str(), 0, QR_ECLEVEL_L, QR_MODE_8, 1);
 	if (qrcode == nullptr) {
         LOG_ERROR << "Can't encode status";
         return;

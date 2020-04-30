@@ -31,6 +31,9 @@
 #include "screen_manager.h"
 #include "options.h"
 #include "repetive_task.h"
+#include "cloud.h"
+#include "web_server.h"
+#include "network_manager.h"
 #include <exception>
 #include <pstream.h>
 #include <chrono>
@@ -52,8 +55,19 @@ AquaBox& AquaBox::i()
 
 AquaBox::AquaBox()
     : m_fileAppender("./../log/aquabox.log", LOG_FILE_SIZE_IN_MB * BYTES_IN_MB, MAX_LOG_FILES)
-    , m_globalTimer("GlobalRoutines")
+    , m_globalTimer(new Timer("GlobalRoutines"))
+    , m_rulesTimer(new RulesTimer())
+    , m_cloud(new Cloud())
+    , m_server(new WebServer)
 {}
+
+AquaBox::~AquaBox()
+{
+    delete m_globalTimer;
+    delete m_rulesTimer;
+    delete m_cloud;
+    delete m_server;
+}
 
 int AquaBox::start()
 {
@@ -69,6 +83,7 @@ int AquaBox::start()
 
     NetworkManager::i().setInterface(Settings::string(Settings::Keys::CLIENT_INTERFACE, Settings::Defaults::CLIENT_INTERFACE));
     NetworkManager::i().updateCurrentNetwork();
+    NetworkManager::i().currentNetwork.connect([this](Connection net) { onCurrentNetworkChanged(net); });
 
     LOG_INFO << "Starting " << Settings::Defaults::APPLICATION << " ver. " << std::hex << Settings::Defaults::VERSION_MAJOR << "." << Settings::Defaults::VERSION_MINOR;
     if(Options::Lock) {
@@ -111,20 +126,20 @@ int AquaBox::start()
     readRules(m_wd);
     readUsers();
 
-    m_globalTimer.start([this](const Timer::ClockTimePoint&) {
+    m_globalTimer->start([this](const Timer::ClockTimePoint&) {
         NetworkManager::i().updateCurrentNetwork();
         if (Options::Render) {
-            m_screen.show();
+            m_screen->show();
         }
         if (Options::EnableCloud) {
-            m_cloud.heartheat();
+            m_cloud->heartheat();
         }
         SensorsTracker::processUpdates();
 
     }, std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::seconds(10)));
 
-    m_timer.start();
-    m_server.start();
+    m_rulesTimer->start();
+    m_server->start();
 
     std::getchar();
 
@@ -293,15 +308,15 @@ void AquaBox::doLater(std::function<void(void)>&& task)
 
 Cloud& AquaBox::cloud()
 {
-    return m_cloud;
+    return *m_cloud;
 }
 
 void AquaBox::postUpdate(std::shared_ptr<Event> event)
 {
-    m_server.postUpdate(event);
+    m_server->postUpdate(event);
 
     if (Options::EnableCloud) {
-        m_cloud.postUpdate(event);
+        m_cloud->postUpdate(event);
     }
 }
 
@@ -316,4 +331,32 @@ double AquaBox::systemTemperature() const
     temp = 65.89;
 #endif
     return temp;
+}
+
+std::string AquaBox::configurationData() const
+{
+    std::string configurationDataString;
+    configurationDataString += std::to_string(Settings::integer(Settings::Keys::HTTP_PORT, Settings::Defaults::REST_PORT));
+    configurationDataString += ";";
+
+    configurationDataString += std::to_string(Settings::integer(Settings::Keys::STREAM_PORT, Settings::Defaults::WS_PORT));
+    configurationDataString += ";";
+
+    configurationDataString += SERIAL_NUMBER;
+    configurationDataString += ";";
+
+    configurationDataString += NetworkManager::i().currentNetwork.value.ip;
+    configurationDataString += ";";
+
+    configurationDataString += std::to_string((int)AquaBox::i().systemTemperature());
+    return configurationDataString;
+}
+
+void AquaBox::onCurrentNetworkChanged(const Connection& network)
+{
+    std::shared_ptr<BoxEvent> event = std::make_shared<BoxEvent>();
+    event->setPropertiesUpdate({
+        { "network", network.ssid }
+    });
+    postUpdate(event);
 }

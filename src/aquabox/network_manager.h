@@ -37,6 +37,11 @@ namespace aquabox
         }
     };
 
+    struct Connection: public WifiNetwork
+    {
+        std::string uuid;
+    };
+
     class NetworkManager
     {
         NetworkManager();
@@ -44,12 +49,12 @@ namespace aquabox
     public:
 
         static NetworkManager& i();
-        bool connectedToInternet() { return false; }
+        bool connectedToInternet();
         void setInterface(std::string interface);
         bool requestScan(bool force = true);
-        SignalSlot::Property<WifiNetwork> currentNetwork;
+        SignalSlot::Property<Connection> currentNetwork;
         std::vector<WifiNetwork> networks();
-        bool connect(const std::string& iface, WifiNetwork network);
+        bool connect(const std::string& iface, const WifiNetwork& network, bool waitForActivation = true);
         bool activateConnection(std::string uuid, bool async = false);
         SignalSlot::Signal<size_t> NetworksChanged;
         void updateCurrentNetwork();

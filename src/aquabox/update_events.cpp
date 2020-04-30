@@ -21,8 +21,14 @@
 #include "sensor.h"
 #include "rule.h"
 #include "enumerations.h"
+#include "serial.h"
 
 using namespace aquabox;
+
+BoxEvent::BoxEvent()
+{
+    setSender(SERIAL_NUMBER, "aquabox");
+}
 
 OnOffChangedEvent::OnOffChangedEvent(std::shared_ptr<Relay> device, std::string reason)
 {

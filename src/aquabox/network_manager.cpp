@@ -70,33 +70,36 @@ bool NetworkManager::requestScan(bool force)
     return m_data->requestScanResult;
 }
 
+bool NetworkManager::connectedToInternet()
+{
+    return nm_client_get_connectivity(m_data->Client) == NM_CONNECTIVITY_FULL;
+}
+
 void NetworkManager::updateCurrentNetwork()
 {
-    WifiNetwork network;
+    Connection connectionInfo;
     NMDevice *device = nm_client_get_device_by_iface(m_data->Client, m_data->Interface.c_str());
     if (!NM_IS_DEVICE_WIFI(device)) {
-        currentNetwork = network;
         return;
     }
 
     NMAccessPoint* ap = nm_device_wifi_get_active_access_point(NM_DEVICE_WIFI(device));
     if (ap == NULL) {
-        currentNetwork = network;
         return;
     }
     bool ok;
-    network = GetWifiNetworksInfo(ap, ok);
+    (WifiNetwork&) connectionInfo = GetWifiNetworksInfo(ap, ok);
     if (!ok) {
-        currentNetwork = network;
         return;
     }
 
     NMActiveConnection* connection = nm_device_get_active_connection(device);
 
     if (connection == NULL) {
-        currentNetwork = network;
         return;
     }
+
+    connectionInfo.uuid = nm_active_connection_get_uuid(connection);
     
     NMRemoteConnection* remote = nm_active_connection_get_connection(connection);
     NMIPConfig* cfg = nm_active_connection_get_ip4_config(connection);
@@ -105,16 +108,16 @@ void NetworkManager::updateCurrentNetwork()
         for (int i = 0; i < ips->len; i++) {
             NMIPAddress *ip = (NMIPAddress*)(g_ptr_array_index(ips, i));
             if (ip != NULL) {
-                network.ip = nm_ip_address_get_address(ip);
+                connectionInfo.ip = nm_ip_address_get_address(ip);
             }
 
-            if (!network.ip.empty()) {
+            if (!connectionInfo.ip.empty()) {
                 break;
             }
         }
     }
 
-    currentNetwork = network;
+    currentNetwork = connectionInfo;
 }
 
 std::vector<WifiNetwork> NetworkManager::networks()
@@ -122,7 +125,7 @@ std::vector<WifiNetwork> NetworkManager::networks()
     return GetAvailableWifiNetworks(m_data);
 }
 
-bool NetworkManager::connect(const std::string& iface, WifiNetwork authData)
+bool NetworkManager::connect(const std::string& iface, const WifiNetwork& authData, bool waitForActivation)
 {
     int count = 0;
     NMDevice *device = nm_client_get_device_by_iface(m_data->Client, iface.c_str());
@@ -248,7 +251,7 @@ bool NetworkManager::connect(const std::string& iface, WifiNetwork authData)
     // TODO: Wait for activation
     addOptions.waitForResult();
 
-    if (addOptions.Result) {
+    if (addOptions.Result && waitForActivation) {
         ActivateConnectionData activateOptions;
         if(!activateConnection(uuid)) {
             LOG_ERROR << "Activation failed!";

@@ -22,10 +22,7 @@
 #include "serial.h"
 #include <thread_pool.hpp>
 #include "rules_timer.h"
-#include "web_server.h"
 #include "path.h"
-#include "network_manager.h"
-#include "cloud.h"
 #include "screen_manager.h"
 #include <memory>
 #include <unordered_map>
@@ -40,6 +37,11 @@ namespace aquabox
     class Rule;
     class User;
     class Event;
+    class Cloud;
+    class WebServer;
+    class ScreenManager;
+    class Timer;
+    class RulesTimer;
 
     using DevicesMap = std::unordered_map<std::string, std::shared_ptr<Device>>;
     using RulesMap = std::unordered_map<std::string, std::shared_ptr<Rule>>;
@@ -55,7 +57,7 @@ namespace aquabox
     public:
         static AquaBox& i();
         int start();
-        ~AquaBox() = default;
+        ~AquaBox();
         std::shared_ptr<Device> findDevice(std::string id);
         std::shared_ptr<Rule> findRule(std::string id);
         const Path& workingDirectory() const;
@@ -70,7 +72,9 @@ namespace aquabox
         Cloud& cloud();
         bool assistantIsConnected() const { return false; }
         double systemTemperature() const;
+        std::string configurationData() const;
     private:
+        void onCurrentNetworkChanged(const class Connection& network);
         void trackSensors();
         void readDevices(const Path& root);
         void readUsers();
@@ -83,14 +87,14 @@ namespace aquabox
         mutable DevicesMap m_devices;
         mutable UsersMap m_users;
         mutable RulesMap m_rules;
-        mutable Cloud m_cloud;
+        Cloud* m_cloud;
+        WebServer* m_server;
         Path m_wd;
         Path m_devicesDir;
         Path m_rulesDir;
-        RulesTimer m_timer;
-        WebServer m_server;
-        Timer m_globalTimer;
-        ScreenManager m_screen;
+        RulesTimer* m_rulesTimer;
+        Timer* m_globalTimer;
+        ScreenManager* m_screen;
     };
 }
 

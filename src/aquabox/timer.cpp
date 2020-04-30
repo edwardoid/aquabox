@@ -52,6 +52,7 @@ bool Timer::start(std::function<void(const ClockTimePoint&)>&& callback,
     m_state.store(State::Starting);
 
     m_thread = std::move(std::thread(std::bind(&Timer::run, this)));
+    pthread_setname_np(m_thread.native_handle(), m_name.c_str());
     m_thread.detach();
     return true;
 }

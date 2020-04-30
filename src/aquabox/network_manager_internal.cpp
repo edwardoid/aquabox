@@ -82,7 +82,12 @@ std::vector<WifiNetwork> GetAvailableWifiNetworks (Data* data)
         bool ok = false;
         WifiNetwork wifi = GetWifiNetworksInfo(ap, ok);
         if (ok) {
-            nets.push_back(wifi);
+            auto it = std::find(nets.begin(), nets.end(), wifi);
+            if (it != nets.end()) {
+                it->signal = std::max(it->signal, wifi.signal);
+            } else {
+                nets.push_back(wifi);
+            }
         }
     }
     std::sort(nets.begin(), nets.end());

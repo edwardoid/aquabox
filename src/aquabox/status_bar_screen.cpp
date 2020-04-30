@@ -18,6 +18,8 @@
 
 #include "status_bar_screen.h"
 #include "aquabox.h"
+#include "cloud.h"
+#include "network_manager.h"
 #include <sprite.h>
 
 #define ASSISTANT_X 132
