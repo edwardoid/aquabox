@@ -40,3 +40,6 @@
 [submodule "scripts/clone"]
 	path = scripts/clone
 	url = https://github.com/edwardoid/rpi_rootfs.git
+[submodule "3dp/mqtt_cpp"]
+	path = 3dp/mqtt_cpp
+	url = https://github.com/redboltz/mqtt_cpp.git
