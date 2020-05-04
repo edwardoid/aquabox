@@ -49,6 +49,7 @@ bool WebServer::start()
 
     m_rest.join();
     m_stream.join();
+    return true;
 }
 
 void WebServer::postUpdate(std::shared_ptr<Event> event)

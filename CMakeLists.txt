@@ -42,6 +42,9 @@ add_library(json-hpp INTERFACE)
 set(NLOHMANN_JSON_DIR ${NLOHMANN_INCLUDE_DIR}/nlohmann)
 set(AQUABOX_ROOT_DIR ${CMAKE_CURRENT_LIST_DIR})
 
+set(MQTT_BUILD_EXAMPLES OFF)
+set(MQTT_BUILD_TESTS OFF)
+
 if (NOT CLOUD_ONLY)
   set(QRENDOCE_INCLUDE_DIR "${PROJECT_SOURCE_DIR}/3dp/qrencode")
   set(FB_INCLUDE_DIR "${PROJECT_SOURCE_DIR}/3dp/libfb/include")
@@ -88,7 +91,9 @@ if (NOT CLOUD_ONLY)
   add_subdirectory("${THREE_DP_DIR}/owt")
   option(MQTT_BUILD_TESTS OFF)
   add_subdirectory("${THREE_DP_DIR}/mqtt_cpp")
-  find_package (NetworkManager REQUIRED)
+  if (USE_NM)
+    find_package (NetworkManager REQUIRED)
+  endif()
 endif()
 
 execute_process(

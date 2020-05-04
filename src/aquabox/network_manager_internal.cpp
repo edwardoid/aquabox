@@ -1,10 +1,11 @@
 #include "network_manager_internal.h"
 #include "log.h"
-#include <NetworkManager.h>
 #include <algorithm>
 #include <thread>
 
 namespace aquabox {
+
+#ifdef USE_NM
 
 WifiNetwork GetWifiNetworksInfo(NMAccessPoint* ap, bool& ok)
 {
@@ -197,5 +198,7 @@ void OnConnectionActivated(GObject *client, GAsyncResult *result, gpointer user_
     }
     data->ready(succeeded);
 }
+
+#endif // USE_NM
 
 } // namespace aquabox

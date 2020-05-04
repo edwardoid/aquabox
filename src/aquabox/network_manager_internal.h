@@ -2,7 +2,10 @@
 #define NETWORK_MANAGER_INTERNAL_H
 
 #include "network_manager.h"
+
+#ifdef USE_NM
 #include <NetworkManager.h>
+#endif // USE_NM
 #include <mutex>
 #include <chrono>
 #include <condition_variable>
@@ -11,13 +14,16 @@ namespace aquabox
 {
     struct Data
     {
+#ifdef USE_NM
         NMClient* Client;
+#endif // USE_NM
         std::string Interface;  
         bool requestScanResult;
         std::vector<WifiNetwork> networks;
         SignalSlot::Signal<size_t>* NetworksChanged;
     };
 
+#ifdef USE_NM
     template<typename ResultType>
     struct Syncronizer
     {
@@ -54,6 +60,9 @@ namespace aquabox
     void RequestRescan (GObject *object, GAsyncResult *result, gpointer user_data);
     void OnAddedNewConnection(GObject *client, GAsyncResult *result, gpointer user_data);
     void OnConnectionActivated(GObject *client, GAsyncResult *result, gpointer user_data);
+
+#endif
+
 }
 
 #endif // NETWORK_MANAGER_INTERNAL_H

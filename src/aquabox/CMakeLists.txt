@@ -28,6 +28,7 @@ file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/rules)
 
 include_directories(${GLIB_INCLUDE_DIRS})
 include_directories(${NETWORKMANAGER_INCLUDE_DIRS})
+include_directories(${MQTT_INCLUDE_DIR})
 include_directories(${AQUABOX_COMMON_PATH})
 file(GLOB AQUABOX_SOURCES "*.cpp")
 

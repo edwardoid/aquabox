@@ -1,15 +1,20 @@
 #include "network_manager.h"
-#include <NetworkManager.h>
+
 #include "log.h"
 #include "network_manager_internal.h"
 #include <mutex>
 #include <thread>
+
+#ifdef USE_NM
+#include <NetworkManager.h>
+#endif // USE_NM
 
 using namespace aquabox;
 
 NetworkManager::NetworkManager()
     : m_data(new Data())
 {
+    #ifdef USE_NM
     m_data->Client = nm_client_new(NULL, NULL);
     m_data->NetworksChanged = & this->NetworksChanged;
 
@@ -17,16 +22,19 @@ NetworkManager::NetworkManager()
         g_main_loop_run(g_main_loop_new(NULL, FALSE));
     });
     loopThread.detach();
+    #endif // USE_NM
 }
 
 NetworkManager::~NetworkManager()
 {
+    #ifdef USE_NM
     if (m_data->Client)
     {
         g_object_unref(m_data->Client);
     }
 
     delete m_data;
+    #endif // USE_NM
 }
 
 NetworkManager& NetworkManager::i()
@@ -44,6 +52,7 @@ void NetworkManager::setInterface(std::string interface)
 
 bool NetworkManager::requestScan(bool force)
 {
+    #ifdef USE_NM
     if (m_data->Client == NULL || m_data->Interface.empty()) {
         return false;
     }
@@ -66,17 +75,22 @@ bool NetworkManager::requestScan(bool force)
     }
 
     nm_device_wifi_request_scan_async(NM_DEVICE_WIFI(dev), NULL, RequestRescan, m_data);
-    
+    #endif // USE_NM
     return m_data->requestScanResult;
 }
 
 bool NetworkManager::connectedToInternet()
 {
+#ifdef USE_NM
     return nm_client_get_connectivity(m_data->Client) == NM_CONNECTIVITY_FULL;
+#else
+    return true;
+#endif
 }
 
 void NetworkManager::updateCurrentNetwork()
 {
+#ifdef USE_NM
     Connection connectionInfo;
     NMDevice *device = nm_client_get_device_by_iface(m_data->Client, m_data->Interface.c_str());
     if (!NM_IS_DEVICE_WIFI(device)) {
@@ -118,15 +132,21 @@ void NetworkManager::updateCurrentNetwork()
     }
 
     currentNetwork = connectionInfo;
+#endif // USE_NM
 }
 
 std::vector<WifiNetwork> NetworkManager::networks()
 {
+#ifdef USE_NM
     return GetAvailableWifiNetworks(m_data);
+#else
+    return {};
+#endif
 }
 
 bool NetworkManager::connect(const std::string& iface, const WifiNetwork& authData, bool waitForActivation)
 {
+#ifdef USE_NM
     int count = 0;
     NMDevice *device = nm_client_get_device_by_iface(m_data->Client, iface.c_str());
     if (!NM_IS_DEVICE_WIFI(device)) {
@@ -264,10 +284,14 @@ bool NetworkManager::connect(const std::string& iface, const WifiNetwork& authDa
     g_free(uuid);
     g_object_unref(connection);
     return addOptions.Result;
+#else
+    return true;
+#endif // USE_NM
 }
 
 bool NetworkManager::activateConnection(std::string uuid, bool async)
 {
+#ifdef USE_NM
     NMRemoteConnection *conn = nm_client_get_connection_by_uuid(m_data->Client, uuid.c_str());
     if (conn == NULL) {
         return false;
@@ -287,4 +311,7 @@ bool NetworkManager::activateConnection(std::string uuid, bool async)
     }
 
     return data.Result;
+#else
+    return true;
+#endif
 }

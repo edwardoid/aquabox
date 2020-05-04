@@ -94,7 +94,7 @@ bool Rule::parseFile(const std::string& file)
     }
 
     if(nullptr == m_Device.resolve()) {
-        LOG_ERROR << "Device " << (std::string) m_Device << " can not be found";
+        LOG_ERROR << "Device " << m_Device.Value << " can not be found";
         return false;
     }
     return true;

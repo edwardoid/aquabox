@@ -24,6 +24,12 @@
 
 namespace aquabox
 {
+    enum class State
+    {
+        RegistrationRequest,
+        Online,
+        Oflfine
+    };
     class Hardware
     {
     public:

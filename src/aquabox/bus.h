@@ -21,6 +21,7 @@
 
 #include <memory>
 #include "hardware.h"
+#include "s2s.h"
 
 namespace aquabox
 {
@@ -28,6 +29,7 @@ namespace aquabox
     {
     public:
         virtual std::shared_ptr<Hardware> hw(std::string hw) = 0;
+        SignalSlot::Signal<std::shared_ptr<Hardware>, State> HardwareStateChanged;
     };
 }
 
