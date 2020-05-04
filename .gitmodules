@@ -1,12 +1,6 @@
 [submodule "3dp/plog"]
 	path = 3dp/plog
 	url = https://github.com/SergiusTheBest/plog.git
-[submodule "3dp/qrencode"]
-	path = 3dp/qrencode
-	url = https://github.com/fukuchi/libqrencode.git
-[submodule "3dp/nlohmann"]
-	path = 3dp/nlohmann
-	url = https://github.com/nlohmann/json.git
 [submodule "3dp/thread-pool-cpp"]
 	path = 3dp/thread-pool-cpp
 	url = https://github.com/inkooboo/thread-pool-cpp.git
@@ -19,9 +13,6 @@
 [submodule "3dp/pngwriter"]
 	path = 3dp/pngwriter
 	url = https://github.com/pngwriter/pngwriter.git
-[submodule "3dp/pstreams"]
-	path = 3dp/pstreams
-	url = https://github.com/jwakely/pstreams.git
 [submodule "3dp/libfb"]
 	path = 3dp/libfb
 	url = https://github.com/edwardoid/libfb.git
@@ -31,15 +22,9 @@
 [submodule "3dp/json-schema-validator"]
 	path = 3dp/json-schema-validator
 	url = https://github.com/pboettch/json-schema-validator.git
-[submodule "3dp/backward-cpp"]
-	path = 3dp/backward-cpp
-	url = https://github.com/bombela/backward-cpp.git
 [submodule "3dp/s2s"]
 	path = 3dp/s2s
 	url = https://github.com/edwardoid/s2s.git
 [submodule "scripts/clone"]
 	path = scripts/clone
 	url = https://github.com/edwardoid/rpi_rootfs.git
-[submodule "3dp/mqtt_cpp"]
-	path = 3dp/mqtt_cpp
-	url = https://github.com/redboltz/mqtt_cpp.git
