@@ -1,8 +1,6 @@
 cmake_minimum_required(VERSION 3.5)
 project(aquabox-service)
 
-find_package(libmongocxx REQUIRED)
-
 include_directories(${PLOG_INCLUDE_DIR})
 include_directories(${QRENDOCE_INCLUDE_DIR})
 include_directories(${NLOHMANN_INCLUDE_DIR})
@@ -30,9 +28,8 @@ target_link_libraries(${PROJECT_NAME} ${OPENSSL_CRYPTO_LIBRARY})
 target_link_libraries(${PROJECT_NAME} ${PNG_LIBRARY})
 target_link_libraries(${PROJECT_NAME} ${ZLIB_LIBRARIES})
 target_link_libraries(${PROJECT_NAME} Boost::system)
-target_link_libraries(${PROJECT_NAME} OpenSSL::SSL)
+#target_link_libraries(${PROJECT_NAME} OpenSSL::SSL)
 target_link_libraries(${PROJECT_NAME} ${LIBMONGOCXX_LIBRARIES})
 target_link_libraries (${PROJECT_NAME} ${CMAKE_THREAD_LIBS_INIT})
-add_backward(${PROJECT_NAME})
 
 install(TARGETS ${PROJECT_NAME} DESTINATION bin)

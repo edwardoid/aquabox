@@ -34,7 +34,7 @@ void BoxConnection::runCommand(Command& cmd)
     }
     nlohmann::json cmdJson = cmd.toJSON();
 
-    LOG_DEBUG << "Executing command\n" << cmd.toJSON();
+    LOG_DEBUG << "Executing command\n" << cmd.toJSON().dump();
 
     commands->send(cmdJson.dump());
 

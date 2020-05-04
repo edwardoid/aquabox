@@ -40,7 +40,7 @@
 using namespace aquabox::v1;
 using namespace aquabox;
 
-Command createCommand(Operation operation, Web::Request request, bool body, std::unordered_map<std::string, std::string> params = {})
+Command createCommand(Operation operation, Web::Request request, bool body, std::unordered_map<std::string, std::string> params = std::unordered_map<std::string, std::string>())
 {
     Command command;
     command.setOperation(operation);

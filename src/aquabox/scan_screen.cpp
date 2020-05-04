@@ -20,7 +20,6 @@
 #include "log.h"
 #include "settings.h"
 #include <nlohmann/json.hpp>
-#include <pstream.h>
 #include <framebuffer.h>
 #include <pngprovider.h>
 #include <sprite.h>
