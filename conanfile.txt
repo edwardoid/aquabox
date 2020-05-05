@@ -10,6 +10,7 @@ boost_asio/1.69.0@bincrafters/stable
 zlib/1.2.11
 bzip2/1.0.8
 #mongo-cxx-driver/3.2.0@conan/stable
+mongo-c-driver/1.16.1@bincrafters/stable
 mongo-cxx-driver/3.2.0@bincrafters/stable
 #libpng/1.6.37@bincrafters/stable
 libpng/1.6.37
@@ -21,3 +22,7 @@ backward-cpp/1.4
 [generators]
 cmake
 cmake_find_package
+
+
+[imports]
+lib, *.so* -> ./lib # Copies all dylib files from packages lib folder to my "lib" folder
