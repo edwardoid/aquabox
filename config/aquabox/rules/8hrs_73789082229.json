@@ -1,0 +1,23 @@
+{
+    "actions": [
+        {
+            "at": 1586174442726,
+            "type": "turn_on"
+        },
+        {
+            "at": 1586203242726,
+            "type": "turn_off"
+        }
+    ],
+    "created_at": 0,
+    "device": "dev1",
+    "enabled": true,
+    "id": "8hrs_73789082229",
+    "index": 0,
+    "lastRun": 0,
+    "name": "8hrs",
+    "repeat": {
+        "deleteAfter": 0,
+        "unit": "hour"
+    }
+}

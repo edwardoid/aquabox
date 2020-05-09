@@ -1,0 +1,23 @@
+{
+    "actions": [
+        {
+            "at": 1586091619636,
+            "type": "turn_on"
+        },
+        {
+            "at": 1586116819636,
+            "type": "turn_off"
+        }
+    ],
+    "created_at": 0,
+    "device": "dev2",
+    "enabled": true,
+    "id": "15-22_128319963999",
+    "index": 0,
+    "lastRun": 0,
+    "name": "15-22",
+    "repeat": {
+        "deleteAfter": 0,
+        "unit": "hour"
+    }
+}

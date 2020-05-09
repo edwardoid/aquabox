@@ -21,6 +21,7 @@
 
 #include "hardware.h"
 #include <string>
+#include <mutex>
 
 namespace aquabox
 {
@@ -47,6 +48,8 @@ namespace aquabox
         static const std::string SysClassGpio;
         static const std::string SysClassGpioExport;
         static const std::string SysClassGpioUnexport;
+        static std::mutex SysClassGpioExportLock;
+        static std::mutex SysClassGpioUnexportLock;
         std::string Pin;
         const std::string ValueFile;
         const std::string DirectionFile;

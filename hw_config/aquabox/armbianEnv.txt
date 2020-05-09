@@ -8,8 +8,8 @@ overlay_prefix=sun8i-h3
 overlays=uart1 usbhost2 usbhost3 w1-gpio
 param_w1_pin=PA11
 param_w1_pin_int_pullup=1
+user_overlays=st7735opizero
 #param_spidev_spi_bus=1
 rootdev=UUID=48c1e88a-b408-42ec-9d6c-9aaacd147312
 rootfstype=ext4
-user_overlays=st7735opizero
 usbstoragequirks=0x2537:0x1066:u,0x2537:0x1068:u

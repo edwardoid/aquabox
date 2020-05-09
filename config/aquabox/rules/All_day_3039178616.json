@@ -1,0 +1,23 @@
+{
+    "actions": [
+        {
+            "at": 1586037616495,
+            "type": "turn_on"
+        },
+        {
+            "at": 1586123956495,
+            "type": "turn_off"
+        }
+    ],
+    "created_at": 0,
+    "device": "dev3",
+    "enabled": true,
+    "id": "All_day_3039178616",
+    "index": 0,
+    "lastRun": 0,
+    "name": "All day",
+    "repeat": {
+        "deleteAfter": 0,
+        "unit": "hour"
+    }
+}

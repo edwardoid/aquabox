@@ -1,0 +1,39 @@
+
+FROM conanio/gcc8
+
+LABEL maintainer="Edward Sargsyan <edward.sarkisyan@gmail.com>"
+
+USER root
+
+RUN wget -c https://liquidtelecom.dl.sourceforge.net/project/raspberry-pi-cross-compilers/Raspberry%20Pi%20GCC%20Cross-Compiler%20Toolchains/Buster/GCC%208.3.0/Raspberry%20Pi%201%2C%20Zero/cross-gcc-8.3.0-pi_0-1.tar.gz && \
+    tar xf cross-gcc-8.3.0-pi_0-1.tar.gz && \
+    cp -R cross-pi-gcc-8.3.0-0/* /usr && \
+    rm -rf cross-pi-gcc-8.3.0-0 && \
+    pip install --upgrade pip && \
+    pip install --upgrade conan && \
+    conan profile new default --detect && \
+    conan profile update settings.compiler.libcxx=libstdc++11 default && \
+    conan profile update settings.build_type=Release default && \
+    conan profile update settings.arch=armv7hf default && \
+    conan profile update settings.compiler=gcc default && \
+    conan remote add iot https://api.bintray.com/conan/edwardoid/iot && \
+    conan remote add bincrafters https://api.bintray.com/conan/bincrafters/public-conan && \
+    update-alternatives --install /usr/bin/gcc gcc /usr/bin/arm-linux-gnueabihf-gcc 100 && \
+    update-alternatives --install /usr/bin/g++ g++ /usr/bin/arm-linux-gnueabihf-g++ 100 && \
+    update-alternatives --install /usr/bin/ld ld /usr/bin/arm-linux-gnueabihf-ld 100 && \
+    update-alternatives --install /usr/bin/strip strip /usr/bin/arm-linux-gnueabihf-strip 100 && \
+    update-alternatives --install /usr/bin/ranlib ranlib /usr/bin/arm-linux-gnueabihf-ranlib 100 && \
+    update-alternatives --install /usr/bin/gcov gcov /usr/bin/arm-linux-gnueabihf-gcov 100 && \
+    update-alternatives --install /usr/bin/dump gcov-dump /usr/bin/arm-linux-gnueabihf-gcov-dump 100 && \
+    update-alternatives --install /usr/bin/gcov-tool gcov-tool /usr/bin/arm-linux-gnueabihf-gcov-tool 100 && \
+    update-alternatives --install /usr/bin/ar ar /usr/bin/arm-linux-gnueabihf-ar 100 && \
+    update-alternatives --install /usr/bin/as as /usr/bin/arm-linux-gnueabihf-as 100
+
+ENV CC=arm-linux-gnueabihf-gcc \
+    CXX=arm-linux-gnueabihf-g++ \
+    CMAKE_C_COMPILER=arm-linux-gnueabihf-gcc \
+    CMAKE_CXX_COMPILER=arm-linux-gnueabihf-g++ \
+    STRIP=arm-linux-gnueabihf-strip \
+    RANLIB=arm-linux-gnueabihf-ranlib \
+    LD=arm-linux-gnueabihf-ld
+

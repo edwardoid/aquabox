@@ -8,6 +8,6 @@
         "vendor": "ada"
     },
     "name": "virtual 2",
-    "rulesEnabled": false,
+    "rulesEnabled": true,
     "type": "heater"
 }

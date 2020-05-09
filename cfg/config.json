@@ -1,18 +1,21 @@
 {
-    "encryption": "WPA",
-    "http": "",
-    "httpPort": 8974,
-    "log": "VERBOSE",
-    "password": "azazello",
-    "ssid": "AquaBox",
-    "network": "8c229b02-185b-4792-b380-8d0cbd536add",
-    "streamPort": 1214,
-    "threads": 8,
-    "users": [
-        {
-            "password": "pass",
-            "user": "admin"
-        }
-    ],
-    "workingDirectory": "/home/edward/Programming/aquabox/bin/host"
+    "aquabox": {
+        "cloudPort": 5555,
+        "cloudUrl": "edwardoid.redirectme.net",
+        "cloudWSPort": 5556,
+        "httpPort": 8974,
+        "interface": "wlxecade01b61c2",
+        "log": "DEBUG",
+        "password": "aquabox",
+        "ssid": "AquaBox",
+        "streamPort": 1214,
+        "threads": 8,
+        "workingDirectory": "/aquabox/bin",
+	"serial": "dfb1e54e863a175d0832615844d1e9bb08d8a9cd"
+    },
+    "cloud": {
+        "cloudPort": 5557,
+        "cloudWSPort": 5556,
+        "httpPort": 1213
+    }
 }

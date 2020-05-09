@@ -1,0 +1,45 @@
+FROM debian:stable
+
+ENV DEBIAN_FRONTEND noninteractive
+
+LABEL maintainer="Edward Sargsyan <edward.sarkisyan@gmail.com>"
+
+USER root
+
+RUN apt-get update
+
+# roc dependencies
+RUN apt-get install -y \
+    wget \
+    libtool \
+    intltool \
+    autoconf \
+    automake \
+    automake-1.15 \
+    pkg-config \
+    make \
+    cmake \
+    tar
+
+# tools
+RUN apt-get install -y \
+    python-pip git && \
+    pip install conan --upgrade
+
+# sysroot
+RUN ln -s /opt/toolchain/arm-linux-gnueabihf /opt/sysroot
+
+ENV CFLAGS=-pthread \
+    CXXFLAGS=-pthread \
+    LDFLAGS=-pthread
+
+# tools
+RUN conan profile new default --detect && \
+    conan profile update settings.compiler.libcxx=libstdc++11 default && \
+    conan profile update settings.build_type=Release default && \
+    conan profile update settings.os=Linux default && \
+    conan profile update settings.compiler.cppstd=14 default
+
+RUN conan remote add iot https://api.bintray.com/conan/edwardoid/iot && \
+    conan remote add bincrafters https://api.bintray.com/conan/bincrafters/public-conan && \
+    conan remote add devcodeone https://api.bintray.com/conan/devcodeone/public-conan

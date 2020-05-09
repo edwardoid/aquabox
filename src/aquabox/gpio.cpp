@@ -23,16 +23,13 @@
 
 using namespace aquabox;
 
-#ifndef TARGET_DEVICE
-const std::string GPIO::SysClassGpio("./../../../arm/sysroot/sys/class/gpio");
-const std::string GPIO::SysClassGpioExport("./../../../arm/sysroot/sys/class/gpio/export");
-const std::string GPIO::SysClassGpioUnexport("./../../../arm/sysroot/sys/class/gpio/unexport");
-
-#else
 const std::string GPIO::SysClassGpio("/sys/class/gpio");
 const std::string GPIO::SysClassGpioExport("/sys/class/gpio/export");
 const std::string GPIO::SysClassGpioUnexport("/sys/class/gpio/unexport");
-#endif 
+
+std::mutex GPIO::SysClassGpioExportLock;
+std::mutex GPIO::SysClassGpioUnexportLock;
+
 
 GPIO::GPIO(std::string pin)
     : Pin(pin)
@@ -73,14 +70,16 @@ GPIO::Mode GPIO::readMode()
 }
 
 bool GPIO::writeMode(Mode mode) {
-    if (mode == Mode::Unknown)
+    if (mode == Mode::Unknown) {
         return close();
+    }
 
     auto fp = fopen(DirectionFile.c_str(), "w");
     if (fp != nullptr) {
         const char* dir = mode == Mode::In ? "in" : "out";
 
         auto count = fwrite(dir, sizeof(char), strlen(dir) + 1, fp);
+        fflush(fp);
         fclose(fp);
         
         m_mode = count == (strlen(dir) + 1) ? mode : Mode::Unknown;
@@ -104,15 +103,20 @@ bool GPIO::open(int flags)
         writeMode(static_cast<Mode>(flags));
         return true;
     }
+
+    std::lock_guard<std::mutex> lock(SysClassGpioExportLock);
     LOG_DEBUG << "Opening " << SysClassGpioExport << " for " << Pin;
     auto fp = fopen(SysClassGpioExport.c_str(), "w");
     if (fp == nullptr) {
-        LOG_ERROR << "Can't open " << SysClassGpioExport << " errno: " << strerror(errno);
+        LOG_ERROR << "Can't open " << SysClassGpioExport << " for write errno: " << strerror(errno);
         return false;
     }
     
     auto count = fwrite(Pin.c_str(), sizeof(std::string::value_type), Pin.size() + 1, fp);
-    fclose(fp);
+    fflush(fp);
+    if(fclose(fp) != 0) {
+        LOG_ERROR << "Can't close " << SysClassGpioExport << " errno: " << strerror(errno);
+    }
 
     writeMode(static_cast<Mode>(flags));
 
@@ -125,6 +129,8 @@ bool GPIO::close()
         return true;
     }
 
+    std::lock_guard<std::mutex> lock(SysClassGpioUnexportLock);
+
     LOG_DEBUG << "Opening " << SysClassGpioUnexport << " for " << Pin;
 
     auto fp = fopen(SysClassGpioUnexport.c_str(), "w");
@@ -135,7 +141,9 @@ bool GPIO::close()
     
     auto count = fwrite(Pin.c_str(), sizeof(std::string::value_type), Pin.size() + 1, fp);
     fflush(fp);
-    fclose(fp);
+    if(fclose(fp) != 0) {
+        LOG_ERROR << "Can't close " << SysClassGpioUnexport << " error: " << strerror(errno);
+    }
 
     m_mode = Mode::Unknown;
     return count == Pin.size() + 1;
@@ -171,7 +179,9 @@ BytesCount GPIO::read(Bytes& data, const Offset)
     if (fp != nullptr) {
         char data[] = { 0, 0 };
         auto count = fread(data, sizeof(char), 2, fp);
-        fclose(fp);
+        if(fclose(fp) != 0) {
+            LOG_ERROR << "Can't close " << ValueFile << " error: " << strerror(errno);
+        }
         isHigh = count > 0 ? data[0] == '1' : false;
     } else {
         LOG_DEBUG << "Can't open " << ValueFile << " error: " << strerror(errno);

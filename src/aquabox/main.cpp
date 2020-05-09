@@ -19,13 +19,13 @@
 #include "aquabox.h"
 #include "options.h"
 #include "settings.h"
-#include "backward.hpp"
+#include "stacktrace.h"
 #include <iostream>
 
 int main(int argc, char** argv)
 {
   aquabox::Settings::setDomain("aquabox");
-  backward::SignalHandling sh;
+  aquabox::StackTrace();
   for(int i = 1; i < argc; ++i)
   {
     if(strcmp(argv[i], "--service") == 0) {

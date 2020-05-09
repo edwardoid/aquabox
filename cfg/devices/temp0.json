@@ -1,0 +1,13 @@
+{
+    "address": "PHY:1W:0417b1b7d0ff",
+    "class": "sensor",
+    "id": "temp0",
+    "index": 0,
+    "meta": {
+        "model": "MyTemp",
+        "vendor": "eheim"
+    },
+    "name": "💧Water",
+    "rulesEnabled": true,
+    "type": "thermometer"
+}

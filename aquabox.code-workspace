@@ -82,7 +82,9 @@
 			"shared_mutex": "cpp",
 			"hash_map": "cpp",
 			"hash_set": "cpp",
-			"filesystem": "cpp"
+			"filesystem": "cpp",
+			"bit": "cpp",
+			"variant": "cpp"
 		}
 	}
 }

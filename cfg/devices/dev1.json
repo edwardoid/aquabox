@@ -1,13 +1,13 @@
 {
+    "address": "PHY:GPIO:7",
     "class": "relay",
     "id": "dev1",
-    "index": 2,
+    "index": 0,
     "meta": {
-        "model": "classicLED_mod",
-        "vendor": "eheim"
+        "model": "7200lm",
+        "vendor": "daytime"
     },
-    "name": "Light 1000lm",
-    "address": "PHY:GPIO:18",
-    "rulesEnabled": false,
+    "name": "matrix 80.4",
+    "rulesEnabled": true,
     "type": "light"
 }

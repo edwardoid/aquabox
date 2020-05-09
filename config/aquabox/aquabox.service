@@ -7,7 +7,8 @@ StartLimitBurst=5
 
 [Service]
 Type=simple
-ExecStart=/bin/bash /aquabox/bin/startup.sh
+WorkingDirectory=/aquabox/bin
+ExecStart=/aquabox/bin/startup.sh
 Restart=on-failure
 RestartSec=5s
 

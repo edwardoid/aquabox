@@ -1,0 +1,71 @@
+FROM debian:stable
+
+ENV DEBIAN_FRONTEND noninteractive
+
+LABEL maintainer="Edward Sargsyan <edward.sarkisyan@gmail.com>"
+
+USER root
+
+RUN apt-get update
+
+# roc dependencies
+RUN apt-get install -y \
+    wget \
+    libtool \
+    intltool \
+    autoconf \
+    automake \
+    automake-1.15 \
+    pkg-config \
+    make \
+    cmake \
+    tar
+
+# tools
+RUN apt-get install -y \
+    python-pip git && \
+    pip install conan --upgrade
+
+RUN TOOLCHAIN="arm-linux-gnueabihf"; \
+    MAJOR="7.5"; \
+    MINOR="0"; \
+    DATE="2019.12"; \
+    ARCH="x86_64"; \
+    ARCHIVE="gcc-linaro-${MAJOR}.${MINOR}-${DATE}-${ARCH}_${TOOLCHAIN}"; \
+    MIRROR="https://releases.linaro.org/components/toolchain/binaries"; \
+    wget -O - "${MIRROR}/${MAJOR}-${DATE}/${TOOLCHAIN}/${ARCHIVE}.tar.xz" | \
+    tar -C /opt -xJf - && \
+    mv /opt/${ARCHIVE} /opt/toolchain && \
+    cp -a /opt/toolchain/${TOOLCHAIN}/libc/lib/* /opt/toolchain/${TOOLCHAIN}/lib
+
+# sysroot
+RUN ln -s /opt/toolchain/arm-linux-gnueabihf /opt/sysroot
+
+ENV PATH="/opt/toolchain/bin:${PATH}" \
+    CC=arm-linux-gnueabihf-gcc \
+    CXX=arm-linux-gnueabihf-g++ \
+    CMAKE_C_COMPILER=arm-linux-gnueabihf-gcc \
+    CMAKE_CXX_COMPILER=arm-linux-gnueabihf-g++ \
+    STRIP=arm-linux-gnueabihf-strip \
+    RANLIB=arm-linux-gnueabihf-ranlib \
+    LD=arm-linux-gnueabihf-ld \
+    CFLAGS=-pthread \
+    CXXFLAGS=-pthread \
+    LDFLAGS=-pthread
+
+# tools
+RUN conan profile new default --detect
+
+RUN conan profile update settings.compiler.libcxx=libstdc++11 default && \
+    conan profile update settings.build_type=Release default && \
+    conan profile update settings.os=Linux default && \
+    conan profile update settings.arch=armv7hf default && \
+    conan profile update settings.os_build=Linux default && \
+    conan profile update settings.arch_build=x86_64 default && \
+    conan profile update settings.compiler=gcc default && \
+    conan profile update settings.compiler.version=7 default && \
+    conan profile update settings.compiler.cppstd=14 default
+
+RUN conan remote add iot https://api.bintray.com/conan/edwardoid/iot && \
+    conan remote add bincrafters https://api.bintray.com/conan/bincrafters/public-conan && \
+    conan remote add devcodeone https://api.bintray.com/conan/devcodeone/public-conan

@@ -1,13 +1,13 @@
 {
+    "address": "PHY:GPIO:18",
     "class": "relay",
     "id": "dev3",
     "index": 3,
     "meta": {
-        "model": "100W",
-        "vendor": "juwel"
+        "model": "300W",
+        "vendor": "jbl"
     },
-    "name": "Heater",
-    "address": "PHY:GPIO:199",
-    "rulesEnabled": false,
+    "name": "Pro Heat",
+    "rulesEnabled": true,
     "type": "heater"
 }

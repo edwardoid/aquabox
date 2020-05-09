@@ -4,10 +4,10 @@
     "id": "dev1",
     "index": 0,
     "meta": {
-        "model": "300W",
-        "vendor": "jbl"
+        "model": "7200lm",
+        "vendor": "daytime"
     },
-    "name": "ProHeat e300s",
+    "name": "matrix 80.4",
     "rulesEnabled": true,
-    "type": "heater"
+    "type": "light"
 }
