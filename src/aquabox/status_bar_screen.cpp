@@ -39,8 +39,8 @@ using namespace aquabox;
 void StatusBarScreen::draw()
 {
     int wifiIndex = 10;
-    if (NetworkManager::i().currentNetwork.value.signal > 0) {
-        wifiIndex = NetworkManager::i().currentNetwork.value.signal / 25;
+    if (NetworkManager::i().currentNetwork.value.strength > 0) {
+        wifiIndex = NetworkManager::i().currentNetwork.value.strength / 25;
     }
 
     int cloudIndex = AquaBox::i().cloud().isRegistered()

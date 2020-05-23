@@ -223,6 +223,8 @@ bool CommandExecutor::UpdateDevice()
     AquaBox::i().postUpdate(std::make_shared<DeviceUpdatedEvent>(device, before));
 
     m_cmd.response(Result::Ok);
+
+    return true;
 }
 
 bool CommandExecutor::GetRules()
@@ -457,11 +459,11 @@ bool CommandExecutor::ListNetworks()
             {
                 { "ssid" , net.ssid },
                 { "ip", ( net.ssid == currentNetwork.ssid ? currentNetwork.ip : "" ) },
-                { "auth" , (net.auth == Authentication::WEP ? "wep" :
-                           (net.auth == Authentication::WPA ? "wpa" :
-                           (net.auth == Authentication::WPA2? "wpa2":
-                           (net.auth == Authentication::None? "none": 
-                           (net.auth == Authentication::Enterprise ? "enterprize" : "unknown"))))) },
+                { "auth" , (net.auth == nm::Security::WEP ? "wep" :
+                           (net.auth == nm::Security::WPA ? "wpa" :
+                           (net.auth == nm::Security::WPA2? "wpa2":
+                           (net.auth == nm::Security::None? "none": 
+                           (net.auth == nm::Security::Enterprise ? "enterprise" : "unknown"))))) },
                 { "encrypted", net.encrypted },
                 { "signal", net.signal }
             }
@@ -493,16 +495,15 @@ bool CommandExecutor::ConnectToWiFi()
         return true;
     }
 
-    WifiNetwork wifi;
-    wifi.ssid = ssid->get<std::string>();
-    wifi.password = password->get<std::string>();
-    if(wifi.ssid.empty() || wifi.password.size() < 8) {
+    std::string ssidStr = ssid->get<std::string>();
+    std::string passwordStr = password->get<std::string>();
+    if(ssidStr.empty() || passwordStr.size() < 8) {
         m_cmd.response(Result::BadCommand);
         return true;
     }
 
-    m_cmd.response(NetworkManager::i().connect(
-        Settings::string(Settings::Keys::CLIENT_INTERFACE, Settings::Defaults::CLIENT_INTERFACE),
-        wifi) ? Result::Ok : Result::BadCommand);
+    auto connectResult = NetworkManager::i().connect(ssidStr, passwordStr);
+
+    m_cmd.response(connectResult ? Result::Ok : Result::BadCommand);
     return true;
 }

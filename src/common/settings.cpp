@@ -61,6 +61,7 @@ const std::string Settings::Keys::APP_COLLECTION_NAME = "applicationsCollection"
 const std::string Settings::Keys::CLIENT_INTERFACE = "interface";
 const std::string Settings::Keys::AP_INTERFACE = "apInterface";
 const std::string Settings::Keys::SERIAL = "serial";
+const std::string Settings::Keys::FRAMEBUFFER = "framebuffer";
 
 const std::string Settings::Defaults::GIT_HASH = AB_GIT_HASH ;
 const std::string Settings::Defaults::APPLICATION = "Aquabox";
@@ -86,6 +87,7 @@ const std::string Settings::Defaults::APP_COLLECTION_NAME = "app";
 const std::string Settings::Defaults::CLIENT_INTERFACE = "wlan0";
 const std::string Settings::Defaults::AP_INTERFACE = "wlan0";
 const std::string Settings::Defaults::SERIAL = "testDev";
+const std::string Settings::Defaults::FRAMEBUFFER = "/dev/fb0";
 
 bool Settings::dataToWrite = false;
 bool Settings::ready = false;

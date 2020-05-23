@@ -22,7 +22,7 @@ WifiNetwork GetWifiNetworksInfo(NMAccessPoint* ap, bool& ok)
     auto wpa_flags = nm_access_point_get_wpa_flags(ap);
     auto rsn_flags = nm_access_point_get_rsn_flags(ap);
 
-    wifi.encrypted = !(flags & NM_802_11_AP_FLAGS_PRIVACY) && (wpa_flags != NM_802_11_AP_SEC_NONE) && (rsn_flags != NM_802_11_AP_SEC_NONE);
+    wifi.encrypted = !(flags &  ) && (wpa_flags != NM_802_11_AP_SEC_NONE) && (rsn_flags != NM_802_11_AP_SEC_NONE);
 
     wifi.auth = Authentication::None;
     if ((flags & NM_802_11_AP_FLAGS_PRIVACY) && (wpa_flags == NM_802_11_AP_SEC_NONE) && (rsn_flags == NM_802_11_AP_SEC_NONE)) {

@@ -13,11 +13,11 @@ export BUILD_DIR=$SOURCES_DIR/build/$1
 export LOG_FILE=$SOURCES_DIR/build/$1.log
 
 echo "Sources located in $SOURCES_DIR"
-export mkdir -p $BUILD_DIR
+mkdir -p $BUILD_DIR
 echo "Build will be done in $BUILD_DIR"
 echo "Logs will be $LOG_FILE"
 
 
 export IMAGE=conan_$1
 
-sudo docker build -t $IMAGE - < $DIR/Dockerfile.$1
+sudo docker image build -t $IMAGE - < $DIR/Dockerfile.$1

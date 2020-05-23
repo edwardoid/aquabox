@@ -17,6 +17,9 @@
 cmake_minimum_required(VERSION 3.5)
 project(AquaboxProject)
 
+
+set(ENV{PKG_CONFIG_PATH}  "/usr/lib/arm-linux-gnueabihf/pkgconfig")
+
 include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
 set(CMAKE_MODULE_PATH ${CMAKE_BINARY_DIR} ${CMAKE_MODULE_PATH})
 conan_basic_setup()
@@ -25,7 +28,6 @@ if (TARGET_DEVICE)
   add_definitions(-DTARGET_DEVICE)
 endif()
 
-#set(PKG_CONFIG_USE_CMAKE_PREFIX_PATH YES)
 set(THREE_DP_DIR "${PROJECT_SOURCE_DIR}/3dp")
 set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_CPPCHECK "")
@@ -33,17 +35,14 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 set(PLOG_INCLUDE_DIR "${PROJECT_SOURCE_DIR}/3dp/plog/include")
 set(THREAD_POOL_INCLUDE_DIR "${PROJECT_SOURCE_DIR}/3dp/thread-pool-cpp/include")
-set(NLOHMANN_INCLUDE_DIR "${PROJECT_SOURCE_DIR}/3dp/nlohmann/include")
 set(JSV_INCLUDE_DIR "${PROJECT_SOURCE_DIR}/3dp/json-schema-validator/src")
 set(SWS_HTTP_INCLUDE_DIR "${PROJECT_SOURCE_DIR}/3dp/swshttp")
 set(SWS_WS_INCLUDE_DIR "${PROJECT_SOURCE_DIR}/3dp/swsws")
 set(PSTREAMS_INCLUDE_DIR "${PROJECT_SOURCE_DIR}/3dp/pstreams")
 set(HEADER_SEARCH_PATHS ${PROJECT_INCLUDE_DIR} ${PLOG_INCLUDE_DIR})
-set(NLOHMANN_JSON_DIR ${NLOHMANN_INCLUDE_DIR})
 set(S2S_INCLUDE_DIR "${PROJECT_SOURCE_DIR}/3dp/s2s")
-set(MQTT_INCLUDE_DIR "${PROJECT_SOURCE_DIR}/3dp/mqtt_cpp/include")
+set(NM_DBUS_INCLUDE_DIR "${PROJECT_SOURCE_DIR}/3dp/nm-dbus/include")
 add_library(json-hpp INTERFACE)
-set(NLOHMANN_JSON_DIR ${NLOHMANN_INCLUDE_DIR}/nlohmann)
 set(AQUABOX_ROOT_DIR ${CMAKE_CURRENT_LIST_DIR})
 
 set(MQTT_BUILD_EXAMPLES OFF)
@@ -52,9 +51,7 @@ set(MQTT_BUILD_TESTS OFF)
 if (NOT CLOUD_ONLY)
   set(FB_INCLUDE_DIR "${PROJECT_SOURCE_DIR}/3dp/libfb/include")
   set(OWT_INCLUDE_DIR "${PROJECT_SOURCE_DIR}/3dp/owt/include")
-
   option(FREETYPE ON)
-
 endif()
 
 option(BUILD_TESTING OFF)
@@ -62,9 +59,12 @@ option(WITH_TESTS OFF)
 option(WITH_TOOLS OFF)
 
 find_package(OpenSSL REQUIRED)
-find_package(Threads)
+find_package(Threads REQUIRED)
 find_package(nlohmann_json REQUIRED)
-find_package(libqrencode)
+find_package(libqrencode REQUIRED)
+find_package(simppl REQUIRED)
+find_package(dbus REQUIRED)
+
 include_directories(${PLOG_INCLUDE_DIR})
 include_directories(${JSV_INCLUDE_DIR})
 include_directories(${THREAD_POOL_INCLUDE_DIR})
@@ -80,12 +80,14 @@ include_directories(${PNG_INCLUDE_DIR})
 
 add_subdirectory("${THREE_DP_DIR}/plog")
 add_subdirectory("${THREE_DP_DIR}/json-schema-validator")
-
 add_subdirectory("${THREE_DP_DIR}/libfb")
 add_subdirectory("${THREE_DP_DIR}/owt")
+add_subdirectory("${THREE_DP_DIR}/nm-dbus")
+
 if (USE_NM)
     find_package (NetworkManager REQUIRED)
     link_directories(${NETWORKMANAGER_LIBRARY_DIRS})
+    add_definitions(-DUSE_NM)
 endif()
 
 execute_process(
@@ -95,7 +97,7 @@ execute_process(
   OUTPUT_STRIP_TRAILING_WHITESPACE
 )
 
-find_package(PkgConfig REQUIRED)
+  find_package(PkgConfig REQUIRED)
 find_package(Boost REQUIRED COMPONENTS system stacktrace)
 find_package(OpenSSL)
 find_package(mongo-cxx-driver REQUIRED)

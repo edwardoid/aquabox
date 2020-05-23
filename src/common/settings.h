@@ -59,6 +59,7 @@ namespace aquabox
             static const std::string CLIENT_INTERFACE;
             static const std::string AP_INTERFACE;
             static const std::string SERIAL;
+            static const std::string FRAMEBUFFER;
         };
 
         struct Defaults {
@@ -84,6 +85,7 @@ namespace aquabox
             static const std::string CLIENT_INTERFACE;
             static const std::string AP_INTERFACE;
             static const std::string SERIAL;
+            static const std::string FRAMEBUFFER;
 
             static const int REST_PORT;
             static const int WS_PORT;

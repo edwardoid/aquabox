@@ -4,16 +4,25 @@
 #include <string>
 #include <vector>
 #include <s2s_property.h>
+#include <nmdbus/NetworkManager.h>
+#include <nmdbus/AccessPoint.h>
 
 namespace aquabox
 {
-    enum class Authentication
+    struct CurrentNetworkState
     {
-        None,
-        WEP,
-        WPA,
-        WPA2,
-        Enterprise
+        std::string uuid;
+        std::string ssid;
+        std::string ip;
+        int strength = 0;
+        bool hasInternet = false;
+        bool operator == (const CurrentNetworkState& o) const {
+            return  uuid == o.uuid &&
+                    ssid == o.ssid &&
+                    ip == o.ip &&
+                    strength == o.strength &&
+                    hasInternet == hasInternet;
+        }
     };
 
     struct WifiNetwork
@@ -21,7 +30,7 @@ namespace aquabox
         std::string ssid;
         std::string password;
         std::string ip;
-        Authentication auth;
+        nm::Security auth;
         bool encrypted = 0;
         int signal = 0;
 
@@ -52,14 +61,15 @@ namespace aquabox
         bool connectedToInternet();
         void setInterface(std::string interface);
         bool requestScan(bool force = true);
-        SignalSlot::Property<Connection> currentNetwork;
+        SignalSlot::Property<CurrentNetworkState> currentNetwork;
         std::vector<WifiNetwork> networks();
-        bool connect(const std::string& iface, const WifiNetwork& network, bool waitForActivation = true);
-        bool activateConnection(std::string uuid, bool async = false);
+        bool connect(const std::string& ssid, const std::string& password);
+        bool activateConnection(std::string uuid);
         SignalSlot::Signal<size_t> NetworksChanged;
-        void updateCurrentNetwork();
+        void updateCurrentState();
     private:
-        struct Data* m_data;
+        std::string m_interface;
+        nm::NetworkManager m_nm;
     };
 }
 

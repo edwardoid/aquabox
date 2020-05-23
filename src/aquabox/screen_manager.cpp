@@ -18,12 +18,13 @@
  */
 
 #include "screen_manager.h"
+#include "settings.h"
 
 using namespace aquabox;
 
 ScreenManager::ScreenManager()
-    : m_main("/dev/fb0")
-    , m_scan("/dev/fb0")
+    : m_main(Settings::string(Settings::Keys::FRAMEBUFFER, Settings::Defaults::FRAMEBUFFER))
+    , m_scan(Settings::string(Settings::Keys::FRAMEBUFFER, Settings::Defaults::FRAMEBUFFER))
 {
 }
 

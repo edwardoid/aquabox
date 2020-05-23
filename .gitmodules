@@ -28,3 +28,9 @@
 [submodule "scripts/clone"]
 	path = scripts/clone
 	url = https://github.com/edwardoid/rpi_rootfs.git
+[submodule "3dp/nm-dbus"]
+	path = 3dp/nm-dbus
+	url = https://github.com/edwardoid/nm-dbus.git
+[submodule "3dp/pstreams"]
+	path = 3dp/pstreams
+	url = https://github.com/jwakely/pstreams.git

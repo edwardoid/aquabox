@@ -6,6 +6,8 @@ conan install /sources --build=missing
 cmake /sources
 make -j8
 
+echo "Build done"
+
 cd /sources
 GIT_HASH=$(git log --pretty=format:'%h' -n 1)
 cd /build
@@ -32,6 +34,8 @@ cp -r rules bin/
 cp -r devices bin/
 tar cvfz $CLIENT_PKG_NAME.tar.gz version.txt lib bin
 rm bin/aquabox
+
+chmod +rw -R *
 
 echo "Done"
 

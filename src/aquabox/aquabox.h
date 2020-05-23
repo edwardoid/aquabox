@@ -74,7 +74,7 @@ namespace aquabox
         double systemTemperature() const;
         std::string configurationData() const;
     private:
-        void onCurrentNetworkChanged(const class Connection& network);
+        void onCurrentNetworkChanged(const class CurrentNetworkState& state);
         void trackSensors();
         void readDevices(const Path& root);
         void readUsers();

@@ -14,6 +14,7 @@ mongo-cxx-driver/3.2.0@bincrafters/stable
 mqtt_cpp/8.x@devcodeone/stable
 nlohmann_json/3.7.3
 zlib/1.2.11
+simppl/0.3.0@conan/stable
 
 [generators]
 cmake

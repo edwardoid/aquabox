@@ -34,6 +34,7 @@
 #include "cloud.h"
 #include "web_server.h"
 #include "network_manager.h"
+#include <pstream.h>
 #include <exception>
 #include <chrono>
 #include <random>
@@ -66,6 +67,7 @@ AquaBox::~AquaBox()
     delete m_rulesTimer;
     delete m_cloud;
     delete m_server;
+    delete m_screen;
 }
 
 int AquaBox::start()
@@ -81,8 +83,7 @@ int AquaBox::start()
     }
 
     NetworkManager::i().setInterface(Settings::string(Settings::Keys::CLIENT_INTERFACE, Settings::Defaults::CLIENT_INTERFACE));
-    NetworkManager::i().updateCurrentNetwork();
-    NetworkManager::i().currentNetwork.connect([this](Connection net) { onCurrentNetworkChanged(net); });
+    NetworkManager::i().currentNetwork.connect([this](CurrentNetworkState net) { onCurrentNetworkChanged(net); });
 
     LOG_INFO << "Starting " << Settings::Defaults::APPLICATION << " ver. " << std::hex << Settings::Defaults::VERSION_MAJOR << "." << Settings::Defaults::VERSION_MINOR;
     if(Options::Lock) {
@@ -116,6 +117,7 @@ int AquaBox::start()
         }
     }
 
+    m_screen = new ScreenManager();
     m_poolOptions.setThreadCount(Settings::integer(Settings::Keys::THREADS, std::thread::hardware_concurrency()));
     m_poolOptions.setQueueSize(1024);
 
@@ -126,7 +128,6 @@ int AquaBox::start()
     readUsers();
 
     m_globalTimer->start([this](const Timer::ClockTimePoint&) {
-        NetworkManager::i().updateCurrentNetwork();
         if (Options::Render) {
             m_screen->show();
         }
@@ -351,7 +352,7 @@ std::string AquaBox::configurationData() const
     return configurationDataString;
 }
 
-void AquaBox::onCurrentNetworkChanged(const Connection& network)
+void AquaBox::onCurrentNetworkChanged(const CurrentNetworkState& network)
 {
     std::shared_ptr<BoxEvent> event = std::make_shared<BoxEvent>();
     event->setPropertiesUpdate({

@@ -28,6 +28,7 @@ namespace aquabox
     {
     public:
         ScreenManager();
+        void init();
         void show();
     private:
         MainScreen m_main;
