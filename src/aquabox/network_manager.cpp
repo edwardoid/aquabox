@@ -1,7 +1,6 @@
 #include "network_manager.h"
 
 #include "log.h"
-#include "network_manager_internal.h"
 #include <nmdbus/Device.h>
 #include <nmdbus/WirelessDevice.h>
 #include <nmdbus/ActiveConnection.h>

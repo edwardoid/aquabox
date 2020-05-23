@@ -74,7 +74,6 @@ include_directories(${PSTREAMS_INCLUDE_DIR})
 include_directories(${S2S_INCLUDE_DIR})
 
 include_directories(${FB_INCLUDE_DIR})
-include_directories(${IWS_INCLUDE_DIR})
 include_directories(${OWT_INCLUDE_DIR})
 include_directories(${PNG_INCLUDE_DIR})
 
@@ -84,12 +83,6 @@ add_subdirectory("${THREE_DP_DIR}/libfb")
 add_subdirectory("${THREE_DP_DIR}/owt")
 add_subdirectory("${THREE_DP_DIR}/nm-dbus")
 
-if (USE_NM)
-    find_package (NetworkManager REQUIRED)
-    link_directories(${NETWORKMANAGER_LIBRARY_DIRS})
-    add_definitions(-DUSE_NM)
-endif()
-
 execute_process(
   COMMAND git log -1 --format=%H
   WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
@@ -97,7 +90,7 @@ execute_process(
   OUTPUT_STRIP_TRAILING_WHITESPACE
 )
 
-  find_package(PkgConfig REQUIRED)
+find_package(PkgConfig REQUIRED)
 find_package(Boost REQUIRED COMPONENTS system stacktrace)
 find_package(OpenSSL)
 find_package(mongo-cxx-driver REQUIRED)

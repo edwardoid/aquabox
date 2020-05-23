@@ -12,13 +12,6 @@ file(COPY ${AQUABOX_ROOT_DIR}/config/aquabox/assets DESTINATION ${CMAKE_BINARY_D
 
 file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/rules)
 
-if (USE_NM)
-    find_package (NetworkManager REQUIRED)
-    link_directories(${NETWORKMANAGER_LIBRARY_DIRS})
-    include_directories(${GLIB_INCLUDE_DIRS})
-    include_directories(${NETWORKMANAGER_INCLUDE_DIRS})
-endif()
-
 include_directories(${NM_DBUS_INCLUDE_DIR})
 include_directories(${AQUABOX_COMMON_PATH})
 file(GLOB AQUABOX_SOURCES "*.cpp")
