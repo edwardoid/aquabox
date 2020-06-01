@@ -18,6 +18,7 @@
 
 #include "layer.h"
 #include "physical_layer.h"
+#include "network_layer.h"
 #include <unordered_map>
 
 using namespace aquabox;
@@ -25,7 +26,8 @@ using namespace aquabox;
 std::shared_ptr<Layer> Layer::get(std::string layer)
 {
     static std::unordered_map<std::string, std::shared_ptr<Layer>> availableLayers({
-        { "PHY", std::make_shared<Physical>() }
+        { "PHY", std::make_shared<Physical>() },
+        { "NET", std::make_shared<NetworkLayer>() }
     });
 
     auto pos = availableLayers.find(layer);

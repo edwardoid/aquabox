@@ -89,8 +89,9 @@ bool REST::IsAuthorized(const Route& route, Request& request, Response& response
     auto params = route.extract(request->path);
     auto appId = params.find(":appId");
     if (appId != params.end()) {
-
+        return true;
     }
+    return false;
 }
 
 void REST::Status(const Route& route, Web::Request& request, Web::Response& response, Web::Headers& headers)

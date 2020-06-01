@@ -60,6 +60,7 @@ namespace aquabox
             static const std::string AP_INTERFACE;
             static const std::string SERIAL;
             static const std::string FRAMEBUFFER;
+            static const std::string MQTT_PORT;
         };
 
         struct Defaults {
@@ -89,6 +90,7 @@ namespace aquabox
 
             static const int REST_PORT;
             static const int WS_PORT;
+            static const int MQTT_PORT;
         };
 
         static void set(std::string key, bool value);
