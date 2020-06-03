@@ -8,6 +8,26 @@ make -j8
 
 echo "Build done"
 
+function copy_file {
+    echo "Copying $1 to /build/bin/$1"
+    cp /build/$1 /build/bin/$1
+}
+
+function del_file {
+    echo "Deleting file /build/bin/$1"
+    rm /build/bin/$1
+}
+
+function copy_dir {
+    echo "Copying $1 to /build/bin/$1"
+    cp -R /build/$1 /build/bin
+}
+
+function del_dir {
+    echo "Deleting directory /build/bin/$1"
+    rm -rf /build/bin/$1
+}
+
 cd /sources
 GIT_HASH=$(git log --pretty=format:'%h' -n 1)
 cd /build
@@ -21,19 +41,23 @@ SERVER_PKG_NAME="aquabox-server$NAME_BASE"
 $CC --version > version.txt
 date >> version.txt
 
-cp aquabox-service bin/
-mv config.json bin/
+copy_file aquabox-service
+copy_file config.json
 tar cvfz $SERVER_PKG_NAME.tar.gz version.txt lib bin
+cp $SERVER_PKG_NAME.tar.gz aquabox-server-latest.tar.gz
 
-rm bin/aquabox-service
+del_file aquabox-service
 
-mv bin/aquabox-service .
-cp aquabox bin/
-cp -r assets bin/
-cp -r rules bin/
-cp -r devices bin/
+echo "Copy"
+copy_file aquabox
+copy_file aquabox.service
+copy_file startup.sh
+copy_dir assets
+copy_dir rules
+copy_dir devices
+
 tar cvfz $CLIENT_PKG_NAME.tar.gz version.txt lib bin
-rm bin/aquabox
+cp $CLIENT_PKG_NAME.tar.gz aquabox-latest.tar.gz
 
 chmod +rw -R *
 

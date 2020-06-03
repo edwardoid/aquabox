@@ -17,8 +17,7 @@
  */
 
 #include "update_events.h"
-#include "relay.h"
-#include "sensor.h"
+#include "device.h"
 #include "rule.h"
 #include "enumerations.h"
 #include "serial.h"
@@ -30,7 +29,7 @@ BoxEvent::BoxEvent()
     setSender(SERIAL_NUMBER, "aquabox");
 }
 
-OnOffChangedEvent::OnOffChangedEvent(std::shared_ptr<Relay> device, std::string reason)
+OnOffChangedEvent::OnOffChangedEvent(std::shared_ptr<AbstractRelay> device, std::string reason)
 {
     setSender(device->getId(), "device");
     setData({
@@ -44,7 +43,7 @@ OnOffChangedEvent::OnOffChangedEvent(std::shared_ptr<Relay> device, std::string 
     });
 }
 
-SensorChangedEvent::SensorChangedEvent(std::shared_ptr<Sensor> sensor, std::string reason)
+SensorChangedEvent::SensorChangedEvent(std::shared_ptr<AbstractSensor> sensor, std::string reason)
 {
     setSender(sensor->getId(), "device");
     setData({
@@ -57,12 +56,12 @@ SensorChangedEvent::SensorChangedEvent(std::shared_ptr<Sensor> sensor, std::stri
     });
 }
 
-RuleTriggeredEvent::RuleTriggeredEvent(std::shared_ptr<Relay> device)
+RuleTriggeredEvent::RuleTriggeredEvent(std::shared_ptr<AbstractRelay> device)
     : OnOffChangedEvent(device, "rule")
 {
 }
 
-ManualStateChangedEvent::ManualStateChangedEvent(std::shared_ptr<Relay> device)
+ManualStateChangedEvent::ManualStateChangedEvent(std::shared_ptr<AbstractRelay> device)
     : OnOffChangedEvent(device, "manual")
 {
 }

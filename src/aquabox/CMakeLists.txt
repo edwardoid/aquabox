@@ -3,14 +3,16 @@ project(aquabox)
 MESSAGE(STATUS "AquaBox will be installed to ${CMAKE_INSTALL_PREFIX}")
 
 
-configure_file(${AQUABOX_ROOT_DIR}/config/aquabox/config.dev.json.in ${CMAKE_BINARY_DIR}/config.json)
-configure_file(${AQUABOX_ROOT_DIR}/config/aquabox/devices/vdev0.json ${CMAKE_BINARY_DIR}/devices/vdev0.json COPYONLY)
-configure_file(${AQUABOX_ROOT_DIR}/config/aquabox/devices/vdev1.json ${CMAKE_BINARY_DIR}/devices/vdev1.json COPYONLY)
-
-
-file(COPY ${AQUABOX_ROOT_DIR}/config/aquabox/assets DESTINATION ${CMAKE_BINARY_DIR})
-
 file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/rules)
+file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/devices)
+file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/assets)
+
+configure_file(${AQUABOX_ROOT_DIR}/config/aquabox/$ENV{BUILD_PLATFORM}/config.dev.json.in ${CMAKE_BINARY_DIR}/config.json)
+configure_file(${AQUABOX_ROOT_DIR}/config/aquabox/$ENV{BUILD_PLATFORM}/startup.sh ${CMAKE_BINARY_DIR}/startup.sh)
+configure_file(${AQUABOX_ROOT_DIR}/config/aquabox/$ENV{BUILD_PLATFORM}/aquabox.service ${CMAKE_BINARY_DIR}/aquabox.service)
+file(COPY ${AQUABOX_ROOT_DIR}/config/aquabox/$ENV{BUILD_PLATFORM}/assets DESTINATION ${CMAKE_BINARY_DIR})
+file(COPY ${AQUABOX_ROOT_DIR}/config/aquabox/$ENV{BUILD_PLATFORM}/devices DESTINATION ${CMAKE_BINARY_DIR})
+file(COPY ${AQUABOX_ROOT_DIR}/config/aquabox/$ENV{BUILD_PLATFORM}/rules DESTINATION ${CMAKE_BINARY_DIR})
 
 include_directories(${NM_DBUS_INCLUDE_DIR})
 include_directories(${AQUABOX_COMMON_PATH})
@@ -24,11 +26,9 @@ target_compile_definitions(${PROJECT_NAME} PUBLIC AB_GIT_HASH=\"${GIT_COMMIT_HAS
 
 find_package(mqtt_cpp REQUIRED)
 
-target_link_libraries(${PROJECT_NAME} qrencode NMDBus)
-target_link_libraries(${PROJECT_NAME} fb_static)
-target_link_libraries(${PROJECT_NAME} w1temp_static)
-target_link_libraries(${PROJECT_NAME} aquabox-common_static)
-target_link_libraries(${PROJECT_NAME} nlohmann_json_schema_validator)
+target_link_libraries(${PROJECT_NAME} qrencode NMDBus fb w1temp)
+target_link_libraries(${PROJECT_NAME} aquabox-common)
+target_link_libraries(${PROJECT_NAME} JsonSchemaValidator::JsonSchemaValidator)
 target_link_libraries(${PROJECT_NAME} ${Boost_LIBRARIES})
 target_link_libraries(${PROJECT_NAME} OpenSSL::OpenSSL)
 target_link_libraries(${PROJECT_NAME} PNG::PNG)
@@ -38,6 +38,3 @@ target_link_libraries(${PROJECT_NAME} Threads::Threads)
 target_link_libraries(${PROJECT_NAME} dbus::dbus)
 
 install(TARGETS ${PROJECT_NAME} DESTINATION bin)
-
-file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/install)
-file(COPY ${AQUABOX_ROOT_DIR}/config/aquabox/assets DESTINATION ${CMAKE_BINARY_DIR})

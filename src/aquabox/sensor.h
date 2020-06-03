@@ -16,22 +16,19 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef SENSOR_H
-#define SENSOR_H
+#pragma once
 
 #include "device.h"
 
 namespace aquabox
 {
-    class Sensor: public Device
+    class Sensor: public AbstractSensor
     {
     public:
         Sensor() = default;
         Sensor(const Sensor& src) = default;
         Sensor(Sensor&& src) = default;
 
-        double value() const;
+        virtual double value() const override;
     };
 }
-
-#endif // SENSOR_H

@@ -19,8 +19,7 @@
 #include "command_executor.h"
 #include "aquabox.h"
 #include "settings.h"
-#include "relay.h"
-#include "sensor.h"
+#include "device.h"
 #include "rule.h"
 #include "update_events.h"
 #include "network_manager.h"
@@ -133,10 +132,11 @@ bool CommandExecutor::GetDevices()
     for (auto &dev : AquaBox::i().devices()) {
         nlohmann::json json;
         dev.second->json(json);
-        if (dev.second->isRelay()) {
-            json["isOn"] = std::dynamic_pointer_cast<Relay>(dev.second)->turnedOn();
-        } else if(dev.second->isSensor()) {
-            json["value"] = std::dynamic_pointer_cast<Sensor>(dev.second)->value();
+        if (dev.second->supports(DeviceClass::Relay)) {
+            json["isOn"] = std::dynamic_pointer_cast<AbstractRelay>(dev.second)->turnedOn();
+        }
+        if(dev.second->supports(DeviceClass::Sensor)) {
+            json["value"] = std::dynamic_pointer_cast<AbstractSensor>(dev.second)->value();
         }
         all.push_back(json);
     }
@@ -164,10 +164,11 @@ bool CommandExecutor::GetDevice()
 
     nlohmann::json data;
     pos->second->json(data);
-    if (pos->second->isRelay()) {
-        data["isOn"] = std::dynamic_pointer_cast<Relay>(pos->second)->turnedOn();
-    } else if(pos->second->isSensor()) {
-        data["value"] = std::dynamic_pointer_cast<Sensor>(pos->second)->value();
+    if (pos->second->supports(DeviceClass::Relay)) {
+        data["isOn"] = std::dynamic_pointer_cast<AbstractRelay>(pos->second)->turnedOn();
+    }
+    if(pos->second->supports(DeviceClass::Sensor)) {
+        data["value"] = std::dynamic_pointer_cast<AbstractSensor>(pos->second)->value();
     }
 
     m_cmd.response(data, Result::Ok);
@@ -213,8 +214,8 @@ bool CommandExecutor::UpdateDevice()
     auto& device = pos->second;
     nlohmann::json before;
     device->json(before);
-    if (pos->second->isRelay()) {
-        before["isOn"] = std::dynamic_pointer_cast<Relay>(pos->second)->turnedOn();
+    if (pos->second->supports(DeviceClass::Relay)) {
+        before["isOn"] = std::dynamic_pointer_cast<AbstractRelay>(pos->second)->turnedOn();
     }
 
     device->copyData(*d);
@@ -392,12 +393,12 @@ bool CommandExecutor::TurnOn()
         return true;
     }
 
-    if (!pos->second->isRelay()) {
+    if (!pos->second->supports(DeviceClass::Relay)) {
         m_cmd.response(Result::BadCommand);
         return true;
     }
 
-    auto relay = std::dynamic_pointer_cast<Relay>(pos->second);
+    auto relay = std::dynamic_pointer_cast<AbstractRelay>(pos->second);
 
     relay->turnOn();
     nlohmann::json data;
@@ -424,12 +425,12 @@ bool CommandExecutor::TurnOff()
         return true;
     }
     
-    if (!pos->second->isRelay()) {
+    if (!pos->second->supports(DeviceClass::Relay)) {
         m_cmd.response(Result::BadCommand);
         return true;
     }
 
-    auto relay = std::dynamic_pointer_cast<Relay>(pos->second);
+    auto relay = std::dynamic_pointer_cast<AbstractRelay>(pos->second);
     
     relay->turnOff();
     nlohmann::json data;

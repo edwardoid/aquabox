@@ -16,8 +16,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef PHY_GPIO_BUS_H
-#define PHY_GPIO_BUS_H
+#pragma once
 
 #include "bus.h"
 
@@ -29,5 +28,3 @@ namespace aquabox
         std::shared_ptr<Hardware> hw(std::string hw) override;
     };
 }
-
-#endif // PHY_GPIO_BUS_H

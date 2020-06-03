@@ -23,12 +23,13 @@ RUN apt-get install -y \
 
 # tools
 RUN apt-get install -y \
-    python-pip git && \
+    python-pip git ssh sshpass && \
     pip install conan --upgrade
 
 ENV CFLAGS=-pthread \
     CXXFLAGS=-pthread \
-    LDFLAGS=-pthread
+    LDFLAGS=-pthread \
+    BUILD_PLATFORM=x86_64 
 
 # tools
 RUN conan profile new default --detect && \

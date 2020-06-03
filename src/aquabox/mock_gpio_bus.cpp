@@ -24,13 +24,14 @@ using namespace aquabox;
 
 std::shared_ptr<Hardware> MockGPIOBus::hw(std::string hw)
 {
-    static std::unordered_map<std::string, std::shared_ptr<MockHardware> > pins({
+    static std::unordered_map<std::string, std::shared_ptr<MockedOnOffDevice> > pins({
         { "12", nullptr },
         { "11", nullptr },
         { "6", nullptr },
         { "1", nullptr },
         { "0", nullptr },
         { "3", nullptr },
+        { "4", nullptr },
         { "15", nullptr },
         { "16", nullptr },
         { "14", nullptr },
@@ -48,7 +49,7 @@ std::shared_ptr<Hardware> MockGPIOBus::hw(std::string hw)
     if (pos == pins.end())
         return nullptr;
     if (pos->second == nullptr)
-        pos->second = std::make_shared<MockHardware>(std::string("GPIO_pin") + pos->first);
+        pos->second = std::make_shared<MockedOnOffDevice>(std::string("GPIO_pin") + pos->first);
 
     return pos->second;
 }

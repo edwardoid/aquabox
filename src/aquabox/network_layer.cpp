@@ -28,5 +28,5 @@ std::shared_ptr<Bus> NetworkLayer::bus(const std::string bus)
         { "MQTT", std::make_shared<Mqtt>() }
     });
 
-    buses.find(bus) == buses.end() ? nullptr : buses[bus];
+    return buses.find(bus) == buses.end() ? nullptr : buses[bus];
 }

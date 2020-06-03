@@ -21,10 +21,26 @@
 
 using namespace aquabox;
 
+Relay::Relay()
+{
+}
+
 bool Relay::turnedOn() const
 {
-    auto data = read(1);
-    return data.size() > 0 && data[0] == 0;
+    auto hw = Hardware::resolve(getAddress().Value);
+    if (hw == nullptr) {
+        LOG_ERROR << "Can't find device " << getAddress().Value;
+        return false;
+    }
+
+    auto impl = hw->implementation<OnOffDevice>();
+
+    if (impl == nullptr) {
+        LOG_ERROR << "Can't find device " << getAddress().Value;
+        return false;
+    }
+
+    return impl->isOn();
 }
 
 void Relay::turnOn()
@@ -33,36 +49,44 @@ void Relay::turnOn()
         return;
     }
 
-    auto hw = Hardware::resolve(getAddress());
+    auto hw = Hardware::resolve(getAddress().Value);
     if (hw == nullptr) {
-        LOG_ERROR << "Can't find device " << getAddress();
+        LOG_ERROR << "Can't find device " << getAddress().Value;
         return;
     }
-    
-    static Bytes ON({ 0 });
-    if (ON.size() != hw->send(ON, ON.size())) {
-        LOG_ERROR << "Can't write to HW " << getAddress();
+
+    auto impl = hw->implementation<OnOffDevice>();
+
+    if (impl == nullptr) {
+        LOG_ERROR << getAddress().Value << " does not implement OnOff interface.";
+        return;
     }
+
+    impl->setOn();
 
     LOG_DEBUG << "Turned on";
 }
 
 void Relay::turnOff()
 {
-    auto hw = Hardware::resolve(getAddress());
-    if (hw == nullptr) {
-        LOG_ERROR << "Can't find device " << (std::string)(getAddress());
-        return;
-    }
-
     if (!turnedOn()) {
         return;
     }
 
-    static Bytes OFF({ 1 });
-    if (OFF.size() != hw->send(OFF, OFF.size())) {
-        LOG_ERROR << "Can't write to HW " << (std::string)(getAddress());
+    auto hw = Hardware::resolve(getAddress().Value);
+    if (hw == nullptr) {
+        LOG_ERROR << "Can't find device " << getAddress().Value;
+        return;
     }
+
+    auto impl = hw->implementation<OnOffDevice>();
+
+    if (impl == nullptr) {
+        LOG_ERROR << getAddress().Value << " does not implement OnOff interface.";
+        return;
+    }
+
+    impl->setOff();
 
     LOG_DEBUG << "Turned off";
 }

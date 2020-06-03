@@ -1,0 +1,16 @@
+[Unit]
+Description=Aquabox systemd service.
+After=network.target
+Wants=network.target
+StartLimitIntervalSec=500
+StartLimitBurst=5
+
+[Service]
+Type=simple
+WorkingDirectory=/aquabox/bin
+ExecStart=/aquabox/bin/startup.sh
+Restart=on-failure
+RestartSec=5s
+
+[Install]
+WantedBy=multi-user.target

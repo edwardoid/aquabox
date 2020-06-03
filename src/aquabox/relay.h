@@ -16,8 +16,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef RELAY_H
-#define RELAY_H
+#pragma once
 
 #include "device.h"
 #include "action_type.h"
@@ -25,11 +24,11 @@
 
 namespace aquabox
 {
-    class Relay: public Device
+    class Relay: public AbstractRelay
     {
         static const uint64_t INVALID_PRIORITY = static_cast<uint64_t>(-1);
     public:
-        Relay() = default;
+        Relay();
         Relay(const Relay& src) = default;
         Relay(Relay&& src) = default;
 
@@ -42,7 +41,6 @@ namespace aquabox
         bool performPendingAction();
     private:
         std::map<int64_t, ActionType> m_pendingActions;
+        std::shared_ptr<class RelayImplementation> m_impl;
     };
 }
-
-#endif // RELAY_H

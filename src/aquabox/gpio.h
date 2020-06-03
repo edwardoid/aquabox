@@ -25,7 +25,7 @@
 
 namespace aquabox
 {
-    class GPIO: public Hardware
+    class GPIO: public OnOffDevice
     {
     public:
         GPIO(std::string pin);
@@ -39,11 +39,16 @@ namespace aquabox
         Mode readMode();
         bool writeMode(Mode mode);
         bool exported() const;
+        BytesCount send(const Bytes& data, const BytesCount count = 0);
+        BytesCount read(Bytes& data, const Offset = 0);
     public:
         bool open(int flags) override;
         bool close() override;
-        BytesCount send(const Bytes& data, const BytesCount count = 0) override;
-        BytesCount read(Bytes& data, const Offset = 0) override;
+
+        virtual void setOn() override;
+        virtual void setOff() override;
+        virtual bool isOn() override;
+    
     private:
         static const std::string SysClassGpio;
         static const std::string SysClassGpioExport;

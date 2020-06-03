@@ -111,30 +111,6 @@ void Device::copyData(const Device& src)
     copyProperty(Meta);
 }
 
-Bytes Device::read(uint32_t len) const
-{
-    Bytes data(len, 0);
-    auto hw = Hardware::resolve(m_Address);
-    if (hw == nullptr) {
-        return Bytes();
-    }
-
-    
-    auto got = hw->read(data);
-    data.resize(static_cast<uint32_t>(got));
-    return data;
-}
-
-bool Device::isRelay() const
-{
-    return getClass() == DeviceClass::Relay;
-}
-
-bool Device::isSensor() const
-{
-    return getClass() == DeviceClass::Sensor;
-}
-
 std::vector<std::shared_ptr<Rule>> Device::rules() const
 {
     RulesMap rules = AquaBox::i().rules();
@@ -146,4 +122,24 @@ std::vector<std::shared_ptr<Rule>> Device::rules() const
     }
 
     return res;
+}
+
+void Device::enableSupport(DeviceClass _class)
+{
+    m_implementation.insert(_class);
+}
+
+bool Device::supports(DeviceClass _class) const
+{
+    return m_implementation.find(_class) != m_implementation.end();
+}
+
+AbstractRelay::AbstractRelay()
+{
+    enableSupport(DeviceClass::Relay);
+}
+
+AbstractSensor::AbstractSensor()
+{
+    enableSupport(DeviceClass::Sensor);
 }

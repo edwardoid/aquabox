@@ -171,6 +171,7 @@ BytesCount GPIO::send(const Bytes& data, const BytesCount count)
 BytesCount GPIO::read(Bytes& data, const Offset)
 {
     if (m_mode == Mode::Unknown) {
+        LOG_DEBUG << "GPIO is in Unknown mode";
         return 0;
     }
 
@@ -182,6 +183,9 @@ BytesCount GPIO::read(Bytes& data, const Offset)
         if(fclose(fp) != 0) {
             LOG_ERROR << "Can't close " << ValueFile << " error: " << strerror(errno);
         }
+        if (count == 0) {
+            LOG_DEBUG << "From " << ValueFile << " read " << count << " bytes.";
+        }
         isHigh = count > 0 ? data[0] == '1' : false;
     } else {
         LOG_DEBUG << "Can't open " << ValueFile << " error: " << strerror(errno);
@@ -190,4 +194,29 @@ BytesCount GPIO::read(Bytes& data, const Offset)
     
     data[0] = isHigh ? 1 : 0;
     return 1;
+}
+
+void GPIO::setOn()
+{
+    static Bytes ON({ 1 });
+    if (ON.size() != send(ON, ON.size())) {
+        LOG_ERROR << "Can't write to GPIO " << ValueFile;
+    }
+}
+
+void GPIO::setOff()
+{
+    static Bytes OFF({ 0 });
+    if (OFF.size() != send(OFF, OFF.size())) {
+        LOG_ERROR << "Can't write to GPIO " << ValueFile;
+    }
+}
+
+bool GPIO::isOn()
+{
+    static Bytes V({ 1 });
+    if (0 == read(V)) {
+        return false;
+    }
+    return V[0] == 1;
 }

@@ -16,32 +16,105 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef MOCK_HARDWARE_H
-#define MOCK_HARDWARE_H
+#pragma once
 
 #include "hardware.h"
 #include <string>
+#include <nlohmann/json.hpp>
+#include <fstream>
+#include "log.h"
 
 namespace aquabox
 {
-    class MockHardware: public Hardware
+    template<typename MockedData, class HardwareInterface>
+    class MockHardware: public HardwareInterface
     {
     public:
-        MockHardware(std::string identifier);
+        MockHardware(std::string identifier)
+            : m_identifier(identifier)
+        { readMockData(); }
     public:
-        bool open(int flags) override;
-        bool close() override;
-        BytesCount send(const Bytes& data, const BytesCount count = 0) override;
-        BytesCount read(Bytes& data, const Offset = 0) override;
-    private:
-        void writeMockData();
-        void readMockData(bool force = false);
-    private:
+        bool open(int flags) override
+        {
+            LOG_ERROR << "Opening with flags " << flags;
+            m_flags = flags;
+            m_opened = true;
+            writeMockData();
+            return true;
+        }
+
+        bool close() override
+        {
+            LOG_ERROR << "Closing device";
+            m_opened = false;
+            writeMockData();
+            return true;
+        }
+    protected:
+        void writeMockData()
+        {
+            nlohmann::json data ({
+                { "identifier", m_identifier },
+                { "opened", m_opened },
+                { "flags", m_flags },
+                { "data", m_data }
+            });
+
+            std::ofstream os(m_identifier + "_mock.json");
+            os << data.dump(4);
+            os.close();
+        }
+        void readMockData(bool force = false)
+        {
+            if (!force && (time(NULL) % 5 != 0)) {
+                return;
+            }
+
+            std::ifstream is(m_identifier + "_mock.json");
+            std::string dataStr, line;
+            while(std::getline(is, line)) {
+                dataStr += line;
+            }
+            try {
+                nlohmann::json data = nlohmann::json::parse(dataStr);
+
+                m_opened = data["opened"].get<bool>();
+                m_flags = data["flags"].get<int>();
+                m_data = data["data"].get<MockedData>();
+            } catch(nlohmann::json::parse_error ex) {
+                LOG_ERROR << "Can't deserialize mock data file: " << ex.what() << " content: " << dataStr;
+                writeMockData();
+            } catch(std::exception ex) {
+                LOG_ERROR << "Can't deserialize mock data file: " << ex.what() << " content: " << dataStr;
+                writeMockData();
+            }
+
+            is.close();
+        }
+    protected:
         std::string m_identifier;
         bool m_opened = false;
         int m_flags = 0;
-        Bytes m_data;
+        MockedData m_data;
+    };
+
+    struct MockedOnOffDevice: public MockHardware<bool, OnOffDevice>
+    {
+        MockedOnOffDevice(std::string identifier): MockHardware(identifier) {}
+        virtual void setOn() override
+        {
+            m_data = true;
+            writeMockData();
+        }
+
+        virtual void setOff() override
+        {
+            m_data = false;
+            writeMockData();
+        }
+        virtual bool isOn() override
+        {
+            return m_data;
+        }
     };
 }
-
-#endif // GPIO_H

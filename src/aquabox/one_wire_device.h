@@ -21,15 +21,15 @@
 
 namespace aquabox
 {
-    class OneWireDevice: public Hardware
+    class OneWireDevice: public FloatValueDevice
     {
     public:
         OneWireDevice(const w1::Device& dev);
     public:
         bool open(int flags) override;
         bool close() override;
-        BytesCount send(const Bytes& data, const BytesCount count = 0) override;
-        BytesCount read(Bytes& data, const Offset = 0) override;
+        bool set(double precision) override;
+        double get() override;
     private:
         w1::Device m_dev;
     };

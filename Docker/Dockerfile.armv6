@@ -30,11 +30,15 @@ RUN wget -c https://liquidtelecom.dl.sourceforge.net/project/raspberry-pi-cross-
     update-alternatives --install /usr/bin/ar ar /usr/bin/arm-linux-gnueabihf-ar 100 && \
     update-alternatives --install /usr/bin/as as /usr/bin/arm-linux-gnueabihf-as 100
 
+RUN apt-get update && \
+    apt-get install ssh sshpass -y
+
 ENV CC=arm-linux-gnueabihf-gcc \
     CXX=arm-linux-gnueabihf-g++ \
     CMAKE_C_COMPILER=arm-linux-gnueabihf-gcc \
     CMAKE_CXX_COMPILER=arm-linux-gnueabihf-g++ \
     STRIP=arm-linux-gnueabihf-strip \
     RANLIB=arm-linux-gnueabihf-ranlib \
-    LD=arm-linux-gnueabihf-ld
+    LD=arm-linux-gnueabihf-ld \
+    BUILD_PLATFORM=armv6
 

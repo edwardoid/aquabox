@@ -34,17 +34,14 @@ bool OneWireDevice::close()
     return true;
 }
 
-BytesCount OneWireDevice::send(const Bytes& data, const BytesCount count)
+bool OneWireDevice::set(double precision)
 {
-    const int prec = atoi(reinterpret_cast<const char*>(data.data()));
-    m_dev.setPrecition(static_cast<w1::Precision>(prec));
-    return data.size();
+    int p = precision;
+    m_dev.setPrecition(static_cast<w1::Precision>(p));
+    return true;
 }
 
-BytesCount OneWireDevice::read(Bytes& data, const Offset)
+double OneWireDevice::get()
 {
-    auto temp = std::to_string((int)(m_dev.temperature() * 1000.));
-    data.resize(temp.size() + 1);
-    data.assign(temp.begin(), temp.end());
-    return temp.size();
+    return m_dev.temperature();
 }

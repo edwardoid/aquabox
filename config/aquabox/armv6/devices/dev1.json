@@ -1,5 +1,5 @@
 {
-    "address": "PHY:GPIO:7",
+    "address": "PHY:GPIO:4",
     "class": "relay",
     "id": "dev1",
     "index": 0,
@@ -8,6 +8,6 @@
         "vendor": "daytime"
     },
     "name": "matrix 80.4",
-    "rulesEnabled": true,
+    "rulesEnabled": false,
     "type": "light"
 }

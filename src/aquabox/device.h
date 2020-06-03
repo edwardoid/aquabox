@@ -23,7 +23,9 @@
 #include "device_type.h"
 #include "property.h"
 #include "hardware.h"
+#include "action_type.h"
 #include <string>
+#include <set>
 
 namespace aquabox
 {
@@ -41,12 +43,9 @@ namespace aquabox
         bool parseFile(const std::string& file);
         bool saveToFile(const std::string& file);
 
-        bool isRelay() const;
-        bool isSensor() const;
-
         std::vector<std::shared_ptr<class Rule>> rules() const;
 
-        Bytes read(uint32_t len) const;
+        //Bytes read(uint32_t len) const;
 
         property(Id, StringProperty)
         property(Index, UnsignedNumberProperty)
@@ -56,6 +55,30 @@ namespace aquabox
         property(Type, EnumProperty<DeviceType>)
         property(Class, EnumProperty<DeviceClass>)
         property(Meta, Metadata)
+
+        bool supports(DeviceClass _class) const;
+    protected:
+        void enableSupport(DeviceClass _class);
+    private:
+        std::set<DeviceClass> m_implementation;
+    };
+
+    struct AbstractRelay: public Device
+    {
+        AbstractRelay();
+        virtual bool turnedOn() const = 0;
+
+        virtual void turnOn() = 0;
+        virtual void turnOff() = 0;
+
+        virtual void addPendingAction(uint64_t priority, ActionType action) = 0;
+        virtual bool performPendingAction() = 0;
+    };
+
+    struct AbstractSensor: public Device
+    {
+        AbstractSensor();
+        virtual double value() const = 0;
     };
 }
 

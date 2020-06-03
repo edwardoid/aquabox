@@ -31,6 +31,7 @@ std::shared_ptr<Hardware> PhysicalGPIOBus::hw(std::string hw)
         { "1", nullptr },
         { "0", nullptr },
         { "3", nullptr },
+        { "4", nullptr }, // armv6
         { "15", nullptr },
         { "16", nullptr },
         { "14", nullptr },

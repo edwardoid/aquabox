@@ -34,8 +34,8 @@ int main(int argc, char** argv)
         } else if(strcmp(argv[i], "--nodraw") == 0) {
             aquabox::Options::Render = false;
         }
-        else if(strcmp(argv[i], "--ignore-lock") == 0) {
-            aquabox::Options::Lock = false;
+        else if(strcmp(argv[i], "--lock") == 0) {
+            aquabox::Options::Lock = true;
         }
         else if(strcmp(argv[i], "--disable-access-point") == 0) {
             aquabox::Options::AccessPoint = false;

@@ -24,12 +24,18 @@ using namespace aquabox;
 
 double Sensor::value() const
 {
-    auto val = read(64);
 
-    if (val.empty()) {
-        return 0.0;
+    auto hw = Hardware::resolve(getAddress().Value);
+    if (hw == nullptr) {
+        LOG_ERROR << "Can't find device " << getAddress().Value;
+        return 0.;
     }
 
-    double floatVal = (double) atoi(reinterpret_cast<const char*>(val.data()));
-    return floatVal / 1000.;
+    auto impl = hw->implementation<FloatValueDevice>();
+
+    if (impl == nullptr) {
+        return 0.;
+    }
+
+    return impl->get();
 }

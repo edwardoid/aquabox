@@ -29,11 +29,11 @@ void SensorsTracker::processUpdates() {
 
     AquaBox::i().doLater([]() {
         for (auto dev : AquaBox::i().devices()) {
-            if (!dev.second->isSensor()) {
+            if (!dev.second->supports(DeviceClass::Sensor)) {
                 continue;
             }
 
-            auto sensor = std::dynamic_pointer_cast<Sensor>(dev.second);
+            auto sensor = std::dynamic_pointer_cast<AbstractSensor>(dev.second);
             if (sensor == nullptr) {
                 continue;
             }

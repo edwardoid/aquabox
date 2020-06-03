@@ -16,8 +16,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef UPDATE_EVENTS_H
-#define UPDATE_EVENTS_H
+#pragma once
 
 #include "event.h"
 
@@ -32,25 +31,25 @@ namespace aquabox
     class OnOffChangedEvent: public Event
     {
     public:
-        OnOffChangedEvent(std::shared_ptr<class Relay> device, std::string reason);
+        OnOffChangedEvent(std::shared_ptr<class AbstractRelay> device, std::string reason);
     };
 
     class SensorChangedEvent: public Event
     {
     public:
-        SensorChangedEvent(std::shared_ptr<class Sensor> sensor, std::string reason);
+        SensorChangedEvent(std::shared_ptr<class AbstractSensor> sensor, std::string reason);
     };
 
     class RuleTriggeredEvent: public OnOffChangedEvent
     {
     public:
-        RuleTriggeredEvent(std::shared_ptr<class Relay> device);
+        RuleTriggeredEvent(std::shared_ptr<class AbstractRelay> device);
     };
 
     class ManualStateChangedEvent: public OnOffChangedEvent
     {
     public:
-        ManualStateChangedEvent(std::shared_ptr<class Relay> device);
+        ManualStateChangedEvent(std::shared_ptr<class AbstractRelay> device);
     };
 
     class RuleEnableChangedEvent: public Event
@@ -89,5 +88,3 @@ namespace aquabox
         DeviceUpdatedEvent(std::shared_ptr<class Device> device, const nlohmann::json& before);
     };
 }
-
-#endif // UPDATE_EVENTS_H

@@ -23,7 +23,7 @@ RUN apt-get install -y \
 
 # tools
 RUN apt-get install -y \
-    python-pip git && \
+    python-pip git ssh sshpass && \
     pip install conan --upgrade
 
 RUN TOOLCHAIN="arm-linux-gnueabihf"; \
@@ -51,7 +51,8 @@ ENV PATH="/opt/toolchain/bin:${PATH}" \
     LD=arm-linux-gnueabihf-ld \
     CFLAGS=-pthread \
     CXXFLAGS=-pthread \
-    LDFLAGS=-pthread
+    LDFLAGS=-pthread \
+    BUILD_PLATFORM=armv7
 
 # tools
 RUN conan profile new default --detect

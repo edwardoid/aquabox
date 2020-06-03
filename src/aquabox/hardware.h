@@ -16,19 +16,38 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef HARDWARE_H
-#define HARDWARE_H
+#pragma once
 
 #include "types.h"
 #include <memory>
 
 namespace aquabox
-{
+{   
     enum class State
     {
         RegistrationRequest,
         Online,
         Oflfine
+    };
+    
+    struct IO
+    {
+        virtual BytesCount send(const Bytes& data, const BytesCount count = 0) = 0;
+        virtual BytesCount read(Bytes& data, const Offset = 0) = 0;
+    };
+
+    struct OnOff
+    {
+        virtual void setOn() = 0;
+        virtual void setOff() = 0;
+        virtual bool isOn() = 0;
+    };
+
+    template<typename T>
+    struct Value
+    {
+        virtual bool set(T type) = 0;
+        virtual T get() = 0;
     };
     class Hardware
     {
@@ -36,9 +55,21 @@ namespace aquabox
         static std::shared_ptr<Hardware> resolve(const std::string& address);
         virtual bool open(int flags) = 0;
         virtual bool close() = 0;
-        virtual BytesCount send(const Bytes& data, const BytesCount count = 0) = 0;
-        virtual BytesCount read(Bytes& data, const Offset = 0) = 0;
-    };
-}
 
-#endif // HARDWARE_H
+        template<class IFace>
+        IFace* implementation()
+        {
+            return dynamic_cast<IFace*>(this);
+        }
+
+        template<typename IFace>
+        bool implements() const
+        {
+            return implementation<IFace>() != nullptr;
+        }
+    };
+
+    struct OnOffDevice: public Hardware, public OnOff {};
+
+    struct FloatValueDevice: public Hardware, public Value<double> {};
+}
