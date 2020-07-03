@@ -22,12 +22,6 @@
 
 namespace aquabox
 {
-    class BoxEvent: public Event
-    {
-    public:
-        BoxEvent();
-    };
-
     class OnOffChangedEvent: public Event
     {
     public:

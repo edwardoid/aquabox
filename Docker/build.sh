@@ -1,12 +1,18 @@
 #/bin/bash
 
-cd /build
-rm -rf *
-conan install /sources --build=missing
-cmake /sources
-make -j8
+function clean_build {
+    rm -rf /build/*
+}
 
-echo "Build done"
+function do_build {
+    make -j8
+    chmod +rw -R /build
+}
+
+function prepare_build {
+    conan install /sources --build=missing
+    cmake /sources
+}
 
 function copy_file {
     echo "Copying $1 to /build/bin/$1"
@@ -41,26 +47,36 @@ SERVER_PKG_NAME="aquabox-server$NAME_BASE"
 $CC --version > version.txt
 date >> version.txt
 
-copy_file aquabox-service
-copy_file config.json
-tar cvfz $SERVER_PKG_NAME.tar.gz version.txt lib bin
-cp $SERVER_PKG_NAME.tar.gz aquabox-server-latest.tar.gz
+function pack_server {
+    copy_file aquabox-service
+    copy_file config.json
+    tar cvfz $SERVER_PKG_NAME.tar.gz version.txt lib bin
+    cp $SERVER_PKG_NAME.tar.gz aquabox-server-latest.tar.gz
+    del_file aquabox-service
+}
 
 del_file aquabox-service
 
-echo "Copy"
-copy_file aquabox
-copy_file aquabox.service
-copy_file startup.sh
-copy_dir assets
-copy_dir rules
-copy_dir devices
+function pack_client {
+    echo "Copy"
+    copy_file aquabox
+    copy_file aquabox.service
+    copy_file startup.sh
+    copy_dir assets
+    copy_dir rules
+    copy_dir devices
+    tar cvfz $CLIENT_PKG_NAME.tar.gz version.txt lib bin
+    cp $CLIENT_PKG_NAME.tar.gz aquabox-latest.tar.gz
+}
 
-tar cvfz $CLIENT_PKG_NAME.tar.gz version.txt lib bin
-cp $CLIENT_PKG_NAME.tar.gz aquabox-latest.tar.gz
+cd /build
 
-chmod +rw -R *
+#clean_build
+#prepare_build
+do_build
+pack_server
+pack_client
 
 echo "Done"
 
-exit
+#exit

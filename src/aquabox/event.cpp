@@ -17,6 +17,7 @@
  */
 
 #include "event.h"
+#include "serial.h"
 
 using namespace aquabox;
 
@@ -56,4 +57,9 @@ nlohmann::json Event::serialize() const
         { "data", m_data },
         { "props", m_properties } 
     });
+}
+
+BoxEvent::BoxEvent()
+{
+    setSender(SERIAL_NUMBER, "aquabox");
 }

@@ -46,6 +46,12 @@ namespace aquabox
         nlohmann::json m_data;
         nlohmann::json m_properties;
     };
+
+    class BoxEvent: public Event
+    {
+    public:
+        BoxEvent();
+    };
 }
 
 #endif // EVENT_H

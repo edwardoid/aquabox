@@ -17,7 +17,7 @@
  */
 
 #include "network_manager.h"
-
+#include "settings.h"
 #include "log.h"
 #include <nmdbus/Device.h>
 #include <nmdbus/WirelessDevice.h>
@@ -30,10 +30,20 @@
 using namespace aquabox;
 
 NetworkManager::NetworkManager()
+    : m_reconnectThread(std::bind(&NetworkManager::reconnect, this))
 {
     m_nm.ActiveConnectionsChanged.connect([this](const std::vector<std::shared_ptr<nm::ActiveConnection>>&) {
+        auto dev = m_nm.getDevice(m_interface);
+        if (dev == nullptr) {
+            LOG_ERROR << "Can't find device " << m_interface;
+            return;
+        }
         updateCurrentState();
     });
+
+    m_nm.StateChanged.connect(currentState);
+
+    m_reconnectThread.detach();
 }
 
 NetworkManager::~NetworkManager()
@@ -45,62 +55,100 @@ NetworkManager& NetworkManager::i()
     return instance;
 }
 
-void NetworkManager::updateCurrentState()
+void NetworkManager::reconnect()
 {
-    CurrentNetworkState newValue = currentNetwork.value;
-    do {
-        auto dev = m_nm.getDevice(m_interface);
-        if (dev == nullptr) {
-            LOG_ERROR << "Can't find device " << m_interface;
-            break;
-        }
+    while(1) {
+        std::this_thread::sleep_for (std::chrono::minutes(1));
+        if(Settings::has(Settings::Keys::NETWORK) && currentState == NetworkingState::Disconnected)
+        {
+            auto uuid = Settings::string(Settings::Keys::NETWORK, currentNetwork.value.uuid);
+            if (uuid.empty()) {
+                continue;
+            }
 
-        auto wifi = dev->asWireless();
-        if (wifi == nullptr) {
-            LOG_ERROR << "Device " << m_interface << " is not a WiFi device";
-            break;
-        }
-
-        auto ipv4 = dev->ipv4Configuration();
-        if (ipv4 == nullptr) {
-            LOG_ERROR << "Can't get IPv4 configuration";
-            break;
-        }
-
-        newValue.ip = ipv4->ip();
-
-        auto ac = dev->activeConnection();
-        if (ac == nullptr) {
-            LOG_DEBUG << "No active connection at this moment!";
-            break;
-        }
-
-        auto c = ac->connection();
-        if (c == nullptr) {
-            LOG_ERROR << "Can't find conenction instance!";
-            break;
-        }
-
-        nm::ConnectionSettings connectionSettings = c->settings();
-
-        auto uuidPos = connectionSettings.connection.find(CONNECTION_DATA_WIFI_UUID);
-
-        if (uuidPos != connectionSettings.connection.end()) {
-            auto& uuid = uuidPos->second;
-            if (uuid.get<std::string>() != nullptr) {
-                newValue.uuid = *(uuid.get<std::string>());
+            if (m_connectingInProgress.try_lock()) {
+                try {
+                    activateConnection(uuid);
+                }
+                catch(std::exception& ex) {
+                    LOG_ERROR << "Reconnect failed: " << ex.what();
+                }
+                catch(...) {
+                    LOG_ERROR << "Reconnect failed...";
+                }
+                m_connectingInProgress.unlock();
             }
         }
+        updateCurrentState();
+    }
+}
 
-        auto ap = wifi->activeAccessPoint();
-        if (ap != nullptr) {
-            newValue.ssid = ap->ssid();
-            newValue.strength = ap->strength();
-        } else {
-            LOG_DEBUG << "No Access point info available";
+void NetworkManager::updateCurrentState()
+{
+    CurrentNetworkState newValue;
+    do {
+        try {
+            auto dev = m_nm.getDevice(m_interface);
+            if (dev == nullptr) {
+                LOG_ERROR << "Can't find device " << m_interface;
+                break;
+            }
+
+            auto ac = dev->activeConnection();
+            if (ac == nullptr) {
+                LOG_DEBUG << "No active connection at this moment!";
+                break;
+            }
+
+            auto c = ac->connection();
+            if (c == nullptr) {
+                LOG_ERROR << "Can't find conenction instance!";
+                break;
+            }
+
+            nm::ConnectionSettings connectionSettings = c->settings();
+
+            auto uuidPos = connectionSettings.connection.find(CONNECTION_DATA_WIFI_UUID);
+
+            if (uuidPos != connectionSettings.connection.end()) {
+                auto& uuid = uuidPos->second;
+                if (uuid.get<std::string>() != nullptr) {
+                    newValue.uuid = *(uuid.get<std::string>());
+                }
+            }
+
+            auto wifi = dev->asWireless();
+            if (wifi == nullptr) {
+                LOG_ERROR << "Device " << m_interface << " is not a WiFi device";
+                break;
+            }
+
+            auto ap = wifi->activeAccessPoint();
+            if (ap != nullptr) {
+                newValue.ssid = ap->ssid();
+                newValue.strength = ap->strength();
+            } else {
+                LOG_DEBUG << "No Access point info available";
+            }
+
+            newValue.hasInternet = m_nm.state() == nm::NetworkingState::ConnectedGlobal;
+
+            if (!newValue.uuid.empty()) {
+                Settings::set(Settings::Keys::NETWORK, newValue.uuid); // Update
+            }
+
+            auto ipv4 = dev->ipv4Configuration();
+            if (ipv4 == nullptr) {
+                LOG_ERROR << "Can't get IPv4 configuration";
+                break;
+            }
+
+            newValue.ip = ipv4->ip();
         }
-
-        newValue.hasInternet = m_nm.state() == nm::NetworkingState::ConnectedGlobal;
+        catch (std::exception& ex) {
+            LOG_ERROR << ex.what();
+            break;
+        }
     
     } while(false);
 
@@ -110,6 +158,22 @@ void NetworkManager::updateCurrentState()
 void NetworkManager::setInterface(std::string interface)
 {
     m_interface = interface;
+    if (m_interface.empty()) {
+        return;
+    }
+    auto dev = m_nm.getDevice(m_interface);
+    if (dev != nullptr) {
+        dev->StateChanged.connect([this](nm::NMDeviceState newState, nm::NMDeviceState oldState) {
+            LOG_ERROR << "State changed from " << oldState << " to " << newState;
+            if (newState == nm::NM_DEVICE_STATE_NEED_AUTH) {
+                AuthentificationFailed.emit();
+            } else if (newState == nm::NM_DEVICE_STATE_FAILED) {
+                ConnectingFailed.emit();
+            }
+            updateCurrentState();
+        });
+    }
+
 }
 
 bool NetworkManager::requestScan(bool force)
@@ -160,7 +224,9 @@ std::vector<WifiNetwork> NetworkManager::networks()
 
 bool NetworkManager::connect(const std::string& ssid, const std::string& password)
 {
+    std::lock_guard<std::mutex> lock(m_connectingInProgress);
     return m_nm.connect(m_interface, ssid, password);
+
 }
 
 bool NetworkManager::activateConnection(std::string uuid)

@@ -19,16 +19,37 @@
 
 #include "screen_manager.h"
 #include "settings.h"
+#include "log.h"
+#include <thread>
 
 using namespace aquabox;
+
 
 ScreenManager::ScreenManager()
     : m_main(Settings::string(Settings::Keys::FRAMEBUFFER, Settings::Defaults::FRAMEBUFFER))
     , m_scan(Settings::string(Settings::Keys::FRAMEBUFFER, Settings::Defaults::FRAMEBUFFER))
+    , m_network(Settings::string(Settings::Keys::FRAMEBUFFER, Settings::Defaults::FRAMEBUFFER))
 {
+    init();
 }
 
 void ScreenManager::show()
 {
-    m_scan.show();
+    if((time(NULL) % 60) > 30) {
+        m_main.show();
+    } else {
+        m_scan.show();
+    }
+}
+
+void ScreenManager::init()
+{
+    static std::thread gui([this] {
+        while(true) {
+            show();
+            std::this_thread::sleep_for(std::chrono::milliseconds(100));
+        }
+    } );
+
+    gui.detach();
 }

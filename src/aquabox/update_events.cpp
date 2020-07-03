@@ -20,14 +20,8 @@
 #include "device.h"
 #include "rule.h"
 #include "enumerations.h"
-#include "serial.h"
 
 using namespace aquabox;
-
-BoxEvent::BoxEvent()
-{
-    setSender(SERIAL_NUMBER, "aquabox");
-}
 
 OnOffChangedEvent::OnOffChangedEvent(std::shared_ptr<AbstractRelay> device, std::string reason)
 {

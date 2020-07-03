@@ -34,9 +34,8 @@ void Screen::show()
         return;
     }
 
-    m_fb.clear(0xFFFFFF);
+    m_fb.clear(0xbcded0); 
     
-
     draw();
 
     m_fb.flush();
@@ -68,12 +67,12 @@ std::string Screen::font(std::string name)
     return resource(name + std::string(".ttf"));
 }
 
-IoT::FrameBuffer& Screen::fb()
+LIBFB_NS::FrameBuffer& Screen::fb()
 {
     return m_fb;
 }
 
-std::shared_ptr<IoT::PNGImage> Screen::pixmap(std::string name)
+std::shared_ptr<LIBFB_NS::PNGImage> Screen::pixmap(std::string name)
 {
     auto px = m_provider.get(asset(name));
     if (px == nullptr) {

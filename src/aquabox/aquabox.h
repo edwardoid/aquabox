@@ -23,7 +23,6 @@
 #include <thread_pool.hpp>
 #include "rules_timer.h"
 #include "path.h"
-#include "screen_manager.h"
 #include <memory>
 #include <unordered_map>
 
@@ -92,9 +91,9 @@ namespace aquabox
         Path m_wd;
         Path m_devicesDir;
         Path m_rulesDir;
-        RulesTimer* m_rulesTimer;
-        Timer* m_globalTimer;
-        ScreenManager* m_screen;
+        class ScreenManager* m_screen = nullptr;
+        RulesTimer* m_rulesTimer = nullptr;
+        Timer* m_globalTimer = nullptr;
     };
 }
 

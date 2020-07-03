@@ -5,6 +5,14 @@
 
 using namespace aquabox;
 
+MainScreen::MainScreen(std::string dev)
+    : StatusBarScreen(dev)
+{
+    m_text.setColor(0x5aa61aff);
+    m_text.setSize(24);
+    m_text.setFont(font("DroidSansMono"));
+}
+
 void MainScreen::draw()
 {
     StatusBarScreen::draw();
@@ -14,10 +22,16 @@ void MainScreen::draw()
     std::tm* timeinfo = std::localtime (&rawtime);
 
     std::string time = std::to_string(timeinfo->tm_hour)
-                        + std::string(":")
-                        + std::to_string(timeinfo->tm_min);
+                        + std::string(timeinfo->tm_sec % 2 ? ":" : " ")
+                        + std::to_string(timeinfo->tm_min / 10)
+                        + std::to_string(timeinfo->tm_min % 10);
+    
+    m_text.setText(time);
 
-    uint32_t estimatedWidth = 0, estimatedHeight = 0;
-    fb().textSize(font("DroidSansMono"), 24, time, 0, estimatedWidth, estimatedHeight);
-    fb().drawText(font("DroidSansMono"), 24, (fb().width() - estimatedWidth)/2, (fb().height() - estimatedHeight)/2, degree(90), time, 0xFF);
+
+
+    m_text.mapTo((fb().width() - m_text.width()) / 2, 
+                 (fb().height() - m_text.height()) / 2 + m_text.height() / 2);
+
+    fb().draw(&m_text);
 }

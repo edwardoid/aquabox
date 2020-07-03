@@ -20,6 +20,7 @@
 
 #include <string>
 #include <vector>
+#include <mutex>
 #include <s2s_property.h>
 #include <nmdbus/NetworkManager.h>
 #include <nmdbus/AccessPoint.h>
@@ -41,6 +42,8 @@ namespace aquabox
                     hasInternet == hasInternet;
         }
     };
+
+    using NetworkingState = nm::NetworkingState;
 
     struct WifiNetwork
     {
@@ -79,13 +82,20 @@ namespace aquabox
         void setInterface(std::string interface);
         bool requestScan(bool force = true);
         SignalSlot::Property<CurrentNetworkState> currentNetwork;
+        SignalSlot::Property<NetworkingState> currentState;
         std::vector<WifiNetwork> networks();
         bool connect(const std::string& ssid, const std::string& password);
         bool activateConnection(std::string uuid);
         SignalSlot::Signal<size_t> NetworksChanged;
+        SignalSlot::Signal<> AuthentificationFailed;
+        SignalSlot::Signal<> ConnectingFailed;
         void updateCurrentState();
     private:
+        void reconnect();
+    private:
         std::string m_interface;
+        std::thread m_reconnectThread;
+        std::mutex m_connectingInProgress;
         nm::NetworkManager m_nm;
     };
 }

@@ -21,18 +21,20 @@
 
 #include "scan_screen.h"
 #include "main_screen.h"
-
+#include "network_screen.h"
 namespace aquabox
 {
     class ScreenManager
     {
     public:
         ScreenManager();
-        void init();
         void show();
+    private:
+        void init();
     private:
         MainScreen m_main;
         ScanScreen m_scan;
+        NetworkScreen m_network;
     };
 }
 

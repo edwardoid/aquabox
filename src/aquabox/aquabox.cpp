@@ -28,12 +28,14 @@
 #include "device_parser.h"
 #include "user.h"
 #include "update_events.h"
+#include "network_events.h"
 #include "screen_manager.h"
 #include "options.h"
 #include "repetive_task.h"
 #include "cloud.h"
 #include "web_server.h"
 #include "network_manager.h"
+#include "screen_manager.h"
 #include <pstream.h>
 #include <exception>
 #include <chrono>
@@ -83,7 +85,9 @@ int AquaBox::start()
     }
 
     NetworkManager::i().setInterface(Settings::string(Settings::Keys::CLIENT_INTERFACE, Settings::Defaults::CLIENT_INTERFACE));
-    NetworkManager::i().currentNetwork.connect([this](CurrentNetworkState net) { onCurrentNetworkChanged(net); });
+    NetworkManager::i().currentNetwork.connect([this](CurrentNetworkState net) { postUpdate(std::make_shared<NetworkChangedEvent>()); });
+    NetworkManager::i().AuthentificationFailed.connect([this]() { postUpdate(std::make_shared<NetworkAuthentifiationFailedEvent>()); });
+    NetworkManager::i().ConnectingFailed.connect([this]() { postUpdate(std::make_shared<NetworkConnectionFailedEvent>()); });
 
     LOG_INFO << "Starting " << Settings::Defaults::APPLICATION << " ver. " << std::hex << Settings::Defaults::VERSION_MAJOR << "." << Settings::Defaults::VERSION_MINOR;
     if(Options::Lock) {
@@ -128,15 +132,12 @@ int AquaBox::start()
     readUsers();
 
     m_globalTimer->start([this](const Timer::ClockTimePoint&) {
-        if (Options::Render) {
-            m_screen->show();
-        }
         if (Options::EnableCloud) {
             m_cloud->heartheat();
         }
         SensorsTracker::processUpdates();
 
-    }, std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::seconds(10)));
+    }, std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::seconds(1)));
 
     m_rulesTimer->start();
     m_server->start();
@@ -350,13 +351,4 @@ std::string AquaBox::configurationData() const
 
     configurationDataString += std::to_string((int)AquaBox::i().systemTemperature());
     return configurationDataString;
-}
-
-void AquaBox::onCurrentNetworkChanged(const CurrentNetworkState& network)
-{
-    std::shared_ptr<BoxEvent> event = std::make_shared<BoxEvent>();
-    event->setPropertiesUpdate({
-        { "network", network.ssid }
-    });
-    postUpdate(event);
 }

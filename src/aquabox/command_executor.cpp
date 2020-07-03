@@ -503,8 +503,20 @@ bool CommandExecutor::ConnectToWiFi()
         return true;
     }
 
-    auto connectResult = NetworkManager::i().connect(ssidStr, passwordStr);
+    for(const WifiNetwork& net : NetworkManager::i().networks())
+    {
+        if (net.ssid == ssidStr) {
+            m_cmd.response(Result::Ok);
+            AquaBox::i().doLater([ssidStr, passwordStr] () {
+                auto uuid = NetworkManager::i().currentNetwork.value.uuid;
+                auto connectResult = NetworkManager::i().connect(ssidStr, passwordStr);
+                if (!connectResult && !uuid.empty()) {
+                    NetworkManager::i().activateConnection(uuid);
+                }
+            });
+        }
+    }
 
-    m_cmd.response(connectResult ? Result::Ok : Result::BadCommand);
+    m_cmd.response(Result::NotFound);
     return true;
 }

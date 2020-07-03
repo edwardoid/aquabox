@@ -20,6 +20,7 @@
 #include "aquabox.h"
 #include "cloud.h"
 #include "network_manager.h"
+#include "rotate.h"
 #include <sprite.h>
 
 #define ASSISTANT_X 132
@@ -38,32 +39,37 @@ using namespace aquabox;
 
 void StatusBarScreen::draw()
 {
+    std::vector<int> elements;
+
     int wifiIndex = 10;
     if (NetworkManager::i().currentNetwork.value.strength > 0) {
         wifiIndex = NetworkManager::i().currentNetwork.value.strength / 25;
     }
 
+    elements.push_back(wifiIndex);
+
     int cloudIndex = AquaBox::i().cloud().isRegistered()
-                    ? 13
-                    : 12;
+                    ? 6
+                    : 7;
+    elements.push_back(cloudIndex);
 
 
-    int assistantIndex = AquaBox::i().assistantIsConnected() ? 15
-                                                             : 14;
+    int assistantIndex = AquaBox::i().assistantIsConnected() ? 8
+                                                             : 9;
 
-#ifdef TARGET_DEVICE
-    IoT::Sprite statusBar(pixmap("status_bar"), 25, 25, 18);
+    elements.push_back(assistantIndex);
 
-    statusBar.jump(wifiIndex);
-    fb().drawPixmap(WIFI_X, WIFI_Y, &statusBar);
+    LIBFB_NS::Sprite statusBar(pixmap("status_bar"), 24, 24, 10);
 
-    statusBar.jump(cloudIndex);
-    fb().drawPixmap(CLOUD_X, CLOUD_Y, &statusBar);
+    fb().fillRect(0, 0, fb().width(), 24, 0x81bf2a);
+    fb().drawLine(0, 24, fb().width(), 24, 0xebeb8c);
     
-    statusBar.jump(11);
-    fb().drawPixmap(HOTSPOT_X, HOTSPOT_Y, &statusBar);
+    int spacing = (fb().width() - 24 * elements.size()) / (elements.size() + 1);
 
-    statusBar.jump(assistantIndex);
-    fb().drawPixmap(ASSISTANT_X, ASSISTANT_Y, &statusBar);
-#endif // TARGET_DEVICE
+    for(int i = 0; i < elements.size(); ++i)
+    {
+        statusBar.jump(elements[i]);
+        statusBar.mapTo(i * (24 + spacing) + spacing, 0);
+        fb().draw(&statusBar);
+    }
 }

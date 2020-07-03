@@ -24,8 +24,14 @@ include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
 set(CMAKE_MODULE_PATH ${CMAKE_BINARY_DIR} ${CMAKE_MODULE_PATH})
 conan_basic_setup()
 
+if ($ENV{BUILD_PLATFORM} EQUAL "armv6" OR $ENV{BUILD_PLATFORM} EQUAL "armv7")
+  option(TARGET_DEVICE ON)
+endif()
+
+
+add_definitions(-DTARGET_DEVICE)
+
 if (TARGET_DEVICE)
-  add_definitions(-DTARGET_DEVICE)
 endif()
 
 set(THREE_DP_DIR "${PROJECT_SOURCE_DIR}/3dp")
@@ -45,6 +51,8 @@ set(HEADER_SEARCH_PATHS ${PROJECT_INCLUDE_DIR} ${PLOG_INCLUDE_DIR})
 set(S2S_INCLUDE_DIR "${PROJECT_SOURCE_DIR}/3dp/s2s")
 set(NM_DBUS_INCLUDE_DIR "${PROJECT_SOURCE_DIR}/3dp/nm-dbus/include")
 set(AQUABOX_ROOT_DIR ${CMAKE_CURRENT_LIST_DIR})
+
+add_definitions(-DBOOST_STACKTRACE_USE_ADDR2LINE)
 
 if (NOT CLOUD_ONLY)
   set(FB_INCLUDE_DIR "${PROJECT_SOURCE_DIR}/3dp/libfb/include")

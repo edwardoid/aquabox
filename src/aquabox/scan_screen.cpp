@@ -24,6 +24,8 @@
 #include <pngprovider.h>
 #include <sprite.h>
 #include "aquabox.h"
+#include <qrcode.h>
+#include <helpers.h>
 using namespace aquabox;
 
 #define degree(angle) ((double)(angle) * 0.0174533)
@@ -35,21 +37,26 @@ using namespace aquabox;
 void ScanScreen::draw()
 {
     StatusBarScreen::draw();
-    
-    QRcode *qrcode = QRcode_encodeString(AquaBox::i().configurationData().c_str(), 0, QR_ECLEVEL_L, QR_MODE_8, 1);
-	if (qrcode == nullptr) {
-        LOG_ERROR << "Can't encode status";
-        return;
-    }
+
+    int margins = 2;
+    int canvasWidth = fb().width() - 2 * margins;
+    int canvasHeight = fb().height() - 24 - 2 * margins;
+
+    LIBFB_NS::QRCode code;
+    code.setText(AquaBox::i().configurationData());
+    code.setColors(
+        0x000000FF,
+        0xFFFFFFFF
+    );
+    code.resizeTo(std::min(canvasWidth, canvasHeight));
+
+    LOG_DEBUG << "Size: " << code.width() << " H " << code.height();
 
     std::string temp = std::to_string(AquaBox::i().systemTemperature());
     temp += "°C";
 
-#ifdef TARGET_DEVICE
-    auto estimatedQrSize = fb().qrCodeSize(qrcode, QR_SIZE);
-    uint32_t qrsize = fb().drawQRCode(qrcode,
-        (fb().width() - 29 - estimatedQrSize) / 2,
-        (fb().height() - estimatedQrSize ) / 2,
-        QR_SIZE, 0x000000);
-#endif // TARGET_DEVICE
+    code.mapTo((canvasWidth - code.width()) / 2,
+               24 + (canvasHeight - code.height()) / 2);
+
+    fb().draw(&code);
 }

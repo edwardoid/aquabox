@@ -21,7 +21,7 @@
 
 #include <pngprovider.h>
 #include <framebuffer.h>
-#include <pixmap.h>
+#include <pngimage.h>
 
 namespace aquabox
 {
@@ -32,14 +32,14 @@ namespace aquabox
         std::string resource(std::string name);
         std::string asset(std::string name);
         std::string font(std::string name);
-        std::shared_ptr<IoT::PNGImage> pixmap(std::string name);
+        std::shared_ptr<LIBFB_NS::PNGImage> pixmap(std::string name);
         void show();
     protected:
         virtual void draw() = 0;
-        IoT::FrameBuffer& fb();
+        LIBFB_NS::FrameBuffer& fb();
     private:
-        IoT::PNGProvider m_provider;
-        IoT::FrameBuffer m_fb;
+        LIBFB_NS::PNGProvider m_provider;
+        LIBFB_NS::FrameBuffer m_fb;
     };
 }
 

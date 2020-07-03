@@ -15,5 +15,5 @@
             "user": "admin"
         }
     ],
-    "workingDirectory": "${CMAKE_BINARY_DIR}"
+    "workingDirectory": "/aquabox/bin"
 }

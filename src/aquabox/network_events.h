@@ -1,6 +1,6 @@
 /*
  * AquaBox
- * Copyright (C) 2019  Eduard Sargsyan
+ * Copyright (C) 2020  Eduard Sargsyan
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,12 +16,15 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef DEBUG_TOOLS_H
-#define DEBUG_TOOLS_H
+#pragma once
 
-using namespace aquabox
+#include "event.h"
+
+namespace aquabox
 {
-    
-}
+    class NetworkChangedEvent: public BoxEvent { public: NetworkChangedEvent(); };
 
-#endif // DEBUG_TOOLS_H
+    class NetworkConnectionFailedEvent: public BoxEvent { public: NetworkConnectionFailedEvent(); };
+
+    class NetworkAuthentifiationFailedEvent: public BoxEvent { public: NetworkAuthentifiationFailedEvent(); };
+}

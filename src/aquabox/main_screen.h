@@ -20,15 +20,19 @@
 #define MAIN_SCREEN_H
 
 #include "status_bar_screen.h"
-#include <string>
+#include "text.h"
 
 namespace aquabox
 {
     class MainScreen: public StatusBarScreen
     {
     public:
-        MainScreen(std::string dev): StatusBarScreen(dev) {}
+        MainScreen(std::string dev);
         virtual void draw() override;
+    private:
+        LIBFB_NS::Text m_text;
+        int m_x;
+        int m_y;
     };
 }
 
