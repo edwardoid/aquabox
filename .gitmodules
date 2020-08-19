@@ -15,19 +15,16 @@
 	url = https://github.com/pngwriter/pngwriter.git
 [submodule "3dp/libfb"]
 	path = 3dp/libfb
-	url = https://github.com/edwardoid/libfb.git
+	url = git@github.com:edwardoid/libfb.git
 [submodule "3dp/owt"]
 	path = 3dp/owt
-	url = https://github.com/edwardoid/1w-temp.git
+	url = git@github.com:edwardoid/1w-temp.git
 [submodule "3dp/s2s"]
 	path = 3dp/s2s
-	url = https://github.com/edwardoid/s2s.git
-[submodule "scripts/clone"]
-	path = scripts/clone
-	url = https://github.com/edwardoid/rpi_rootfs.git
+	url = git@github.com:edwardoid/s2s.git
 [submodule "3dp/nm-dbus"]
 	path = 3dp/nm-dbus
-	url = https://github.com/edwardoid/nm-dbus.git
+	url = git@github.com:edwardoid/nm-dbus.git
 [submodule "3dp/pstreams"]
 	path = 3dp/pstreams
 	url = https://github.com/jwakely/pstreams.git
