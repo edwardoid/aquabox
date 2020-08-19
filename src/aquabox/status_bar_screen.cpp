@@ -1,6 +1,6 @@
 /*
  * AquaBox
- * Copyright (C) 2019  Eduard Sargsyan
+ * Copyright (C) 2019-2020  Eduard Sargsyan
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -42,8 +42,8 @@ void StatusBarScreen::draw()
     std::vector<int> elements;
 
     int wifiIndex = 10;
-    if (NetworkManager::i().currentNetwork.value.strength > 0) {
-        wifiIndex = NetworkManager::i().currentNetwork.value.strength / 25;
+    if (NetworkManager::i().currentConnection.value.signal > 0) {
+        wifiIndex = NetworkManager::i().currentConnection.value.signal / 25;
     }
 
     elements.push_back(wifiIndex);

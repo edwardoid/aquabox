@@ -32,14 +32,7 @@ using namespace aquabox;
 NetworkManager::NetworkManager()
     : m_reconnectThread(std::bind(&NetworkManager::reconnect, this))
 {
-    m_nm.ActiveConnectionsChanged.connect([this](const std::vector<std::shared_ptr<nm::ActiveConnection>>&) {
-        auto dev = m_nm.getDevice(m_interface);
-        if (dev == nullptr) {
-            LOG_ERROR << "Can't find device " << m_interface;
-            return;
-        }
-        updateCurrentState();
-    });
+    m_nm.ActiveConnectionsChanged.connect(std::bind(&NetworkManager::onActiveConnectionChanged, this, std::placeholders::_1));
 
     m_nm.StateChanged.connect(currentState);
 
@@ -61,7 +54,8 @@ void NetworkManager::reconnect()
         std::this_thread::sleep_for (std::chrono::minutes(1));
         if(Settings::has(Settings::Keys::NETWORK) && currentState == NetworkingState::Disconnected)
         {
-            auto uuid = Settings::string(Settings::Keys::NETWORK, currentNetwork.value.uuid);
+            m_changeReason = NetworkChangeReason::Reconnect;
+            auto uuid = Settings::string(Settings::Keys::NETWORK, currentConnection.value.uuid);
             if (uuid.empty()) {
                 continue;
             }
@@ -79,22 +73,24 @@ void NetworkManager::reconnect()
                 m_connectingInProgress.unlock();
             }
         }
+        if (!m_connectingInProgress.try_lock())
+            return;
         updateCurrentState();
+        m_connectingInProgress.unlock();
     }
 }
 
-void NetworkManager::updateCurrentState()
+void NetworkManager::updateCurrentState(bool notify)
 {
-    CurrentNetworkState newValue;
+    Connection newValue;
     do {
         try {
-            auto dev = m_nm.getDevice(m_interface);
-            if (dev == nullptr) {
+            if (m_dev == nullptr) {
                 LOG_ERROR << "Can't find device " << m_interface;
                 break;
             }
 
-            auto ac = dev->activeConnection();
+            auto ac = m_dev->activeConnection();
             if (ac == nullptr) {
                 LOG_DEBUG << "No active connection at this moment!";
                 break;
@@ -102,7 +98,7 @@ void NetworkManager::updateCurrentState()
 
             auto c = ac->connection();
             if (c == nullptr) {
-                LOG_ERROR << "Can't find conenction instance!";
+                LOG_ERROR << "Can't find conection instance!";
                 break;
             }
 
@@ -117,7 +113,7 @@ void NetworkManager::updateCurrentState()
                 }
             }
 
-            auto wifi = dev->asWireless();
+            auto wifi = m_dev->asWireless();
             if (wifi == nullptr) {
                 LOG_ERROR << "Device " << m_interface << " is not a WiFi device";
                 break;
@@ -126,18 +122,17 @@ void NetworkManager::updateCurrentState()
             auto ap = wifi->activeAccessPoint();
             if (ap != nullptr) {
                 newValue.ssid = ap->ssid();
-                newValue.strength = ap->strength();
+                newValue.signal = ap->strength();
+                newValue.encrypted = ap->encrypted();
             } else {
                 LOG_DEBUG << "No Access point info available";
             }
-
-            newValue.hasInternet = m_nm.state() == nm::NetworkingState::ConnectedGlobal;
 
             if (!newValue.uuid.empty()) {
                 Settings::set(Settings::Keys::NETWORK, newValue.uuid); // Update
             }
 
-            auto ipv4 = dev->ipv4Configuration();
+            auto ipv4 = m_dev->ipv4Configuration();
             if (ipv4 == nullptr) {
                 LOG_ERROR << "Can't get IPv4 configuration";
                 break;
@@ -152,7 +147,14 @@ void NetworkManager::updateCurrentState()
     
     } while(false);
 
-    currentNetwork.set(newValue);
+    currentConnection.blockSignals(!notify);
+    currentConnection.set(newValue);
+    currentConnection.blockSignals(false);
+}
+
+NetworkChangeReason NetworkManager::changeReason() const
+{
+    return m_changeReason;
 }
 
 void NetworkManager::setInterface(std::string interface)
@@ -161,29 +163,45 @@ void NetworkManager::setInterface(std::string interface)
     if (m_interface.empty()) {
         return;
     }
-    auto dev = m_nm.getDevice(m_interface);
-    if (dev != nullptr) {
-        dev->StateChanged.connect([this](nm::NMDeviceState newState, nm::NMDeviceState oldState) {
-            LOG_ERROR << "State changed from " << oldState << " to " << newState;
-            if (newState == nm::NM_DEVICE_STATE_NEED_AUTH) {
-                AuthentificationFailed.emit();
-            } else if (newState == nm::NM_DEVICE_STATE_FAILED) {
-                ConnectingFailed.emit();
-            }
-            updateCurrentState();
-        });
+    m_dev = m_nm.getDevice(m_interface);
+    if (m_dev != nullptr) {
+        m_dev->StateChanged.connect(std::bind(&NetworkManager::onDeviceStateChanged, this, std::placeholders::_1, std::placeholders::_2));
     }
 
 }
 
+void NetworkManager::onDeviceStateChanged(nm::NMDeviceState newState, nm::NMDeviceState oldState)
+{
+    updateCurrentState(newState == nm::NMDeviceState::NM_DEVICE_STATE_ACTIVATED);
+    deviceState.set(newState);
+    LOG_ERROR << "State changed from " << oldState << " to " << newState;
+    if (newState == nm::NM_DEVICE_STATE_FAILED && oldState == nm::NM_DEVICE_STATE_NEED_AUTH) {
+        AuthentificationFailed.emit();
+    } else if (newState == nm::NM_DEVICE_STATE_FAILED) {
+        ConnectingFailed.emit();
+    } else if (newState == nm::NM_DEVICE_STATE_ACTIVATED) {
+        
+    }
+}
+
+void NetworkManager::onActiveConnectionChanged(const std::vector<std::shared_ptr<nm::ActiveConnection>>&)
+{
+    if (m_dev == nullptr) {
+        LOG_ERROR << "Can't find device " << m_interface;
+        return;
+    }
+    if (!m_connectingInProgress.try_lock()) return;
+    updateCurrentState();
+    m_connectingInProgress.unlock();
+}
+
 bool NetworkManager::requestScan(bool force)
 {
-    auto dev = m_nm.getDevice(m_interface);
-    if (dev == nullptr) {
+    if (m_dev == nullptr) {
         return false;
     }
 
-    auto wifi = dev->asWireless();
+    auto wifi = m_dev->asWireless();
     if (wifi == nullptr) {
         return false;
     }
@@ -200,12 +218,11 @@ std::vector<WifiNetwork> NetworkManager::networks()
 {
     std::vector<WifiNetwork> networks;
 
-    auto dev = m_nm.getDevice(m_interface);
-    if (dev == nullptr) {
+    if (m_dev == nullptr) {
         return networks;
     }
 
-    auto wifi = dev->asWireless();
+    auto wifi = m_dev->asWireless();
     if (wifi == nullptr) {
         return networks;
     }
@@ -222,7 +239,7 @@ std::vector<WifiNetwork> NetworkManager::networks()
     return networks;
 }
 
-bool NetworkManager::connect(const std::string& ssid, const std::string& password)
+std::string NetworkManager::connect(const std::string& ssid, const std::string& password)
 {
     std::lock_guard<std::mutex> lock(m_connectingInProgress);
     return m_nm.connect(m_interface, ssid, password);
@@ -236,10 +253,9 @@ bool NetworkManager::activateConnection(std::string uuid)
         return false;
     }
 
-    auto dev = m_nm.getDevice(m_interface);
-    if (dev == nullptr) {
+    if (m_dev == nullptr) {
         return false;
     }
 
-    return m_nm.activate(conn, dev);
+    return m_nm.activate(conn, m_dev);
 }

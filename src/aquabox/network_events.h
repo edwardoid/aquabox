@@ -19,9 +19,12 @@
 #pragma once
 
 #include "event.h"
+#include "network_change_reason.h"
 
 namespace aquabox
 {
+    class NetworkDeviceStateEvent: public BoxEvent { public: NetworkDeviceStateEvent(); };
+
     class NetworkChangedEvent: public BoxEvent { public: NetworkChangedEvent(); };
 
     class NetworkConnectionFailedEvent: public BoxEvent { public: NetworkConnectionFailedEvent(); };

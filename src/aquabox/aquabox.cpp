@@ -85,9 +85,10 @@ int AquaBox::start()
     }
 
     NetworkManager::i().setInterface(Settings::string(Settings::Keys::CLIENT_INTERFACE, Settings::Defaults::CLIENT_INTERFACE));
-    NetworkManager::i().currentNetwork.connect([this](CurrentNetworkState net) { postUpdate(std::make_shared<NetworkChangedEvent>()); });
-    NetworkManager::i().AuthentificationFailed.connect([this]() { postUpdate(std::make_shared<NetworkAuthentifiationFailedEvent>()); });
-    NetworkManager::i().ConnectingFailed.connect([this]() { postUpdate(std::make_shared<NetworkConnectionFailedEvent>()); });
+    // NetworkManager::i().AuthentificationFailed.connect([this]() { postUpdate(std::make_shared<NetworkAuthentifiationFailedEvent>()); });
+    // NetworkManager::i().ConnectingFailed.connect([this]() { postUpdate(std::make_shared<NetworkConnectionFailedEvent>()); });
+    NetworkManager::i().currentConnection.connect([this](Connection) { postUpdate(std::make_shared<NetworkChangedEvent>()); });
+    NetworkManager::i().deviceState.connect([this](NetworkDeviceState) { postUpdate(std::make_shared<NetworkDeviceStateEvent>());});
 
     LOG_INFO << "Starting " << Settings::Defaults::APPLICATION << " ver. " << std::hex << Settings::Defaults::VERSION_MAJOR << "." << Settings::Defaults::VERSION_MINOR;
     if(Options::Lock) {
@@ -346,7 +347,7 @@ std::string AquaBox::configurationData() const
     configurationDataString += SERIAL_NUMBER;
     configurationDataString += ";";
 
-    configurationDataString += NetworkManager::i().currentNetwork.value.ip;
+    configurationDataString += NetworkManager::i().currentConnection.value.ip;
     configurationDataString += ";";
 
     configurationDataString += std::to_string((int)AquaBox::i().systemTemperature());

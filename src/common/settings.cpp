@@ -63,6 +63,7 @@ const std::string Settings::Keys::AP_INTERFACE = "apInterface";
 const std::string Settings::Keys::SERIAL = "serial";
 const std::string Settings::Keys::FRAMEBUFFER = "framebuffer";
 const std::string Settings::Keys::MQTT_PORT = "mqtt";
+const std::string Settings::Keys::DEBUG = "debug";
 
 const std::string Settings::Defaults::GIT_HASH = AB_GIT_HASH ;
 const std::string Settings::Defaults::APPLICATION = "Aquabox";
@@ -90,6 +91,7 @@ const std::string Settings::Defaults::AP_INTERFACE = "wlan0";
 const std::string Settings::Defaults::SERIAL = "testDev";
 const std::string Settings::Defaults::FRAMEBUFFER = "/dev/fb0";
 const int Settings::Defaults::MQTT_PORT = 1883;
+const bool Settings::Defaults::DEBUG = false;
 
 bool Settings::dataToWrite = false;
 bool Settings::ready = false;

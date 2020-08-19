@@ -24,25 +24,16 @@
 #include <s2s_property.h>
 #include <nmdbus/NetworkManager.h>
 #include <nmdbus/AccessPoint.h>
+#include <nmdbus/Device.h>
+#include "network_change_reason.h"
+#include "network_manager_device_state.h"
 
+namespace nm
+{
+    class ActiveConnection;
+}
 namespace aquabox
 {
-    struct CurrentNetworkState
-    {
-        std::string uuid;
-        std::string ssid;
-        std::string ip;
-        int strength = 0;
-        bool hasInternet = false;
-        bool operator == (const CurrentNetworkState& o) const {
-            return  uuid == o.uuid &&
-                    ssid == o.ssid &&
-                    ip == o.ip &&
-                    strength == o.strength &&
-                    hasInternet == hasInternet;
-        }
-    };
-
     using NetworkingState = nm::NetworkingState;
 
     struct WifiNetwork
@@ -56,7 +47,10 @@ namespace aquabox
 
         const bool operator == (const WifiNetwork& wifi)
         {
-            return ssid == wifi.ssid && auth == wifi.auth && encrypted == wifi.encrypted;
+            return  ssid == wifi.ssid &&
+                    auth == wifi.auth &&
+                    encrypted == wifi.encrypted &&
+                    signal == wifi.signal;
         }
 
         const bool operator < (const WifiNetwork& wifi)
@@ -81,18 +75,24 @@ namespace aquabox
         bool connectedToInternet();
         void setInterface(std::string interface);
         bool requestScan(bool force = true);
-        SignalSlot::Property<CurrentNetworkState> currentNetwork;
+        SignalSlot::Property<Connection> currentConnection;
         SignalSlot::Property<NetworkingState> currentState;
+        SignalSlot::Property<NetworkDeviceState> deviceState;
         std::vector<WifiNetwork> networks();
-        bool connect(const std::string& ssid, const std::string& password);
+        std::string connect(const std::string& ssid, const std::string& password);
         bool activateConnection(std::string uuid);
         SignalSlot::Signal<size_t> NetworksChanged;
         SignalSlot::Signal<> AuthentificationFailed;
         SignalSlot::Signal<> ConnectingFailed;
-        void updateCurrentState();
+        void updateCurrentState(bool notify = true);
+        NetworkChangeReason changeReason() const;
     private:
         void reconnect();
+        void onActiveConnectionChanged(const std::vector<std::shared_ptr<nm::ActiveConnection>>&);
+        void onDeviceStateChanged(nm::NMDeviceState newState, nm::NMDeviceState oldState);
     private:
+        NetworkChangeReason m_changeReason;
+        std::shared_ptr<nm::Device> m_dev;
         std::string m_interface;
         std::thread m_reconnectThread;
         std::mutex m_connectingInProgress;

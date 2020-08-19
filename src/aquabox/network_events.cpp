@@ -19,32 +19,44 @@
 
 #include "network_events.h"
 #include "network_manager.h"
+#include "network_manager_device_state.h"
+#include "enumerations.h"
 
 using namespace aquabox;
 
+NetworkDeviceStateEvent::NetworkDeviceStateEvent()
+{
+    Connection net = (Connection) NetworkManager::i().currentConnection;
+    setData({
+        { "state", Serializable<nm::NMDeviceState>::convert((nm::NMDeviceState )NetworkManager::i().deviceState) }
+    });
+    setPropertiesUpdate({
+        { "ssid", net.ssid },
+        { "uuid", net.uuid }
+    });
+}
+
 NetworkChangedEvent::NetworkChangedEvent()
 {
-    CurrentNetworkState net = (CurrentNetworkState) NetworkManager::i().currentNetwork;
+    Connection net = (Connection) NetworkManager::i().currentConnection;
     setData({
         { "network", net.ssid },
-        { "failed", false},
-        { "auth", true }
+        { "reason", Serializable<NetworkChangeReason>::convert(NetworkManager::i().changeReason()) }
     });
     setPropertiesUpdate({
         { "ssid", net.ssid },
         { "uuid", net.uuid },
         { "ip", net.ip },
-        { "strength", net.strength }
+        { "strength", net.signal }
     });
 }
 
 NetworkConnectionFailedEvent::NetworkConnectionFailedEvent()
 {
-    CurrentNetworkState net = (CurrentNetworkState) NetworkManager::i().currentNetwork;
+    Connection net = (Connection) NetworkManager::i().currentConnection;
     setData({
         { "network", net.ssid },
-        { "failed", true},
-        { "auth", true }
+        { "reason", "connectoin_failed"}
     });
     setPropertiesUpdate({
         { "ssid", net.ssid },
@@ -54,11 +66,10 @@ NetworkConnectionFailedEvent::NetworkConnectionFailedEvent()
 
 NetworkAuthentifiationFailedEvent::NetworkAuthentifiationFailedEvent()
 {
-    CurrentNetworkState net = (CurrentNetworkState) NetworkManager::i().currentNetwork;
+    Connection net = (Connection) NetworkManager::i().currentConnection;
     setData({
         { "network", net.ssid },
-        { "failed", true},
-        { "auth", false }
+        { "reason", "authentification_failed"}
     });
     setPropertiesUpdate({
         { "ssid", net.ssid },

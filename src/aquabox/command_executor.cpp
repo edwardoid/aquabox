@@ -114,8 +114,8 @@ bool CommandExecutor::GetStatus()
     });
 
     host["network"] = nlohmann::json({
-        { "ssid", NetworkManager::i().currentNetwork.value.ssid },
-        { "ip", NetworkManager::i().currentNetwork.value.ip },
+        { "ssid", NetworkManager::i().currentConnection.value.ssid },
+        { "ip", NetworkManager::i().currentConnection.value.ip },
         { "internet",  NetworkManager::i().connectedToInternet() }});
 
     host["host"] = boost::asio::ip::host_name();
@@ -453,13 +453,13 @@ bool CommandExecutor::ScanWiFiNetworks()
 bool CommandExecutor::ListNetworks()
 {
     std::vector<nlohmann::json> nets;
-    auto currentNetwork = NetworkManager::i().currentNetwork.value;
+    auto currentConnection = NetworkManager::i().currentConnection.value;
     for (auto& net : NetworkManager::i().networks())
     {
         nets.emplace_back(nlohmann::json(
             {
                 { "ssid" , net.ssid },
-                { "ip", ( net.ssid == currentNetwork.ssid ? currentNetwork.ip : "" ) },
+                { "ip", ( net.ssid == currentConnection.ssid ? currentConnection.ip : "" ) },
                 { "auth" , (net.auth == nm::Security::WEP ? "wep" :
                            (net.auth == nm::Security::WPA ? "wpa" :
                            (net.auth == nm::Security::WPA2? "wpa2":
@@ -506,13 +506,10 @@ bool CommandExecutor::ConnectToWiFi()
     for(const WifiNetwork& net : NetworkManager::i().networks())
     {
         if (net.ssid == ssidStr) {
-            m_cmd.response(Result::Ok);
-            AquaBox::i().doLater([ssidStr, passwordStr] () {
-                auto uuid = NetworkManager::i().currentNetwork.value.uuid;
-                auto connectResult = NetworkManager::i().connect(ssidStr, passwordStr);
-                if (!connectResult && !uuid.empty()) {
-                    NetworkManager::i().activateConnection(uuid);
-                }
+            auto uuid = NetworkManager::i().connect(ssidStr, passwordStr);
+            m_cmd.response({ { "uuid", uuid } }, Result::Ok);
+            AquaBox::i().doLater([uuid] () {
+                NetworkManager::i().activateConnection(uuid);
             });
         }
     }

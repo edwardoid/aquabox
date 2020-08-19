@@ -62,3 +62,13 @@ StackTrace::StackTrace()
         ::signal(s, print_trace);
     }
 }
+
+std::vector<std::string> StackTrace::st()
+{
+    std::vector<std::string> trace;
+    for(auto& f : boost::stacktrace::stacktrace())
+    {
+        trace.push_back(boost::stacktrace::to_string(f));
+    }
+    return trace;
+}

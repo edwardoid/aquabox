@@ -88,8 +88,8 @@ nlohmann::json getStatusInfo(bool detailed)
 
     if (detailed) {
         host["network"] = nlohmann::json({
-                    { "ssid", NetworkManager::i().currentNetwork.value.ssid },
-                    { "ip", NetworkManager::i().currentNetwork.value.ip },
+                    { "ssid", NetworkManager::i().currentConnection.value.ssid },
+                    { "ip", NetworkManager::i().currentConnection.value.ip },
                     { "internet",  NetworkManager::i().connectedToInternet() }});
     }
 

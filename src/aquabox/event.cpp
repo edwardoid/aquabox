@@ -18,6 +18,8 @@
 
 #include "event.h"
 #include "serial.h"
+#include "stacktrace.h"
+#include "settings.h"
 
 using namespace aquabox;
 
@@ -51,12 +53,18 @@ void Event::setPropertiesUpdate(const nlohmann::json& update)
 
 nlohmann::json Event::serialize() const
 {
-    return nlohmann::json({
+    nlohmann::json event({
         { "sender", m_sender },
         { "class", m_class },
         { "data", m_data },
         { "props", m_properties } 
     });
+
+    if (Settings::boolean(Settings::Keys::DEBUG, Settings::Defaults::DEBUG)) {
+        event["_debug_"] = StackTrace::st();
+    }
+
+    return event;
 }
 
 BoxEvent::BoxEvent()

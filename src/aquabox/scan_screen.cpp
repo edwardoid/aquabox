@@ -50,8 +50,6 @@ void ScanScreen::draw()
     );
     code.resizeTo(std::min(canvasWidth, canvasHeight));
 
-    LOG_DEBUG << "Size: " << code.width() << " H " << code.height();
-
     std::string temp = std::to_string(AquaBox::i().systemTemperature());
     temp += "°C";
 
