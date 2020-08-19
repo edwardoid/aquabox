@@ -71,8 +71,8 @@ function pack_client {
 
 cd /build
 
-#clean_build
-#prepare_build
+clean_build
+prepare_build
 do_build
 pack_server
 pack_client

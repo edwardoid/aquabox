@@ -12,6 +12,5 @@ source $DIR/set_env.sh $1
 
 sudo docker run -v $SOURCES_DIR:/sources \
 				-v $BUILD_DIR:/build \
-				--rm edwardoid/$IMAGE:latest \
+				--rm $IMAGE:latest \
 				/bin/bash /sources/Docker/build.sh |& tee $LOG_FILE
-
