@@ -1,6 +1,6 @@
 /*
  * AquaBox
- * Copyright (C) 2019  Eduard Sargsyan
+ * Copyright (C) 2019-2020 Eduard Sargsyan
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -87,11 +87,30 @@ bool Database::connect()
     return false;
 }
 
-bool Database::wasProduced(std::string id) {
+bool Database::wasProduced(std::string id)
+{
     LOG_DEBUG << "Trying to determine was box " << id << " produced or not...";
     bool res = (bool)(m_aquabox[Settings::string(Settings::Keys::HW_COLLECTION_NAME, Settings::Defaults::HW_COLLECTION_NAME)].find_one(bsoncxx::builder::stream::document{} << "serial" << id << bsoncxx::builder::stream::finalize));
     if (!res) {
         LOG_DEBUG << "Box " << id << " was not produced!";
+    }
+    return res;
+}
+
+bool Database::isApplicationAuthorized(std::string app, std::string box)
+{
+    bool res = (bool)(m_aquabox[Settings::string(Settings::Keys::HW_COLLECTION_NAME, Settings::Defaults::HW_COLLECTION_NAME)]
+        .find_one(
+            bsoncxx::builder::stream::document{}
+                << "serial" << box
+                << "apps"   << bsoncxx::builder::stream::open_document
+                                << "$elemMatch" << bsoncxx::builder::stream::open_document
+                                                    << "$eq" << app
+                                                << bsoncxx::builder::stream::close_document
+                            << bsoncxx::builder::stream::close_document <<
+            bsoncxx::builder::stream::finalize));
+    if (!res) {
+        LOG_DEBUG << "App " << app << " is not authoriozed for box " << box << "!";
     }
     return res;
 }

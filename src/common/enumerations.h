@@ -20,6 +20,7 @@
 #define ENUMERRATIONS_H
 
 #include <unordered_map>
+#include <string>
 
 namespace aquabox
 {

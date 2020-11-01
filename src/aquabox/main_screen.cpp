@@ -1,20 +1,26 @@
 #include "main_screen.h"
 #include <ctime>
+#include <singleton.h>
 
 #define degree(angle) ((double)(angle) * 0.0174533)
 
 using namespace aquabox;
 
-MainScreen::MainScreen(std::string dev)
-    : StatusBarScreen(dev)
+MainScreen::MainScreen()
+    : StatusBarScreen()
 {
     m_text.setColor(0x5aa61aff);
     m_text.setSize(24);
     m_text.setFont(font("DroidSansMono"));
+    m_text.setAngle(0.);
 }
 
 void MainScreen::draw()
 {
+    auto fb = Singleton<LIBFB_NS::FrameBuffer>::i();
+    if (fb == nullptr) {
+        return;
+    }
     StatusBarScreen::draw();
 
     std::time_t rawtime;
@@ -30,8 +36,9 @@ void MainScreen::draw()
 
 
 
-    m_text.mapTo((fb().width() - m_text.width()) / 2, 
-                 (fb().height() - m_text.height()) / 2 + m_text.height() / 2);
+    m_text.mapTo((fb->width() - m_text.width()) / 2, 
+                 (fb->height() - m_text.height()) / 2 + m_text.height() / 2);
 
-    fb().draw(&m_text);
+    fb->drawRect(m_text.x(), m_text.y(), m_text.width(), m_text.height(), 0xFF0000FF);
+    fb->draw(&m_text);
 }

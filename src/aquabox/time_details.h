@@ -16,8 +16,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef TIME_DETAILS_H
-#define TIME_DETAILS_H
+#pragma once
 
 #include <chrono>
 #include <string>
@@ -36,5 +35,3 @@ namespace aquabox
         std::tm m_internal;
     };
 }
-
-#endif // TIME_DETAIL_H

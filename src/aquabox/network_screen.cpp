@@ -20,12 +20,6 @@
 
 using namespace aquabox;
 
-NetworkScreen::NetworkScreen(std::string dev)
-    : StatusBarScreen(dev)
-{
-
-}
-
 void NetworkScreen::draw()
 {
 

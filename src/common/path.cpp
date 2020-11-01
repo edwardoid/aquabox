@@ -118,6 +118,7 @@ std::list<Path> Path::children() const
             
             desc = readdir(dir);
         }
+        closedir(dir);
     }
     return paths;
 }

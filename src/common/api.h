@@ -1,6 +1,6 @@
 /*
  * AquaBox
- * Copyright (C) 2019  Eduard Sargsyan
+ * Copyright (C) 2020  Eduard Sargsyan
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,8 +16,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef API_H
-#define API_H
+#pragma once
 
 #include "route.h"
 #include "log.h"
@@ -106,5 +105,3 @@ namespace aquabox
         };
     }
 }
-
-#endif // API_H

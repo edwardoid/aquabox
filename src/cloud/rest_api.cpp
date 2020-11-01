@@ -88,8 +88,9 @@ bool REST::IsAuthorized(const Route& route, Request& request, Response& response
 {
     auto params = route.extract(request->path);
     auto appId = params.find(":appId");
-    if (appId != params.end()) {
-        return true;
+    auto boxId = params.find(":boxId");
+    if (appId == params.end() || boxId == params.end()) {
+        return false;
     }
     return false;
 }

@@ -19,36 +19,31 @@
 
 #include "screen.h"
 #include "log.h"
+#include <singleton.h>
 #include "aquabox.h"
 
 using namespace aquabox;
 
-Screen::Screen(std::string fbDev)
-    : m_fb(fbDev)
-{}
-
 void Screen::show()
 {
-    if (!m_fb.open()) {
-        LOG_ERROR << "Can't open framebuffer";
+    auto fb = Singleton<LIBFB_NS::FrameBuffer>::get();
+    if (fb == nullptr)
         return;
-    }
-
-    m_fb.clear(0xbcded0); 
+    
+    fb->clear(0xbcded0); 
     
     draw();
 
-    m_fb.flush();
-    m_fb.close();
+    fb->flush();
 }
 
 std::string Screen::resource(std::string name)
 {
     std::string base = "";
-    if (aquabox::AquaBox::i().workingDirectory().empty()) {
+    if (aquabox::Singleton<AquaBox>::get()->workingDirectory().empty()) {
         base = ".";
     } else {
-        base = aquabox::AquaBox::i().workingDirectory();
+        base = aquabox::Singleton<AquaBox>::get()->workingDirectory();
     }
     if (* base.rbegin() != '/') {
         base += "/";
@@ -67,14 +62,9 @@ std::string Screen::font(std::string name)
     return resource(name + std::string(".ttf"));
 }
 
-LIBFB_NS::FrameBuffer& Screen::fb()
-{
-    return m_fb;
-}
-
 std::shared_ptr<LIBFB_NS::PNGImage> Screen::pixmap(std::string name)
 {
-    auto px = m_provider.get(asset(name));
+    auto px = Singleton<LIBFB_NS::PNGProvider>::i()->get(asset(name));
     if (px == nullptr) {
         LOG_ERROR << "Can't find: " << asset(name);
     }

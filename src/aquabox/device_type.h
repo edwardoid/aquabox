@@ -1,6 +1,6 @@
 /*
  * AquaBox
- * Copyright (C) 2019  Eduard Sargsyan
+ * Copyright (C) 2020  Eduard Sargsyan
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,8 +16,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef DEVICE_TYPE_H
-#define DEVICE_TYPE_H
+#pragma once
 
 #include "enumerations.h"
 
@@ -52,5 +51,3 @@ namespace aquabox
         Thermometer
     };
 }
-
-#endif // DEVICE_TYPE_H

@@ -22,12 +22,15 @@
 #include "scan_screen.h"
 #include "main_screen.h"
 #include "network_screen.h"
+#include <singleton.h>
 namespace aquabox
 {
     class ScreenManager
     {
-    public:
+    protected:
         ScreenManager();
+        friend Singleton<ScreenManager>;
+    public:
         void show();
     private:
         void init();

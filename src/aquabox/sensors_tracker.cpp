@@ -27,8 +27,8 @@ using namespace aquabox;
 void SensorsTracker::processUpdates() {
     static std::unordered_map<std::string, double> values;
 
-    AquaBox::i().doLater([]() {
-        for (auto dev : AquaBox::i().devices()) {
+    Singleton<AquaBox>::get()->doLater("seonsors_tracker", []() {
+        for (auto dev : Singleton<AquaBox>::get()->devices()) {
             if (!dev.second->supports(DeviceClass::Sensor)) {
                 continue;
             }
@@ -49,7 +49,7 @@ void SensorsTracker::processUpdates() {
                 values.insert( {sensor->getId(), newValue} );
             }
 
-            AquaBox::i().postUpdate(std::make_shared<SensorChangedEvent>(sensor, "regular_check"));
+            Singleton<AquaBox>::get()->postUpdate(std::make_shared<SensorChangedEvent>(sensor, "regular_check"));
         }
     });
 }

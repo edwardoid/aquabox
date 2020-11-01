@@ -10,6 +10,7 @@
         "serial": "testDev",
         "streamPort": 1214,
         "threads": 1,
-        "workingDirectory": "/aquabox/bin"
+        "workingDirectory": "/aquabox/bin",
+        "debug": true
     }
 }

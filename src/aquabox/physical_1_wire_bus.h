@@ -1,6 +1,6 @@
 /*
  * AquaBox
- * Copyright (C) 2019  Eduard Sargsyan
+ * Copyright (C) 2019-2020 Eduard Sargsyan
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,8 +16,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef PHY_1W_BUS_H
-#define PHY_1W_BUS_H
+#pragma once
 
 #include "bus.h"
 
@@ -29,5 +28,3 @@ namespace aquabox
         std::shared_ptr<Hardware> hw(std::string hw) override;
     };
 }
-
-#endif // PHY_1W_BUS_H

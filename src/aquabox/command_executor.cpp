@@ -113,23 +113,29 @@ bool CommandExecutor::GetStatus()
         {"serial", Settings::string(Settings::Keys::SERIAL, Settings::Defaults::SERIAL )}
     });
 
-    host["network"] = nlohmann::json({
-        { "ssid", NetworkManager::i().currentConnection.value.ssid },
-        { "ip", NetworkManager::i().currentConnection.value.ip },
-        { "internet",  NetworkManager::i().connectedToInternet() }});
+    auto nm = Singleton<NetworkManager>::i();
+
+    if (nm != nullptr) {
+        host["network"] = nlohmann::json({
+            { "ssid", nm->currentConnection.value.ssid },
+            { "ip", nm->currentConnection.value.ip },
+            { "internet",  nm->connectedToInternet() }});
+    }
 
     host["host"] = boost::asio::ip::host_name();
 
-    host["config"] = AquaBox::i().configurationData();
+    host["config"] = Singleton<AquaBox>::get()->configurationData();
 
-    m_cmd.response(nlohmann::json({{"aquabox", host}, {"status" , "online"}}), Result::Ok);
+    nlohmann::json tasks;
+
+    m_cmd.response(nlohmann::json({{"aquabox", host}, {"status" , "online"}, {"tasks", tasks}}), Result::Ok);
     return true;
 }
 
 bool CommandExecutor::GetDevices()
 {
     std::vector<nlohmann::json> all;
-    for (auto &dev : AquaBox::i().devices()) {
+    for (auto &dev : Singleton<AquaBox>::get()->devices()) {
         nlohmann::json json;
         dev.second->json(json);
         if (dev.second->supports(DeviceClass::Relay)) {
@@ -154,7 +160,7 @@ bool CommandExecutor::GetDevice()
     
     std::string dev = m_cmd.getParameter(":dev");
 
-    auto& devices = AquaBox::i().devices();
+    auto& devices = Singleton<AquaBox>::get()->devices();
     auto pos = devices.find(dev);
     if (pos == devices.end()) {
         LOG_ERROR << "No device " << dev << " not found";
@@ -184,7 +190,7 @@ bool CommandExecutor::UpdateDevice()
     }
     std::string dev = m_cmd.getParameter(":dev");
     
-    auto& devices = AquaBox::i().devices();
+    auto& devices = Singleton<AquaBox>::get()->devices();
     auto pos = devices.find(dev);
     if (pos == devices.end()) {
         LOG_ERROR << "No device " << dev << " found";
@@ -220,8 +226,8 @@ bool CommandExecutor::UpdateDevice()
 
     device->copyData(*d);
 
-    AquaBox::i().updateDevice(dev);
-    AquaBox::i().postUpdate(std::make_shared<DeviceUpdatedEvent>(device, before));
+    Singleton<AquaBox>::get()->updateDevice(dev);
+    Singleton<AquaBox>::get()->postUpdate(std::make_shared<DeviceUpdatedEvent>(device, before));
 
     m_cmd.response(Result::Ok);
 
@@ -230,8 +236,10 @@ bool CommandExecutor::UpdateDevice()
 
 bool CommandExecutor::GetRules()
 {
+    RulesMap& allRules = Singleton<AquaBox>::get()->rules();
+    std::lock_guard<RulesMap> lock(allRules);
     std::vector<nlohmann::json> all;
-    for (auto &rule : AquaBox::i().rules()) {
+    for (auto &rule : allRules) {
         nlohmann::json data;
         rule.second->json(data);
         all.push_back(data);
@@ -251,7 +259,9 @@ bool CommandExecutor::GetRule()
     }
     std::string rule = m_cmd.getParameter(":rule");
 
-    auto all = AquaBox::i().rules();
+    RulesMap& all = Singleton<AquaBox>::get()->rules();
+    std::lock_guard<RulesMap> lock(all);
+
     auto pos = all.find(rule);
 
     if (pos == all.end()) {
@@ -305,7 +315,7 @@ bool CommandExecutor::CreateOrUpdateRule(bool update)
         return true;
     }
 
-    if (!AquaBox::i().addRule(r, update)) {
+    if (!Singleton<AquaBox>::get()->addRule(r, update)) {
         data["cause"] = "Wrong method or internal data";
         m_cmd.response(data, Result::BadCommand);
         return true;
@@ -326,7 +336,9 @@ bool CommandExecutor::DeleteRule()
     }
     auto rule = m_cmd.getParameter(":rule");
 
-    auto& all = AquaBox::i().rules();
+    RulesMap& all = Singleton<AquaBox>::get()->rules();
+    std::lock_guard<RulesMap> lock(all);
+
     auto pos = all.find(rule);
 
     if (pos == all.end()) {
@@ -335,7 +347,7 @@ bool CommandExecutor::DeleteRule()
         return true;
     }
 
-    if (AquaBox::i().removeRule(pos->second)) {
+    if (Singleton<AquaBox>::get()->removeRule(pos->second)) {
         LOG_DEBUG << "Rule " << rule << " removed";
         m_cmd.response(Result::Ok);
     } else {
@@ -354,7 +366,9 @@ bool CommandExecutor::DeviceRules()
     }
     std::string dev = m_cmd.getParameter(":dev");
     std::vector<nlohmann::json> all;
-    for (auto &rule : AquaBox::i().rules()) {
+    RulesMap& allRules = Singleton<AquaBox>::get()->rules();
+    std::lock_guard<RulesMap> lock(allRules);
+    for (auto &rule : allRules) {
         if (((std::string)rule.second->getDevice().Value) == dev) {
             nlohmann::json data;
             rule.second->json(data);
@@ -387,8 +401,8 @@ bool CommandExecutor::TurnOn()
         return true;
     }
     std::string dev = m_cmd.getParameter(":dev");
-    auto pos = AquaBox::i().devices().find(dev);
-    if (pos == AquaBox::i().devices().end()) {
+    auto pos = Singleton<AquaBox>::get()->devices().find(dev);
+    if (pos == Singleton<AquaBox>::get()->devices().end()) {
         m_cmd.response(Result::NotFound);
         return true;
     }
@@ -404,7 +418,7 @@ bool CommandExecutor::TurnOn()
     nlohmann::json data;
     relay->json(data);
     data["isOn"] = relay->turnedOn();
-    AquaBox::i().postUpdate(std::make_shared<ManualStateChangedEvent>(relay));
+    Singleton<AquaBox>::get()->postUpdate(std::make_shared<ManualStateChangedEvent>(relay));
 
     m_cmd.response(data, Result::Ok);
     return true;
@@ -419,8 +433,8 @@ bool CommandExecutor::TurnOff()
     }
     std::string dev = m_cmd.getParameter(":dev");
 
-    auto pos = AquaBox::i().devices().find(dev);
-    if (pos == AquaBox::i().devices().end()) {
+    auto pos = Singleton<AquaBox>::get()->devices().find(dev);
+    if (pos == Singleton<AquaBox>::get()->devices().end()) {
         m_cmd.response(Result::NotFound);
         return true;
     }
@@ -437,7 +451,7 @@ bool CommandExecutor::TurnOff()
     relay->json(data);
     data["isOn"] = relay->turnedOn();
 
-    AquaBox::i().postUpdate(std::make_shared<ManualStateChangedEvent>(relay));
+    Singleton<AquaBox>::get()->postUpdate(std::make_shared<ManualStateChangedEvent>(relay));
 
     m_cmd.response(data, Result::Ok);
     return true;
@@ -445,7 +459,13 @@ bool CommandExecutor::TurnOff()
 
 bool CommandExecutor::ScanWiFiNetworks()
 {
-    bool res = NetworkManager::i().requestScan();
+    auto nm = Singleton<NetworkManager>::i();
+
+    bool res = false;
+    if (nm != nullptr) {
+        res = nm->requestScan();
+    }
+
     m_cmd.response(nlohmann::json({{"requestResult", res}}), Result::Ok);
     return true;
 }
@@ -453,22 +473,27 @@ bool CommandExecutor::ScanWiFiNetworks()
 bool CommandExecutor::ListNetworks()
 {
     std::vector<nlohmann::json> nets;
-    auto currentConnection = NetworkManager::i().currentConnection.value;
-    for (auto& net : NetworkManager::i().networks())
-    {
-        nets.emplace_back(nlohmann::json(
-            {
-                { "ssid" , net.ssid },
-                { "ip", ( net.ssid == currentConnection.ssid ? currentConnection.ip : "" ) },
-                { "auth" , (net.auth == nm::Security::WEP ? "wep" :
-                           (net.auth == nm::Security::WPA ? "wpa" :
-                           (net.auth == nm::Security::WPA2? "wpa2":
-                           (net.auth == nm::Security::None? "none": 
-                           (net.auth == nm::Security::Enterprise ? "enterprise" : "unknown"))))) },
-                { "encrypted", net.encrypted },
-                { "signal", net.signal }
-            }
-        ));
+
+    auto nm = Singleton<NetworkManager>::i();
+
+    if (nm != nullptr) {
+        auto currentConnection = nm->currentConnection.value;
+        for (auto& net : nm->networks())
+        {
+            nets.emplace_back(nlohmann::json(
+                {
+                    { "ssid" , net.ssid },
+                    { "ip", ( net.ssid == currentConnection.ssid ? currentConnection.ip : "" ) },
+                    { "auth" , (net.auth == nm::Security::WEP ? "wep" :
+                            (net.auth == nm::Security::WPA ? "wpa" :
+                            (net.auth == nm::Security::WPA2? "wpa2":
+                            (net.auth == nm::Security::None? "none": 
+                            (net.auth == nm::Security::Enterprise ? "enterprise" : "unknown"))))) },
+                    { "encrypted", net.encrypted },
+                    { "signal", net.signal }
+                }
+            ));
+        }
     }
 
     m_cmd.response(nlohmann::json({
@@ -503,14 +528,19 @@ bool CommandExecutor::ConnectToWiFi()
         return true;
     }
 
-    for(const WifiNetwork& net : NetworkManager::i().networks())
+    auto nm = Singleton<NetworkManager>::i();
+
+    if (nm != nullptr)
     {
-        if (net.ssid == ssidStr) {
-            auto uuid = NetworkManager::i().connect(ssidStr, passwordStr);
-            m_cmd.response({ { "uuid", uuid } }, Result::Ok);
-            AquaBox::i().doLater([uuid] () {
-                NetworkManager::i().activateConnection(uuid);
-            });
+        for(const WifiNetwork& net : nm->networks())
+        {
+            if (net.ssid == ssidStr) {
+                auto uuid = nm->connect(ssidStr, passwordStr);
+                m_cmd.response({ { "uuid", uuid } }, Result::Ok);
+                Singleton<AquaBox>::get()->doLater("activating_connection", [uuid, nm] () {
+                    nm->activateConnection(uuid);
+                });
+            }
         }
     }
 

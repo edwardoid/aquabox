@@ -22,6 +22,7 @@
 #include "network_manager.h"
 #include "rotate.h"
 #include <sprite.h>
+#include <singleton.h>
 
 #define ASSISTANT_X 132
 #define ASSISTANT_Y 97
@@ -39,37 +40,51 @@ using namespace aquabox;
 
 void StatusBarScreen::draw()
 {
+    auto fb = Singleton<LIBFB_NS::FrameBuffer>::i();
+    if (fb == nullptr)
+    {
+        return;
+    }
+
     std::vector<int> elements;
 
     int wifiIndex = 10;
-    if (NetworkManager::i().currentConnection.value.signal > 0) {
-        wifiIndex = NetworkManager::i().currentConnection.value.signal / 25;
+    int signalStrength = Singleton<NetworkManager>::available ?  Singleton<NetworkManager>::i()->currentConnection.value.signal : 0;
+    if (signalStrength > 0) {
+        wifiIndex = signalStrength / 25;
     }
 
     elements.push_back(wifiIndex);
 
-    int cloudIndex = AquaBox::i().cloud().isRegistered()
-                    ? 6
-                    : 7;
+    auto cloud = Singleton<Cloud>::i();
+    bool isRegistered = cloud == nullptr ? false : cloud->isRegistered();
+    int cloudIndex = isRegistered ? 6 : 7;
     elements.push_back(cloudIndex);
 
 
-    int assistantIndex = AquaBox::i().assistantIsConnected() ? 8
+    int assistantIndex = Singleton<AquaBox>::get()->assistantIsConnected() ? 8
                                                              : 9;
 
     elements.push_back(assistantIndex);
 
     LIBFB_NS::Sprite statusBar(pixmap("status_bar"), 24, 24, 10);
 
-    fb().fillRect(0, 0, fb().width(), 24, 0x81bf2a);
-    fb().drawLine(0, 24, fb().width(), 24, 0xebeb8c);
+    fb->fillRect(0, 0, fb->width(), 24, 0x81bf2a);
+    fb->drawLine(0, 24, fb->width(), 24, 0xebeb8c);
+
+
+    static const uint32_t live[] = {
+        0xff0000, 0x00ff00, 0x0000ff
+    };
+
+    fb->fillRect(0, 0, 5, 5, live[time(NULL) % 3]);
     
-    int spacing = (fb().width() - 24 * elements.size()) / (elements.size() + 1);
+    int spacing = (fb->width() - 24 * elements.size()) / (elements.size() + 1);
 
     for(int i = 0; i < elements.size(); ++i)
     {
         statusBar.jump(elements[i]);
         statusBar.mapTo(i * (24 + spacing) + spacing, 0);
-        fb().draw(&statusBar);
+        fb->draw(&statusBar);
     }
 }

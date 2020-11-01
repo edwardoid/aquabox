@@ -25,6 +25,7 @@
 #include <nmdbus/NetworkManager.h>
 #include <nmdbus/AccessPoint.h>
 #include <nmdbus/Device.h>
+#include <singleton.h>
 #include "network_change_reason.h"
 #include "network_manager_device_state.h"
 
@@ -41,7 +42,7 @@ namespace aquabox
         std::string ssid;
         std::string password;
         std::string ip;
-        nm::Security auth;
+        nm::Security auth = nm::Security::Unknown;
         bool encrypted = 0;
         int signal = 0;
 
@@ -67,11 +68,10 @@ namespace aquabox
 
     class NetworkManager
     {
+    protected:
         NetworkManager();
-        ~NetworkManager();
+        friend Singleton<NetworkManager>;
     public:
-
-        static NetworkManager& i();
         bool connectedToInternet();
         void setInterface(std::string interface);
         bool requestScan(bool force = true);

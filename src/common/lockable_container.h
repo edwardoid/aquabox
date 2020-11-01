@@ -1,6 +1,6 @@
 /*
  * AquaBox
- * Copyright (C) 2019  Eduard Sargsyan
+ * Copyright (C) 2019-2020 Eduard Sargsyan
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,8 +16,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef LOCKABLE_CONTAINER_H
-#define LOCKABLE_CONTAINER_H
+#pragma once
 
 #include <mutex>
 #include <map>
@@ -27,19 +26,16 @@
 namespace aquabox
 {
     template<class Container,
-            class Lock = std::mutex>
+            class Lock = std::recursive_mutex>
     class LockableContainer: public Container, public Lock
     {};
 
-    template<typename T, class Lock = std::mutex>
+    template<typename T, class Lock = std::recursive_mutex>
     struct LockableSet: public LockableContainer<std::set<T>, Lock> {};
 
-    template<typename K, typename V, class Lock = std::mutex>
+    template<typename K, typename V, class Lock = std::recursive_mutex>
     struct LockableMap: public LockableContainer<std::map<K, V>, Lock> {};
 
-    template<typename K, typename V, class Lock = std::mutex>
+    template<typename K, typename V, class Lock = std::recursive_mutex>
     struct LockableHashMap: public LockableContainer<std::unordered_map<K, V>, Lock> {};
 }
-
-
-#endif // LOCKABLE_CONTAINER_H

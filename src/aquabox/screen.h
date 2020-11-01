@@ -1,6 +1,6 @@
 /*
  * AquaBox
- * Copyright (C) 2019  Eduard Sargsyan
+ * Copyright (C) 2019-2020  Eduard Sargsyan
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,8 +16,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef SCREEN_H
-#define SCREEN_H
+#pragma once
 
 #include <pngprovider.h>
 #include <framebuffer.h>
@@ -28,19 +27,13 @@ namespace aquabox
     class Screen
     {
     public:
-        Screen(std::string fbDev);
-        std::string resource(std::string name);
-        std::string asset(std::string name);
-        std::string font(std::string name);
-        std::shared_ptr<LIBFB_NS::PNGImage> pixmap(std::string name);
+        Screen() = default;
+        static std::string resource(std::string name);
+        static std::string asset(std::string name);
+        static std::string font(std::string name);
+        static std::shared_ptr<LIBFB_NS::PNGImage> pixmap(std::string name);
         void show();
     protected:
         virtual void draw() = 0;
-        LIBFB_NS::FrameBuffer& fb();
-    private:
-        LIBFB_NS::PNGProvider m_provider;
-        LIBFB_NS::FrameBuffer m_fb;
     };
 }
-
-#endif // SCREEN_H

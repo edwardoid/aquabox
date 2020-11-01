@@ -1,6 +1,6 @@
 /*
  * AquaBox
- * Copyright (C) 2019  Eduard Sargsyan
+ * Copyright (C) 2020  Eduard Sargsyan
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,8 +16,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef DEVICE_REFERENCE_H
-#define DEVICE_REFERENCE_H
+#pragma once
 
 #include "property.h"
 
@@ -26,9 +25,7 @@ namespace aquabox
     class DeviceReference: public StringProperty
     {
     public:
-        DeviceReference(std::string name, bool required = true);
+        DeviceReference(const std::string& name, bool required = true);
         std::shared_ptr<class Device> resolve() const;
     };
 }
-
-#endif // DEVICE_REFERENCE_H

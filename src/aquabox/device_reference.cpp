@@ -22,12 +22,12 @@
 
 using namespace aquabox;
 
-DeviceReference::DeviceReference(std::string name, bool required)
+DeviceReference::DeviceReference(const std::string& name, bool required)
     : StringProperty(name.c_str(), required)
 {}
 
 std::shared_ptr<Device> DeviceReference::resolve() const
 {
-    auto i = AquaBox::i().devices().find(Value);
-    return i == AquaBox::i().devices().end() ? nullptr : i->second;
+    auto i = Singleton<AquaBox>::get()->devices().find(Value);
+    return i == Singleton<AquaBox>::get()->devices().end() ? nullptr : i->second;
 }

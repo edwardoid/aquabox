@@ -7,9 +7,11 @@ StartLimitBurst=5
 
 [Service]
 Type=simple
+Environment="LD_LIBRARY_PATH=/aquabox/lib"
+Environment="DBUS_SYSTEM_BUS_ADDRESS=unix:path=/var/run/dbus/system_bus_socket"
 WorkingDirectory=/aquabox/bin
-ExecStart=/aquabox/bin/startup.sh
-Restart=on-failure
+ExecStart=/aquabox/bin/aquabox --service --ignore-lock
+Restart=always
 RestartSec=5s
 
 [Install]

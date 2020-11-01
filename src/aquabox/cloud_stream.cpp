@@ -46,6 +46,7 @@ CloudStream::CloudStream(std::string url)
             std::this_thread::sleep_for(std::chrono::seconds(10));
         }
     });
+    m_thread.detach();
 }
 
 void CloudStream::attach()
@@ -55,7 +56,7 @@ void CloudStream::attach()
 
 bool CloudStream::isAttached() const
 {
-    return m_attached;
+    return m_attached || m_reattach;
 }
 
 CloudStream::~CloudStream()

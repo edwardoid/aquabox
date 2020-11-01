@@ -16,8 +16,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef BUS_H
-#define BUS_H
+#pragma once
 
 #include <memory>
 #include "hardware.h"
@@ -32,5 +31,3 @@ namespace aquabox
         SignalSlot::Signal<std::shared_ptr<Hardware>, State> HardwareStateChanged;
     };
 }
-
-#endif // BUS_H

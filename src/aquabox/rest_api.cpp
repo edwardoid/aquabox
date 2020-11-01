@@ -19,8 +19,6 @@
 #include "rest_api.h"
 #include "log.h"
 #include "qr.h"
-#include "settings.h"
-#include "aquabox.h"
 #include "rule.h"
 #include "device.h"
 #include "relay.h"
@@ -28,11 +26,12 @@
 #include "user.h"
 #include "repeat_timeout.h"
 #include "enumerations.h"
-#include "path.h"
 #include "update_events.h"
 #include "command_executor.h"
-#include "http_helpers.h"
 #include "network_manager.h"
+#include <settings.h>
+#include <path.h>
+#include <http_helpers.h>
 #include <nlohmann/json.hpp>
 #include <stdio.h>
 #include <random>
@@ -86,16 +85,20 @@ nlohmann::json getStatusInfo(bool detailed)
         {"serial", Settings::string(Settings::Keys::SERIAL, Settings::Defaults::SERIAL) }
     });
 
-    if (detailed) {
+    auto nm = Singleton<NetworkManager>::i();
+    if (detailed && nm) {
         host["network"] = nlohmann::json({
-                    { "ssid", NetworkManager::i().currentConnection.value.ssid },
-                    { "ip", NetworkManager::i().currentConnection.value.ip },
-                    { "internet",  NetworkManager::i().connectedToInternet() }});
+                    { "ssid", nm->currentConnection.value.ssid },
+                    { "ip", nm->currentConnection.value.ip },
+                    { "internet",  nm->connectedToInternet() }});
     }
 
     host["host"] = boost::asio::ip::host_name();
 
-    nlohmann::json status({{"aquabox", host}, {"status" , "online"}});
+    nlohmann::json status({
+                            {"aquabox", host},
+                            {"status" , "online"}
+                        });
 
     return status;
 }
@@ -110,11 +113,11 @@ void REST::init(std::shared_ptr<HttpServer> http, Route base)
 /*
 void REST::StaticFiles(const Route& route, Web::Request& request, Web::Response& response, Headers& headers)
 {
-    Path p = AquaBox::i().workingDirectory();
+    Path p = Singleton<AquaBox>::get()->workingDirectory();
     p.append(request->path);
     p.normalize();
 
-    if (!p.contains(AquaBox::i().workingDirectory())) {
+    if (!p.contains(Singleton<AquaBox>::get()->workingDirectory())) {
         response->write(SimpleWeb::StatusCode::client_error_forbidden, headers);
         return;
     }

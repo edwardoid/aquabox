@@ -16,14 +16,14 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef CLOUD_H
-#define CLOUD_H
+#pragma once
 
 #include <client_http.hpp>
 #include <unordered_map>
 #include <memory>
 #include <atomic>
 #include "cloud_stream.h"
+#include <timeout.h>
 
 using WsClient = SimpleWeb::SocketClient<SimpleWeb::WS>;
 using HttpClient = SimpleWeb::Client<SimpleWeb::HTTP>;
@@ -33,6 +33,7 @@ namespace aquabox
     class Cloud
     {
     public:
+        Cloud();
         void connect();
         void disconnect();
         bool isRegistered();
@@ -45,7 +46,6 @@ namespace aquabox
     private:
         std::atomic_bool m_working;
         std::unordered_map<std::string, std::shared_ptr<CloudStream>> m_streams;
+        Timeout m_updateTimeout;
     };
 }
-
-#endif // CLOUD_H

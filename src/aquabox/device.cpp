@@ -113,9 +113,11 @@ void Device::copyData(const Device& src)
 
 std::vector<std::shared_ptr<Rule>> Device::rules() const
 {
-    RulesMap rules = AquaBox::i().rules();
+    RulesMap& allRules = Singleton<AquaBox>::get()->rules();
+    std::lock_guard<RulesMap> lock(allRules);
+
     std::vector<std::shared_ptr<Rule>> res;
-    for(auto r : rules) {
+    for(auto r : allRules) {
         if (r.second->getDevice() == m_Id) {
             res.push_back(r.second);
         }

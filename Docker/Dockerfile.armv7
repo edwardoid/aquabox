@@ -22,7 +22,8 @@ RUN apt-get install -y \
     tar
 
 # tools
-RUN apt-get install -y \
+RUN apt-get update --fix-missing && \
+    apt-get install -y \
     python-pip git ssh sshpass && \
     pip install conan --upgrade
 

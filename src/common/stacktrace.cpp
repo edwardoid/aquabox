@@ -1,6 +1,6 @@
 /*
  * AquaBox
- * Copyright (C) 2019  Eduard Sargsyan
+ * Copyright (C) 2019-2020  Eduard Sargsyan
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -25,37 +25,19 @@
 using namespace aquabox;
 
 void print_trace(int signum) {
+    std::cerr << "Signal: " << signum << "\n" << boost::stacktrace::stacktrace();
     ::signal(signum, SIG_DFL);
-    std::cerr << boost::stacktrace::stacktrace();
-    ::raise(SIGABRT);
+    ::raise(SIGQUIT);
 }
 
 StackTrace::StackTrace()
 {
     for(auto s: std::vector<int>({
-        SIGILL,
-        SIGFPE,
-        SIGSEGV,
+        SIGABRT,
         SIGBUS,
-        // I am not sure the following signals should be enabled by
-        // default:
-        // default action: Term
-        SIGHUP,
-        SIGINT,
-        SIGPIPE,
-        SIGALRM,
-        SIGTERM,
-        SIGUSR1,
-        SIGUSR2,
-        SIGPOLL,
-        SIGPROF,
-        SIGVTALRM,
-        SIGIO,
-        SIGPWR,
-        // default action: Core
-        SIGQUIT,
+        SIGILL,
+        SIGSEGV,
         SIGSYS,
-        SIGTRAP,
         SIGXCPU,
         SIGXFSZ
     })) {

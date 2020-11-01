@@ -21,7 +21,7 @@
 #include "box.h"
 #include "database.h"
 #include "log.h"
-#include "settings.h"
+#include <settings.h>
 
 #include <thread>
 #include <nlohmann/json.hpp>

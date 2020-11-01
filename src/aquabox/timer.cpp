@@ -40,7 +40,7 @@ bool Timer::start(std::function<void(const ClockTimePoint&)>&& callback,
                   std::chrono::milliseconds timeout)
 {
     if(m_state.load() != State::Idle) {
-        LOG_ERROR << "Timer \"" << m_name << "\" i salready running";
+        LOG_ERROR << "Timer \"" << m_name << "\" is already running";
         return false;
     }
 
@@ -61,8 +61,6 @@ void Timer::stop()
 {
     LOG_ERROR_IF(!m_thread.joinable()) << "Can't stop timer \"" << m_name << "\"";
     m_state.exchange(State::Stoppping);
-
-    m_thread.join();
 }
 
 void Timer::run()

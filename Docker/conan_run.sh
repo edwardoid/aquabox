@@ -10,7 +10,9 @@ DIR="$( cd -P "$( dirname "$SOURCE" )" >/dev/null 2>&1 && pwd )"
 
 source $DIR/set_env.sh $1
 
-sudo docker run -v $SOURCES_DIR:/sources \
+sudo docker run --privileged \
+                -v /var/run/dbus/system_bus_socket:/var/run/dbus/system_bus_socket \
+                -v $SOURCES_DIR:/sources \
                 -v $BUILD_DIR:/build \
                 -it --rm $IMAGE:latest \
                 /bin/bash

@@ -1,6 +1,6 @@
 /*
  * AquaBox
- * Copyright (C) 2019  Eduard Sargsyan
+ * Copyright (C) 2019-2020  Eduard Sargsyan
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -23,19 +23,20 @@
 #include "rest_api.h"
 #include "rule.h"
 #include "device.h"
-#include "sensors_tracker.h"
 #include "rule_parser.h"
 #include "device_parser.h"
 #include "user.h"
 #include "update_events.h"
 #include "network_events.h"
-#include "screen_manager.h"
 #include "options.h"
 #include "repetive_task.h"
 #include "cloud.h"
 #include "web_server.h"
 #include "network_manager.h"
 #include "screen_manager.h"
+#include "global_timer.h"
+#include "rules_timer.h"
+#include <singleton.h>
 #include <pstream.h>
 #include <exception>
 #include <chrono>
@@ -47,29 +48,19 @@
 
 using namespace aquabox;
 
-AquaBox AquaBox::Instance;
-
-
-AquaBox& AquaBox::i()
-{
-    return Instance;
-}
-
 AquaBox::AquaBox()
-    : m_fileAppender("./../log/aquabox.log", LOG_FILE_SIZE_IN_MB * BYTES_IN_MB, MAX_LOG_FILES)
-    , m_globalTimer(new Timer("GlobalRoutines"))
+    : m_pool(Settings::integer(Settings::Keys::THREADS, std::thread::hardware_concurrency()))
+    , m_fileAppender("./../log/aquabox.log", LOG_FILE_SIZE_IN_MB * BYTES_IN_MB, MAX_LOG_FILES)
     , m_rulesTimer(new RulesTimer())
-    , m_cloud(new Cloud())
     , m_server(new WebServer)
-{}
+{
+    //PerformanceMetrics::update();
+}
 
 AquaBox::~AquaBox()
 {
-    delete m_globalTimer;
     delete m_rulesTimer;
-    delete m_cloud;
     delete m_server;
-    delete m_screen;
 }
 
 int AquaBox::start()
@@ -84,11 +75,13 @@ int AquaBox::start()
                 &m_fileAppender);
     }
 
-    NetworkManager::i().setInterface(Settings::string(Settings::Keys::CLIENT_INTERFACE, Settings::Defaults::CLIENT_INTERFACE));
-    // NetworkManager::i().AuthentificationFailed.connect([this]() { postUpdate(std::make_shared<NetworkAuthentifiationFailedEvent>()); });
-    // NetworkManager::i().ConnectingFailed.connect([this]() { postUpdate(std::make_shared<NetworkConnectionFailedEvent>()); });
-    NetworkManager::i().currentConnection.connect([this](Connection) { postUpdate(std::make_shared<NetworkChangedEvent>()); });
-    NetworkManager::i().deviceState.connect([this](NetworkDeviceState) { postUpdate(std::make_shared<NetworkDeviceStateEvent>());});
+    if (Singleton<NetworkManager>::available)
+    {
+        auto nm = Singleton<NetworkManager>::i();
+        nm->setInterface(Settings::string(Settings::Keys::CLIENT_INTERFACE, Settings::Defaults::CLIENT_INTERFACE));
+        nm->currentConnection.connect([this](Connection c) { postUpdate(std::make_shared<NetworkChangedEvent>(c)); });
+        nm->deviceState.connect([this](NetworkDeviceState state) { postUpdate(std::make_shared<NetworkDeviceStateEvent>(state));});
+    }
 
     LOG_INFO << "Starting " << Settings::Defaults::APPLICATION << " ver. " << std::hex << Settings::Defaults::VERSION_MAJOR << "." << Settings::Defaults::VERSION_MINOR;
     if(Options::Lock) {
@@ -122,23 +115,12 @@ int AquaBox::start()
         }
     }
 
-    m_screen = new ScreenManager();
-    m_poolOptions.setThreadCount(Settings::integer(Settings::Keys::THREADS, std::thread::hardware_concurrency()));
-    m_poolOptions.setQueueSize(1024);
-
-    m_pool.reset(new tp::ThreadPool(m_poolOptions));
-
     readDevices(m_wd);
     readRules(m_wd);
     readUsers();
 
-    m_globalTimer->start([this](const Timer::ClockTimePoint&) {
-        if (Options::EnableCloud) {
-            m_cloud->heartheat();
-        }
-        SensorsTracker::processUpdates();
-
-    }, std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::seconds(1)));
+    Singleton<ScreenManager>::i(); // Create manager if needed!
+    m_globalTimer = std::make_unique<GlobalTimer>();
 
     m_rulesTimer->start();
     m_server->start();
@@ -172,7 +154,10 @@ void AquaBox::readRules(const Path& p)
 {
     m_rulesDir = p;
     m_rulesDir.append("rules");
-    m_rules = RulesParser::parse(m_rulesDir);
+    auto candidates = RulesParser::parse(m_rulesDir);
+    std::lock_guard<RulesMap> lock(m_rules);
+    m_rules.clear();
+    m_rules.insert(candidates.begin(), candidates.end());
 }
 
 std::shared_ptr<Device> AquaBox::findDevice(std::string id)
@@ -210,6 +195,7 @@ RulesMap& AquaBox::rules() const
 
 bool AquaBox::addRule(std::shared_ptr<Rule>& rule, bool replace)
 {
+    std::lock_guard<RulesMap> lock(m_rules);
     auto pos = m_rules.find(rule->getId());
     nlohmann::json beforeUpdate;
     if (pos != m_rules.end()) {
@@ -253,6 +239,7 @@ bool AquaBox::addRule(std::shared_ptr<Rule>& rule, bool replace)
 
 bool AquaBox::removeRule(std::shared_ptr<Rule> rule)
 {
+    std::lock_guard<RulesMap> lock(m_rules);
     auto pos = m_rules.find(rule->getId());
     if (pos == m_rules.end()) {
         return false;
@@ -280,6 +267,7 @@ bool AquaBox::removeRule(std::shared_ptr<Rule> rule)
 
 bool AquaBox::updateDevice(std::string id)
 {
+    std::lock_guard<RulesMap> lock(m_rules);
     auto pos = m_devices.find(id);
     if (pos == m_devices.end()) {
         return false;
@@ -301,24 +289,19 @@ UsersMap& AquaBox::users() const
     return m_users;
 }
 
-void AquaBox::doLater(std::function<void(void)>&& task)
+void AquaBox::doLater(const std::string& name, std::function<void(void)>&& task)
 {
-    if(!m_pool->tryPost(task)) {
-        LOG_ERROR << "Can't schedule a new task";
-    }
-}
-
-Cloud& AquaBox::cloud()
-{
-    return *m_cloud;
+    boost::asio::post(m_pool, task);
 }
 
 void AquaBox::postUpdate(std::shared_ptr<Event> event)
 {
     m_server->postUpdate(event);
 
-    if (Options::EnableCloud) {
-        m_cloud->postUpdate(event);
+    auto c = Singleton<Cloud>::i();
+
+    if (c != nullptr) {
+        c->postUpdate(event);
     }
 }
 
@@ -347,9 +330,12 @@ std::string AquaBox::configurationData() const
     configurationDataString += SERIAL_NUMBER;
     configurationDataString += ";";
 
-    configurationDataString += NetworkManager::i().currentConnection.value.ip;
+    if (Singleton<NetworkManager>::i() != nullptr)
+        configurationDataString += Singleton<NetworkManager>::i()->currentConnection.value.ip;
+    else
+        configurationDataString += "aquabox";
     configurationDataString += ";";
 
-    configurationDataString += std::to_string((int)AquaBox::i().systemTemperature());
+    configurationDataString += std::to_string((int)Singleton<AquaBox>::get()->systemTemperature());
     return configurationDataString;
 }

@@ -16,8 +16,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef SCAN_SCREEN_H
-#define SCAN_SCREEN_H
+#pragma once
 
 #include "status_bar_screen.h"
 #include <string>
@@ -27,9 +26,7 @@ namespace aquabox
     class ScanScreen: public StatusBarScreen
     {
     public:
-        ScanScreen(std::string dev): StatusBarScreen(dev) {}
+        ScanScreen() = default;
         virtual void draw() override;
     };
 }
-
-#endif // SCAN_SCREEN_H

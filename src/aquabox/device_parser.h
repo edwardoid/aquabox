@@ -1,6 +1,6 @@
 /*
  * AquaBox
- * Copyright (C) 2019  Eduard Sargsyan
+ * Copyright (C) 2020  Eduard Sargsyan
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,12 +16,11 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef DEVICE_PARSER_H
-#define DEVICE_PARSER_H
+#pragma once
 
 #include <unordered_map>
 #include <memory>
-#include "path.h"
+#include <path.h>
 
 namespace aquabox
 {
@@ -33,5 +32,3 @@ namespace aquabox
         static std::unordered_map<std::string, std::shared_ptr<Device>> parse(Path& root);
     };
 }
-
-#endif // DEVICE_PARSER_H

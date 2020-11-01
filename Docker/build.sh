@@ -1,41 +1,45 @@
 #/bin/bash
 
 function clean_build {
-    rm -rf /build/*
+    rm build.log
+    rm -rf /build/* |& tee -a build.log
 }
 
 function do_build {
-    make -j8
-    chmod +rw -R /build
+    make -j8 |& tee -a build.log
+    chmod +rw -R /build |& tee -a build.log
 }
 
 function prepare_build {
-    conan install /sources --build=missing
-    cmake /sources
+    conan install /sources --build=missing |& tee -a build.log
+#    cmake /sources -DCMAKE_BUILD_TYPE=asan |& tee -a build.log
+#    cmake /sources -DCMAKE_BUILD_TYPE=Release |& tee -a build.log
+    cmake /sources -DCMAKE_BUILD_TYPE=RelWithDebInfo |& tee -a build.log
 }
 
 function copy_file {
-    echo "Copying $1 to /build/bin/$1"
-    cp /build/$1 /build/bin/$1
+    echo "Copying $1 to /build/bin/$1" |& tee -a build.log
+    cp /build/$1 /build/bin/$1 |& tee -a build.log
 }
 
 function del_file {
-    echo "Deleting file /build/bin/$1"
-    rm /build/bin/$1
+    echo "Deleting file /build/bin/$1" |& tee -a build.log
+    rm /build/bin/$1 |& tee -a build.log
 }
 
 function copy_dir {
-    echo "Copying $1 to /build/bin/$1"
-    cp -R /build/$1 /build/bin
+    echo "Copying $1 to /build/bin/$1" |& tee -a build.log
+    cp -R /build/$1 /build/bin |& tee -a build.log
 }
 
 function del_dir {
     echo "Deleting directory /build/bin/$1"
-    rm -rf /build/bin/$1
+    rm -rf /build/bin/$1 |& tee -a build.log
 }
 
 cd /sources
 GIT_HASH=$(git log --pretty=format:'%h' -n 1)
+GIT_BRANCH=$(git show-branch)
 cd /build
 BUILD_TIME=$(date +%s)
 
@@ -44,35 +48,47 @@ NAME_BASE="-${BUILD_PLATFORM}_${GIT_HASH}_${BUILD_TIME}"
 CLIENT_PKG_NAME="aquabox-client$NAME_BASE"
 SERVER_PKG_NAME="aquabox-server$NAME_BASE"
 
-$CC --version > version.txt
-date >> version.txt
-
-function pack_server {
-    copy_file aquabox-service
-    copy_file config.json
-    tar cvfz $SERVER_PKG_NAME.tar.gz version.txt lib bin
-    cp $SERVER_PKG_NAME.tar.gz aquabox-server-latest.tar.gz
-    del_file aquabox-service
+function create_version {
+    touch version.txt
+    $CC --version > version.txt
+    echo "Branch: $GIT_BRANCH" >> version.txt
+    echo "Commit $GIT_HASH" >> version.txt
+    echo "Platform: $BUILD_PLATFORM" >> version.txt
+    echo "Machine: $(uname -a)" >> version.txt
+    echo "Bild started at $(date)" >> version.txt
+    conan --version >> version.txt
 }
 
-del_file aquabox-service
+function pack_server {
+    tar cvfz $SERVER_PKG_NAME.tar.gz \
+                    version.txt \
+                    lib \
+                    bin/aquabox-service \
+                    bin/aquabox.service \
+                    bin/config.json \
+                    bin/startup.sh |& tee -a build.log
+    cp $SERVER_PKG_NAME.tar.gz aquabox-server-latest.tar.gz |& tee -a build.log
+}
 
 function pack_client {
-    echo "Copy"
-    copy_file aquabox
-    copy_file aquabox.service
-    copy_file startup.sh
-    copy_dir assets
-    copy_dir rules
-    copy_dir devices
-    tar cvfz $CLIENT_PKG_NAME.tar.gz version.txt lib bin
-    cp $CLIENT_PKG_NAME.tar.gz aquabox-latest.tar.gz
+    tar cvfz $CLIENT_PKG_NAME.tar.gz \
+                    version.txt \
+                    lib \
+                    bin/aquabox \
+                    bin/aquabox.service \
+                    bin/assets \
+                    bin/config.json \
+                    bin/devices \
+                    bin/rules \
+                    bin/startup.sh |& tee -a build.log
+    cp $CLIENT_PKG_NAME.tar.gz aquabox-latest.tar.gz |& tee -a build.log
 }
 
 cd /build
 
 clean_build
 prepare_build
+create_version
 do_build
 pack_server
 pack_client

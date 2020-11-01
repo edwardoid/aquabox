@@ -43,9 +43,11 @@ RulesTimer::RulesTimer()
 void RulesTimer::start()
 {
     m_timer.start([this](const Timer::ClockTimePoint& when){
-        AquaBox::i().doLater([this, when]() {
+        Singleton<AquaBox>::get()->doLater("rule_executor", [this, when]() {
             RulesMap rulesToDelete;
-            for(auto rule : AquaBox::i().rules()) {
+            RulesMap& allRules = Singleton<AquaBox>::get()->rules();
+            std::lock_guard<RulesMap> lock(allRules);
+            for(auto rule : allRules) {
                 const Time at = rule.second->getRepeat().getDeleteAfter();
                 const RepeatUnit unit = rule.second->getRepeat().getUnit();
                 if(at != 0 &&
@@ -60,10 +62,10 @@ void RulesTimer::start()
             }
 
             for(auto rule : rulesToDelete) {
-                AquaBox::i().removeRule(rule.second);
+                Singleton<AquaBox>::get()->removeRule(rule.second);
             }
 
-            for(auto& dev : AquaBox::i().devices()) {
+            for(auto& dev : Singleton<AquaBox>::get()->devices()) {
                 auto relay = std::dynamic_pointer_cast<Relay>(dev.second);
                 if (relay == nullptr) {
                     continue;
@@ -73,11 +75,11 @@ void RulesTimer::start()
                     LOG_DEBUG_IF_(1, true) << "Device" << (std::string)(relay->getName()) << " changed to Turned " << (relay->turnedOn() ? "ON" : "OFF");
                 }
                 if (isOn != relay->turnedOn()) {
-                    AquaBox::i().postUpdate(std::make_shared<RuleTriggeredEvent>(relay));
+                    Singleton<AquaBox>::get()->postUpdate(std::make_shared<RuleTriggeredEvent>(relay));
                 }
             }
         });
-    }, std::chrono::milliseconds(1000)); // once per second
+    }, std::chrono::seconds(1)); // once per second
 }
 
 void RulesTimer::stop()

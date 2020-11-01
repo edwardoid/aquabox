@@ -27,7 +27,7 @@ namespace aquabox
     class MainScreen: public StatusBarScreen
     {
     public:
-        MainScreen(std::string dev);
+        MainScreen();
         virtual void draw() override;
     private:
         LIBFB_NS::Text m_text;

@@ -25,7 +25,7 @@ namespace aquabox
     class NetworkScreen: public StatusBarScreen
     {
     public:
-        NetworkScreen(std::string dev);
+        NetworkScreen() = default;
         virtual void draw() override;
     };
 }

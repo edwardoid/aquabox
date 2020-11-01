@@ -28,3 +28,6 @@
 [submodule "3dp/pstreams"]
 	path = 3dp/pstreams
 	url = https://github.com/jwakely/pstreams.git
+[submodule "3dp/libstats"]
+	path = 3dp/libstats
+	url = https://github.com/edwardoid/libstats.git

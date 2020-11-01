@@ -20,12 +20,14 @@
 
 #include "event.h"
 #include "network_change_reason.h"
+#include "network_manager.h"
+#include "network_manager_device_state.h"
 
 namespace aquabox
 {
-    class NetworkDeviceStateEvent: public BoxEvent { public: NetworkDeviceStateEvent(); };
+    class NetworkDeviceStateEvent: public BoxEvent { public: NetworkDeviceStateEvent(const nm::NMDeviceState& state); };
 
-    class NetworkChangedEvent: public BoxEvent { public: NetworkChangedEvent(); };
+    class NetworkChangedEvent: public BoxEvent { public: NetworkChangedEvent(const Connection& connection); };
 
     class NetworkConnectionFailedEvent: public BoxEvent { public: NetworkConnectionFailedEvent(); };
 

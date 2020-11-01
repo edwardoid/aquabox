@@ -1,4 +1,4 @@
-FROM debian:stable
+FROM ubuntu:20.10
 
 ENV DEBIAN_FRONTEND noninteractive
 
@@ -6,7 +6,10 @@ LABEL maintainer="Edward Sargsyan <edward.sarkisyan@gmail.com>"
 
 USER root
 
-RUN apt-get update
+#RUN add-apt-repository universe
+
+RUN apt-get update --fix-missing && apt-get install -y \
+    software-properties-common
 
 # roc dependencies
 RUN apt-get install -y \
@@ -18,15 +21,27 @@ RUN apt-get install -y \
     automake-1.15 \
     pkg-config \
     make \
-    cmake \
-    tar
+    tar \
+    valgrind \
+    vim \
+    git \
+    ssh \
+    sshpass \
+    python3-pip
+
+RUN apt-get purge -y cmake
 
 # tools
-RUN apt-get install -y \
-    python-pip git ssh sshpass && \
-    pip install conan --upgrade
+RUN pip install conan --upgrade
 
-ENV CFLAGS=-pthread \
+RUN cd /opt && \
+    wget -c https://github.com/Kitware/CMake/releases/download/v3.18.4/cmake-3.18.4-Linux-x86_64.sh && \
+    chmod +x /opt/cmake-3.18.4-Linux-x86_64.sh && \
+    bash /opt/cmake-3.18.4-Linux-x86_64.sh --skip-license --prefix=/usr/local/
+
+
+ENV CC=gcc \
+    CFLAGS=-pthread \
     CXXFLAGS=-pthread \
     LDFLAGS=-pthread \
     BUILD_PLATFORM=x86_64 

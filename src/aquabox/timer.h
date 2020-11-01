@@ -23,6 +23,7 @@
 #include <chrono>
 #include <atomic>
 #include <functional>
+#include <string>
 
 namespace aquabox
 {

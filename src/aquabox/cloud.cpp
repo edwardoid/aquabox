@@ -24,14 +24,25 @@
 #include "event.h"
 #include "commands_stream.h"
 #include "network_manager.h"
+#include <singleton.h>
 #include <nlohmann/json.hpp>
 
 #define AUTH_URL "/hw/api/v1/register"
 
 using namespace aquabox;
 
+Cloud::Cloud()
+    : m_updateTimeout(std::chrono::minutes(1))
+{
+
+}
+
 void Cloud::connect()
 {
+    if (!m_updateTimeout.expired()) {
+        return;
+    }
+    m_updateTimeout.reset();
     for(auto s : m_streams)
     {
         try
@@ -54,6 +65,18 @@ void Cloud::disconnect()
 
 bool Cloud::isRegistered()
 {
+    if (!m_updateTimeout.expired()) {
+        return true;
+    }
+    m_updateTimeout.reset();
+
+    bool streamsAreOk = true;
+    for(auto s : m_streams) {
+        streamsAreOk &= s.second->isAttached();
+    }
+    if (streamsAreOk && !m_streams.empty()) {
+        return streamsAreOk;
+    }
     const auto cloudBaseUrl = Settings::string(Settings::Keys::CLOUD_URL, Settings::Defaults::CLOUD_URL);
     const std::string cloudHttpUrl = cloudBaseUrl + ":" + std::to_string(Settings::integer(Settings::Keys::CLOUD_PORT, Settings::Defaults::CLOUD_PORT));
     const std::string cloudWSUrl =  cloudBaseUrl + ":" + std::to_string(Settings::integer(Settings::Keys::CLOUD_WS_PORT, Settings::Defaults::CLOUD_WS_PORT));
@@ -94,7 +117,6 @@ bool Cloud::isRegistered()
                         }
                         
                         if (existingStream) {
-                            LOG_DEBUG << "Stream " << name << " exists";
                             if (!existingStream->isAttached())
                             {
                                 LOG_DEBUG << "Stream " << name << " exists but not attached. Reattaching...";
@@ -114,7 +136,6 @@ bool Cloud::isRegistered()
                     }
                 }
             }
-            LOG_ERROR << "Device is registered.";
             return true;
         } else {
             disconnect();
@@ -145,12 +166,14 @@ void Cloud::heartheat()
         return;
     }
     m_working = true;
-    AquaBox::i().doLater([this](){
+    Singleton<AquaBox>::get()->doLater("cloud_connection_manager", [this](){
         do {
             if (isConnected()) {
                 break;
             }
-            if (NetworkManager::i().connectedToInternet()) {
+            auto nm = Singleton<NetworkManager>::i();
+
+            if (nm != nullptr && !nm->connectedToInternet()) {
                 break;
             }
 

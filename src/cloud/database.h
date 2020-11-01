@@ -31,7 +31,7 @@ namespace aquabox
     public:
         static Database& i();
         bool wasProduced(const std::string id);
-        bool isApplicationAuthorized(std::string app, std::string box) { return true; }
+        bool isApplicationAuthorized(std::string app, std::string box);
         void setConnectedApps(std::string id, std::vector<std::string> appId);
         void setStreamAvailable(std::string id, std::string stream, bool available);
         nlohmann::json firmwareVersions(std::string version);

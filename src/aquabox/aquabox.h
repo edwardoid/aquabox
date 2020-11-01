@@ -1,6 +1,6 @@
 /*
  * AquaBox
- * Copyright (C) 2019  Eduard Sargsyan
+ * Copyright (C) 2020  Eduard Sargsyan
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,15 +16,15 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef AQUABOX_H
-#define AQUABOX_H
+#pragma once
 
 #include "serial.h"
-#include <thread_pool.hpp>
-#include "rules_timer.h"
 #include "path.h"
+#include "log.h"
+#include "lockable_container.h"
+#include <boost/asio.hpp>
 #include <memory>
-#include <unordered_map>
+#include <singleton.h>
 
 #define LOG_FILE_SIZE_IN_MB 10
 #define BYTES_IN_MB 1000000
@@ -36,25 +36,25 @@ namespace aquabox
     class Rule;
     class User;
     class Event;
-    class Cloud;
     class WebServer;
-    class ScreenManager;
     class Timer;
     class RulesTimer;
+    class ThreadPool;
+    class GlobalTimer;
 
     using DevicesMap = std::unordered_map<std::string, std::shared_ptr<Device>>;
-    using RulesMap = std::unordered_map<std::string, std::shared_ptr<Rule>>;
+    using RulesMap = LockableHashMap<std::string, std::shared_ptr<Rule>>;
     using UsersMap = std::unordered_map<std::string, std::shared_ptr<User>>;
 
     class AquaBox
     {
+    protected:
         AquaBox(const AquaBox&) = delete;
         AquaBox(AquaBox&&) = delete;
         AquaBox& operator = (const AquaBox&) = delete;
         AquaBox();
-        static AquaBox Instance;
+        friend class Singleton<AquaBox>;
     public:
-        static AquaBox& i();
         int start();
         ~AquaBox();
         std::shared_ptr<Device> findDevice(std::string id);
@@ -66,9 +66,8 @@ namespace aquabox
         bool addRule(std::shared_ptr<Rule>& rule, bool replace = false);
         bool removeRule(std::shared_ptr<Rule> rule);
         bool updateDevice(std::string id);
-        void doLater(std::function<void(void)>&& task);
+        void doLater(const std::string& name, std::function<void(void)>&& task);
         void postUpdate(std::shared_ptr<Event> event);
-        Cloud& cloud();
         bool assistantIsConnected() const { return false; }
         double systemTemperature() const;
         std::string configurationData() const;
@@ -79,22 +78,17 @@ namespace aquabox
         void readUsers();
         void readRules(const Path& root);
     private:
+        boost::asio::thread_pool m_pool;
         plog::ColorConsoleAppender<plog::TxtFormatter> m_consoleAppender;
         plog::RollingFileAppender<plog::TxtFormatter> m_fileAppender;
-        tp::ThreadPoolOptions m_poolOptions;
-        std::unique_ptr<tp::ThreadPool> m_pool;
         mutable DevicesMap m_devices;
         mutable UsersMap m_users;
         mutable RulesMap m_rules;
-        Cloud* m_cloud;
         WebServer* m_server;
         Path m_wd;
         Path m_devicesDir;
         Path m_rulesDir;
-        class ScreenManager* m_screen = nullptr;
+        std::unique_ptr<GlobalTimer> m_globalTimer;
         RulesTimer* m_rulesTimer = nullptr;
-        Timer* m_globalTimer = nullptr;
     };
 }
-
-#endif // AQUABOX_H

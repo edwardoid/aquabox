@@ -1,6 +1,6 @@
 /*
  * AquaBox
- * Copyright (C) 2019  Eduard Sargsyan
+ * Copyright (C) 2019-2020 Eduard Sargsyan
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,12 +16,10 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef RULESCONTAINER_H
-#define RULESCONTAINER_H
+#pragma once
 
-#include <string>
-#include <unordered_map>
 #include <memory>
+#include <unordered_map>
 
 namespace aquabox
 {
@@ -34,5 +32,3 @@ namespace aquabox
         static std::unordered_map<std::string, std::shared_ptr<Rule>> parse(Path& root);
     };
 }
-
-#endif // RULE_H

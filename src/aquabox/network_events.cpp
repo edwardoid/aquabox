@@ -18,17 +18,20 @@
  */
 
 #include "network_events.h"
-#include "network_manager.h"
-#include "network_manager_device_state.h"
 #include "enumerations.h"
-
+#include <singleton.h>
 using namespace aquabox;
 
-NetworkDeviceStateEvent::NetworkDeviceStateEvent()
+NetworkDeviceStateEvent::NetworkDeviceStateEvent(const nm::NMDeviceState& state)
 {
-    Connection net = (Connection) NetworkManager::i().currentConnection;
+    auto nm = Singleton<NetworkManager>::i();
+
+    if (nm == nullptr) {
+        return;
+    }
+    Connection net = (Connection) nm->currentConnection;
     setData({
-        { "state", Serializable<nm::NMDeviceState>::convert((nm::NMDeviceState )NetworkManager::i().deviceState) }
+        { "state", Serializable<nm::NMDeviceState>::convert(state) }
     });
     setPropertiesUpdate({
         { "ssid", net.ssid },
@@ -36,12 +39,16 @@ NetworkDeviceStateEvent::NetworkDeviceStateEvent()
     });
 }
 
-NetworkChangedEvent::NetworkChangedEvent()
+NetworkChangedEvent::NetworkChangedEvent(const Connection& net)
 {
-    Connection net = (Connection) NetworkManager::i().currentConnection;
+    auto nm = Singleton<NetworkManager>::i();
+
+    if (nm == nullptr) {
+        return;
+    }
     setData({
         { "network", net.ssid },
-        { "reason", Serializable<NetworkChangeReason>::convert(NetworkManager::i().changeReason()) }
+        { "reason", Serializable<NetworkChangeReason>::convert(nm->changeReason()) }
     });
     setPropertiesUpdate({
         { "ssid", net.ssid },
@@ -53,7 +60,13 @@ NetworkChangedEvent::NetworkChangedEvent()
 
 NetworkConnectionFailedEvent::NetworkConnectionFailedEvent()
 {
-    Connection net = (Connection) NetworkManager::i().currentConnection;
+    auto nm = Singleton<NetworkManager>::i();
+
+    if (nm == nullptr) {
+        return;
+    }
+   
+    Connection net = (Connection) nm->currentConnection;
     setData({
         { "network", net.ssid },
         { "reason", "connectoin_failed"}
@@ -66,7 +79,13 @@ NetworkConnectionFailedEvent::NetworkConnectionFailedEvent()
 
 NetworkAuthentifiationFailedEvent::NetworkAuthentifiationFailedEvent()
 {
-    Connection net = (Connection) NetworkManager::i().currentConnection;
+    auto nm = Singleton<NetworkManager>::i();
+
+    if (nm == nullptr) {
+        return;
+    }
+
+    Connection net = (Connection) nm->currentConnection;
     setData({
         { "network", net.ssid },
         { "reason", "authentification_failed"}

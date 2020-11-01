@@ -5,6 +5,12 @@ LABEL maintainer="Edward Sargsyan <edward.sarkisyan@gmail.com>"
 
 USER root
 
+# RUN wget -c https://sourceforge.net/projects/raspberry-pi-cross-compilers/files/Raspberry%20Pi%20GCC%20Cross-Compiler%20Toolchains/Buster/GCC%2010.1.0/Raspberry%20Pi%201%2C%20Zero/cross-gcc-10.1.0-pi_0-1.tar.gz && \
+#    tar xvf cross-gcc-10.1.0-pi_0-1.tar.gz && \
+#    cp -R cross-pi-gcc-10.1.0-0/* /usr && \
+#    rm -rf cross-pi-gcc-10.1.0-0 && \
+#
+#
 RUN wget -c https://liquidtelecom.dl.sourceforge.net/project/raspberry-pi-cross-compilers/Raspberry%20Pi%20GCC%20Cross-Compiler%20Toolchains/Buster/GCC%208.3.0/Raspberry%20Pi%201%2C%20Zero/cross-gcc-8.3.0-pi_0-1.tar.gz && \
     tar xf cross-gcc-8.3.0-pi_0-1.tar.gz && \
     cp -R cross-pi-gcc-8.3.0-0/* /usr && \
@@ -16,6 +22,7 @@ RUN wget -c https://liquidtelecom.dl.sourceforge.net/project/raspberry-pi-cross-
     conan profile update settings.build_type=Release default && \
     conan profile update settings.arch=armv7hf default && \
     conan profile update settings.compiler=gcc default && \
+    conan profile update settings.compiler.version=8 default && \
     conan remote add iot https://api.bintray.com/conan/edwardoid/iot && \
     conan remote add bincrafters https://api.bintray.com/conan/bincrafters/public-conan && \
     conan remote add devcodeone https://api.bintray.com/conan/devcodeone/public-conan && \
@@ -30,7 +37,7 @@ RUN wget -c https://liquidtelecom.dl.sourceforge.net/project/raspberry-pi-cross-
     update-alternatives --install /usr/bin/ar ar /usr/bin/arm-linux-gnueabihf-ar 100 && \
     update-alternatives --install /usr/bin/as as /usr/bin/arm-linux-gnueabihf-as 100
 
-RUN apt-get update && \
+RUN apt-get update --fix-missing && \
     apt-get install ssh sshpass -y
 
 ENV CC=arm-linux-gnueabihf-gcc \

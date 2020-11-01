@@ -198,7 +198,7 @@ BytesCount GPIO::read(Bytes& data, const Offset)
 
 void GPIO::setOn()
 {
-    static Bytes ON({ 1 });
+    static Bytes ON({ 0 });
     if (ON.size() != send(ON, ON.size())) {
         LOG_ERROR << "Can't write to GPIO " << ValueFile;
     }
@@ -206,7 +206,7 @@ void GPIO::setOn()
 
 void GPIO::setOff()
 {
-    static Bytes OFF({ 0 });
+    static Bytes OFF({ 1 });
     if (OFF.size() != send(OFF, OFF.size())) {
         LOG_ERROR << "Can't write to GPIO " << ValueFile;
     }
@@ -218,5 +218,5 @@ bool GPIO::isOn()
     if (0 == read(V)) {
         return false;
     }
-    return V[0] == 1;
+    return V[0] == 0;
 }

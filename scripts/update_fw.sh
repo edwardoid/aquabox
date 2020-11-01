@@ -24,10 +24,13 @@ rm -rf $AB_BACKUP_DIR
 echo "Making backup"
 mv $AB_DIR $AB_BACKUP_DIR
 
-echo "Installing update"
+echo "Installing update"$AB_DIR/bin/config.json
 mv $TMP_DIR $AB_DIR
 
 cd $AB_DIR
+
+echo "Restoring config file from $AB_BACKUP_DIR/bin/config.json to $AB_DIR/bin/config.json"
+cp $AB_BACKUP_DIR/bin/config.json $AB_DIR/bin/config.json
 
 echo "Restarting service"
 systemctl restart aquabox

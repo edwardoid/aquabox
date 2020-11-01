@@ -23,9 +23,10 @@
 #include <framebuffer.h>
 #include <pngprovider.h>
 #include <sprite.h>
+#include <singleton.h>
 #include "aquabox.h"
 #include <qrcode.h>
-#include <helpers.h>
+#include <libfb_globals.h>
 using namespace aquabox;
 
 #define degree(angle) ((double)(angle) * 0.0174533)
@@ -36,25 +37,30 @@ using namespace aquabox;
 
 void ScanScreen::draw()
 {
+    auto fb = Singleton<LIBFB_NS::FrameBuffer>::i();
+    if (fb == nullptr) {
+        return;
+    }
+
     StatusBarScreen::draw();
 
     int margins = 2;
-    int canvasWidth = fb().width() - 2 * margins;
-    int canvasHeight = fb().height() - 24 - 2 * margins;
+    int canvasWidth = fb->width() - 2 * margins;
+    int canvasHeight = fb->height() - 24 - 2 * margins;
 
     LIBFB_NS::QRCode code;
-    code.setText(AquaBox::i().configurationData());
+    code.setText(Singleton<AquaBox>::get()->configurationData());
     code.setColors(
         0x000000FF,
         0xFFFFFFFF
     );
     code.resizeTo(std::min(canvasWidth, canvasHeight));
 
-    std::string temp = std::to_string(AquaBox::i().systemTemperature());
+    std::string temp = std::to_string(Singleton<AquaBox>::get()->systemTemperature());
     temp += "°C";
 
     code.mapTo((canvasWidth - code.width()) / 2,
                24 + (canvasHeight - code.height()) / 2);
 
-    fb().draw(&code);
+    fb->draw(&code);
 }

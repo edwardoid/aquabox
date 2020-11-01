@@ -1,6 +1,6 @@
 /*
  * AquaBox
- * Copyright (C) 2019  Eduard Sargsyan
+ * Copyright (C) 2019-2020 Eduard Sargsyan
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -25,8 +25,6 @@ using namespace aquabox;
 #include <ow_bus.h>
 #include <unordered_map>
 
-using namespace aquabox;
-
 std::shared_ptr<Hardware> PhysicalOneWireBus::hw(std::string hw)
 {
     static std::unordered_map<std::string, std::shared_ptr<OneWireDevice> > devices;
@@ -38,7 +36,8 @@ std::shared_ptr<Hardware> PhysicalOneWireBus::hw(std::string hw)
 
     auto pos = devices.find(hw);
     if (pos == devices.end()) {
-        LOG_ERROR << "Can't find 1-Wire device with adress: " << hw;
+        static int queriesCount;
+        LOG_ERROR_IF((++queriesCount) % 10 == 0) << "Can't find 1-Wire device with adress: " << hw;
     }
     return pos == devices.end() ? nullptr : pos->second;
 }

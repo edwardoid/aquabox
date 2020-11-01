@@ -115,6 +115,12 @@ bool Relay::performPendingAction()
     }
 
     m_pendingActions.clear();
+
+    if ((actionToPerform == ActionType::TurnOn) == turnedOn())
+    {
+        return false;
+    }
+
     switch(actionToPerform)
     {
         case ActionType::TurnOn: {

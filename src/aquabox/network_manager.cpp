@@ -31,21 +31,15 @@ using namespace aquabox;
 
 NetworkManager::NetworkManager()
     : m_reconnectThread(std::bind(&NetworkManager::reconnect, this))
+    , m_changeReason(NetworkChangeReason::NothingSpecial)
+    , currentState(NetworkingState::Unknown)
+    , deviceState(NetworkDeviceState::NM_DEVICE_STATE_UNKNOWN)
 {
     m_nm.ActiveConnectionsChanged.connect(std::bind(&NetworkManager::onActiveConnectionChanged, this, std::placeholders::_1));
 
     m_nm.StateChanged.connect(currentState);
 
     m_reconnectThread.detach();
-}
-
-NetworkManager::~NetworkManager()
-{}
-
-NetworkManager& NetworkManager::i()
-{
-    static NetworkManager instance;
-    return instance;
 }
 
 void NetworkManager::reconnect()
@@ -62,6 +56,7 @@ void NetworkManager::reconnect()
 
             if (m_connectingInProgress.try_lock()) {
                 try {
+                    LOG_INFO << "Reconnecting...";
                     activateConnection(uuid);
                 }
                 catch(std::exception& ex) {
@@ -248,6 +243,7 @@ std::string NetworkManager::connect(const std::string& ssid, const std::string& 
 
 bool NetworkManager::activateConnection(std::string uuid)
 {
+    LOG_DEBUG << "Activating connection " << uuid;
     auto conn = m_nm.getConnectionByUuid(uuid);
     if (conn == nullptr) {
         return false;

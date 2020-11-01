@@ -20,7 +20,12 @@
 #include "options.h"
 #include "settings.h"
 #include "stacktrace.h"
+#include "screen_manager.h"
+#include "cloud.h"
+#include "network_manager.h"
 #include <iostream>
+#include <framebuffer.h>
+#include <singleton.h>
 
 int main(int argc, char** argv)
 {
@@ -40,6 +45,9 @@ int main(int argc, char** argv)
         else if(strcmp(argv[i], "--disable-access-point") == 0) {
             aquabox::Options::AccessPoint = false;
         }
+        else if(strcmp(argv[i], "--ignore-networking") == 0) {
+            aquabox::Options::UseNetworkManager = false;
+        }
         else if(strcmp(argv[i], "--standalone") == 0) {
             aquabox::Options::EnableCloud = false;
         }
@@ -56,10 +64,15 @@ int main(int argc, char** argv)
                       << " --ignore-lock            Do not create lock/runfiles\n"
                       << " --disable-access-point   Do not switch to AP mode if there is no internet connection\n"
                       << " --standalone             Do not connect to remote service\n"
+                      << " --ignore-networking      Do not connect to NetworkManager\n"
                       << " --help                   Show this help"
                       << std::endl;
             return 0;
         }
     }
-    return aquabox::AquaBox::i().start();
+    aquabox::Singleton<LIBFB_NS::FrameBuffer>::available = aquabox::Options::Render;
+    aquabox::Singleton<aquabox::ScreenManager>::available = aquabox::Singleton<LIBFB_NS::FrameBuffer>::available;
+    aquabox::Singleton<aquabox::Cloud>::available = aquabox::Options::EnableCloud;
+    aquabox::Singleton<aquabox::NetworkManager>::available = aquabox::Options::UseNetworkManager;
+    return aquabox::Singleton<aquabox::AquaBox>::get()->start();
 }
