@@ -26,5 +26,6 @@ namespace aquabox
     {
     public:
         GlobalTimer();
+        void waitToFinish();
     };
 }

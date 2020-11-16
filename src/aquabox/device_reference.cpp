@@ -28,6 +28,5 @@ DeviceReference::DeviceReference(const std::string& name, bool required)
 
 std::shared_ptr<Device> DeviceReference::resolve() const
 {
-    auto i = Singleton<AquaBox>::get()->devices().find(Value);
-    return i == Singleton<AquaBox>::get()->devices().end() ? nullptr : i->second;
+    return Singleton<AquaBox>::get()->devices().get(Value, nullptr);
 }

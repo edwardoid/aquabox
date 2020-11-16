@@ -16,16 +16,20 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#pragma once
+#include "events_stream.h"
+#include "log.h"
 
-#include "status_bar_screen.h"
+using namespace aquabox;
 
-namespace aquabox
+EventsStream::EventsStream(const std::string& url)
+    : CloudStream(url)
+{}
+
+EventsStream::~EventsStream()
+{}
+
+nlohmann::json EventsStream::messageReceived(const nlohmann::json& message)
 {
-    class NetworkScreen: public StatusBarScreen
-    {
-    public:
-        NetworkScreen() = default;
-        virtual void draw() override;
-    };
+    LOG_ERROR << "Events stream should not receive messages!";
+    return message;
 }

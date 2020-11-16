@@ -1,6 +1,6 @@
 /*
  * AquaBox
- * Copyright (C) 2020  Eduard Sargsyan
+ * Copyright (C) 2019  Eduard Sargsyan
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,11 +16,24 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "network_screen.h"
+#pragma once
 
-using namespace aquabox;
+#include <tgbot/tgbot.h>
+#include <string>
+#include <thread>
 
-void NetworkScreen::draw()
+namespace aquabox
 {
-
+    class TelegramBot
+    {
+    public:
+        TelegramBot(const std::string& token = "1406003356:AAEE_dI8UiBKAhbkBEvUvSewWbGaG5Zwubg");
+        ~TelegramBot();
+        void start();
+    private:
+        void setup();
+    private:
+        TgBot::Bot m_bot;
+        std::thread m_loop;
+    };
 }

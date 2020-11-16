@@ -41,6 +41,7 @@
 #include <exception>
 #include <chrono>
 #include <random>
+#include <telegram_bot.h>
 
 #define LOG_FILE_SIZE_IN_MB 10
 #define BYTES_IN_MB 1000000
@@ -49,10 +50,7 @@
 using namespace aquabox;
 
 AquaBox::AquaBox()
-    : m_pool(Settings::integer(Settings::Keys::THREADS, std::thread::hardware_concurrency()))
-    , m_fileAppender("./../log/aquabox.log", LOG_FILE_SIZE_IN_MB * BYTES_IN_MB, MAX_LOG_FILES)
-    , m_rulesTimer(new RulesTimer())
-    , m_server(new WebServer)
+    : m_pool(Settings::integer(Settings::Keys::THREADS, std::thread::hardware_concurrency())), m_fileAppender("./../log/aquabox.log", LOG_FILE_SIZE_IN_MB * BYTES_IN_MB, MAX_LOG_FILES), m_rulesTimer(new RulesTimer()), m_server(new WebServer)
 {
     //PerformanceMetrics::update();
 }
@@ -67,12 +65,13 @@ int AquaBox::start()
 {
     Lockfile lock;
 
-    plog::init( plog::severityFromString(Settings::string(Settings::Keys::LOG_LEVEL, plog::severityToString(plog::Severity::info)).c_str()),
-                &m_consoleAppender);
+    plog::init(plog::severityFromString(Settings::string(Settings::Keys::LOG_LEVEL, plog::severityToString(plog::Severity::info)).c_str()),
+               &m_consoleAppender);
 
-    if (!Options::Service) {
-        plog::init( plog::severityFromString(Settings::string(Settings::Keys::LOG_LEVEL, plog::severityToString(plog::Severity::info)).c_str()),
-                &m_fileAppender);
+    if (!Options::Service)
+    {
+        plog::init(plog::severityFromString(Settings::string(Settings::Keys::LOG_LEVEL, plog::severityToString(plog::Severity::info)).c_str()),
+                   &m_fileAppender);
     }
 
     if (Singleton<NetworkManager>::available)
@@ -80,12 +79,14 @@ int AquaBox::start()
         auto nm = Singleton<NetworkManager>::i();
         nm->setInterface(Settings::string(Settings::Keys::CLIENT_INTERFACE, Settings::Defaults::CLIENT_INTERFACE));
         nm->currentConnection.connect([this](Connection c) { postUpdate(std::make_shared<NetworkChangedEvent>(c)); });
-        nm->deviceState.connect([this](NetworkDeviceState state) { postUpdate(std::make_shared<NetworkDeviceStateEvent>(state));});
+        nm->deviceState.connect([this](NetworkDeviceState state) { postUpdate(std::make_shared<NetworkDeviceStateEvent>(state)); });
     }
 
     LOG_INFO << "Starting " << Settings::Defaults::APPLICATION << " ver. " << std::hex << Settings::Defaults::VERSION_MAJOR << "." << Settings::Defaults::VERSION_MINOR;
-    if(Options::Lock) {
-        if (!lock.create()) {
+    if (Options::Lock)
+    {
+        if (!lock.create())
+        {
             LOG_FATAL << "Another instance of " << Settings::Defaults::APPLICATION << " is running...";
             std::exit(EXIT_FAILURE);
         }
@@ -97,23 +98,32 @@ int AquaBox::start()
     procPath += "/exe";
 
     char cwd[1024];
-    memset(cwd,'\0', 1024);
+    memset(cwd, '\0', 1024);
 
     int bytes = std::min<size_t>(readlink(procPath.c_str(), cwd, 1024), 1024 - 1);
-    if(bytes >= 0) {
+    if (bytes >= 0)
+    {
         cwd[bytes] = '\0';
     }
 
     m_wd = Settings::string(Settings::Keys::WORKING_DIRECTORY, cwd);
-    if (!m_wd.normalize()) {
+    if (!m_wd.normalize())
+    {
         LOG_ERROR << "Bad working directory path " << m_wd;
-    } else {
-        if(0 != chdir(m_wd.c_str())) {
+    }
+    else
+    {
+        if (0 != chdir(m_wd.c_str()))
+        {
             LOG_ERROR << "Can't change working directory to " << m_wd << " errno: " << errno << " : " << strerror(errno);
-        } else {
+        }
+        else
+        {
             LOG_INFO << "Changed working direcotry to " << m_wd;
         }
     }
+
+    Singleton<TelegramBot>::available = !Settings::string(Settings::Keys::TELEGRAM_BOT_API, "").empty();
 
     readDevices(m_wd);
     readRules(m_wd);
@@ -125,16 +135,21 @@ int AquaBox::start()
     m_rulesTimer->start();
     m_server->start();
 
-    std::getchar();
+    auto telegram = Singleton<TelegramBot>::i();
+    if (telegram != nullptr) {
+        telegram->start();
+    }
+
+    m_globalTimer->waitToFinish();
 
     return EXIT_SUCCESS;
 }
 
-void AquaBox::readDevices(const Path& p)
+void AquaBox::readDevices(const Path &p)
 {
     m_devicesDir = p;
     m_devicesDir.append("devices");
-    m_devices = DeviceParser::parse(m_devicesDir);
+    m_devices.set(DeviceParser::parse(m_devicesDir));
 }
 
 void AquaBox::readUsers()
@@ -142,72 +157,73 @@ void AquaBox::readUsers()
     auto users = Settings::array(Settings::Keys::USERS);
 
     LOG_INFO << "Loading " << users.size() << " users...";
-    for (auto u : users) {
+    for (auto u : users)
+    {
         auto usr = std::make_shared<User>();
-        if(usr->init(u)) {
-            m_users.insert({usr->user(), usr});
+        if (usr->init(u))
+        {
+            m_users.insert(usr->user(), usr);
         }
     }
 }
 
-void AquaBox::readRules(const Path& p)
+void AquaBox::readRules(const Path &p)
 {
     m_rulesDir = p;
     m_rulesDir.append("rules");
-    auto candidates = RulesParser::parse(m_rulesDir);
-    std::lock_guard<RulesMap> lock(m_rules);
-    m_rules.clear();
-    m_rules.insert(candidates.begin(), candidates.end());
+    m_rules.set(RulesParser::parse(m_rulesDir));
 }
 
-std::shared_ptr<Device> AquaBox::findDevice(std::string id)
+std::shared_ptr<Device> AquaBox::findDevice(const std::string &id)
 {
-    auto p = m_devices.find(id);
-    if (p == m_devices.end()) {
-        return nullptr;
-    }
-    return p->second;
+    return m_devices.get(id, nullptr);
 }
 
-std::shared_ptr<Rule> AquaBox::findRule(std::string id)
+std::shared_ptr<Rule> AquaBox::findRule(const std::string &id)
 {
-    auto p = m_rules.find(id);
-    if (p == m_rules.end()) {
-        return nullptr;
-    }
-    return p->second;
+    return m_rules.get(id, nullptr);
 }
 
-const Path& AquaBox::workingDirectory() const
+const Path &AquaBox::workingDirectory() const
 {
     return m_wd;
 }
 
-DevicesMap& AquaBox::devices() const
+DevicesMap &AquaBox::devices() const
 {
     return m_devices;
 }
 
-RulesMap& AquaBox::rules() const
+RulesMap &AquaBox::rules() const
 {
     return m_rules;
 }
 
-bool AquaBox::addRule(std::shared_ptr<Rule>& rule, bool replace)
+bool AquaBox::addRule(std::shared_ptr<Rule> &rule, bool replace)
 {
-    std::lock_guard<RulesMap> lock(m_rules);
-    auto pos = m_rules.find(rule->getId());
     nlohmann::json beforeUpdate;
-    if (pos != m_rules.end()) {
-        if (!replace) {
-            LOG_ERROR << "Rule " << pos->first << " has already beed added, and replace flag was not set";
+
+    bool replaceError = false;
+
+    if (m_rules.on(rule->getId(), [this, rule, &beforeUpdate, replace, &replaceError](auto &k, auto &v) {
+            replaceError = !replace;
+
+            if (!replaceError)
+            {
+                v->json(beforeUpdate);
+                v = rule;
+            }
+        }))
+    {
+        if (replaceError)
+        {
+            LOG_ERROR << "Rule " << rule->getId() << " has already beed added, and replace flag was not set";
             return false;
         };
-        pos->second->json(beforeUpdate);
-        pos->second = rule;
     }
-    else {
-        m_rules.insert({ rule->getId(), rule });
+    else
+    {
+        m_rules.insert(rule->getId(), rule);
     }
 
     Path p = m_rulesDir;
@@ -215,83 +231,98 @@ bool AquaBox::addRule(std::shared_ptr<Rule>& rule, bool replace)
     auto device = rule->getDevice().resolve();
 
     bool pathOk = p.append((std::string)(rule->getId()) + ".json");
-    if(!pathOk) {
+    if (!pathOk)
+    {
         LOG_ERROR << "Can't form path for rule. Root: " << m_rulesDir.c_str() << " formed " << p.c_str() << " error " << strerror(errno);
         return false;
     }
 
     bool saved = rule->saveToFile(p);
-    if (!saved) {
-        m_rules.erase(m_rules.find(rule->getId()));
+    if (!saved)
+    {
+        m_rules.erase(rule->getId());
     }
 
-    if (saved) {
+    if (saved)
+    {
         postUpdate(std::make_shared<DeviceRulesChangedEvent>(device));
-        if (replace) {
+        if (replace)
+        {
             postUpdate(std::make_shared<RuleUpdatedEvent>(rule, beforeUpdate));
         }
-        else {
+        else
+        {
             postUpdate(std::make_shared<RuleCreatedEvent>(rule));
         }
     }
     return saved;
 }
 
-bool AquaBox::removeRule(std::shared_ptr<Rule> rule)
+bool AquaBox::removeRule(const std::string &id)
 {
-    std::lock_guard<RulesMap> lock(m_rules);
-    auto pos = m_rules.find(rule->getId());
-    if (pos == m_rules.end()) {
+    if (!m_rules.erase(id))
+    {
         return false;
     }
 
+    std::shared_ptr<Device> device;
+    m_rules.on<std::shared_ptr<Device>>(
+        id, [this](auto id, auto rule) {
+            postUpdate(std::make_shared<RuleDeletedEvent>(rule));
+            return rule->getDevice().resolve();
+        },
+        device);
+
+    if (m_rules.erase(id))
+    {
+        postUpdate(std::make_shared<DeviceRulesChangedEvent>(device));
+    }
+
     Path p = m_rulesDir;
-    p.append((std::string)(rule->getId()) + ".json");
-    if (!p.exists()) {
-        LOG_ERROR << "Can't find rule " << rule->getId() << " tried: " << p.c_str();
+    p.append(id + ".json");
+    if (!p.exists())
+    {
+        LOG_ERROR << "Can't find rule " << id << " tried: " << p.c_str();
         return false;
     }
     std::remove(p.c_str());
 
-    if(p.exists()) {
+    if (p.exists())
+    {
         LOG_ERROR << "Can't remove file " << p.c_str();
         return false;
     }
-    auto device = pos->second->getDevice().resolve();
-
-    postUpdate(std::make_shared<RuleDeletedEvent>(pos->second));
-    m_rules.erase(pos);
-    postUpdate(std::make_shared<DeviceRulesChangedEvent>(device));
     return true;
 }
 
 bool AquaBox::updateDevice(std::string id)
 {
-    std::lock_guard<RulesMap> lock(m_rules);
-    auto pos = m_devices.find(id);
-    if (pos == m_devices.end()) {
-        return false;
-    }
-
     Path p = m_devicesDir;
 
     bool pathOk = p.append(id + ".json");
-    if(!pathOk) {
+    if (!pathOk)
+    {
         LOG_ERROR << "Can't form path for device. Root: " << m_devicesDir.c_str() << " formed " << p.c_str() << " error " << strerror(errno);
         return false;
     }
 
-    return pos->second->saveToFile(p);
+    return m_devices.on(id, [p] (auto id, auto dev) {
+        dev->saveToFile(p);
+    });
 }
 
-UsersMap& AquaBox::users() const
+UsersMap &AquaBox::users() const
 {
     return m_users;
 }
 
-void AquaBox::doLater(const std::string& name, std::function<void(void)>&& task)
+void AquaBox::doLater(const std::string &name, std::function<void(void)> &&task)
 {
-    boost::asio::post(m_pool, task);
+    auto id = m_perfomance.taskStarted(name);
+    boost::asio::post(m_pool, [this, id, t = std::move(task)] {
+        t();
+        m_perfomance.taskFinished(id);
+    });
 }
 
 void AquaBox::postUpdate(std::shared_ptr<Event> event)
@@ -300,7 +331,8 @@ void AquaBox::postUpdate(std::shared_ptr<Event> event)
 
     auto c = Singleton<Cloud>::i();
 
-    if (c != nullptr) {
+    if (c != nullptr)
+    {
         c->postUpdate(event);
     }
 }

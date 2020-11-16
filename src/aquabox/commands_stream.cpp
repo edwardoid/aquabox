@@ -20,32 +20,29 @@
 #include "log.h"
 #include "command.h"
 #include "command_executor.h"
-#include <nlohmann/json.hpp>
 
 using namespace aquabox;
 
-CommandsStream::CommandsStream(std::string url)
+CommandsStream::CommandsStream(const std::string& url)
     : CloudStream(url)
 {}
 
-void CommandsStream::onMessage(std::shared_ptr<class Connection> connection, std::shared_ptr<class InMessage> message)
+nlohmann::json CommandsStream::messageReceived(const nlohmann::json& message)
 {
     try {
-        nlohmann::json json = nlohmann::json::parse(message->string());
-
         Command cmd;
-        cmd.fromJSON(json);
+        cmd.fromJSON(message);
 
         CommandExecutor exe;
         if(exe.exec(cmd)) {
         }
 
-        connection->send(cmd.toResultJSON().dump());
+        return cmd.toResultJSON().dump();
     } catch (nlohmann::json::parse_error err) {
-        connection->send(nlohmann::json({ "error", err.what()}).dump(4));
+        return nlohmann::json({ "error", err.what()}).dump(4);
     } catch (std::exception err) {
-        connection->send(nlohmann::json({ "error", err.what()}).dump(4));
+        return nlohmann::json({ "error", err.what()}).dump(4);
     } catch (...) {
-        connection->send(nlohmann::json({ "error", "Something went wrong"}).dump(4));
+        return nlohmann::json({ "error", "Something went wrong"}).dump(4);
     }
 }

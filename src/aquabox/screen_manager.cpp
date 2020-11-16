@@ -18,6 +18,7 @@
  */
 
 #include "screen_manager.h"
+#include <chrono>
 #include <thread>
 #include <settings.h>
 
@@ -35,11 +36,15 @@ void ScreenManager::show()
         return;
     }
 
-    if((time(NULL) % 60) > 30) {
-        m_main.show();
-    } else {
-        m_scan.show();
+    static std::vector<Screen*> allScreens({ &m_main, &m_scan, &m_stats, &m_stats });
+    static uint32_t nextScreen = 0;
+    static const std::chrono::seconds singleScreenDuration = std::chrono::seconds(10);
+    static std::chrono::system_clock::time_point begin = std::chrono::system_clock::now();
+    if (std::chrono::duration_cast<std::chrono::seconds>(std::chrono::system_clock::now() - begin) >= singleScreenDuration) {
+        ++nextScreen;
+        begin = std::chrono::system_clock::now();
     }
+    allScreens[nextScreen % allScreens.size()]->show();
 
     fb->flush();
 }

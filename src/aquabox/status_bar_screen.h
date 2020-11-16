@@ -16,8 +16,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef STATUS_BAR_SCREEN_H
-#define STATUS_BAR_SCREEN_H
+#pragma once
 
 #include "screen.h"
 #include <string>
@@ -27,9 +26,8 @@ namespace aquabox
     class StatusBarScreen: public Screen
     {
     public:
+        std::size_t height() const;
         StatusBarScreen() = default;
         virtual void draw() override;
     };
 }
-
-#endif // STATUS_BAR_SCREEN_H

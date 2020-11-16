@@ -44,7 +44,8 @@ ENV CC=gcc \
     CFLAGS=-pthread \
     CXXFLAGS=-pthread \
     LDFLAGS=-pthread \
-    BUILD_PLATFORM=x86_64 
+    BUILD_PLATFORM=x86_64 \
+    LD_LIBRARY_PATH=/build/lib
 
 # tools
 RUN conan profile new default --detect && \

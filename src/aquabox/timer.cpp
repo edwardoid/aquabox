@@ -53,7 +53,6 @@ bool Timer::start(std::function<void(const ClockTimePoint&)>&& callback,
 
     m_thread = std::move(std::thread(std::bind(&Timer::run, this)));
     pthread_setname_np(m_thread.native_handle(), m_name.c_str());
-    m_thread.detach();
     return true;
 }
 
@@ -61,6 +60,12 @@ void Timer::stop()
 {
     LOG_ERROR_IF(!m_thread.joinable()) << "Can't stop timer \"" << m_name << "\"";
     m_state.exchange(State::Stoppping);
+    wait();
+}
+
+void Timer::wait()
+{
+    m_thread.join();
 }
 
 void Timer::run()

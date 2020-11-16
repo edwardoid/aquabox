@@ -22,7 +22,7 @@
 using namespace aquabox;
 
 
-CloudStream::CloudStream(std::string url)
+CloudStream::CloudStream(const std::string& url)
     : SimpleWeb::SocketClient<SimpleWeb::WS>(url)
     , m_url(url)
     , m_attached(false)
@@ -36,7 +36,7 @@ CloudStream::CloudStream(std::string url)
 
     on_error = [this](std::shared_ptr<CloudStream::Connection> connection, const SimpleWeb::error_code & code) { onError(connection, code); };
 
-    m_thread = std::thread([this]{
+    m_thread = std::move(std::thread([this]{
         bool canStart = true;
         while(true) {
             if(m_reattach.compare_exchange_weak(canStart, false)) {
@@ -45,8 +45,7 @@ CloudStream::CloudStream(std::string url)
             
             std::this_thread::sleep_for(std::chrono::seconds(10));
         }
-    });
-    m_thread.detach();
+    }));
 }
 
 void CloudStream::attach()
@@ -60,7 +59,9 @@ bool CloudStream::isAttached() const
 }
 
 CloudStream::~CloudStream()
-{}
+{
+    m_thread.join();
+}
 
 void CloudStream::onOpen(std::shared_ptr<CloudStream::Connection> connection)
 {
@@ -71,7 +72,20 @@ void CloudStream::onOpen(std::shared_ptr<CloudStream::Connection> connection)
 
 void CloudStream::onMessage(std::shared_ptr<CloudStream::Connection> connection, std::shared_ptr<CloudStream::InMessage> message)
 {
-    m_attached = true;    
+    m_attached = true;
+    std::string messageString = "";;
+    try {
+        messageString = message->string();
+        const nlohmann::json json = nlohmann::json::parse(messageString);
+        auto reply = messageReceived(json);
+        connection->send(reply.dump(4));
+    }
+    catch (const std::exception& ex) {
+        LOG_ERROR << "Invalid message from cloud \"" << messageString << "\" :" << ex.what();
+    }
+    catch(...) {
+        LOG_ERROR << "Unknown error in message from cloud";
+    }
 }
 
 void CloudStream::onClose(std::shared_ptr<CloudStream::Connection> connection, int status, const std::string &reason)
@@ -88,7 +102,11 @@ void CloudStream::onError(std::shared_ptr<CloudStream::Connection>, const Simple
     m_attached = false;
     m_connection = nullptr;
     SimpleWeb::SocketClient<SimpleWeb::WS>::stop();
-    //handler_runner->stop();
+}
+
+void CloudStream::sendMessage(const nlohmann::json& message)
+{
+    send(message.dump(4));
 }
 
 void CloudStream::send(std::string data)

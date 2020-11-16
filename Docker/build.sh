@@ -13,8 +13,8 @@ function do_build {
 function prepare_build {
     conan install /sources --build=missing |& tee -a build.log
 #    cmake /sources -DCMAKE_BUILD_TYPE=asan |& tee -a build.log
-#    cmake /sources -DCMAKE_BUILD_TYPE=Release |& tee -a build.log
-    cmake /sources -DCMAKE_BUILD_TYPE=RelWithDebInfo |& tee -a build.log
+    cmake /sources -DCMAKE_BUILD_TYPE=Release |& tee -a build.log
+#    cmake /sources -DCMAKE_BUILD_TYPE=Debug |& tee -a build.log
 }
 
 function copy_file {

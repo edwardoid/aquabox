@@ -70,6 +70,7 @@ namespace aquabox
     {
     protected:
         NetworkManager();
+        ~NetworkManager();
         friend Singleton<NetworkManager>;
     public:
         bool connectedToInternet();
@@ -95,7 +96,6 @@ namespace aquabox
         std::shared_ptr<nm::Device> m_dev;
         std::string m_interface;
         std::thread m_reconnectThread;
-        std::mutex m_connectingInProgress;
         nm::NetworkManager m_nm;
     };
 }

@@ -25,9 +25,9 @@ namespace aquabox
     class CommandsStream: public CloudStream
     {
     public:
-        CommandsStream(std::string url);
+        CommandsStream(const std::string& url);
         virtual ~CommandsStream() {}
     protected:
-        virtual void onMessage(std::shared_ptr<class Connection> connection, std::shared_ptr<class InMessage> message) override;
+        virtual nlohmann::json messageReceived(const nlohmann::json& message) override;
     };
 }

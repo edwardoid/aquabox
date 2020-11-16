@@ -16,57 +16,147 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef IDENTIFIABLES_MAP_H
-#define IDENTIFIABLES_MAP_H
+#pragma once
 
-#include <string>
 #include <unordered_map>
+#include <map>
+#include <set>
 #include <mutex>
-#include <memory>
 
 namespace aquabox
 {
-    template<typename T>
-    
-    class Map: public std::unordered_map<std::string /* id */, std::shared_ptr<T>>
-             , public std::recursive_mute 
+    template <typename KeyT, typename ValueT, class Container = std::map<KeyT, ValueT>, class Lock = std::recursive_mutex>
+    class LockableAssociativeContainer : public Lock
     {
     public:
-        using IdType = std::string;
-        using DataType = T;
-        using DataRef = std::shared_ptr<DataType>;
-        bool contains(IdType id);
-        bool remove(IdType id);
-        bool update(IdType id, DataRef instance);
-    };
-
-    template<typename T>
-    class LockedMap
-    {
-    public:
-        using ContainerType = Map<T>;
-        using IdType = ContainerType::IdType;
-        using DataRef = ContainerType::DataRef;
-
-        LockedMap(ContainerType& src);
-        LockedMap(LockedMap&& ref);
-        
-        bool contains(IdType id);
-        DataRef get(IdType id);
-        DataRef insert(IdType id);
-
-        operator ContainerType& ()
+        std::set<KeyT> keys() const
         {
-
+            LockableAssociativeContainer* l = const_cast<LockableAssociativeContainer*>(this);
+            std::lock_guard<Lock> lock(*l);
+            std::set<KeyT> k;
+            for (const auto &i : m_container)
+            {
+                k.insert(i.first);
+            }
+            return k;
+        }
+        const ValueT &operator[](const KeyT &key)
+        {
+            std::lock_guard<Lock> lock(*this);
+            return m_container[key];
         }
 
-        operator const ContainerType() const
+        ValueT get(const KeyT& key, const ValueT& defaultValue = ValueT())
         {
-
+            std::lock_guard<Lock> lock(*this);
+            auto i = m_container.find(key);
+            if (i != m_container.end()) {
+                return i->second;
+            }
+            return defaultValue;
         }
+
+        ValueT &at(const KeyT &key) const
+        {
+            std::lock_guard<Lock> lock(*this);
+            return m_container.at(key);
+        }
+        bool has(const KeyT &key) const
+        {
+            std::lock_guard<Lock> lock(*this);
+            return m_container.find(key) != m_container.cend();
+        }
+        void for_each(std::function<void(const KeyT &, ValueT &)> cb)
+        {
+            std::lock_guard<Lock> lock(*this);
+            for (auto &it : m_container)
+            {
+                cb(it.first, it.second);
+            }
+        }
+
+        LockableAssociativeContainer operator = (const Container& src)
+        {
+            set(src);
+            return *this;
+        }
+
+        void set(const Container& src)
+        {
+            std::lock_guard<Lock> lock(*this);
+            m_container = src;
+        }
+
+        void insert(const KeyT &key, const ValueT &value)
+        {
+            std::lock_guard<Lock> lock(*this);
+            m_container[key] = value;
+        }
+
+        void for_each(std::function<void(const KeyT &, const ValueT &)> cb) const
+        {
+            std::lock_guard<Lock> lock(*this);
+            for (auto &it : m_container)
+            {
+                cb(it.first, it.second);
+            }
+        }
+
+        bool erase(const KeyT& key)
+        {
+            std::lock_guard<Lock> lock(*this);
+            auto i = m_container.find(key);
+            if (i == m_container.end()) {
+                return false;
+            }
+            m_container.erase(i);
+            return true;
+        }
+
+        bool on(const KeyT& key, std::function<void(const KeyT& key, ValueT& value)> cb)
+        {
+            std::lock_guard<Lock> lock(*this);
+            auto i = m_container.find(key);
+            if (i == m_container.end()) {
+                return false;
+            }
+            cb(i->first, i->second);
+            return true;
+        }
+
+        template<typename RetType>
+        bool on(const KeyT& key, std::function<RetType (const KeyT& key, ValueT& value)> cb, RetType& ret)
+        {
+            std::lock_guard<Lock> lock(*this);
+            auto i = m_container.find(key);
+            if (i == m_container.end()) {
+                return false;
+            }
+            ret = cb(i->first, i->second);
+            return true;
+        }
+
+        bool empty() const {
+            LockableAssociativeContainer* l = const_cast<LockableAssociativeContainer*>(this);
+            std::lock_guard<Lock> lock(*l);
+            return m_container.empty();
+        }
+
+        std::size_t size() const {
+            LockableAssociativeContainer* l = const_cast<LockableAssociativeContainer*>(this);
+            std::lock_guard<Lock> lock(*l);
+            return m_container.size();
+        }
+
     private:
-        ContainerType m_stored;
+        Container m_container;
     };
-}
 
-#endif// IDENTIFIABLES_MAP_H
+    template <typename KeyT, typename ValueT>
+    struct LocableMap : public LockableAssociativeContainer < KeyT, ValueT, std::map<KeyT, ValueT> >
+    {};
+
+    template <typename KeyT, typename ValueT>
+    struct LockableHashMap : public LockableAssociativeContainer < KeyT, ValueT, std::unordered_map<KeyT, ValueT> >
+    {};
+} // namespace aquabox

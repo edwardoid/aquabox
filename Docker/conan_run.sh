@@ -11,6 +11,13 @@ DIR="$( cd -P "$( dirname "$SOURCE" )" >/dev/null 2>&1 && pwd )"
 source $DIR/set_env.sh $1
 
 sudo docker run --privileged \
+                -p 1213:1213 \
+                -p 1214:1214 \
+                -p 5555:5555 \
+                -p 5556:5556 \
+                -p 8974:8974 \
+                -p 2159:2159 \
+                --hostname $1 \
                 -v /var/run/dbus/system_bus_socket:/var/run/dbus/system_bus_socket \
                 -v $SOURCES_DIR:/sources \
                 -v $BUILD_DIR:/build \

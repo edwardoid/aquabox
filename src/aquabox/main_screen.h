@@ -16,11 +16,10 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef MAIN_SCREEN_H
-#define MAIN_SCREEN_H
+#pragma once
 
 #include "status_bar_screen.h"
-#include "text.h"
+#include <text.h>
 
 namespace aquabox
 {
@@ -35,5 +34,3 @@ namespace aquabox
         int m_y;
     };
 }
-
-#endif // MAIN_SCREEN_H

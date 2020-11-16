@@ -202,14 +202,15 @@ void HardwareApi::setupRoutes()
     m_ws.endpoint[m_commands.url()].on_message = [this](std::shared_ptr<Web::WSConnection> connection,
                                                         std::shared_ptr<Web::Message> in_message) {
 
-        LOG_DEBUG << "On " << connection->path << " got some data";
+        std::string data = in_message->string();
+        LOG_DEBUG << "On " << connection->path << " got some data: " << data;
         
         auto id = m_commands.extract(connection->path)[":id"];
 
         auto box = BoxesManager::get(id);
 
         if (box) {
-            box->ready(in_message->string());
+            box->ready(data);
         }
     };
 }

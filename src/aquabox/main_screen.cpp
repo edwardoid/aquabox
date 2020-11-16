@@ -34,11 +34,8 @@ void MainScreen::draw()
     
     m_text.setText(time);
 
-
-
     m_text.mapTo((fb->width() - m_text.width()) / 2, 
                  (fb->height() - m_text.height()) / 2 + m_text.height() / 2);
 
-    fb->drawRect(m_text.x(), m_text.y(), m_text.width(), m_text.height(), 0xFF0000FF);
     fb->draw(&m_text);
 }

@@ -42,3 +42,8 @@ GlobalTimer::GlobalTimer()
         // PerformanceMetrics::handleBounds();
     }, std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::seconds(1)));
 }
+
+void GlobalTimer::waitToFinish()
+{
+    wait();
+}

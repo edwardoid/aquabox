@@ -38,6 +38,12 @@
 
 using namespace aquabox;
 
+
+std::size_t StatusBarScreen::height() const
+{
+    return 24;
+}
+
 void StatusBarScreen::draw()
 {
     auto fb = Singleton<LIBFB_NS::FrameBuffer>::i();
@@ -58,7 +64,7 @@ void StatusBarScreen::draw()
 
     auto cloud = Singleton<Cloud>::i();
     bool isRegistered = cloud == nullptr ? false : cloud->isRegistered();
-    int cloudIndex = isRegistered ? 6 : 7;
+    int cloudIndex = isRegistered ? 7 : 6;
     elements.push_back(cloudIndex);
 
 
@@ -70,7 +76,7 @@ void StatusBarScreen::draw()
     LIBFB_NS::Sprite statusBar(pixmap("status_bar"), 24, 24, 10);
 
     fb->fillRect(0, 0, fb->width(), 24, 0x81bf2a);
-    fb->drawLine(0, 24, fb->width(), 24, 0xebeb8c);
+    fb->drawLine(0, height(), fb->width(), 24, 0xebeb8c);
 
 
     static const uint32_t live[] = {

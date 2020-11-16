@@ -21,7 +21,8 @@
 #include "serial.h"
 #include "path.h"
 #include "log.h"
-#include "lockable_container.h"
+#include "lockablemap.h"
+#include "performance_metrics.h"
 #include <boost/asio.hpp>
 #include <memory>
 #include <singleton.h>
@@ -42,9 +43,9 @@ namespace aquabox
     class ThreadPool;
     class GlobalTimer;
 
-    using DevicesMap = std::unordered_map<std::string, std::shared_ptr<Device>>;
+    using DevicesMap = LockableHashMap<std::string, std::shared_ptr<Device>>;
     using RulesMap = LockableHashMap<std::string, std::shared_ptr<Rule>>;
-    using UsersMap = std::unordered_map<std::string, std::shared_ptr<User>>;
+    using UsersMap = LockableHashMap<std::string, std::shared_ptr<User>>;
 
     class AquaBox
     {
@@ -57,14 +58,14 @@ namespace aquabox
     public:
         int start();
         ~AquaBox();
-        std::shared_ptr<Device> findDevice(std::string id);
-        std::shared_ptr<Rule> findRule(std::string id);
+        std::shared_ptr<Device> findDevice(const std::string& id);
+        std::shared_ptr<Rule> findRule(const std::string& id);
         const Path& workingDirectory() const;
         DevicesMap& devices() const;
         UsersMap& users() const;
         RulesMap& rules() const;
         bool addRule(std::shared_ptr<Rule>& rule, bool replace = false);
-        bool removeRule(std::shared_ptr<Rule> rule);
+        bool removeRule(const std::string& id);
         bool updateDevice(std::string id);
         void doLater(const std::string& name, std::function<void(void)>&& task);
         void postUpdate(std::shared_ptr<Event> event);
@@ -78,6 +79,7 @@ namespace aquabox
         void readUsers();
         void readRules(const Path& root);
     private:
+        PerformanceMetrics m_perfomance;
         boost::asio::thread_pool m_pool;
         plog::ColorConsoleAppender<plog::TxtFormatter> m_consoleAppender;
         plog::RollingFileAppender<plog::TxtFormatter> m_fileAppender;

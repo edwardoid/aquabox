@@ -21,11 +21,33 @@
 #include <vector>
 #include <signal.h>
 #include <boost/stacktrace.hpp>
+#include <sys/types.h>
+#include <unistd.h>
 
 using namespace aquabox;
 
 void print_trace(int signum) {
-    std::cerr << "Signal: " << signum << "\n" << boost::stacktrace::stacktrace();
+    auto ss = boost::stacktrace::stacktrace();
+    std::cerr << "Signal: " << signum << "\n" << ss;
+    int pid = ::getpid();
+
+    std::string sstr = boost::stacktrace::detail::to_string(&ss.as_vector()[0], ss.size());
+
+    char fname[128], thread[128];
+    sprintf(fname, "/stack_%d.txt", pid);
+    FILE *f = ::fopen(fname, "a+");
+    if (f != NULL) {
+        ::pthread_getname_np(::pthread_self(), thread, 128);
+        ::fprintf(f, "\n--------- BEGIN ---------\n");
+        ::fprintf(f, "Signal: %d\nPID: %d\nThread: %s\nStacktrace:\n", signum, pid, thread);
+        ::fwrite(sstr.c_str(), sstr.size(), 1, f);
+        ::fprintf(f, "\n---------- END ----------");
+        ::fflush(f);
+        ::fclose(f);
+    }
+
+
+
     ::signal(signum, SIG_DFL);
     ::raise(SIGQUIT);
 }
@@ -39,7 +61,9 @@ StackTrace::StackTrace()
         SIGSEGV,
         SIGSYS,
         SIGXCPU,
-        SIGXFSZ
+        SIGXFSZ,
+        SIGSTKFLT,
+        SIGFPE
     })) {
         ::signal(s, print_trace);
     }

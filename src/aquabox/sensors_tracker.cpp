@@ -28,12 +28,14 @@ void SensorsTracker::processUpdates() {
     static std::unordered_map<std::string, double> values;
 
     Singleton<AquaBox>::get()->doLater("seonsors_tracker", []() {
-        for (auto dev : Singleton<AquaBox>::get()->devices()) {
-            if (!dev.second->supports(DeviceClass::Sensor)) {
+        auto devices = Singleton<AquaBox>::get()->devices().keys();
+        for (auto id : devices) {
+            auto dev = Singleton<AquaBox>::get()->findDevice(id);
+            if (dev == nullptr) {
                 continue;
             }
 
-            auto sensor = std::dynamic_pointer_cast<AbstractSensor>(dev.second);
+            auto sensor = std::dynamic_pointer_cast<AbstractSensor>(dev);
             if (sensor == nullptr) {
                 continue;
             }

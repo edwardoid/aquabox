@@ -41,6 +41,7 @@ namespace aquabox
         bool start(std::function<void(const ClockTimePoint&)>&& callback,
                    std::chrono::milliseconds timeout);
         void stop();
+        void wait();
     protected:
         void run ();
     private:

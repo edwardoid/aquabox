@@ -16,8 +16,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef RULE_H
-#define RULE_H
+#pragma once
 
 #include <string>
 #include "repeat_timeout.h"
@@ -76,5 +75,3 @@ namespace aquabox
         property(Actions, ClassArrayProperty<Action>)
     };
 }
-
-#endif // RULE_H

@@ -33,6 +33,7 @@ namespace aquabox
     class WebServer
     {
     public:
+        ~WebServer();
         bool start();
         void setupRoutes();
         bool bindApiCalls();

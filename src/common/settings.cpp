@@ -65,9 +65,10 @@ const std::string Settings::Keys::FRAMEBUFFER = "framebuffer";
 const std::string Settings::Keys::MQTT_PORT = "mqtt";
 const std::string Settings::Keys::DEBUG = "debug";
 const std::string Settings::Keys::MAX_MEM = "maxMemory";
+const std::string Settings::Keys::TELEGRAM_BOT_API = "telegramBotAPIKey";
 
 const std::string Settings::Defaults::GIT_HASH = AB_GIT_HASH ;
-const std::string Settings::Defaults::APPLICATION = "Aquabox";
+const std::string Settings::Defaults::APPLICATION = "aquabox";
 const std::string Settings::Defaults::DESCRIPTION = "Some kind of smart aquarium controller";
 const std::string Settings::Defaults::VERSION = AB_VERSION;
 const uint16_t Settings::Defaults::VERSION_MAJOR = AB_VERSION_MAJOR;
@@ -94,6 +95,7 @@ const std::string Settings::Defaults::FRAMEBUFFER = "/dev/fb0";
 const int Settings::Defaults::MQTT_PORT = 1883;
 const bool Settings::Defaults::DEBUG = false;
 const int Settings::Defaults::MAX_MEM = 80;
+const std::string Settings::Defaults::TELEGRAM_BOT_API = "";
 
 bool Settings::dataToWrite = false;
 bool Settings::ready = false;

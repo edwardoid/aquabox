@@ -1,6 +1,6 @@
 /*
  * AquaBox
- * Copyright (C) 2019-2020 Eduard Sargsyan
+ * Copyright (C) 2020  Eduard Sargsyan
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,24 +18,18 @@
 
 #pragma once
 
-#include <mutex>
-#include <map>
-#include <unordered_map>
-#include <set>
+#include "status_bar_screen.h"
+#include <text.h>
 
 namespace aquabox
 {
-    template<class Container,
-            class Lock = std::recursive_mutex>
-    class LockableContainer: public Container, public Lock
-    {};
-
-    template<typename T, class Lock = std::recursive_mutex>
-    struct LockableSet: public LockableContainer<std::set<T>, Lock> {};
-
-    template<typename K, typename V, class Lock = std::recursive_mutex>
-    struct LockableMap: public LockableContainer<std::map<K, V>, Lock> {};
-
-    template<typename K, typename V, class Lock = std::recursive_mutex>
-    struct LockableHashMap: public LockableContainer<std::unordered_map<K, V>, Lock> {};
+    class StatsScreen: public StatusBarScreen
+    {
+    public:
+        StatsScreen();
+        virtual ~StatsScreen() = default;
+        virtual void draw() override;
+    private:
+        LIBFB_NS::Text m_uptime;
+    };
 }

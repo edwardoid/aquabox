@@ -16,8 +16,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef RULE_EXECUTOR_H
-#define RULE_EXECUTOR_H
+#pragma once
 
 #include "timer.h"
 #include "rule.h"
@@ -38,5 +37,3 @@ namespace aquabox
         std::shared_ptr<class Rule> m_rule;
     };
 }
-
-#endif // RULE_EXECUTOR_H

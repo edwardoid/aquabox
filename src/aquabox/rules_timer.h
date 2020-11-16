@@ -16,8 +16,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef RULES_TIMER_H
-#define RULES_TIMER_H
+#pragma once
 
 #include "timer.h"
 
@@ -26,6 +25,7 @@
 #include <plog/Appenders/RollingFileAppender.h>
 #include <plog/Formatters/TxtFormatter.h>
 #include <plog/Formatters/CsvFormatter.h>
+#include <atomic>
 
 namespace aquabox
 {
@@ -36,12 +36,14 @@ namespace aquabox
         void start();
         void stop();
     private:
+        void processRules(const Timer::ClockTimePoint& when);
+        void applyChanges();
+    private:
         plog::RollingFileAppender<plog::CsvFormatter> m_rulesAppender;
         plog::ColorConsoleAppender<plog::TxtFormatter> m_consoleAppender;
         plog::Logger<1> m_rulesLogger;
+        std::atomic_bool m_skip;
 
         Timer m_timer;
     };
 }
-
-#endif // RULES_TIMER_H

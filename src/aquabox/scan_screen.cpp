@@ -46,7 +46,7 @@ void ScanScreen::draw()
 
     int margins = 2;
     int canvasWidth = fb->width() - 2 * margins;
-    int canvasHeight = fb->height() - 24 - 2 * margins;
+    int canvasHeight = fb->height() - (StatusBarScreen::height() + 2 * margins);
 
     LIBFB_NS::QRCode code;
     code.setText(Singleton<AquaBox>::get()->configurationData());
@@ -60,7 +60,7 @@ void ScanScreen::draw()
     temp += "°C";
 
     code.mapTo((canvasWidth - code.width()) / 2,
-               24 + (canvasHeight - code.height()) / 2);
+               (margins + StatusBarScreen::height()) + (canvasHeight - code.height()) / 2);
 
     fb->draw(&code);
 }

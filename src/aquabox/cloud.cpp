@@ -23,6 +23,7 @@
 #include "settings.h"
 #include "event.h"
 #include "commands_stream.h"
+#include "events_stream.h"
 #include "network_manager.h"
 #include <singleton.h>
 #include <nlohmann/json.hpp>
@@ -33,30 +34,30 @@ using namespace aquabox;
 
 Cloud::Cloud()
     : m_updateTimeout(std::chrono::minutes(1))
+    , m_registered(false)
 {
 
 }
 
 void Cloud::connect()
 {
-    if (!m_updateTimeout.expired()) {
+    if (m_updateTimeout.expired() == 0) {
         return;
     }
     m_updateTimeout.reset();
-    for(auto s : m_streams)
-    {
+    m_streams.for_each([](const std::string& name, std::shared_ptr<CloudStream>& stream) {
         try
         {
-            if (!s.second->isAttached()) {
-                s.second->attach();
+            if (!stream->isAttached()) {
+                stream->attach();
             }
         }
         catch (std::exception& e) {
-            LOG_ERROR << "Can't connect to stream " << s.first << ": " << e.what();
+            LOG_ERROR << "Can't connect to stream " << name << ": " << e.what();
         } catch(...) {
-            LOG_ERROR << "Can't connect to stream " << s.first;
+            LOG_ERROR << "Can't connect to stream " << name;
         }
-    }
+    });
 }
 
 void Cloud::disconnect()
@@ -65,15 +66,24 @@ void Cloud::disconnect()
 
 bool Cloud::isRegistered()
 {
-    if (!m_updateTimeout.expired()) {
-        return true;
+    if (m_updateTimeout.expired() == 0) {
+        return m_registered;
     }
-    m_updateTimeout.reset();
 
+    m_updateTimeout.reset();
+    m_registered = checkIfRegistered();
+
+    return m_registered;
+}
+
+bool Cloud::checkIfRegistered()
+{
     bool streamsAreOk = true;
-    for(auto s : m_streams) {
-        streamsAreOk &= s.second->isAttached();
-    }
+
+    m_streams.for_each([&streamsAreOk](auto& name, auto& stream){
+        streamsAreOk &= stream->isAttached();
+    });
+
     if (streamsAreOk && !m_streams.empty()) {
         return streamsAreOk;
     }
@@ -83,7 +93,7 @@ bool Cloud::isRegistered()
     LOG_INFO << "Checking if device is registered on " << cloudHttpUrl;
     HttpClient client(cloudHttpUrl);
 
-    nlohmann::json authData(
+    static const nlohmann::json authData(
         {
             { "type", "box" },
             { "id", SERIAL_NUMBER },
@@ -111,10 +121,7 @@ bool Cloud::isRegistered()
                         url += SERIAL_NUMBER;
                         url += "/";
                         url += name;
-                        std::shared_ptr<CloudStream> existingStream = nullptr;
-                        if (m_streams.find(name) != m_streams.end()) {
-                            existingStream = m_streams[name];
-                        }
+                        std::shared_ptr<CloudStream> existingStream = m_streams.get(name, nullptr);
                         
                         if (existingStream) {
                             if (!existingStream->isAttached())
@@ -128,10 +135,12 @@ bool Cloud::isRegistered()
                             LOG_DEBUG << "Creating stream" << name;
                             if (name == "commands") {
                                 stream = std::make_shared<CommandsStream>(url);
-                            } else {
-                                stream = std::make_shared<CloudStream>(url);
+                            } else if (name == "events") {
+                                stream = std::make_shared<EventsStream>(url);
                             }
-                            m_streams.insert({ name, stream});
+
+                            if (stream)
+                                m_streams.insert(name, stream);
                         }
                     }
                 }
@@ -193,7 +202,7 @@ void Cloud::postUpdate(std::shared_ptr<Event> event)
 {
     auto str = stream("events");
     if (str) {
-        str->send(event->serialize().dump(4));
+        str->sendMessage(event->serialize());
     } else {
         LOG_WARNING << "Can't post update becase stream is not avaialable";
     }
@@ -201,9 +210,5 @@ void Cloud::postUpdate(std::shared_ptr<Event> event)
 
 std::shared_ptr<CloudStream> Cloud::stream(std::string name)
 {
-    auto p = m_streams.find(name);
-    if (p == m_streams.end() || !p->second->isAttached()) {
-        return nullptr;
-    }
-    return p->second;
+    return m_streams.get(name, nullptr);
 }

@@ -1,21 +1,19 @@
 [requires]
 
-boost_any/1.66.0@bincrafters/stable
-boost_asio/1.66.0@bincrafters/stable
-boost_multi_index/1.66.0@bincrafters/stable
-boost_stacktrace/1.66.0@bincrafters/stable
-boost_system/1.66.0@bincrafters/stable
-cmake_findboost_modular/1.66.0@bincrafters/stable
+cmake_findboost_modular/1.69.0@bincrafters/stable
+boost_stacktrace/1.69.0@bincrafters/stable
 freetype/2.9.1@bincrafters/stable
 libpng/1.6.37
 libqrencode/4.0.0@bincrafters/stable
 mongo-c-driver/1.16.1@bincrafters/stable
 mongo-cxx-driver/3.2.0@bincrafters/stable
-mqtt_cpp/8.x@devcodeone/stable
+mqtt_cpp/8.latest@edwardoid/iot
 nlohmann_json/3.7.3
 JsonSchemaValidator/2.1.0@conan/stable
 zlib/1.2.11
 simppl/0.3.0@conan/stable
+tgbot/9535023@edwardoid/iot
+OpenSSL/1.1.1@conan/stable
 
 [generators]
 cmake
@@ -28,6 +26,8 @@ mqtt_cpp:use_std_string_view=False
 mqtt_cpp:use_std_any=False
 mqtt_cpp:use_std_shared_ptr_array=False
 mqtt_cpp:build_tests=False
+tgbot:shared=True
+tgbot:use_curl=True
 
 [imports]
 lib, *.so* -> ./lib # Copies all dylib files from packages lib folder to my "lib" folder

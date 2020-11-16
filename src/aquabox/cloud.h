@@ -23,6 +23,7 @@
 #include <memory>
 #include <atomic>
 #include "cloud_stream.h"
+#include "lockablemap.h"
 #include <timeout.h>
 
 using WsClient = SimpleWeb::SocketClient<SimpleWeb::WS>;
@@ -42,10 +43,12 @@ namespace aquabox
         void postUpdate(std::shared_ptr<class Event> event);
         std::shared_ptr<CloudStream> stream(std::string name);
     private:
+        bool checkIfRegistered();
         bool isConnected();
     private:
         std::atomic_bool m_working;
-        std::unordered_map<std::string, std::shared_ptr<CloudStream>> m_streams;
+        std::atomic_bool m_registered;
+        LockableHashMap<std::string, std::shared_ptr<CloudStream>> m_streams;
         Timeout m_updateTimeout;
     };
 }

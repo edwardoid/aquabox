@@ -17,7 +17,11 @@
 cmake_minimum_required(VERSION 3.5)
 project(AquaboxProject)
 
-set(INSTALL_RPATH_USE_LINK_PATH true)
+#set(INSTALL_RPATH_USE_LINK_PATH true)
+
+set(CMAKE_INSTALL_RPATH "/aquabox/lib")
+
+set(LIBSTATS_SHARED ON)
 
 # Build Types
 set(CMAKE_BUILD_TYPE ${CMAKE_BUILD_TYPE}
@@ -125,6 +129,7 @@ find_package(libqrencode REQUIRED)
 find_package(simppl REQUIRED)
 find_package(dbus REQUIRED)
 find_package(JsonSchemaValidator REQUIRED)
+find_package(tgbot REQUIRED)
 
 include_directories(${PLOG_INCLUDE_DIR})
 include_directories(${THREAD_POOL_INCLUDE_DIR})
