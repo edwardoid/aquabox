@@ -1,22 +1,95 @@
 
-FROM conanio/gcc8
+FROM ubuntu:bionic
 
 LABEL maintainer="Edward Sargsyan <edward.sarkisyan@gmail.com>"
 
 USER root
 
-# RUN wget -c https://sourceforge.net/projects/raspberry-pi-cross-compilers/files/Raspberry%20Pi%20GCC%20Cross-Compiler%20Toolchains/Buster/GCC%2010.1.0/Raspberry%20Pi%201%2C%20Zero/cross-gcc-10.1.0-pi_0-1.tar.gz && \
-#    tar xvf cross-gcc-10.1.0-pi_0-1.tar.gz && \
-#    cp -R cross-pi-gcc-10.1.0-0/* /usr && \
-#    rm -rf cross-pi-gcc-10.1.0-0 && \
-#
-#
+ENV PYENV_ROOT=/opt/pyenv \
+    PATH=/opt/pyenv/shims:${PATH}
+
+RUN usermod --shell /bin/bash root
+
+RUN dpkg --add-architecture i386 \
+    && apt-get -qq update \
+    && apt-get -qq install -y --no-install-recommends \
+       openssh-server \
+       ssh \
+       sshpass \
+       binutils=2.* \
+       wget=1.* \
+       git=1:2.* \
+       libc6-dev-i386=2.* \
+       linux-libc-dev:i386=4.* \
+       g++-8-multilib \
+       libgmp-dev=2:6.* \
+       libmpfr-dev=4.* \
+       libmpc-dev=1.* \
+       libc6-dev=2.* \
+       nasm=2.* \
+       dh-autoreconf=17 \
+       ninja-build=1.* \
+       libffi-dev=3.* \
+       libssl-dev=1.* \
+       pkg-config=0.* \
+       subversion=1.* \
+       zlib1g-dev=1:1.* \
+       libbz2-dev=1.* \
+       libsqlite3-dev=3.* \
+       libreadline-dev=7.* \
+       xz-utils=5.* \
+       curl=7.* \
+       libncurses5-dev=6.* \
+       libncursesw5-dev=6.* \
+       liblzma-dev=5.* \
+       ca-certificates \
+       autoconf-archive \
+    && ln -s /usr/include/locale.h /usr/include/xlocale.h \
+    && rm -rf /var/lib/apt/lists/* \
+    && wget --no-check-certificate --quiet https://cmake.org/files/v3.16/cmake-3.16.4-Linux-x86_64.tar.gz \
+    && tar -xzf cmake-3.16.4-Linux-x86_64.tar.gz \
+       --exclude=bin/cmake-gui \
+       --exclude=doc/cmake \
+       --exclude=share/cmake-3.12/Help \
+    && cp -fR cmake-3.16.4-Linux-x86_64/* /usr \
+    && rm -rf cmake-3.16.4-Linux-x86_64 \
+    && rm cmake-3.16.4-Linux-x86_64.tar.gz \
+    && wget --no-check-certificate --quiet -O /tmp/pyenv-installer https://github.com/pyenv/pyenv-installer/raw/master/bin/pyenv-installer \
+    && chmod +x /tmp/pyenv-installer \
+    && /tmp/pyenv-installer \
+    && rm /tmp/pyenv-installer \
+    && update-alternatives --install /usr/bin/pyenv pyenv /opt/pyenv/bin/pyenv 100 \
+    && PYTHON_CONFIGURE_OPTS="--enable-shared" pyenv install 3.7.5 \
+    && pyenv global 3.7.5 \
+    && pip install -q --upgrade --no-cache-dir pip \
+    && pip install -q --no-cache-dir conan conan-package-tools \
+    && find /opt/pyenv -iname __pycache__ -print0 | xargs -0 rm -rf \
+    && update-alternatives --install /usr/bin/python python /opt/pyenv/shims/python 100 \
+    && update-alternatives --install /usr/bin/python3 python3 /opt/pyenv/shims/python3 100 \
+    && update-alternatives --install /usr/bin/pip pip /opt/pyenv/shims/pip 100 \
+    && update-alternatives --install /usr/bin/pip3 pip3 /opt/pyenv/shims/pip3 100
+
 RUN wget -c https://liquidtelecom.dl.sourceforge.net/project/raspberry-pi-cross-compilers/Raspberry%20Pi%20GCC%20Cross-Compiler%20Toolchains/Buster/GCC%208.3.0/Raspberry%20Pi%201%2C%20Zero/cross-gcc-8.3.0-pi_0-1.tar.gz && \
     tar xf cross-gcc-8.3.0-pi_0-1.tar.gz && \
     cp -R cross-pi-gcc-8.3.0-0/* /usr && \
-    rm -rf cross-pi-gcc-8.3.0-0 && \
-    pip install --upgrade pip && \
-    pip install --upgrade conan && \
+    rm -rf cross-pi-gcc-8.3.0-0*
+
+ENV CC=arm-linux-gnueabihf-gcc \
+    CXX=arm-linux-gnueabihf-g++ \
+    CMAKE_C_COMPILER=arm-linux-gnueabihf-gcc \
+    CMAKE_CXX_COMPILER=arm-linux-gnueabihf-g++ \
+    STRIP=arm-linux-gnueabihf-strip \
+    RANLIB=arm-linux-gnueabihf-ranlib \
+    LD=arm-linux-gnueabihf-ld \
+    AS=arm-linux-gnueabihf-as \
+    AR=arm-linux-gnueabihf-ar \
+    RANLIB=arm-linux-gnueabihf-ranlib \
+    BUILD_PLATFORM=armv6
+
+RUN mkdir -p /root/.conan && \
+    printf 'export PYENV_ROOT=/opt/pyenv' >> /root/.profile && \
+    printf 'eval "$(pyenv init -)"\n' >> /root/.profile && \
+    printf 'eval "$(pyenv virtualenv-init -)"\n' >> /root/.profile && \
     conan profile new default --detect && \
     conan profile update settings.compiler.libcxx=libstdc++11 default && \
     conan profile update settings.build_type=Release default && \
@@ -37,15 +110,29 @@ RUN wget -c https://liquidtelecom.dl.sourceforge.net/project/raspberry-pi-cross-
     update-alternatives --install /usr/bin/ar ar /usr/bin/arm-linux-gnueabihf-ar 100 && \
     update-alternatives --install /usr/bin/as as /usr/bin/arm-linux-gnueabihf-as 100
 
-RUN apt-get update --fix-missing && \
-    apt-get install ssh sshpass -y
+RUN echo "export PATH=/opt/pyenv/shims:/opt/pyenv/bin:$PATH" >> /root/.profile && \
+    echo "export CC=arm-linux-gnueabihf-gcc" >> /root/.profile && \
+    echo "export CXX=arm-linux-gnueabihf-g++" >> /root/.profile && \
+    echo "export CMAKE_C_COMPILER=arm-linux-gnueabihf-gcc" >> /root/.profile && \ 
+    echo "export CMAKE_CXX_COMPILER=arm-linux-gnueabihf-g++" >> /root/.profile && \
+    echo "export STRIP=arm-linux-gnueabihf-strip" >> /root/.profile && \
+    echo "export RANLIB=arm-linux-gnueabihf-ranlib" >> /root/.profile && \
+    echo "export LD=arm-linux-gnueabihf-ld" >> /root/.profile && \
+    echo "export AS=arm-linux-gnueabihf-as" >> /root/.profile && \
+    echo "export AR=arm-linux-gnueabihf-ar" >> /root/.profile && \
+    echo "export BUILD_PLATFORM=armv6" >> /root/.profile && \
+    echo "source $HOME/.bashrc"
 
-ENV CC=arm-linux-gnueabihf-gcc \
-    CXX=arm-linux-gnueabihf-g++ \
-    CMAKE_C_COMPILER=arm-linux-gnueabihf-gcc \
-    CMAKE_CXX_COMPILER=arm-linux-gnueabihf-g++ \
-    STRIP=arm-linux-gnueabihf-strip \
-    RANLIB=arm-linux-gnueabihf-ranlib \
-    LD=arm-linux-gnueabihf-ld \
-    BUILD_PLATFORM=armv6
+RUN mkdir /var/run/sshd
 
+RUN echo 'root:root' |chpasswd
+RUN cat /root/.bashrc >> /root/.bash_profile
+RUN sed -ri 's/^#?PermitRootLogin\s+.*/PermitRootLogin yes/' /etc/ssh/sshd_config && sed -ri 's/UsePAM yes/#UsePAM yes/g' /etc/ssh/sshd_config
+
+RUN mkdir /root/.ssh
+
+RUN service ssh start
+
+EXPOSE 22
+
+CMD    ["/usr/sbin/sshd", "-D"]

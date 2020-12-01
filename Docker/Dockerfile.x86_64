@@ -8,11 +8,8 @@ USER root
 
 #RUN add-apt-repository universe
 
-RUN apt-get update --fix-missing && apt-get install -y \
-    software-properties-common
-
-# roc dependencies
-RUN apt-get install -y \
+RUN apt-get update --fix-missing && \
+    apt-get install -y software-properties-common \
     wget \
     libtool \
     intltool \
@@ -30,6 +27,8 @@ RUN apt-get install -y \
     python3-pip
 
 RUN apt-get purge -y cmake
+
+RUN mkdir /var/run/sshd
 
 # tools
 RUN pip install conan --upgrade
@@ -52,8 +51,28 @@ RUN conan profile new default --detect && \
     conan profile update settings.compiler.libcxx=libstdc++11 default && \
     conan profile update settings.build_type=Release default && \
     conan profile update settings.os=Linux default && \
-    conan profile update settings.compiler.cppstd=14 default
-
-RUN conan remote add iot https://api.bintray.com/conan/edwardoid/iot && \
+    conan profile update settings.compiler.cppstd=14 default && \
+    conan remote add iot https://api.bintray.com/conan/edwardoid/iot && \
     conan remote add bincrafters https://api.bintray.com/conan/bincrafters/public-conan && \
     conan remote add devcodeone https://api.bintray.com/conan/devcodeone/public-conan
+
+RUN echo "export BUILD_PLATFORM=x86_64" >> /root/.profile && \
+    echo "export CC=gcc" >> /root/.profile && \
+    echo "export CFLAGS=-pthread" >> /root/.profile && \
+    echo "export LDFLAGS=-pthread" >> /root/.profile && \
+    echo "export LD_LIBRARY_PATH=/build/lib" >> /root/.profile && \
+    echo "source $HOME/.bashrc"
+
+RUN echo 'root:root' |chpasswd
+
+RUN sed -ri 's/^#?PermitRootLogin\s+.*/PermitRootLogin yes/' /etc/ssh/sshd_config
+RUN sed -ri 's/UsePAM yes/#UsePAM yes/g' /etc/ssh/sshd_config
+
+RUN mkdir /root/.ssh
+
+RUN apt-get clean && \
+    rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
+
+EXPOSE 22
+
+CMD    ["/usr/sbin/sshd", "-D"]

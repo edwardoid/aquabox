@@ -6,25 +6,14 @@ LABEL maintainer="Edward Sargsyan <edward.sarkisyan@gmail.com>"
 
 USER root
 
-RUN apt-get update
-
-# roc dependencies
-RUN apt-get install -y \
-    wget \
-    libtool \
-    intltool \
-    autoconf \
-    automake \
-    automake-1.15 \
-    pkg-config \
-    make \
-    cmake \
-    tar
-
-# tools
 RUN apt-get update --fix-missing && \
     apt-get install -y \
-    python-pip git ssh sshpass && \
+    wget libtool \
+    intltool autoconf \
+    automake automake-1.15 \
+    pkg-config make cmake \
+    tar vim ssh \
+    python-pip git sshpass && \
     pip install conan --upgrade
 
 RUN TOOLCHAIN="arm-linux-gnueabihf"; \
@@ -56,9 +45,8 @@ ENV PATH="/opt/toolchain/bin:${PATH}" \
     BUILD_PLATFORM=armv7
 
 # tools
-RUN conan profile new default --detect
-
-RUN conan profile update settings.compiler.libcxx=libstdc++11 default && \
+RUN conan profile new default --detect && \
+    conan profile update settings.compiler.libcxx=libstdc++11 default && \
     conan profile update settings.build_type=Release default && \
     conan profile update settings.os=Linux default && \
     conan profile update settings.arch=armv7hf default && \
@@ -66,8 +54,41 @@ RUN conan profile update settings.compiler.libcxx=libstdc++11 default && \
     conan profile update settings.arch_build=x86_64 default && \
     conan profile update settings.compiler=gcc default && \
     conan profile update settings.compiler.version=7 default && \
-    conan profile update settings.compiler.cppstd=14 default
-
-RUN conan remote add iot https://api.bintray.com/conan/edwardoid/iot && \
+    conan profile update settings.compiler.cppstd=14 default && \
+    conan remote add iot https://api.bintray.com/conan/edwardoid/iot && \
     conan remote add bincrafters https://api.bintray.com/conan/bincrafters/public-conan && \
     conan remote add devcodeone https://api.bintray.com/conan/devcodeone/public-conan
+
+
+RUN echo "export PATH=/opt/pyenv/shims:/opt/pyenv/bin:/opt/toolchain/bin:$PATH" >> /root/.profile && \
+    echo "export CC=arm-linux-gnueabihf-gcc" >> /root/.profile && \
+    echo "export CXX=arm-linux-gnueabihf-g++" >> /root/.profile && \
+    echo "export CMAKE_C_COMPILER=arm-linux-gnueabihf-gcc" >> /root/.profile && \ 
+    echo "export CMAKE_CXX_COMPILER=arm-linux-gnueabihf-g++" >> /root/.profile && \
+    echo "export STRIP=arm-linux-gnueabihf-strip" >> /root/.profile && \
+    echo "export RANLIB=arm-linux-gnueabihf-ranlib" >> /root/.profile && \
+    echo "export LD=arm-linux-gnueabihf-ld" >> /root/.profile && \
+    echo "export AS=arm-linux-gnueabihf-as" >> /root/.profile && \
+    echo "export AR=arm-linux-gnueabihf-ar" >> /root/.profile && \
+    echo "export BUILD_PLATFORM=armv7" >> /root/.profile && \
+    echo "source $HOME/.bashrc"
+
+
+
+RUN mkdir /var/run/sshd
+
+RUN echo 'root:root' |chpasswd
+
+RUN sed -ri 's/^#?PermitRootLogin\s+.*/PermitRootLogin yes/' /etc/ssh/sshd_config
+RUN sed -ri 's/UsePAM yes/#UsePAM yes/g' /etc/ssh/sshd_config
+
+RUN mkdir /root/.ssh
+
+RUN apt-get clean && \
+    rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
+
+EXPOSE 22
+
+CMD    ["/usr/sbin/sshd", "-D"]
+
+

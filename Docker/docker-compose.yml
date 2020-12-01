@@ -1,0 +1,51 @@
+version: '3.3'
+services:
+    jenkins:
+        ports:
+            - '8080:8080'
+            - '50000:50000'
+        volumes:
+            - '/root/ci:/var/jenkins_home'
+        links:
+                - 'armv6:armv6_build_server'
+                - 'armv7:armv7_build_server'
+                - 'x86:x86_build_server'
+        image: 'jenkins/jenkins:lts'
+        user: 'root'
+
+    armv6:
+        user: 'root'
+        volumes:
+            - '/root/ci:/sources:ro'
+            - '/root/artifactory:/artefacts'
+        build:
+            context: .
+            dockerfile: Dockerfile.armv6
+    armv7:
+        user: 'root'
+        volumes:
+            - '/root/ci:/sources:ro'
+            - '/root/artifactory:/artefacts'
+        build:
+            context: .
+            dockerfile: Dockerfile.armv7
+    x86:
+        user: 'root'
+        volumes:
+            - '/root/ci:/sources:ro'
+            - '/root/artifactory:/artefacts'
+        build:
+            context: .
+            dockerfile: Dockerfile.x86_64
+
+    artifactory:
+        volumes:
+            - '/root/artifactory:/content'
+        environment:
+            - FOLDER=/content
+        ports:
+            - '8081:8080'
+        image: 'halverneus/static-file-server:latest'
+ 
+volumes:
+    sources_dir:
