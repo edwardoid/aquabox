@@ -6,7 +6,7 @@ function clean_build {
 }
 
 function do_build {
-    make -j8 |& tee -a build.log
+    make -j6 |& tee -a build.log
     chmod +rw -R /build |& tee -a build.log
 }
 

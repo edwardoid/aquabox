@@ -41,7 +41,7 @@ target_link_libraries(${PROJECT_NAME} rt)
 
 install(TARGETS ${PROJECT_NAME}
         RUNTIME
-                DESTINATION "lib"
+                DESTINATION "bin"
         LIBRARY
                 DESTINATION "lib"
         ARCHIVE 

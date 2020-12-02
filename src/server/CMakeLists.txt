@@ -27,4 +27,11 @@ target_link_libraries(${PROJECT_NAME} Threads::Threads)
 target_link_libraries(${PROJECT_NAME} dl)
 target_link_libraries(${PROJECT_NAME} rt)
 
-install(TARGETS ${PROJECT_NAME} DESTINATION bin)
+install(TARGETS ${PROJECT_NAME}
+        RUNTIME
+                DESTINATION "bin"
+        LIBRARY
+                DESTINATION "lib"
+        ARCHIVE 
+                DESTINATION "archive"
+)

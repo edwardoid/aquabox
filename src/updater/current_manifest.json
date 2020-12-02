@@ -1,0 +1,51 @@
+{
+    "version": "1.2.3",
+    "hash": "dasdadasda",
+    "build_time": "12:00",
+    "build_nume": "26",
+    "env": {
+        "$INSTALL_DIR": "/aquabox",
+        "$LIB_DIR": "/aquabox/lib",
+        "$BIN_DIR": "/aquabox/bin",
+        "$CFG_DIR": "/aquabox/bin",
+        "$SERVICE_NAME" : "aquabox-client"
+    },
+    "steps" : {
+        "prepare": [
+            {
+                "action": "exec",
+                "data" : "systemctl stop aquabox"
+            }
+        ],
+        "update": [
+            {
+                "action": "extract",
+                "source": "bin/aquabox",
+                "destination": "/aquabox/bin/aquabox"
+            },
+            {
+                "action": "extract",
+                "source": "lib/libaquabox-common.so",
+                "destination": "/aquabox/lib/libaquabox-common.so"
+            },
+            {
+                "action": "extract",
+                "source": "lib/libaquabox-common.so",
+                "destination": "/aquabox/lib/libbson-1.0.so.0.0.0"
+            },
+            {
+                "action": "extract",
+                "source": "lib/libaquabox-common.so",
+                "destination": "/aquabox/lib/libbson-1.0.so.0"
+            },
+            {
+                "action": "extract",
+                "source": "lib/libaquabox-common.so",
+                "destination": "/aquabox/lib/libbson-1.0.so"
+            }
+        ],
+        "finish": [
+
+        ]
+    }
+}
