@@ -8,9 +8,25 @@ import json
 import shutil
 import os
 
-base_url = "http://193.37.152.213:8081/x86_64/"
+base_url = ""
 
 env = {}
+
+def set_env(prop, value):
+    global env
+    if prop[0] != '$':
+        prop = '$' + prop
+    if value is not None:
+        env[prop] = value
+
+def get_env(prop, default = None):
+    global env
+    if prop[0] != '$':
+        prop = '$' + prop
+    v = env.get(prop)
+    if v is None:
+        return default
+    return v
 
 def get_globals():
     global env
@@ -46,9 +62,11 @@ def apply_env(string):
     return string
 
 def get_packages():
+    global base_url
+    global env
     try:
         resp = requests.get(base_url)
-        packes_regexp = re.compile("aquabox-client-\w+.tar.gz")
+        packes_regexp = re.compile("aquabox-" + get_env("$APP") + get_env("$APP_POSTFIX", "") + "-\w+.tar.gz")
         packages = packes_regexp.findall(resp.text)
         packages = list(dict.fromkeys(packages))
         if len(packages) == 0:
@@ -64,8 +82,8 @@ def pick_update(available_packages):
     if len(available_packages) is 0:
         return None
     try:
-        upd = available_packages.index(env.get("$UPDATE_PACKAGE"))
-        if upd + 1 is len(available_packages):
+        upd = available_packages.index(get_env("$UPDATE_PACKAGE", "")) + 1
+        if upd is len(available_packages):
             upd = None
     except:
 	    upd = available_packages[-1]
@@ -253,7 +271,7 @@ def update(pkg):
                 failed_step = apply_steps(manifest["steps"], arch)
                 if failed_step is None:
                     print ("Update applied")
-                    env["$UPDATE_PACKAGE"] = pkg
+                    set_env("$UPDATE_PACKAGE", pkg)
                     manifest["env"] = env
                     with open('current_manifest.json', 'w') as outfile:
                         json.dump(manifest, outfile)
@@ -270,6 +288,8 @@ get_globals()
 
 for v in env:
     print (v + " = " + env[v])
+
+base_url += get_env("$UPDATE_SERVER", "http://193.37.152.213:8081") + "/" get_env("$PLATFORM") + "/"
 
 packages_available = get_packages()
 if packages_available is None:

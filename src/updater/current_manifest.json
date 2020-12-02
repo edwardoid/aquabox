@@ -4,6 +4,10 @@
     "build_time": "12:00",
     "build_nume": "26",
     "env": {
+        "$PLATFORM": "x86_64",
+        "$UPDATE_SERVER": "http://193.37.152.213:8081",
+        "$APP": "client",
+        "$APP_POSTFIX": "-devel",
         "$INSTALL_DIR": "/aquabox",
         "$LIB_DIR": "/aquabox/lib",
         "$BIN_DIR": "/aquabox/bin",
