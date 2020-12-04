@@ -27,11 +27,11 @@ target_link_libraries(${PROJECT_NAME} Threads::Threads)
 target_link_libraries(${PROJECT_NAME} dl)
 target_link_libraries(${PROJECT_NAME} rt)
 
-install(TARGETS ${PROJECT_NAME}
-        RUNTIME
-                DESTINATION "bin"
-        LIBRARY
-                DESTINATION "lib"
-        ARCHIVE 
-                DESTINATION "archive"
+set_target_properties(${PROJECT_NAME}
+    PROPERTIES
+    ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib"
+    LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib"
+    RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin"
 )
+
+configure_file(${AQUABOX_ROOT_DIR}/config/aquabox-server/$ENV{BUILD_PLATFORM}/aquabox.service ${CMAKE_BINARY_DIR}/bin/aquabox-server.service)

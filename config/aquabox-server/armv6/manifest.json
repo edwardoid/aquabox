@@ -1,0 +1,201 @@
+{
+    "version": "1.2.3",
+    "hash": "dasdadasda",
+    "build_time": "12:00",
+    "build_nume": "26",
+    "env": {
+        "$PLATFORM": "x86_64",
+        "$UPDATE_SERVER": "http://193.37.152.213:8081",
+        "$APP": "client",
+        "$APP_POSTFIX": "-devel",
+        "$EXECUTABLE": "aquabox-client",
+        "$INSTALL_DIR": "/aquabox",
+        "$LIB_DIR": "/aquabox/lib",
+        "$BIN_DIR": "/aquabox/bin",
+        "$CFG_DIR": "/aquabox/bin",
+        "$SERVICE_NAME" : "aquabox-client",
+        "$BACKUP_DIR": "/aquabox/backup"
+    },
+    "steps" : {
+        "prepare": [
+            {
+                "mandatory": false,
+                "action": "exec",
+                "data" : "systemctl stop $SERVICE_NAME"
+            },
+            {
+                "mandatory": false,
+                "action": "file",
+                "operation": "mkdir",
+                "source": "$BACKUP_DIR"
+            },
+            {
+                "mandatory": false,
+                "action": "file",
+                "operation": "mkdir",
+                "source": "$BACKUP_DIR/bin"
+            },
+            {
+                "mandatory": false,
+                "action": "file",
+                "operation": "move",
+                "source": "$LIB_DIR",
+                "destination": "$BACKUP_DIR/lib"
+            },
+            {
+                "mandatory": false,
+                "action": "file",
+                "operation": "move",
+                "source": "$BIN_DIR/$EXECUTABLE",
+                "destination": "$BACKUP_DIR/bin/$EXECUTABLE"
+            },
+            {
+                "mandatory": false,
+                "action": "file",
+                "operation": "copy",
+                "source": "$CFG_DIR/config.json",
+                "destination": "$BACKUP_DIR/bin/config.json"
+            }
+        ],
+        "update": [
+            {
+                "action": "extract",
+                "source": "bin/aquabox",
+                "destination": "$BIN_DIR/aquabox"
+            },
+            {
+                "action": "file",
+                "operation": "mkdir",
+                "source": "$LIB_DIR"
+            },
+            {
+                "action": "extract",
+                "source": "lib/libaquabox-common.so",
+                "destination": "$LIB_DIR/libaquabox-common.so"
+            },
+            {
+                "action": "extract",
+                "source": "lib/libbson-1.0.so.0.0.0",
+                "destination": "$LIB_DIR/libbson-1.0.so.0.0.0"
+            },
+            {
+                "action": "extract",
+                "source": "lib/libbson-1.0.so.0",
+                "destination": "$LIB_DIR/libbson-1.0.so.0"
+            },
+            {
+                "action": "extract",
+                "source": "lib/libbson-1.0.so",
+                "destination": "$LIB_DIR/libbson-1.0.so"
+            },
+            {
+                "action": "extract",
+                "source": "lib/libdbus-1.so",
+                "destination": "$LIB_DIR/libdbus-1.so"
+            },
+            {
+                "action": "extract",
+                "source": "lib/libdbus-1.so.3",
+                "destination": "$LIB_DIR/libdbus-1.so.3"
+            },
+            {
+                "action": "extract",
+                "source": "lib/libdbus-1.so.3.19.11",
+                "destination": "$LIB_DIR/libdbus-1.so.3.19.11"
+            },
+            {
+                "action": "extract",
+                "source": "lib/libfb.so.1",
+                "destination": "$LIB_DIR/libfb.so.1"
+            },
+            {
+                "action": "extract",
+                "source": "lib/libfb.so",
+                "destination": "$LIB_DIR/libfb.so"
+            },
+            {
+                "action": "extract",
+                "source": "lib/libmongoc-1.0.so.0.0.0",
+                "destination": "$LIB_DIR/libmongoc-1.0.so.0.0.0"
+            },
+            {
+                "action": "extract",
+                "source": "lib/libmongoc-1.0.so.0",
+                "destination": "$LIB_DIR/libmongoc-1.0.so.0"
+            },
+            {
+                "action": "extract",
+                "source": "lib/libmongoc-1.0.so",
+                "destination": "$LIB_DIR/libmongoc-1.0.so"
+            },
+            {
+                "action": "extract",
+                "source": "lib/libNMDBus.so.0.1.0",
+                "destination": "$LIB_DIR/libNMDBus.so.0.1.0"
+            },
+            {
+                "action": "extract",
+                "source": "lib/libNMDBus.so",
+                "destination": "$LIB_DIR/libNMDBus.so"
+            },
+            {
+                "action": "extract",
+                "source": "lib/libsimppl.so",
+                "destination": "$LIB_DIR/libsimppl.so"
+            },
+            {
+                "action": "extract",
+                "source": "lib/libstats.so.1",
+                "destination": "$LIB_DIR/libstats.so.1"
+            },
+            {
+                "action": "extract",
+                "source": "lib/libstats.so",
+                "destination": "$LIB_DIR/libstats.so"
+            },
+            {
+                "action": "extract",
+                "source": "lib/libTgBot.so.1",
+                "destination": "$LIB_DIR/libTgBot.so.1"
+            },
+            {
+                "action": "extract",
+                "source": "lib/libTgBot.so",
+                "destination": "$LIB_DIR/libTgBot.so"
+            },
+            {
+                "action": "extract",
+                "source": "lib/libw1temp.so.1",
+                "destination": "$LIB_DIR/libw1temp.so.1"
+            },
+            {
+                "action": "extract",
+                "source": "lib/libw1temp.so",
+                "destination": "$LIB_DIR/libw1temp.so"
+            },
+            {
+                "action": "extract",
+                "source": "lib/preloadable_libiconv.so",
+                "destination": "$LIB_DIR/preloadable_libiconv.so"
+            }
+        ],
+        "finish": [
+            {
+                "mandatory": true,
+                "action": "exec",
+                "data" : "systemctl daemon=reload"
+            },
+            {
+                "mandatory": true,
+                "action": "exec",
+                "data" : "systemctl start $SERVICE_NAME"
+            },
+            {
+                "mandatory": false,
+                "action": "file",
+                "operation": "remove",
+                "source": "$BACKUP_DIR"
+            }
+        ]
+    }
+}

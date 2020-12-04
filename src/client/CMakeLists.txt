@@ -1,4 +1,4 @@
-project(aquabox)
+project(aquabox-client)
 
 MESSAGE(STATUS "AquaBox will be installed to ${CMAKE_INSTALL_PREFIX}")
 
@@ -8,8 +8,7 @@ file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/devices)
 file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/assets)
 
 configure_file(${AQUABOX_ROOT_DIR}/config/aquabox/$ENV{BUILD_PLATFORM}/config.dev.json.in ${CMAKE_BINARY_DIR}/bin/config.json)
-configure_file(${AQUABOX_ROOT_DIR}/config/aquabox/$ENV{BUILD_PLATFORM}/startup.sh ${CMAKE_BINARY_DIR}/bin/startup.sh)
-configure_file(${AQUABOX_ROOT_DIR}/config/aquabox/$ENV{BUILD_PLATFORM}/aquabox.service ${CMAKE_BINARY_DIR}/bin/aquabox.service)
+configure_file(${AQUABOX_ROOT_DIR}/config/aquabox/$ENV{BUILD_PLATFORM}/aquabox.service ${CMAKE_BINARY_DIR}/bin/aquabox-client.service)
 file(COPY ${AQUABOX_ROOT_DIR}/config/aquabox/$ENV{BUILD_PLATFORM}/assets DESTINATION ${CMAKE_BINARY_DIR}/bin)
 file(COPY ${AQUABOX_ROOT_DIR}/config/aquabox/$ENV{BUILD_PLATFORM}/devices DESTINATION ${CMAKE_BINARY_DIR}/bin)
 file(COPY ${AQUABOX_ROOT_DIR}/config/aquabox/$ENV{BUILD_PLATFORM}/rules DESTINATION ${CMAKE_BINARY_DIR}/bin)
@@ -39,13 +38,12 @@ target_link_libraries(${PROJECT_NAME} dbus::dbus)
 target_link_libraries(${PROJECT_NAME} dl)
 target_link_libraries(${PROJECT_NAME} rt)
 
-install(TARGETS ${PROJECT_NAME}
-        RUNTIME
-                DESTINATION "bin"
-        LIBRARY
-                DESTINATION "lib"
-        ARCHIVE 
-                DESTINATION "archive"
+
+set_target_properties(${PROJECT_NAME}
+    PROPERTIES
+    ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib"
+    LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib"
+    RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin"
 )
 
 #install(TARGETS ${PROJECT_NAME} DESTINATION bin)

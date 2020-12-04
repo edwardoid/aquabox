@@ -1,0 +1,19 @@
+{
+    "aquabox": {
+        "cloudPort": 5557,
+        "cloudUrl": "edwardoid.redirectme.net",
+        "cloudWSPort": 5556,
+        "httpPort": 1218,
+        "log": "DEBUG",
+        "password": "aquabox",
+        "ssid": "AquaBox",
+        "streamPort": 1214,
+        "threads": 8,
+        "workingDirectory": "/home/esargsyan/ionictests/aquabox/build/aquabox"
+    },
+    "cloud": {
+        "cloudPort": 5557,
+        "cloudWSPort": 5556,
+        "httpPort": 1213
+    }
+}
