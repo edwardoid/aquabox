@@ -35,3 +35,4 @@ set_target_properties(${PROJECT_NAME}
 )
 
 configure_file(${AQUABOX_ROOT_DIR}/config/aquabox-server/$ENV{BUILD_PLATFORM}/aquabox.service ${CMAKE_BINARY_DIR}/bin/aquabox-server.service)
+configure_file(${AQUABOX_ROOT_DIR}/config/aquabox-server/$ENV{BUILD_PLATFORM}/manifest.json ${CMAKE_BINARY_DIR}/manifest-server.json)

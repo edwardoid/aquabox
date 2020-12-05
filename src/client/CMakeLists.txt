@@ -9,6 +9,7 @@ file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/assets)
 
 configure_file(${AQUABOX_ROOT_DIR}/config/aquabox/$ENV{BUILD_PLATFORM}/config.dev.json.in ${CMAKE_BINARY_DIR}/bin/config.json)
 configure_file(${AQUABOX_ROOT_DIR}/config/aquabox/$ENV{BUILD_PLATFORM}/aquabox.service ${CMAKE_BINARY_DIR}/bin/aquabox-client.service)
+configure_file(${AQUABOX_ROOT_DIR}/config/aquabox/$ENV{BUILD_PLATFORM}/manifest.json ${CMAKE_BINARY_DIR}/manifest-client.json)
 file(COPY ${AQUABOX_ROOT_DIR}/config/aquabox/$ENV{BUILD_PLATFORM}/assets DESTINATION ${CMAKE_BINARY_DIR}/bin)
 file(COPY ${AQUABOX_ROOT_DIR}/config/aquabox/$ENV{BUILD_PLATFORM}/devices DESTINATION ${CMAKE_BINARY_DIR}/bin)
 file(COPY ${AQUABOX_ROOT_DIR}/config/aquabox/$ENV{BUILD_PLATFORM}/rules DESTINATION ${CMAKE_BINARY_DIR}/bin)
