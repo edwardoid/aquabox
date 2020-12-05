@@ -1,4 +1,4 @@
-FROM ubuntu:20.10
+FROM ubuntu:18.04
 
 ENV DEBIAN_FRONTEND noninteractive
 
@@ -24,7 +24,8 @@ RUN apt-get update --fix-missing && \
     git \
     ssh \
     sshpass \
-    python3-pip
+    python3-pip \
+    python-pip
 
 RUN apt-get purge -y cmake
 

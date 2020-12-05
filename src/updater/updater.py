@@ -1,4 +1,4 @@
-#!/usr/bin/python2
+#!/usr/bin/python3
 
 import requests
 import re
@@ -7,6 +7,7 @@ import traceback
 import json
 import shutil
 import os
+import subprocess
 
 base_url = ""
 
@@ -69,7 +70,7 @@ def get_packages():
         packes_regexp = re.compile("aquabox-" + get_env("$APP") + get_env("$APP_POSTFIX", "") + "-\w+.tar.gz")
         packages = packes_regexp.findall(resp.text)
         packages = list(dict.fromkeys(packages))
-        if len(packages) == 0:
+        if len(packages) is 0:
             return None
         build_num = re.compile("\d+")
         return sorted(packages, key = lambda pkg: int(build_num.findall(pkg)[0]))
@@ -92,19 +93,20 @@ def pick_update(available_packages):
 def downlad_package(pkg):
     try:
         destination = pkg
-        print("Downloading " + pkg + "as" + destination + " from " + base_url + pkg)
-        r = requests.get(base_url + pkg)
-        with open(destination, 'wb') as f:
-            f.write(r.content)
-            f.close()
-            return destination
+        print("Downloading " + pkg + " as " + destination + " from " + base_url + pkg)
+        r = requests.get(base_url + pkg, allow_redirects=True)
+        f= open(destination, 'wb')
+        print("Saving as " + destination)
+        f.write(r.content)
+        f.close()
+        return destination
     except BaseException as error:
         print('An exception occurred: {}'.format(error))
     return None
 
 def do_exec(action):
-    if "command" in action:
-        subprocess.run(apply_env(action["command"]), shell=True)
+    if "data" in action:
+        os.system(apply_env(action["data"]))
     else:
         print ("Action does not have command attribute!")
         return False
@@ -116,10 +118,11 @@ def do_extract(action, arch):
     destination = action.get("destination")
     destination = apply_env(destination)
     files_in_arch = arch.getmembers()
-    if len(filter(lambda info: info.name == source, files_in_arch)) != 0:
-        stream = arch.extractfile(destination)
+    if ([x for x in files_in_arch if x.name is source]) != 0:
+        stream = arch.extractfile(source)
+        open(destination, "wb").write(stream.read())
     else:
-        print ("File " + source + "was not found in update package")
+        print ("File " + source + " was not found in update package")
         return False
     return True
 
@@ -172,7 +175,8 @@ def do_mkdir(action):
     src = action.get("source")
     src = apply_env(src)
     try:
-        os.mkdirs(src)
+        print("Creating dir " + src)
+        os.makedirs(src, exist_ok=True)
         return True
     except FileExistsError as e:
         return true
@@ -192,13 +196,13 @@ def do_file(action):
         print("Source if not specified")
         return False
     ret = False
-    if operation is "copy":
+    if operation == "copy":
         ret = do_copy(action)
-    elif operation is "remove":
+    elif operation == "remove":
         ret = do_remove(action)
-    elif operation is "move":
+    elif operation == "move":
         ret = do_move(action)
-    elif operation is "mkdir":
+    elif operation == "mkdir":
         ret = do_mkdir(action)
     else:
         print ("Unknown operation " + operation)
@@ -206,13 +210,13 @@ def do_file(action):
 
 def do_action(action, arch):
     ret = False
-    if action["action"] is "exec":
+    if action["action"] == "exec":
         ret = do_exec(action)
-    elif action["action"] is "extract":
+    elif action["action"] == "extract":
         ret = do_extract(action, arch)
-    elif action["action"] is "file":
+    elif action["action"] == "file":
         ret = do_file(action)
-    elif action["action"] is "patch":
+    elif action["action"] == "patch":
         ret = do_file(action)
     else:
         print("Unknown action: " + action["action"])
@@ -220,6 +224,7 @@ def do_action(action, arch):
 
 def do_all_actions(actions, arch):
     for action in actions:
+        print("Applying: " + json.dumps(action))
         mandatory = action.get("mandatory")
         if mandatory is None:
             mandatory = False
@@ -255,11 +260,12 @@ def recover(step):
 def update(pkg):
     global env
     try:
+        print("Loading " + pkg)
         arch = tarfile.open(pkg)
         files_in_arch = arch.getmembers()
-        if len(filter(lambda info: info.name == "manifest.json", files_in_arch)) != 0:
+        if ([x for x in files_in_arch if x.name is "manifest.json"]) != 0:
             stream = arch.extractfile("manifest.json")
-            open(pkg + "exec" , 'w').write(stream.read())
+            open("manifest.json", "wb").write(stream.read())
         else:
             print("Package " + pkg + " does not contain manifest file")
             return False
@@ -273,6 +279,7 @@ def update(pkg):
                     print ("Update applied")
                     set_env("$UPDATE_PACKAGE", pkg)
                     manifest["env"] = env
+                    manifest[
                     with open('current_manifest.json', 'w') as outfile:
                         json.dump(manifest, outfile)
                     return True
@@ -282,6 +289,7 @@ def update(pkg):
                     
     except BaseException as error:
         print('An exception occurred: {}'.format(error))
+        traceback.print_exc()
         return False
 
 get_globals()
@@ -289,7 +297,10 @@ get_globals()
 for v in env:
     print (v + " = " + env[v])
 
-base_url += get_env("$UPDATE_SERVER", "http://193.37.152.213:8081") + "/" get_env("$PLATFORM") + "/"
+set_env("$UPDATE_PACKAGE", "");
+set_env("$APP_POSTFIX", "");
+
+base_url += get_env("$UPDATE_SERVER", "http://193.37.152.213:8081") + "/" + get_env("$PLATFORM") + "/"
 
 packages_available = get_packages()
 if packages_available is None:
