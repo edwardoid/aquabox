@@ -181,9 +181,14 @@
         ],
         "finish": [
             {
+                "action": "extract",
+                "source": "bin/$EXECUTABLE.service",
+                "destination": "/etc/systemd/system/$EXECUTABLE.service"
+            },
+            {
                 "mandatory": true,
                 "action": "exec",
-                "data" : "systemctl daemon=reload"
+                "data" : "systemctl daemon-reload"
             },
             {
                 "mandatory": true,

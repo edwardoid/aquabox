@@ -6,14 +6,14 @@
     "env": {
         "$PLATFORM": "x86_64",
         "$UPDATE_SERVER": "http://193.37.152.213:8081",
-        "$APP": "client",
+        "$APP": "server",
         "$APP_POSTFIX": "-devel",
         "$EXECUTABLE": "aquabox-server",
         "$INSTALL_DIR": "/aquabox",
         "$LIB_DIR": "/aquabox/lib",
         "$BIN_DIR": "/aquabox/bin",
         "$CFG_DIR": "/aquabox/bin",
-        "$SERVICE_NAME" : "aquabox-client",
+        "$SERVICE_NAME" : "aquabox-server",
         "$BACKUP_DIR": "/aquabox/backup"
     },
     "steps" : {
@@ -181,9 +181,14 @@
         ],
         "finish": [
             {
+                "action": "extract",
+                "source": "bin/$EXECUTABLE.service",
+                "destination": "/etc/systemd/system/$EXECUTABLE.service"
+            },
+            {
                 "mandatory": true,
                 "action": "exec",
-                "data" : "systemctl daemon=reload"
+                "data" : "systemctl daemon-reload"
             },
             {
                 "mandatory": true,
