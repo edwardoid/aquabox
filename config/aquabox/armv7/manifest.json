@@ -60,8 +60,8 @@
         "update": [
             {
                 "action": "extract",
-                "source": "bin/aquabox",
-                "destination": "$BIN_DIR/aquabox"
+                "source": "bin/$EXECUTABLE",
+                "destination": "$BIN_DIR/$EXECUTABLE"
             },
             {
                 "action": "file",

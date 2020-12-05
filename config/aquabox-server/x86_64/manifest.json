@@ -8,7 +8,7 @@
         "$UPDATE_SERVER": "http://193.37.152.213:8081",
         "$APP": "client",
         "$APP_POSTFIX": "-devel",
-        "$EXECUTABLE": "aquabox-client",
+        "$EXECUTABLE": "aquabox-server",
         "$INSTALL_DIR": "/aquabox",
         "$LIB_DIR": "/aquabox/lib",
         "$BIN_DIR": "/aquabox/bin",
@@ -60,8 +60,8 @@
         "update": [
             {
                 "action": "extract",
-                "source": "bin/aquabox",
-                "destination": "$BIN_DIR/aquabox"
+                "source": "bin/$EXECUTABLE",
+                "destination": "$BIN_DIR/$EXECUTABLE"
             },
             {
                 "action": "file",
