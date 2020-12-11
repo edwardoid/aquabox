@@ -1,12 +1,22 @@
 #include "box.h"
 #include "log.h"
 #include "application_connection.h"
+#include "boxes_manager.h"
+#include "database.h"
+#include <singleton.h>
+#include "telegram_bot.h"
 
 using namespace aquabox;
 
-Box::Box(ResultsMap<Command>& results)
-    : BoxConnection(results)
-{}
+Box::Box(const std::string& id, ResultsMap<Command>& results)
+    : BoxConnection(id, results)
+{
+    UpdateReceived.connect([this](const nlohmann::json& event){
+        if(Singleton<TelegramBot>::available) {
+            Singleton<TelegramBot>::i()->updateReceived(*this, event);
+        }
+    });
+}
 
 std::vector<std::shared_ptr<ApplicationConnection>> Box::connections() const
 {
@@ -26,3 +36,9 @@ void Box::removeConnection(std::shared_ptr<ApplicationConnection> connection)
     if (p != m_applications.end())
         m_applications.erase(p);
 }
+
+std::set<int64_t> Box::telegramChats() const
+{
+    return Database::i().telegramChats(id());
+}
+

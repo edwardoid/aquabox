@@ -16,8 +16,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef REPETIVE_TASK_H
-#define REPETIVE_TASK_H
+#pragma once
 
 #include <chrono>
 #include <functional>
@@ -39,5 +38,3 @@ namespace aquabox
         std::function<void(void)> m_task;
     };
 }
-
-#endif // REPETIVE_TASK

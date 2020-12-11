@@ -23,6 +23,6 @@ namespace aquabox
     class Physical: public Layer
     {
     public:
-        std::shared_ptr<Bus> bus(std::string bus) override;
+        std::shared_ptr<Bus> bus(const std::string& bus) override;
     };
 }

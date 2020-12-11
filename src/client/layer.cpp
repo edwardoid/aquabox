@@ -23,7 +23,7 @@
 
 using namespace aquabox;
 
-std::shared_ptr<Layer> Layer::get(std::string layer)
+std::shared_ptr<Layer> Layer::get(const std::string& layer)
 {
     static std::unordered_map<std::string, std::shared_ptr<Layer>> availableLayers({
         { "PHY", std::make_shared<Physical>() },

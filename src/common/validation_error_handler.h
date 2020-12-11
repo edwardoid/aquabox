@@ -16,8 +16,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef VALIDATION_ERROR_HANDLER_H
-#define VALIDATION_ERROR_HANDLER_H
+#pragma once
 
 #include <nlohmann/json-schema.hpp>
 
@@ -32,5 +31,3 @@ namespace aquabox
         std::string m_error;
 	};
 }
-
-#endif // VALIDATION_ERROR_HANDLER_H

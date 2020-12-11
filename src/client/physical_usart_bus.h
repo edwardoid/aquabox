@@ -16,8 +16,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef PHY_USART_BUS_H
-#define PHY_USART_BUS_H
+#pragma once
 
 #include "bus.h"
 
@@ -26,8 +25,6 @@ namespace aquabox
     class PhysicalUSARTBus: public Bus
     {
     public:
-        std::shared_ptr<Hardware> hw(std::string hw) override;
+        std::shared_ptr<Hardware> hw(const std::string& hw) override;
     };
 }
-
-#endif // PHY_USART_BUS_H

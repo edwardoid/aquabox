@@ -25,7 +25,7 @@ using namespace aquabox;
 
 using namespace aquabox;
 
-std::shared_ptr<Hardware> PhysicalUSARTBus::hw(std::string hw)
+std::shared_ptr<Hardware> PhysicalUSARTBus::hw(const std::string& hw)
 {
     return nullptr;
 }

@@ -16,8 +16,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef RULE_ACTION_H
-#define RULE_ACTION_H
+#pragma once
 
 #include "enumerations.h"
 
@@ -34,5 +33,3 @@ namespace aquabox
         ActionType m_action;
     };
 }
-
-#endif // RULE_ACTION_H

@@ -16,8 +16,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef HTTP_HELPERS_H
-#define HTTP_HELPERS_H
+#pragma once
 
 #include <fstream>
 #include "iot_definitions.h"
@@ -32,5 +31,3 @@ namespace aquabox
     static void serveStream(Web::Response response, Path path, std::shared_ptr<std::ifstream> ifs, size_t length, bool removeWhenFinished);
     };
 }
-
-#endif // HTTP_HELPERS_H

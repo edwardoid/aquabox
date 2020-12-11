@@ -41,7 +41,6 @@
 #include <exception>
 #include <chrono>
 #include <random>
-#include <telegram_bot.h>
 
 #define LOG_FILE_SIZE_IN_MB 10
 #define BYTES_IN_MB 1000000
@@ -123,8 +122,6 @@ int AquaBox::start()
         }
     }
 
-    Singleton<TelegramBot>::available = !Settings::string(Settings::Keys::TELEGRAM_BOT_API, "").empty();
-
     readDevices(m_wd);
     readRules(m_wd);
     readUsers();
@@ -134,11 +131,6 @@ int AquaBox::start()
 
     m_rulesTimer->start();
     m_server->start();
-
-    auto telegram = Singleton<TelegramBot>::i();
-    if (telegram != nullptr) {
-        telegram->start();
-    }
 
     m_globalTimer->waitToFinish();
 

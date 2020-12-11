@@ -17,8 +17,8 @@
  */
 
 #include "cloud_service.h"
-#include "settings.h"
-#include "stacktrace.h"
+#include <settings.h>
+#include <stacktrace.h>
 
 int main(int argc, char** argv)
 {

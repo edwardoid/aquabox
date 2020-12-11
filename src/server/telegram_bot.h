@@ -16,20 +16,28 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef TYPES_H
-#define TYPES_H
+#pragma once
 
-#include <stdint.h>
-#include <vector>
+#include <tgbot/tgbot.h>
+#include <nlohmann/json.hpp>
+#include <string>
+#include <thread>
 
 namespace aquabox
 {
-
-using Bytes = std::vector<uint8_t>;
-using BytesCount = Bytes::size_type;
-using Offset = Bytes::size_type;
-
-
+    class Box;
+    class TelegramBot
+    {
+    public:
+        TelegramBot(const std::string& token = "1406003356:AAEE_dI8UiBKAhbkBEvUvSewWbGaG5Zwubg");
+        ~TelegramBot();
+        void start();
+        void statusChanged(const Box& box, bool online);
+        void updateReceived(const Box& box, const nlohmann::json& event);
+    private:
+        void setup();
+    private:
+        TgBot::Bot m_bot;
+        std::thread m_loop;
+    };
 }
-
-#endif // TYPES_H

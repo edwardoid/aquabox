@@ -5,6 +5,7 @@
 #include "boxes_manager.h"
 #include "database.h"
 #include "settings.h"
+#include "telegram_bot.h"
 
 using namespace aquabox;
 

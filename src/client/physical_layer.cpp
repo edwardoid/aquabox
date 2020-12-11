@@ -25,7 +25,7 @@
 
 using namespace aquabox;
 
-std::shared_ptr<Bus> Physical::bus(std::string bus)
+std::shared_ptr<Bus> Physical::bus(const std::string& bus)
 {
     static std::unordered_map<std::string, std::shared_ptr<Bus> > availableBuses({
         { "GPIO", std::make_shared<PhysicalGPIOBus>() },

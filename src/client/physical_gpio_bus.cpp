@@ -22,7 +22,7 @@
 
 using namespace aquabox;
 
-std::shared_ptr<Hardware> PhysicalGPIOBus::hw(std::string hw)
+std::shared_ptr<Hardware> PhysicalGPIOBus::hw(const std::string& hw)
 {
     static std::unordered_map<std::string, std::shared_ptr<GPIO> > pins({
         { "12", nullptr },

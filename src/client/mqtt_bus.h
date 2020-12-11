@@ -27,7 +27,7 @@ namespace aquabox
     {
     public:
         Mqtt();
-        virtual std::shared_ptr<Hardware> hw(std::string hw) override;
+        virtual std::shared_ptr<Hardware> hw(const std::string& hw) override;
     private:
         MQTTBroker m_broker;
     };

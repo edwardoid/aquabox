@@ -14,6 +14,6 @@ Mqtt::Mqtt()
    t.detach();
 }
 
-std::shared_ptr<Hardware> Mqtt::hw(std::string hw) {
+std::shared_ptr<Hardware> Mqtt::hw(const std::string& hw) {
    return nullptr;
 }

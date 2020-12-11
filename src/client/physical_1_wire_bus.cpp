@@ -25,7 +25,7 @@ using namespace aquabox;
 #include <ow_bus.h>
 #include <unordered_map>
 
-std::shared_ptr<Hardware> PhysicalOneWireBus::hw(std::string hw)
+std::shared_ptr<Hardware> PhysicalOneWireBus::hw(const std::string& hw)
 {
     static std::unordered_map<std::string, std::shared_ptr<OneWireDevice> > devices;
     if (devices.empty()) {

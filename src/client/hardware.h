@@ -18,11 +18,14 @@
 
 #pragma once
 
-#include "types.h"
 #include <memory>
-
+#include <vector>
 namespace aquabox
-{   
+{
+    using Bytes = std::vector<uint8_t>;
+    using BytesCount = Bytes::size_type;
+    using Offset = Bytes::size_type;
+
     enum class State
     {
         RegistrationRequest,

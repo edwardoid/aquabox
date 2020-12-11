@@ -16,8 +16,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef TIMER_H
-#define TIMER_H
+#pragma once
 
 #include <thread>
 #include <chrono>
@@ -62,5 +61,3 @@ namespace aquabox
         std::thread m_thread;
     };
 }
-
-#endif // TIMER_H

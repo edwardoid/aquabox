@@ -16,8 +16,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef COMMAND_EXECUTOR_H
-#define COMMAND_EXECUTOR_H
+#pragma once
 
 #include "command.h"
 
@@ -31,5 +30,3 @@ namespace aquabox
         Command m_cmd;
     };
 }
-
-#endif // COMMAND_EXECUTOR_H

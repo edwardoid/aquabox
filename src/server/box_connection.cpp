@@ -5,9 +5,15 @@
 
 using namespace aquabox;
 
-BoxConnection::BoxConnection(ResultsMap<Command>& resutsMap)
+BoxConnection::BoxConnection(const std::string& id, ResultsMap<Command>& resutsMap)
     : results(resutsMap)
+    , m_id(id)
 {
+}
+
+const std::string& BoxConnection::id() const
+{
+    return m_id;
 }
 
 void BoxConnection::ready(std::string body)

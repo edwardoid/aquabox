@@ -16,8 +16,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef EVENT_H
-#define EVENT_H
+#pragma once
 
 #include <nlohmann/json.hpp>
 
@@ -47,5 +46,3 @@ namespace aquabox
         nlohmann::json m_properties;
     };
 }
-
-#endif // EVENT_H

@@ -22,6 +22,8 @@
 #include "database.h"
 #include "log.h"
 #include <settings.h>
+#include <singleton.h>
+#include "telegram_bot.h"
 
 #include <thread>
 #include <nlohmann/json.hpp>

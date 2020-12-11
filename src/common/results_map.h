@@ -16,8 +16,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef RESULTS_MAP_H
-#define RESULTS_MAP_H
+#pragma once
 
 #include <set>
 #include <mutex>
@@ -75,6 +74,3 @@ namespace aquabox
         std::mutex m_readyMx;
     };
 }
-
-
-#endif // RESULTS_MAP_H

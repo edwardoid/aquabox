@@ -16,8 +16,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef WEB_SERVER_H
-#define WEB_SERVER_H
+#pragma once
 
 #include <thread>
 #include <server_http.hpp>
@@ -39,7 +38,6 @@ namespace aquabox
         bool bindApiCalls();
         void postUpdate(std::shared_ptr<Event> event);
     private:
-
         std::shared_ptr<Web::HttpServer> m_http;
         Web::WSServer m_ws;
         std::thread m_rest;
@@ -50,5 +48,3 @@ namespace aquabox
         Route m_rpc;
     };
 }
-
-#endif // WEB_SERVER_H

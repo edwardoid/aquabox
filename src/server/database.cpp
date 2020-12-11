@@ -87,7 +87,7 @@ bool Database::connect()
     return false;
 }
 
-bool Database::wasProduced(std::string id)
+bool Database::wasProduced(const std::string& id)
 {
     LOG_DEBUG << "Trying to determine was box " << id << " produced or not...";
     bool res = (bool)(m_aquabox[Settings::string(Settings::Keys::HW_COLLECTION_NAME, Settings::Defaults::HW_COLLECTION_NAME)].find_one(bsoncxx::builder::stream::document{} << "serial" << id << bsoncxx::builder::stream::finalize));
@@ -97,7 +97,7 @@ bool Database::wasProduced(std::string id)
     return res;
 }
 
-bool Database::isApplicationAuthorized(std::string app, std::string box)
+bool Database::isApplicationAuthorized(const std::string& app, const std::string& box)
 {
     bool res = (bool)(m_aquabox[Settings::string(Settings::Keys::HW_COLLECTION_NAME, Settings::Defaults::HW_COLLECTION_NAME)]
         .find_one(
@@ -115,7 +115,7 @@ bool Database::isApplicationAuthorized(std::string app, std::string box)
     return res;
 }
 
-void Database::setConnectedApps(std::string id, std::vector<std::string> appIds)
+void Database::setConnectedApps(const std::string& id, const std::vector<std::string>& appIds)
 {
     auto applications = bsoncxx::builder::basic::array{};
 
@@ -128,7 +128,7 @@ void Database::setConnectedApps(std::string id, std::vector<std::string> appIds)
                         "activeApps" << applications << bsoncxx::builder::stream::close_document << bsoncxx::builder::stream::finalize);
 }
 
-void Database::setStreamAvailable(std::string id, std::string stream, bool available)
+void Database::setStreamAvailable(const std::string& id, const std::string& stream, bool available)
 {
     m_aquabox[Settings::string(Settings::Keys::HW_COLLECTION_NAME, Settings::Defaults::HW_COLLECTION_NAME)]
     .update_one(bsoncxx::builder::stream::document{} << "serial" << id << bsoncxx::builder::stream::finalize,
@@ -136,8 +136,36 @@ void Database::setStreamAvailable(std::string id, std::string stream, bool avail
                         stream << available << bsoncxx::builder::stream::close_document << bsoncxx::builder::stream::finalize);
 }
 
-nlohmann::json Database::firmwareVersions(std::string version)
+nlohmann::json Database::firmwareVersions(const std::string& version)
 {
     nlohmann::json versions({{ "current", version }});
     return versions;
+}
+
+std::set<int64_t> Database::telegramChats(const std::string& id)
+{
+    std::set<int64_t> chats;
+    bsoncxx::stdx::optional<bsoncxx::document::value> cursor = m_aquabox[Settings::string(Settings::Keys::HW_COLLECTION_NAME, Settings::Defaults::HW_COLLECTION_NAME)].find_one(bsoncxx::builder::stream::document{} << "serial" << id << bsoncxx::builder::stream::finalize);
+    if (!cursor) {
+        return chats;
+    }
+    
+    bsoncxx::document::view view = cursor.value().view();
+    auto tgChats = view.find("tgChats");
+    if (tgChats == view.end()) {
+        return chats;
+    }
+    
+    if(tgChats->type() != bsoncxx::type::k_array) {
+        return chats;
+    }
+
+    bsoncxx::array::view ids = tgChats->get_array();
+    for(auto i = ids.begin(); i != ids.end(); ++i) {
+        if (i->type() == bsoncxx::type::k_int64) {
+            chats.insert(i->get_int64());
+        }
+    }
+
+    return chats;
 }

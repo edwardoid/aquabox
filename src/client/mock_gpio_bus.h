@@ -16,9 +16,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef MOCK_GPIO_BUS_H
-#define MOCK_GPIO_BUS_H
-
+#pragma once
 #include "bus.h"
 
 namespace aquabox
@@ -26,8 +24,6 @@ namespace aquabox
     class MockGPIOBus: public Bus
     {
     public:
-        std::shared_ptr<Hardware> hw(std::string hw) override;
+        std::shared_ptr<Hardware> hw(const std::string& hw) override;
     };
 }
-
-#endif // MOCK_GPIO_BUS_H

@@ -20,7 +20,9 @@
 #include "applications_api.h"
 #include "hardware_api.h"
 #include "database.h"
-#include "settings.h"
+#include <settings.h>
+#include "telegram_bot.h"
+#include <singleton.h>
 
 #define LOG_FILE_SIZE_IN_MB 10
 #define BYTES_IN_MB 1000000
@@ -48,6 +50,13 @@ bool CloudService::start()
     plog::init( plog::Severity::debug, &m_logAppender);
 
     LOG_INFO << "Starting Aquabox Cloud Service...";
+
+    Singleton<TelegramBot>::available = !Settings::string(Settings::Keys::TELEGRAM_BOT_API, "").empty();
+    auto telegram = Singleton<TelegramBot>::i();
+    if (telegram != nullptr) {
+        telegram->start();
+    }
+
     ApplicationsApi::start();
     return HardwareApi::start();
 }

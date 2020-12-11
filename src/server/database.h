@@ -16,25 +16,25 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef DATABASE_H
-#define DATABASE_H
+#pragma once
 
 #include <mongocxx/client.hpp>
 #include <mongocxx/database.hpp>
 #include <string>
 #include <nlohmann/json.hpp>
-
+#include <set>
 namespace aquabox
 {
     class Database
     {
     public:
         static Database& i();
-        bool wasProduced(const std::string id);
-        bool isApplicationAuthorized(std::string app, std::string box);
-        void setConnectedApps(std::string id, std::vector<std::string> appId);
-        void setStreamAvailable(std::string id, std::string stream, bool available);
-        nlohmann::json firmwareVersions(std::string version);
+        bool wasProduced(const std::string& id);
+        bool isApplicationAuthorized(const std::string& app, const std::string& box);
+        void setConnectedApps(const std::string& id, const std::vector<std::string>& appId);
+        void setStreamAvailable(const std::string& id, const std::string& stream, bool available);
+        nlohmann::json firmwareVersions(const std::string& version);
+        std::set<int64_t> telegramChats(const std::string& id);
     protected:
         Database();
         Database(const Database&) = delete;
@@ -48,5 +48,3 @@ namespace aquabox
         mongocxx::database m_aquabox;
     };
 }
-
-#endif // DATABASE_H

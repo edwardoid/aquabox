@@ -27,7 +27,7 @@ namespace aquabox
     class Bus
     {
     public:
-        virtual std::shared_ptr<Hardware> hw(std::string hw) = 0;
+        virtual std::shared_ptr<Hardware> hw(const std::string& hw) = 0;
         SignalSlot::Signal<std::shared_ptr<Hardware>, State> HardwareStateChanged;
     };
 }

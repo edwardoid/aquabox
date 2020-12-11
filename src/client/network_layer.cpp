@@ -22,7 +22,7 @@
 
 using namespace aquabox;
 
-std::shared_ptr<Bus> NetworkLayer::bus(const std::string bus)
+std::shared_ptr<Bus> NetworkLayer::bus(const std::string& bus)
 {
     static std::unordered_map<std::string, std::shared_ptr<Bus> > buses({
         { "MQTT", std::make_shared<Mqtt>() }

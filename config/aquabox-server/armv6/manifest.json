@@ -25,6 +25,11 @@
             },
             {
                 "mandatory": false,
+                "action": "exec",
+                "data" : "systemctl disable $SERVICE_NAME"
+            },
+            {
+                "mandatory": false,
                 "action": "file",
                 "operation": "mkdir",
                 "source": "$BACKUP_DIR"
@@ -189,6 +194,11 @@
                 "mandatory": true,
                 "action": "exec",
                 "data" : "systemctl daemon-reload"
+            },
+            {
+                "mandatory": true,
+                "action": "exec",
+                "data" : "systemctl enable $SERVICE_NAME"
             },
             {
                 "mandatory": true,

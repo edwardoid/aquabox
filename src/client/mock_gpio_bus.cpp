@@ -22,7 +22,7 @@
 
 using namespace aquabox;
 
-std::shared_ptr<Hardware> MockGPIOBus::hw(std::string hw)
+std::shared_ptr<Hardware> MockGPIOBus::hw(const std::string& hw)
 {
     static std::unordered_map<std::string, std::shared_ptr<MockedOnOffDevice> > pins({
         { "12", nullptr },

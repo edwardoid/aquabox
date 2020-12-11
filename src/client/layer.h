@@ -16,8 +16,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef LAYER_H
-#define LAYER_H
+#pragma once
 
 #include "bus.h"
 #include <string>
@@ -28,9 +27,7 @@ namespace aquabox
     class Layer
     {
     public:
-        static std::shared_ptr<Layer> get(const std::string layer);
-        virtual std::shared_ptr<Bus> bus(const std::string bus) = 0;
+        static std::shared_ptr<Layer> get(const std::string& layer);
+        virtual std::shared_ptr<Bus> bus(const std::string& bus) = 0;
     };
 }
-
-#endif // LAYER_H

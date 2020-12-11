@@ -16,8 +16,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef PATH_H
-#define PATH_H
+#pragma once
 
 #include <string>
 #include <list>
@@ -40,5 +39,3 @@ namespace aquabox
         std::string extension() const;
     };
 }
-
-#endif // PATH_H

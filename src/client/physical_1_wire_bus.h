@@ -25,6 +25,6 @@ namespace aquabox
     class PhysicalOneWireBus: public Bus
     {
     public:
-        std::shared_ptr<Hardware> hw(std::string hw) override;
+        std::shared_ptr<Hardware> hw(const std::string& hw) override;
     };
 }

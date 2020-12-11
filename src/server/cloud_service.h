@@ -16,8 +16,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef CLOUD_SERVICE_H
-#define CLOUD_SERVICE_H
+#pragma once
 
 #include "log.h"
 
@@ -38,5 +37,3 @@ namespace aquabox
         plog::RollingFileAppender<plog::TxtFormatter> m_fileAppender;
     };
 }
-
-#endif // CLOUD_SERVICE

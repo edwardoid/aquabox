@@ -16,8 +16,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef SETTINGS_H
-#define SETTINGS_H
+#pragma once
 
 #include <nlohmann/json.hpp>
 #include <string>
@@ -125,6 +124,3 @@ namespace aquabox
         static std::string domain;
     };
 }
-
-
-#endif // SETTINGS_H

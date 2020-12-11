@@ -19,7 +19,9 @@
 #include "telegram_bot.h"
 #include "log.h"
 #include <tgbot/tools/StringTools.h>
+#include <sstream>
 #include "settings.h"
+#include "box.h"
 
 using namespace aquabox;
 
@@ -60,18 +62,36 @@ TelegramBot::~TelegramBot()
     m_loop.join();
 }
 
+void TelegramBot::statusChanged(const Box& box, bool online)
+{
+    std::stringstream ss;
+    ss << "Box " << box.id() << " get " << (online ? "online" : "offline");
+    std::string msg = ss.str();
+    for(auto chat : box.telegramChats()) {
+        m_bot.getApi().sendMessage(chat, msg);
+    }
+}
+
+void TelegramBot::updateReceived(const Box& box, const nlohmann::json& event)
+{
+    for(auto chat : box.telegramChats()) {
+        m_bot.getApi().sendMessage(chat, event.dump(4));
+    }
+}
+
 void TelegramBot::setup()
 {
-    //LOG_DEBUG << "Setting up handles for telegram bot " << m_bot.getToken();
     m_bot.getEvents().onCommand("start", [this](TgBot::Message::Ptr message) {
         m_bot.getApi().sendMessage(message->chat->id, "Hi!");
     });
+    m_bot.getEvents().onCommand("login", [this](TgBot::Message::Ptr message) {
+        m_bot.getApi().sendMessage(message->chat->id, message->text);
+    });
+    m_bot.getEvents().onCommand("logoff", [this](TgBot::Message::Ptr message) {
+        m_bot.getApi().sendMessage(message->chat->id, message->text);
+    });
     m_bot.getEvents().onAnyMessage([this](TgBot::Message::Ptr message) {
         LOG_DEBUG << "Got message " << message->text;
-        // if (StringTools::startsWith(message->text, "/start"))
-        // {
-        //     return;
-        // }
         m_bot.getApi().sendMessage(message->chat->id, "Your message is: " + message->text);
     });
 }

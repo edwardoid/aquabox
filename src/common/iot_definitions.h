@@ -16,8 +16,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef IOT_DEFINITIONS_H
-#define IOT_DEFINITIONS_H
+#pragma once
 
 #define STREAM_CONNECTION_REJECTED 0xDEADBEEF
 
@@ -36,5 +35,3 @@ namespace aquabox
         using Message = WSServer::InMessage;
     }
 }
-
-#endif // IOT_DEFINITIONS_H

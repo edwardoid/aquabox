@@ -16,8 +16,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef ENUMERRATIONS_H
-#define ENUMERRATIONS_H
+#pragma once
 
 #include <unordered_map>
 #include <string>
@@ -54,5 +53,3 @@ namespace aquabox
         static std::string convert(EnumClass value) { auto pos = val2Str.find(value); return pos->second; }
     };
 }
-
-#endif // ENUMERRATIONS_H

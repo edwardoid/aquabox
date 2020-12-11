@@ -16,8 +16,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef OPTIONS_H
-#define OPTIONS_H
+#pragma once
 
 namespace aquabox
 {
@@ -31,5 +30,3 @@ namespace aquabox
         static bool UseNetworkManager;
     };
 }
-
-#endif // OPTIONS_H
