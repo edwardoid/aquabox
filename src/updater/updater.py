@@ -279,7 +279,6 @@ def update(pkg):
                     print ("Update applied")
                     set_env("$UPDATE_PACKAGE", pkg)
                     manifest["env"] = env
-                    manifest[
                     with open('current_manifest.json', 'w') as outfile:
                         json.dump(manifest, outfile)
                     return True
