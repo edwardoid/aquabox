@@ -31,6 +31,8 @@ int main(int argc, char** argv)
 {
     aquabox::Settings::setDomain("aquabox");
 
+    bool handleSignals = true;
+
     aquabox::StackTrace();
     for(int i = 1; i < argc; ++i)
     {
@@ -57,6 +59,9 @@ int main(int argc, char** argv)
             aquabox::Options::AccessPoint = false;
             break;
         }
+        else if(strcmp(argv[i], "--ignore-signals") == 0) {
+            handleSignals = false;
+        }
         else if(strcmp(argv[i], "--help") == 0) {
             std::cout << "aquabox [OPTIONS]\n"
                       << " --service                Applications will be runned as part of Linux service\n"
@@ -65,10 +70,15 @@ int main(int argc, char** argv)
                       << " --disable-access-point   Do not switch to AP mode if there is no internet connection\n"
                       << " --standalone             Do not connect to remote service\n"
                       << " --ignore-networking      Do not connect to NetworkManager\n"
+                      << " --ignore-signals         Dump stack traces on errors\n"
                       << " --help                   Show this help"
                       << std::endl;
             return 0;
         }
+    }
+
+    if (handleSignals) {
+        aquabox::StackTrace();
     }
     aquabox::Singleton<LIBFB_NS::FrameBuffer>::available = aquabox::Options::Render;
     aquabox::Singleton<aquabox::ScreenManager>::available = aquabox::Singleton<LIBFB_NS::FrameBuffer>::available;
