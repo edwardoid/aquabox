@@ -21,50 +21,72 @@
 #include <vector>
 #include <signal.h>
 #include <boost/stacktrace.hpp>
+#include <boost/filesystem.hpp>
+#include <fstream>
 #include <sys/types.h>
 #include <unistd.h>
 
+#define LAST_DUMP "/backtrace.dump"
+#define LAST_DUMP_INFO "/backtrace.txt"
+
 using namespace aquabox;
 
-void print_trace(int signum) {
-    auto ss = boost::stacktrace::stacktrace();
-    std::cerr << "Signal: " << signum << "\n" << ss;
-    int pid = ::getpid();
-
-    std::string sstr = boost::stacktrace::detail::to_string(&ss.as_vector()[0], ss.size());
-
-    char fname[128], thread[128];
-    sprintf(fname, "/stack_%d.txt", pid);
-    FILE *f = ::fopen(fname, "a+");
-    if (f != NULL) {
-        ::pthread_getname_np(::pthread_self(), thread, 128);
-        ::fprintf(f, "\n--------- BEGIN ---------\n");
-        ::fprintf(f, "Signal: %d\nPID: %d\nThread: %s\nStacktrace:\n", signum, pid, thread);
-        ::fwrite(sstr.c_str(), sstr.size(), 1, f);
-        ::fprintf(f, "\n---------- END ----------");
-        ::fflush(f);
-        ::fclose(f);
-    }
-
-
-
+void print_trace(int signum)
+{
     ::signal(signum, SIG_DFL);
-    ::raise(SIGQUIT);
+    
+    boost::stacktrace::safe_dump_to(LAST_DUMP);
+
+    //std::ifstream ifs(LAST_DUMP, std::fstream::in);
+    //boost::stacktrace::stacktrace ss = boost::stacktrace::stacktrace::from_dump(ifs);
+    int pid = ::getpid();
+    char thread[128];
+    ::pthread_getname_np(::pthread_self(), thread, 128);
+
+    std::ofstream info(LAST_DUMP_INFO, std::fstream::out);
+    info << "Signal: " << signal << "\n";
+    info << "PID: " << pid << "\n";
+    info << "Thread: " << thread << "\n";
+
+    //info << "Dirty: \n";
+    //for(auto f : ss)
+    //{
+    //    info << f << "\n";
+    //}
+
+    ::raise(SIGABRT);
 }
 
 StackTrace::StackTrace()
 {
-    for(auto s: std::vector<int>({
-        SIGABRT,
-        SIGBUS,
-        SIGILL,
-        SIGSEGV,
-        SIGSYS,
-        SIGXCPU,
-        SIGXFSZ,
-        SIGSTKFLT,
-        SIGFPE
-    })) {
+    if (boost::filesystem::exists(LAST_DUMP))
+    {
+        // there is a backtrace
+        std::ifstream ifs(LAST_DUMP);
+
+        boost::stacktrace::stacktrace ss = boost::stacktrace::stacktrace::from_dump(ifs);
+
+        std::ofstream os(LAST_DUMP_INFO, std::fstream::out | std::fstream::app);
+        os << "Clean: \n";
+        for(auto f : ss)
+        {
+            os << f << "\n";
+        }
+
+        // cleaning up
+        ifs.close();
+        boost::filesystem::remove(LAST_DUMP);
+    }
+    for (auto s : std::vector<int>({SIGABRT,
+                                    SIGBUS,
+                                    SIGILL,
+                                    SIGSEGV,
+                                    SIGSYS,
+                                    SIGXCPU,
+                                    SIGXFSZ,
+                                    SIGSTKFLT,
+                                    SIGFPE}))
+    {
         ::signal(s, print_trace);
     }
 }
@@ -72,7 +94,7 @@ StackTrace::StackTrace()
 std::vector<std::string> StackTrace::st()
 {
     std::vector<std::string> trace;
-    for(auto& f : boost::stacktrace::stacktrace())
+    for (auto &f : boost::stacktrace::stacktrace())
     {
         trace.push_back(boost::stacktrace::to_string(f));
     }
