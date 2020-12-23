@@ -25,11 +25,13 @@
 
 namespace aquabox
 {
-    class NetworkDeviceStateEvent: public BoxEvent { public: NetworkDeviceStateEvent(const nm::NMDeviceState& state); };
+    class NetworkEvent: public Event { public: NetworkEvent(); };
+  
+    class NetworkDeviceStateEvent: public NetworkEvent { public: NetworkDeviceStateEvent(const nm::NMDeviceState& state); };
 
-    class NetworkChangedEvent: public BoxEvent { public: NetworkChangedEvent(const Connection& connection); };
+    class NetworkChangedEvent: public NetworkEvent { public: NetworkChangedEvent(const Connection& connection); };
 
-    class NetworkConnectionFailedEvent: public BoxEvent { public: NetworkConnectionFailedEvent(); };
+    class NetworkConnectionFailedEvent: public NetworkEvent { public: NetworkConnectionFailedEvent(); };
 
-    class NetworkAuthentifiationFailedEvent: public BoxEvent { public: NetworkAuthentifiationFailedEvent(); };
+    class NetworkAuthentifiationFailedEvent: public NetworkEvent { public: NetworkAuthentifiationFailedEvent(); };
 }

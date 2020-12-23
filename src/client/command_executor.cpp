@@ -583,6 +583,8 @@ bool CommandExecutor::ConnectToWiFi()
                 Singleton<AquaBox>::get()->doLater("activating_connection", [uuid, nm]() {
                     nm->activateConnection(uuid);
                 });
+
+                return true;
             }
         }
     }

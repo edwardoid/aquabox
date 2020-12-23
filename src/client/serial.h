@@ -16,13 +16,10 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef SERIAL_H
-#define SERIAL_H
+#pragma once
 
 #include "settings.h"
 
 #ifndef SERIAL_NUMBER
 #define SERIAL_NUMBER aquabox::Settings::string(Settings::Keys::SERIAL, Settings::Defaults::SERIAL)
 #endif // SERIAL_NUMBER
-
-#endif // SERIAL_H

@@ -20,7 +20,14 @@
 #include "network_events.h"
 #include "enumerations.h"
 #include <singleton.h>
+#include "serial.h"
+
 using namespace aquabox;
+
+NetworkEvent::NetworkEvent()
+{
+    setSender(SERIAL_NUMBER, "network");
+}
 
 NetworkDeviceStateEvent::NetworkDeviceStateEvent(const nm::NMDeviceState& state)
 {
