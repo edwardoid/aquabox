@@ -24,7 +24,7 @@ Timeout::Timeout(std::chrono::milliseconds timeout)
     : m_timeout(timeout)
 {}
 
-size_t Timeout::expired()
+size_t Timeout::expired() const
 {
     std::chrono::milliseconds delta = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now() - m_lastPoint);
     return delta.count() / m_timeout.count();

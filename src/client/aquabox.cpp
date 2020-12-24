@@ -78,7 +78,7 @@ int AquaBox::start()
         auto nm = Singleton<NetworkManager>::i();
         nm->setInterface(Settings::string(Settings::Keys::CLIENT_INTERFACE, Settings::Defaults::CLIENT_INTERFACE));
         nm->currentConnection.connect([this](Connection c) { postUpdate(std::make_shared<NetworkChangedEvent>(c)); });
-        nm->deviceState.connect([this](NetworkDeviceState state) { postUpdate(std::make_shared<NetworkDeviceStateEvent>(state)); });
+        LOG_DEBUG << "Signal id: " << nm->deviceState.connect([this](NetworkDeviceState state) { postUpdate(std::make_shared<NetworkDeviceStateEvent>(state)); });
     }
 
     LOG_INFO << "Starting " << Settings::Defaults::APPLICATION << " ver. " << std::hex << Settings::Defaults::VERSION_MAJOR << "." << Settings::Defaults::VERSION_MINOR;

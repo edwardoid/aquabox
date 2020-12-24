@@ -20,6 +20,7 @@
 #include "scan_screen.h"
 #include "main_screen.h"
 #include "stats_screen.h"
+#include "network_change_screen.h"
 #include <singleton.h>
 namespace aquabox
 {
@@ -36,5 +37,6 @@ namespace aquabox
         MainScreen m_main;
         ScanScreen m_scan;
         StatsScreen m_stats;
+        NetworkChangeScreen m_networkChangeScreen;
     };
 }
