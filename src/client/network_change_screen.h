@@ -35,6 +35,7 @@ namespace aquabox
         void updateState(NetworkDeviceState state);
     private:
         LIBFB_NS::Text m_text;
+        NetworkDeviceState m_lastState;
         Timeout m_timeout;
     };
 }
