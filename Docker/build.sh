@@ -65,8 +65,7 @@ function pack_server {
                     lib \
                     bin/aquabox-service \
                     bin/aquabox.service \
-                    bin/config.json \
-                    bin/startup.sh |& tee -a build.log
+                    bin/config.json |& tee -a build.log
     cp $SERVER_PKG_NAME.tar.gz aquabox-server-latest.tar.gz |& tee -a build.log
 }
 
@@ -74,21 +73,20 @@ function pack_client {
     tar cvfz $CLIENT_PKG_NAME.tar.gz \
                     version.txt \
                     lib \
-                    bin/aquabox \
-                    bin/aquabox.service \
+                    bin/aquabox-client \
+                    bin/aquabox-client.service \
                     bin/assets \
                     bin/config.json \
                     bin/devices \
-                    bin/rules \
-                    bin/startup.sh |& tee -a build.log
-    cp $CLIENT_PKG_NAME.tar.gz aquabox-latest.tar.gz |& tee -a build.log
+                    bin/rules |& tee -a build.log
+    cp $CLIENT_PKG_NAME.tar.gz aquabox-client-latest.tar.gz |& tee -a build.log
 }
 
 cd /build
 
-clean_build
-prepare_build
-create_version
+#clean_build
+#prepare_build
+#create_version
 do_build
 pack_server
 pack_client

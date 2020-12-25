@@ -1,0 +1,151 @@
+{
+	"definitions": {},
+	"$schema": "http://json-schema.org/draft-07/schema#", 
+	"$id": "https://example.com/object1608484091.json", 
+	"title": "Root", 
+	"type": "object",
+	"required": [
+		"actions",
+		"created_at",
+		"device",
+		"enabled",
+		"id",
+		"name",
+		"repeat"
+	],
+	"properties": {
+		"actions": {
+			"$id": "#root/actions", 
+			"title": "Actions", 
+			"type": "array",
+			"default": [],
+			"items":{
+				"$id": "#root/actions/items", 
+				"title": "Items", 
+				"type": "object",
+				"required": [
+					"at",
+					"type"
+				],
+				"properties": {
+					"at": {
+						"$id": "#root/actions/items/at", 
+						"title": "At", 
+						"type": "integer",
+						"examples": [
+							1586174442726
+						],
+						"default": 0
+					},
+					"type": {
+						"$id": "#root/actions/items/type", 
+						"title": "Type", 
+						"type": "string",
+						"default": "",
+						"examples": [
+							"turn_on"
+						],
+						"pattern": "^.*$"
+					}
+				}
+			}
+
+		},
+		"created_at": {
+			"$id": "#root/created_at", 
+			"title": "Created_at", 
+			"type": "integer",
+			"examples": [
+				0
+			],
+			"default": 0
+		},
+		"device": {
+			"$id": "#root/device", 
+			"title": "Device", 
+			"type": "string",
+			"default": "",
+			"examples": [
+				"dev1"
+			],
+			"pattern": "^.*$"
+		},
+		"enabled": {
+			"$id": "#root/enabled", 
+			"title": "Enabled", 
+			"type": "boolean",
+			"examples": [
+				true
+			],
+			"default": true
+		},
+		"id": {
+			"$id": "#root/id", 
+			"title": "Id", 
+			"type": "string",
+			"default": "",
+			"examples": [
+				"8hrs_73789082229"
+			],
+			"pattern": "^.*$"
+		},
+		"index": {
+			"$id": "#root/index", 
+			"title": "Index", 
+			"type": "integer",
+			"examples": [
+				0
+			],
+			"default": 0
+		},
+		"lastRun": {
+			"$id": "#root/lastRun", 
+			"title": "Lastrun", 
+			"type": "integer",
+			"examples": [
+				0
+			],
+			"default": 0
+		},
+		"name": {
+			"$id": "#root/name", 
+			"title": "Name", 
+			"type": "string",
+			"default": "",
+			"examples": [
+				"8hrs"
+			],
+			"pattern": "^.*$"
+		},
+		"repeat": {
+			"$id": "#root/repeat", 
+			"title": "Repeat", 
+			"type": "object",
+			"required": [
+				"deleteAfter",
+				"unit"
+			],
+			"properties": {
+				"deleteAfter": {
+					"$id": "#root/repeat/deleteAfter", 
+					"title": "Deleteafter", 
+					"type": "integer",
+					"examples": [
+						0
+					],
+					"default": 0
+				},
+				"unit": {
+					"$id": "#root/repeat/unit", 
+					"title": "Unit", 
+					"type": "string",
+					"default": "",
+					"examples": [
+						"hour"
+					],
+					"pattern": "^.*$"
+				}
+			}
+		}
+	}
+}

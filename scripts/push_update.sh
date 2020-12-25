@@ -2,7 +2,7 @@
 
 HOST=$1
 PASS=$2
-PACKAGE=aquabox-latest.tar.gz
+PACKAGE=aquabox-client-latest.tar.gz
 
 SOURCE="${BASH_SOURCE[0]}"
 while [ -h "$SOURCE" ]; do # resolve $SOURCE until the file is no longer a symlink

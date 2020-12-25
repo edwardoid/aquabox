@@ -26,6 +26,7 @@
 #include <iostream>
 #include <framebuffer.h>
 #include <singleton.h>
+#include <performance_metrics.h>
 
 int main(int argc, char** argv)
 {
@@ -33,6 +34,7 @@ int main(int argc, char** argv)
 
     bool handleSignals = true;
 
+    aquabox::PerformanceMetrics::uptime();
     aquabox::StackTrace();
     for(int i = 1; i < argc; ++i)
     {

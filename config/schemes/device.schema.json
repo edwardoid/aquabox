@@ -1,0 +1,135 @@
+{
+	"definitions": {},
+	"$schema": "http://json-schema.org/draft-07/schema#", 
+	"$id": "https://example.com/object1608484422.json", 
+	"title": "Root", 
+	"type": "object",
+	"required": [
+		"address",
+		"class",
+		"id",
+		"index",
+		"meta",
+		"name",
+		"rulesEnabled",
+		"type"
+	],
+	"properties": {
+		"address": {
+			"$id": "#root/address", 
+			"title": "Address", 
+			"type": "string",
+			"default": "",
+			"examples": [
+				"PHY:GPIO:7"
+			],
+			"pattern": "^.*$"
+		},
+		"class": {
+			"$id": "#root/class", 
+			"title": "Class", 
+			"type": "string",
+            "enum": [ "relay", "analog_relay", "sensor", "unknown" ],
+			"default": "",
+			"examples": [
+				"relay"
+			],
+			"pattern": "^.*$"
+		},
+		"id": {
+			"$id": "#root/id", 
+			"title": "Id", 
+			"type": "string",
+			"default": "",
+			"examples": [
+				"dev1"
+			],
+			"pattern": "^.*$"
+		},
+		"index": {
+			"$id": "#root/index", 
+			"title": "Index", 
+			"type": "integer",
+			"examples": [
+				0
+			],
+			"default": 0
+		},
+		"meta": {
+			"$id": "#root/meta", 
+			"title": "Meta", 
+			"type": "object",
+			"required": [
+				"model",
+				"vendor"
+			],
+			"properties": {
+				"model": {
+					"$id": "#root/meta/model", 
+					"title": "Model", 
+					"type": "string",
+					"default": "",
+					"examples": [
+						"7200lm"
+					],
+					"pattern": "^.*$"
+				},
+				"vendor": {
+					"$id": "#root/meta/vendor", 
+					"title": "Vendor", 
+					"type": "string",
+					"default": "",
+					"examples": [
+						"daytime"
+					],
+					"pattern": "^.*$"
+				}
+			}
+		}
+,
+		"name": {
+			"$id": "#root/name", 
+			"title": "Name", 
+			"type": "string",
+			"default": "",
+			"examples": [
+				"matrix 80.4"
+			],
+			"pattern": "^.*$"
+		},
+		"rulesEnabled": {
+			"$id": "#root/rulesEnabled", 
+			"title": "Rulesenabled", 
+			"type": "boolean",
+			"examples": [
+				true
+			],
+			"default": true
+		},
+		"type": {
+			"$id": "#root/type", 
+			"title": "Type", 
+			"type": "string",
+			"default": "",
+			"enum": [
+				"generic",
+                "light",
+                "air_pump",
+                "water_pump",
+                "external_filter",
+                "internal_filter",
+                "airlift_filter",
+                "sump",
+                "heater",
+                "cooler",
+                "feeder",
+                "dosator",
+                "co2",
+                "uv",
+                "ph_controller",
+                "ph_meter",
+                "thermometer"
+			]
+		}
+	}
+}

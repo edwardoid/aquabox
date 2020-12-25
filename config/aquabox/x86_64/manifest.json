@@ -69,6 +69,26 @@
                 "destination": "$BIN_DIR/$EXECUTABLE"
             },
             {
+                "action": "extract",
+                "source": "bin/assets/Cone.ttf",
+                "destination": "$BIN_DIR/assets/Cone.ttf"
+            },
+            {
+                "action": "extract",
+                "source": "bin/assets/DroidSansMono.ttf",
+                "destination": "$BIN_DIR/assets/DroidSansMono.ttf"
+            },
+            {
+                "action": "extract",
+                "source": "bin/assets/networking_status.png",
+                "destination": "$BIN_DIR/assets/networking_status.png"
+            },
+            {
+                "action": "extract",
+                "source": "bin/assets/status_bar.png",
+                "destination": "$BIN_DIR/assets/status_bar.png"
+            },
+            {
                 "action": "file",
                 "operation": "mkdir",
                 "source": "$LIB_DIR"

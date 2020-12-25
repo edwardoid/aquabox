@@ -12,9 +12,9 @@ TMP_DIR=$(mktemp -d -t aquabox-XXXXXXXXXX)
 echo "Temporary dir: $TMP_DIR Update: $UPDATE_ARCHIVE. Extracting update archive"
 tar xvf $UPDATE_ARCHIVE -C $TMP_DIR
 
-if test -f "$TMP_DIR/bin/aquabox.service"; then
+if test -f "$TMP_DIR/bin/aquabox-client.service"; then
     echo "Updating service"
-    cp $TMP_DIR/bin/aquabox.service /etc/systemd/system/aquabox.service
+    cp $TMP_DIR/bin/aquabox-client.service /etc/systemd/system/aquabox.service
     systemctl daemon-reload
 fi
 
@@ -33,10 +33,10 @@ echo "Restoring config file from $AB_BACKUP_DIR/bin/config.json to $AB_DIR/bin/c
 cp $AB_BACKUP_DIR/bin/config.json $AB_DIR/bin/config.json
 
 echo "Restarting service"
-systemctl restart aquabox
+systemctl restart aquabox-client
 
 echo "Checking service"
-systemctl status aquabox
+systemctl status aquabox-client
 
 echo "Version: "
 cat $AB_DIR/version.txt

@@ -19,13 +19,14 @@
 #pragma once
 
 #include <text.h>
-#include "status_bar_screen.h"
+#include "screen.h"
 #include "network_manager_device_state.h"
 #include <timeout.h>
+#include <sprite.h>
 
 namespace aquabox
 {
-    class NetworkChangeScreen: public StatusBarScreen
+    class NetworkChangeScreen: public Screen
     {
     public:
         NetworkChangeScreen();
@@ -35,6 +36,10 @@ namespace aquabox
         void updateState(NetworkDeviceState state);
     private:
         LIBFB_NS::Text m_text;
+        LIBFB_NS::Text m_networkName;
+        bool m_inProgress = false;
+        uint8_t m_stageIcon = 0;
+        LIBFB_NS::Sprite m_stageImage;
         NetworkDeviceState m_lastState;
         Timeout m_timeout;
     };
