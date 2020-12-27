@@ -57,6 +57,8 @@ bool CloudService::start()
         telegram->start();
     }
 
+    Database::i();
+
     ApplicationsApi::start();
     return HardwareApi::start();
 }

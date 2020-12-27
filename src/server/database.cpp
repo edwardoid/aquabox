@@ -79,7 +79,8 @@ bool Database::connect()
             return false;
         }
         m_aquabox = m_client[Settings::string(Settings::Keys::DATABASE_NAME, Settings::Defaults::DATABASE_NAME)];
-        return (bool)m_client;
+        auto dbs = m_client.list_databases();
+        return (bool)m_client && (dbs.begin() !=  dbs.end());
     }
     catch(mongocxx::exception& e) {
         LOG_ERROR << e.what();
