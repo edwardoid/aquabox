@@ -17,10 +17,11 @@
  */
 
 #include "cloud_stream.h"
-#include "log.h"
+#include <log.h>
+#include <singleton.h>
+#include "cloud.h"
 
 using namespace aquabox;
-
 
 CloudStream::CloudStream(const std::string& url)
     : SimpleWeb::SocketClient<SimpleWeb::WS>(url)
@@ -94,6 +95,8 @@ void CloudStream::onClose(std::shared_ptr<CloudStream::Connection> connection, i
     m_attached = false;
     m_connection = nullptr;
     SimpleWeb::SocketClient<SimpleWeb::WS>::stop();
+
+    Singleton<Cloud>::i()->isRegistered = false;
 }
 
 void CloudStream::onError(std::shared_ptr<CloudStream::Connection>, const SimpleWeb::error_code &code)
@@ -102,6 +105,7 @@ void CloudStream::onError(std::shared_ptr<CloudStream::Connection>, const Simple
     m_attached = false;
     m_connection = nullptr;
     SimpleWeb::SocketClient<SimpleWeb::WS>::stop();
+    Singleton<Cloud>::i()->isRegistered = false;
 }
 
 void CloudStream::sendMessage(const nlohmann::json& message)

@@ -36,10 +36,6 @@ GlobalTimer::GlobalTimer()
             cloud->heartheat();
         }
         SensorsTracker::processUpdates();
-        
-        // if (PerformanceMetrics::update())
-        //     PerformanceMetrics::log();
-        // PerformanceMetrics::handleBounds();
     }, std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::seconds(1)));
 }
 

@@ -22,6 +22,7 @@
 #include "serial.h"
 #include "settings.h"
 #include "event.h"
+#include "cloud_event.h"
 #include "commands_stream.h"
 #include "events_stream.h"
 #include "network_manager.h"
@@ -34,9 +35,11 @@ using namespace aquabox;
 
 Cloud::Cloud()
     : m_updateTimeout(std::chrono::minutes(1))
-    , m_registered(false)
+    , isRegistered(false)
 {
-
+    isRegistered.connect([](bool registered) {
+        Singleton<aquabox::AquaBox>::get()->postUpdate(std::make_shared<CloudEvent>(registered));
+    });
 }
 
 void Cloud::connect()
@@ -64,19 +67,19 @@ void Cloud::disconnect()
 {
 }
 
-bool Cloud::isRegistered()
+bool Cloud::checkIfRegistered()
 {
     if (m_updateTimeout.expired() == 0) {
-        return m_registered;
+        return isRegistered;
     }
 
     m_updateTimeout.reset();
-    m_registered = checkIfRegistered();
+    isRegistered = requestStreams();
 
-    return m_registered;
+    return isRegistered;
 }
 
-bool Cloud::checkIfRegistered()
+bool Cloud::requestStreams()
 {
     bool streamsAreOk = true;
 
@@ -160,7 +163,7 @@ bool Cloud::checkIfRegistered()
 
 void Cloud::doRegister()
 {
-
+    checkIfRegistered();
 }
 
 bool Cloud::isConnected()
@@ -186,7 +189,7 @@ void Cloud::heartheat()
                 break;
             }
 
-            if (isRegistered()) {
+            if (isRegistered) {
                 connect();
             } else {
                 doRegister();

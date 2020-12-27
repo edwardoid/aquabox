@@ -63,7 +63,7 @@ void StatusBarScreen::draw()
     elements.push_back(wifiIndex);
 
     auto cloud = Singleton<Cloud>::i();
-    bool isRegistered = cloud == nullptr ? false : cloud->isRegistered();
+    bool isRegistered = cloud == nullptr ? false : (bool)cloud->isRegistered;
     int cloudIndex = isRegistered ? 7 : 6;
     elements.push_back(cloudIndex);
 

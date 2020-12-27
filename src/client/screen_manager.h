@@ -21,6 +21,7 @@
 #include "main_screen.h"
 #include "stats_screen.h"
 #include "network_change_screen.h"
+#include "cloud_screen.h"
 #include <singleton.h>
 namespace aquabox
 {
@@ -37,6 +38,7 @@ namespace aquabox
         MainScreen m_main;
         ScanScreen m_scan;
         StatsScreen m_stats;
+        CloudScreen m_cloudScreen;
         NetworkChangeScreen m_networkChangeScreen;
     };
 }

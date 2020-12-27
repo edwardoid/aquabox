@@ -1,5 +1,5 @@
 {
-    "address": "PHY:GPIO:4",
+    "address": "PHY:GPIO:13",
     "class": "relay",
     "id": "dev1",
     "index": 0,

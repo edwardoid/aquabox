@@ -36,6 +36,7 @@
 #include "screen_manager.h"
 #include "global_timer.h"
 #include "rules_timer.h"
+#include "cloud.h"
 #include <singleton.h>
 #include <pstream.h>
 #include <exception>
@@ -127,6 +128,7 @@ int AquaBox::start()
     readUsers();
 
     Singleton<ScreenManager>::i(); // Create manager if needed!
+
     m_globalTimer = std::make_unique<GlobalTimer>();
 
     m_rulesTimer->start();

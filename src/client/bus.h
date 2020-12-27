@@ -20,7 +20,7 @@
 
 #include <memory>
 #include "hardware.h"
-#include "s2s.h"
+#include <s2s.h>
 
 namespace aquabox
 {

@@ -36,7 +36,11 @@ void ScreenManager::show()
         return;
     }
 
-    if (!m_networkChangeScreen.hasUpdate()) {
+    if (m_networkChangeScreen.hasUpdate()) {
+        m_networkChangeScreen.show();
+    } else if (m_cloudScreen.hasUpdate()) {
+        m_cloudScreen.show();
+    } else {
         static std::vector<Screen*> allScreens({ &m_main, &m_scan, &m_stats, &m_stats });
         static uint32_t nextScreen = 0;
         static const std::chrono::seconds singleScreenDuration = std::chrono::seconds(10);
@@ -46,8 +50,6 @@ void ScreenManager::show()
             begin = std::chrono::system_clock::now();
         }
         allScreens[nextScreen % allScreens.size()]->show();
-    } else {
-        m_networkChangeScreen.show();
     }
 
     fb->flush();

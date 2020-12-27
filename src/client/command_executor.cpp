@@ -143,7 +143,7 @@ bool CommandExecutor::GetStatus()
     host["config"] = Singleton<AquaBox>::get()->configurationData();
 
     auto cloud = Singleton<Cloud>::i();
-    bool isRegistered = cloud == nullptr ? false : cloud->isRegistered();
+    bool isRegistered = cloud == nullptr ? false : (bool)cloud->isRegistered;
 
     m_cmd.response(nlohmann::json({{"aquabox", host}, {"status", "online"}, {"registered", isRegistered}}), Result::Ok);
     return true;

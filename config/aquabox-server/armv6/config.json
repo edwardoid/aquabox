@@ -1,7 +1,7 @@
 {
     "aquabox": {
-        "cloudPort": 5557,
-        "cloudUrl": "edwardoid.redirectme.net",
+        "cloudPort": 5555,
+        "cloudUrl": "193.37.152.213",
         "cloudWSPort": 5556,
         "httpPort": 1218,
         "log": "DEBUG",
@@ -9,7 +9,7 @@
         "ssid": "AquaBox",
         "streamPort": 1214,
         "threads": 8,
-        "workingDirectory": "/home/esargsyan/ionictests/aquabox/build/aquabox"
+        "workingDirectory": "/aquabox/bin"
     },
     "cloud": {
         "cloudPort": 5557,
@@ -17,9 +17,9 @@
         "httpPort": 1213,
         "streamPort": 1214,
         "database": "aquabox",
-        "databaseURI": "mongodb://admin:password@aquabox.me",
+        "databaseURI": "mongodb://admin:password@193.37.152.213",
         "log": "DEBUG",
         "telegramBotAPIKey": "",
-        "workingDirectory": "/build/bin"
+        "workingDirectory": "/aquabox/bin"
     }
 }
