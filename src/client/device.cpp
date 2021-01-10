@@ -19,9 +19,9 @@
 #include "device.h"
 #include "aquabox.h"
 #include "rule.h"
-#include "log.h"
-#include "event.h"
-#include "hardware.h"
+#include <log.h>
+#include <event.h>
+#include "hardware/hardware.h"
 #include <time.h>
 #include <fstream>
 

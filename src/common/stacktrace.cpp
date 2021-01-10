@@ -33,12 +33,6 @@ using namespace aquabox;
 
 void print_trace(int signum)
 {
-    ::signal(signum, SIG_DFL);
-    
-    boost::stacktrace::safe_dump_to(LAST_DUMP);
-
-    //std::ifstream ifs(LAST_DUMP, std::fstream::in);
-    //boost::stacktrace::stacktrace ss = boost::stacktrace::stacktrace::from_dump(ifs);
     int pid = ::getpid();
     char thread[128];
     ::pthread_getname_np(::pthread_self(), thread, 128);
@@ -48,13 +42,9 @@ void print_trace(int signum)
     info << "PID: " << pid << "\n";
     info << "Thread: " << thread << "\n";
 
-    //info << "Dirty: \n";
-    //for(auto f : ss)
-    //{
-    //    info << f << "\n";
-    //}
+    std::cout << boost::stacktrace::stacktrace();
 
-    ::raise(SIGABRT);
+    ::signal(signum, SIG_DFL);
 }
 
 StackTrace::StackTrace()

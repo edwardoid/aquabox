@@ -17,7 +17,7 @@
  */
 
 #include "relay.h"
-#include "gpio.h"
+#include "hardware/hardware.h"
 
 using namespace aquabox;
 
@@ -33,7 +33,7 @@ bool Relay::turnedOn() const
         return false;
     }
 
-    auto impl = hw->implementation<OnOffDevice>();
+    auto impl = hw->implementation<OnOff>();
 
     if (impl == nullptr) {
         LOG_ERROR << "Can't find device " << getAddress().Value;
@@ -55,7 +55,7 @@ void Relay::turnOn()
         return;
     }
 
-    auto impl = hw->implementation<OnOffDevice>();
+    auto impl = hw->implementation<OnOff>();
 
     if (impl == nullptr) {
         LOG_ERROR << getAddress().Value << " does not implement OnOff interface.";
@@ -79,7 +79,7 @@ void Relay::turnOff()
         return;
     }
 
-    auto impl = hw->implementation<OnOffDevice>();
+    auto impl = hw->implementation<OnOff>();
 
     if (impl == nullptr) {
         LOG_ERROR << getAddress().Value << " does not implement OnOff interface.";

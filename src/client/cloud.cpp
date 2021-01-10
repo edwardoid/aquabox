@@ -17,15 +17,15 @@
  */
 
 #include "cloud.h"
-#include "log.h"
+#include <log.h>
 #include "aquabox.h"
 #include "serial.h"
-#include "settings.h"
-#include "event.h"
-#include "cloud_event.h"
+#include <settings.h>
+#include <event.h>
+#include "events/cloud_event.h"
 #include "commands_stream.h"
 #include "events_stream.h"
-#include "network_manager.h"
+#include "networking/network_manager.h"
 #include <singleton.h>
 #include <nlohmann/json.hpp>
 

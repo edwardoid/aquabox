@@ -16,7 +16,9 @@ file(COPY ${AQUABOX_ROOT_DIR}/config/aquabox/$ENV{BUILD_PLATFORM}/rules DESTINAT
 
 include_directories(${NM_DBUS_INCLUDE_DIR})
 include_directories(${AQUABOX_COMMON_PATH})
-file(GLOB AQUABOX_SOURCES "*.cpp")
+include_directories(${AQUABOX_PROTO_PATH})
+
+file(GLOB AQUABOX_SOURCES "*.cpp" "*/*.cpp")
 
 add_executable(${PROJECT_NAME} ${AQUABOX_SOURCES})
 target_compile_definitions(${PROJECT_NAME} PUBLIC AB_VERSION_MAJOR=${AB_V})
@@ -28,6 +30,7 @@ find_package(mqtt_cpp REQUIRED)
 
 target_link_libraries(${PROJECT_NAME} qrencode NMDBus fb w1temp stats)
 target_link_libraries(${PROJECT_NAME} aquabox-common)
+target_link_libraries(${PROJECT_NAME} aquabox-proto)
 target_link_libraries(${PROJECT_NAME} JsonSchemaValidator::JsonSchemaValidator)
 target_link_libraries(${PROJECT_NAME} ${Boost_LIBRARIES})
 target_link_libraries(${PROJECT_NAME} OpenSSL::OpenSSL)

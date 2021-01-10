@@ -1,5 +1,5 @@
 {
-    "address": "PHY:MOCK_GPIO:19",
+    "address": "NET:SCT:74-73-74-72-65-6c-61-79",
     "class": "relay",
     "id": "vdev0",
     "index": 0,

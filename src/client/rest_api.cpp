@@ -26,9 +26,9 @@
 #include "user.h"
 #include "repeat_timeout.h"
 #include "enumerations.h"
-#include "update_events.h"
+#include "events/update_events.h"
 #include "command_executor.h"
-#include "network_manager.h"
+#include "networking/network_manager.h"
 #include <settings.h>
 #include <path.h>
 #include <http_helpers.h>

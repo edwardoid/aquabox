@@ -8,6 +8,7 @@ libqrencode/4.0.0@bincrafters/stable
 mongo-c-driver/1.16.1@bincrafters/stable
 mongo-cxx-driver/3.2.0@bincrafters/stable
 mqtt_cpp/8.latest@edwardoid/iot
+libserial/latest@edwardoid/iot
 nlohmann_json/3.7.3
 JsonSchemaValidator/2.1.0@conan/stable
 zlib/1.2.11
@@ -28,6 +29,7 @@ mqtt_cpp:use_std_shared_ptr_array=False
 mqtt_cpp:build_tests=False
 tgbot:shared=True
 tgbot:use_curl=True
+libserial:shared=True
 
 [imports]
 lib, *.so* -> ./lib # Copies all dylib files from packages lib folder to my "lib" folder

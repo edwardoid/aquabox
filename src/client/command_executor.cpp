@@ -21,8 +21,8 @@
 #include "settings.h"
 #include "device.h"
 #include "rule.h"
-#include "update_events.h"
-#include "network_manager.h"
+#include "events/update_events.h"
+#include "networking/network_manager.h"
 #include "cloud.h"
 #include <boost/asio/ip/host_name.hpp>
 

@@ -9,7 +9,7 @@
         "ssid": "AquaBox",
         "streamPort": 1214,
         "threads": 8,
-        "workingDirectory": "/aquabox/bin"
+        "workingDirectory": "/build/bin"
     },
     "cloud": {
         "cloudPort": 5557,
@@ -20,6 +20,6 @@
         "databaseURI": "mongodb://admin:password@193.37.152.213",
         "log": "DEBUG",
         "telegramBotAPIKey": "",
-        "workingDirectory": "/aquabox/bin"
+        "workingDirectory": "/build/bin"
     }
 }

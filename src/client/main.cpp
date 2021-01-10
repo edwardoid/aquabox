@@ -19,10 +19,10 @@
 #include "aquabox.h"
 #include "options.h"
 #include "settings.h"
-#include "stacktrace.h"
-#include "screen_manager.h"
+#include <stacktrace.h>
+#include "ui/screen_manager.h"
 #include "cloud.h"
-#include "network_manager.h"
+#include "networking/network_manager.h"
 #include <iostream>
 #include <framebuffer.h>
 #include <singleton.h>

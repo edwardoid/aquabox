@@ -18,7 +18,7 @@
 #pragma once
 
 #include "box_connection.h"
-#include "event.h"
+#include <event.h>
 #include <s2s.h>
 #include <set>
 

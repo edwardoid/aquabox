@@ -21,7 +21,6 @@
 #include <nlohmann/json.hpp>
 #include "device_type.h"
 #include "property.h"
-#include "hardware.h"
 #include "action_type.h"
 #include <string>
 #include <set>
@@ -44,8 +43,6 @@ namespace aquabox
 
         std::vector<std::shared_ptr<class Rule>> rules() const;
 
-        //Bytes read(uint32_t len) const;
-
         property(Id, StringProperty)
         property(Index, UnsignedNumberProperty)
         property(Address, StringProperty);
@@ -54,7 +51,6 @@ namespace aquabox
         property(Type, EnumProperty<DeviceType>)
         property(Class, EnumProperty<DeviceClass>)
         property(Meta, Metadata)
-
         bool supports(DeviceClass _class) const;
     protected:
         void enableSupport(DeviceClass _class);
@@ -78,5 +74,10 @@ namespace aquabox
     {
         AbstractSensor();
         virtual double value() const = 0;
+    };
+
+    struct AbstractFeeder: public Device
+    {
+        virtual void feed(uint8_t times = 1) = 0;
     };
 }

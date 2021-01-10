@@ -31,3 +31,6 @@
 [submodule "3dp/libstats"]
 	path = 3dp/libstats
 	url = https://github.com/edwardoid/libstats.git
+[submodule "src/proto"]
+	path = src/proto
+	url = https://github.com/edwardoid/aquabox-proto.git

@@ -17,7 +17,7 @@
  */
 
 #include "sensor.h"
-#include "layer.h"
+#include "hardware/hardware.h"
 
 using namespace aquabox;
 

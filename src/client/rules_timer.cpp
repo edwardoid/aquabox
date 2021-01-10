@@ -21,8 +21,8 @@
 #include "relay.h"
 #include "rule_executor.h"
 #include "aquabox.h"
-#include "event.h"
-#include "update_events.h"
+#include <event.h>
+#include "events/update_events.h"
 #include "options.h"
 #include <set>
 #include <plog/Log.h>
@@ -74,11 +74,14 @@ void RulesTimer::processRules(const Timer::ClockTimePoint& when)
         }
     });
 
+    static std::set<std::string> rulesInProgress;
     for(auto id : rulesToExec) {
         auto rule = Singleton<AquaBox>::get()->findRule(id);
-        if (rule) {
+        if (rule && rulesInProgress.find(id) == rulesInProgress.end()) {
+            rulesInProgress.insert(id);
             RuleExecutor re(rule, when);
             re();
+            rulesInProgress.erase(id);
         }
     }
 
