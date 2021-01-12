@@ -20,43 +20,66 @@
 
 #include <nlohmann/json.hpp>
 #include "device_type.h"
-#include "property.h"
 #include "action_type.h"
 #include <string>
 #include <set>
 
 namespace aquabox
 {
-    using Metadata = PrimitiveProperty<nlohmann::json, nlohmann::detail::value_t::object>;
+    using Metadata = nlohmann::json::object_t;
 
-    class Device: public ClassProperty
+    class Device
     {
     public:
-        Device();
-        Device(const Device& src);
-        Device(Device&& src);
-        const Device& operator = (const Device& src);
-        void copyData(const Device& src);
+        Device() = default;
+        virtual ~Device() = default;
 
         bool parseFile(const std::string& file);
         bool saveToFile(const std::string& file);
 
         std::vector<std::shared_ptr<class Rule>> rules() const;
 
-        property(Id, StringProperty)
-        property(Index, UnsignedNumberProperty)
-        property(Address, StringProperty);
-        property(RulesEnabled, BooleanProperty)
-        property(Name, StringProperty)
-        property(Type, EnumProperty<DeviceType>)
-        property(Class, EnumProperty<DeviceClass>)
-        property(Meta, Metadata)
+        const std::string& id() const;
+        void setId(const std::string& id);
+
+        const std::string& name() const;
+        void setName(const std::string name);
+
+        const int32_t& index() const;
+        void setIndex(const int32_t& index);
+
+        const std::string& address() const;
+        void setAddress(const std::string address);
+
+        bool rulesEnabled() const;
+        void setRulesEnabled(bool enabled);
+
+        DeviceType type() const;
+        void setType(const DeviceType& type);
+
+        DeviceClass deviceClass() const;
+        void setDeviceClass(DeviceClass deviceClass); 
+
+        const Metadata& metadata() const;
+        void setMetadata(const Metadata& metadata);
+
         bool supports(DeviceClass _class) const;
     protected:
         void enableSupport(DeviceClass _class);
-    private:
+    protected:
+        std::string m_id;
+        std::string m_name;
+        int32_t m_index = -1;
+        std::string m_address;
+        bool m_rulesEnabled = true;
+        DeviceType m_type = DeviceType::Generic;
+        DeviceClass m_deviceClass = DeviceClass::Unknown;
+        Metadata m_metadata;
         std::set<DeviceClass> m_implementation;
     };
+
+    void to_json(nlohmann::json& j, const Device& d);
+    void from_json(const nlohmann::json& j, Device& d);
 
     struct AbstractRelay: public Device
     {

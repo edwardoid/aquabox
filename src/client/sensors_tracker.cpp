@@ -40,15 +40,15 @@ void SensorsTracker::processUpdates() {
                 continue;
             }
             auto newValue = sensor->value();
-            if (values.find(sensor->getId()) != values.end()) {
-                if(values[sensor->getId()] == newValue) {
+            if (values.find(sensor->id()) != values.end()) {
+                if(values[sensor->id()] == newValue) {
                     continue;
                 }
 
-                values[sensor->getId()] = newValue;
+                values[sensor->id()] = newValue;
             }
             else {
-                values.insert( {sensor->getId(), newValue} );
+                values.insert( {sensor->id(), newValue} );
             }
 
             Singleton<AquaBox>::get()->postUpdate(std::make_shared<SensorChangedEvent>(sensor, "regular_check"));

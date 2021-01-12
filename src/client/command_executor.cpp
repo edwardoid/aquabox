@@ -153,8 +153,7 @@ bool CommandExecutor::GetDevices()
 {
     std::vector<nlohmann::json> all;
     Singleton<AquaBox>::get()->devices().for_each([this, &all](auto key, auto dev) {
-        nlohmann::json json;
-        dev->json(json);
+        nlohmann::json json = *dev;
         if (dev->supports(DeviceClass::Relay))
         {
             json["isOn"] = std::dynamic_pointer_cast<AbstractRelay>(dev)->turnedOn();
@@ -189,8 +188,7 @@ bool CommandExecutor::GetDevice()
         return true;
     }
 
-    nlohmann::json data;
-    dev->json(data);
+    nlohmann::json data = *dev;
     if (dev->supports(DeviceClass::Relay))
     {
         data["isOn"] = std::dynamic_pointer_cast<AbstractRelay>(dev)->turnedOn();
@@ -216,10 +214,10 @@ bool CommandExecutor::UpdateDevice()
     std::string id = m_cmd.getParameter(":dev");
 
     nlohmann::json data;
-    nlohmann::json deviceData;
+    std::shared_ptr<Device> d = std::make_shared<Device>();
     try
     {
-        deviceData = nlohmann::json::parse(m_cmd.body());
+        *d = nlohmann::json::parse(m_cmd.body());
     }
     catch (nlohmann::detail::parse_error &e)
     {
@@ -230,23 +228,14 @@ bool CommandExecutor::UpdateDevice()
         return true;
     }
 
-    std::shared_ptr<Device> d = std::make_shared<Device>();
-    if (!d->parse(deviceData))
-    {
-        m_cmd.response(data, Result::BadCommand);
-        return true;
-    }
-
     bool found = Singleton<AquaBox>::get()->devices().on(id, [this, d](auto id, auto dev) {
-        nlohmann::json before;
-        dev->json(before);
+        nlohmann::json before = *dev;
         if (dev->supports(DeviceClass::Relay))
         {
             before["isOn"] = std::dynamic_pointer_cast<AbstractRelay>(dev)->turnedOn();
         }
 
-        dev->copyData(*d);
-
+        *dev = *d;
 
         auto box = Singleton<AquaBox>::get();
         box->updateDevice(id);
@@ -458,7 +447,7 @@ bool CommandExecutor::TurnOn()
 
     relay->turnOn();
     nlohmann::json data;
-    relay->json(data);
+    to_json(data, *relay);
     data["isOn"] = relay->turnedOn();
     Singleton<AquaBox>::get()->postUpdate(std::make_shared<ManualStateChangedEvent>(relay));
 
@@ -491,8 +480,7 @@ bool CommandExecutor::TurnOff()
     auto relay = std::dynamic_pointer_cast<AbstractRelay>(dev);
 
     relay->turnOff();
-    nlohmann::json data;
-    relay->json(data);
+    nlohmann::json data = *relay;
     data["isOn"] = relay->turnedOn();
 
     Singleton<AquaBox>::get()->postUpdate(std::make_shared<ManualStateChangedEvent>(relay));

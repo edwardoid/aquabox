@@ -25,10 +25,10 @@ using namespace aquabox;
 
 OnOffChangedEvent::OnOffChangedEvent(std::shared_ptr<AbstractRelay> device, std::string reason)
 {
-    setSender(device->getId(), "device");
+    setSender(device->id(), "device");
     setData({
         { "reason", reason },
-        { "sender_full", device->getName().Value },
+        { "sender_full", device->name() },
         { "action", Serializable<ActionType>::convert(device->turnedOn() ?  ActionType::TurnOff : ActionType::TurnOn) }
     });
 
@@ -39,10 +39,10 @@ OnOffChangedEvent::OnOffChangedEvent(std::shared_ptr<AbstractRelay> device, std:
 
 SensorChangedEvent::SensorChangedEvent(std::shared_ptr<AbstractSensor> sensor, std::string reason)
 {
-    setSender(sensor->getId(), "device");
+    setSender(sensor->id(), "device");
     setData({
         { "reason", reason },
-        { "sender_full", sensor->getName().Value },
+        { "sender_full", sensor->name() },
     });
 
     setPropertiesUpdate({
@@ -127,9 +127,9 @@ RuleDeletedEvent::RuleDeletedEvent(std::shared_ptr<Rule> rule)
 
 DeviceRulesChangedEvent::DeviceRulesChangedEvent(std::shared_ptr<Device> device)
 {
-    setSender(device->getId(), "device");
+    setSender(device->id(), "device");
     setData({
-        { "sender_full", device->getName().Value },
+        { "sender_full", device->name() },
     });
 
     std::vector<nlohmann::json> rules;
@@ -146,14 +146,13 @@ DeviceRulesChangedEvent::DeviceRulesChangedEvent(std::shared_ptr<Device> device)
 
 DeviceUpdatedEvent::DeviceUpdatedEvent(std::shared_ptr<Device> device, const nlohmann::json& before)
 {
-    setSender(device->getId(), "device");
+    setSender(device->id(), "device");
     setData({
-        { "sender_full", device->getName().Value },
+        { "sender_full", device->name() },
         { "action", "updated"}
     });
 
-    nlohmann::json json;
-    device->json(json);
+    nlohmann::json json = *device;
 
     nlohmann::json res;
     for(auto i : json.items()) {

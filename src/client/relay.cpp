@@ -17,6 +17,7 @@
  */
 
 #include "relay.h"
+#include <log.h>
 #include "hardware/hardware.h"
 
 using namespace aquabox;
@@ -27,16 +28,16 @@ Relay::Relay()
 
 bool Relay::turnedOn() const
 {
-    auto hw = Hardware::resolve(getAddress().Value);
+    auto hw = Hardware::resolve(m_address);
     if (hw == nullptr) {
-        LOG_ERROR << "Can't find device " << getAddress().Value;
+        LOG_ERROR << "Can't find device " << m_address;
         return false;
     }
 
     auto impl = hw->implementation<OnOff>();
 
     if (impl == nullptr) {
-        LOG_ERROR << "Can't find device " << getAddress().Value;
+        LOG_ERROR << "Can't find device " << m_address;
         return false;
     }
 
@@ -49,16 +50,16 @@ void Relay::turnOn()
         return;
     }
 
-    auto hw = Hardware::resolve(getAddress().Value);
+    auto hw = Hardware::resolve(m_address);
     if (hw == nullptr) {
-        LOG_ERROR << "Can't find device " << getAddress().Value;
+        LOG_ERROR << "Can't find device " << m_address;
         return;
     }
 
     auto impl = hw->implementation<OnOff>();
 
     if (impl == nullptr) {
-        LOG_ERROR << getAddress().Value << " does not implement OnOff interface.";
+        LOG_ERROR << m_address << " does not implement OnOff interface.";
         return;
     }
 
@@ -73,16 +74,16 @@ void Relay::turnOff()
         return;
     }
 
-    auto hw = Hardware::resolve(getAddress().Value);
+    auto hw = Hardware::resolve(m_address);
     if (hw == nullptr) {
-        LOG_ERROR << "Can't find device " << getAddress().Value;
+        LOG_ERROR << "Can't find device " << m_address;
         return;
     }
 
     auto impl = hw->implementation<OnOff>();
 
     if (impl == nullptr) {
-        LOG_ERROR << getAddress().Value << " does not implement OnOff interface.";
+        LOG_ERROR << m_address << " does not implement OnOff interface.";
         return;
     }
 

@@ -69,6 +69,7 @@ namespace aquabox
         bool required;
 
         inline bool operator == (const AbstractProperty& src) const { return Value == src.Value; }
+        inline bool operator == (const T& src) const { return Value == src; }
         inline operator T () { return Value; };
         inline operator T& () { return Value; };
         inline operator const T& () const { return Value; };

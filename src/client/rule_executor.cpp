@@ -43,7 +43,7 @@ void RuleExecutor::operator() ()
         return;
     }
 
-    if (!(bool)(dev->getRulesEnabled())) {
+    if (!(bool)(dev->rulesEnabled())) {
         return;
     }
     

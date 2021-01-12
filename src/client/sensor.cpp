@@ -18,6 +18,7 @@
 
 #include "sensor.h"
 #include "hardware/hardware.h"
+#include <log.h>
 
 using namespace aquabox;
 
@@ -25,9 +26,9 @@ using namespace aquabox;
 double Sensor::value() const
 {
 
-    auto hw = Hardware::resolve(getAddress().Value);
+    auto hw = Hardware::resolve(m_address);
     if (hw == nullptr) {
-        LOG_ERROR << "Can't find device " << getAddress().Value;
+        LOG_ERROR << "Can't find device " << m_address;
         return 0.;
     }
 

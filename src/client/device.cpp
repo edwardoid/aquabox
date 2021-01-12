@@ -24,91 +24,120 @@
 #include "hardware/hardware.h"
 #include <time.h>
 #include <fstream>
+#include <nlohmann/json.hpp>
+
+namespace aquabox {
+void to_json(nlohmann::json& j, const Device& d) {
+    try{
+        j = nlohmann::json{
+            { "id", d.id() },
+            { "name", d.name() },
+            { "index", d.index() },
+            { "address", d.address() },
+            { "rulesEnabled", d.rulesEnabled() },
+            { "type", Serializable<DeviceType>::convert(d.type()) },
+            { "class", Serializable<DeviceClass>::convert(d.deviceClass()) },
+            { "meta", d.metadata() }
+        };
+    } catch(nlohmann::detail::exception e) {
+        LOG_ERROR << "Can't serialize Device";
+    }
+}
+
+void from_json(const nlohmann::json& j, Device& d) {
+    d.setId(j.at("id"));
+    d.setName(j.at("name"));
+    d.setIndex(j.at("index"));
+    d.setAddress(j.at("address"));
+    d.setRulesEnabled(j.at("rulesEnabled"));
+    d.setType(Serializable<DeviceType>::convert((std::string)j.at("type")));
+    d.setDeviceClass(Serializable<DeviceClass>::convert((std::string)j.at("class")));
+    d.setMetadata(j.at("meta"));
+}
+
+}
 
 using namespace aquabox;
 
-Device::Device()
-    : ClassProperty("-class Device", { &m_Id, &m_Index, &m_Address, &m_RulesEnabled, &m_Name, &m_Type, &m_Class, &m_Meta })
-    , m_Id("id"), m_Index("index", false), m_Address("address"), m_RulesEnabled("rulesEnabled")
-    , m_Name("name"), m_Type("type"), m_Class("class"), m_Meta("meta")
-{}
-
-Device::Device(const Device& src)
-    : Device()
+const std::string& Device::id() const
 {
-    *this = src;
+    return m_id;    
 }
 
-bool Device::parseFile(const std::string& file)
+void Device::setId(const std::string& id)
 {
-    std::ifstream is(file);
-
-    std::string content, line;
-    while(std::getline(is, line)) {
-        content += line;
-    }
-
-    nlohmann::json root = nlohmann::json::parse(content);
-
-    if(!parse(root)) {
-        LOG_ERROR << "Device from " << file << " can not be parsed!";
-        return false; 
-    }
-    return true;
+    m_id = id;
 }
 
-bool Device::saveToFile(const std::string& file)
+const std::string& Device::name() const
 {
-    std::ofstream os(file);
-    if(!os) {
-        LOG_ERROR << "Can't write to " << file << strerror(errno);
-        return false;
-    }
-    nlohmann::json data;
-    json(data);
-    os << data.dump(4);
-    os.flush();
-    os.close();
-    return true;
+    return m_name;    
 }
 
-Device::Device(Device&& src)
-    : Device()
+void Device::setName(const std::string name)
 {
-    moveData(src);
-    moveProperty(Id);
-    moveProperty(Index);
-    moveProperty(Address);
-    moveProperty(RulesEnabled);
-    moveProperty(Name);
-    moveProperty(Type);
-    moveProperty(Class);
-    moveProperty(Meta);
+    m_name = name;
 }
 
-const Device& Device::operator = (const Device& src)
+const int32_t& Device::index() const
 {
-    copyData(src);
-    copyProperty(Id);
-    copyProperty(Index);
-    copyProperty(Address);
-    copyProperty(RulesEnabled);
-    copyProperty(Name);
-    copyProperty(Type);
-    copyProperty(Class);
-    copyProperty(Meta);
-
-    return *this;
+    return m_index;
 }
 
-void Device::copyData(const Device& src)
+
+void Device::setIndex(const int32_t& index)
 {
-    copyProperty(Index);
-    copyProperty(RulesEnabled);
-    copyProperty(Name);
-    copyProperty(Type);
-    copyProperty(Class);
-    copyProperty(Meta);
+    m_index = index;
+}
+
+const std::string& Device::address() const
+{
+    return m_address;    
+}
+
+void Device::setAddress(const std::string address)
+{
+    m_address = address;
+}
+
+bool Device::rulesEnabled() const
+{
+    return m_rulesEnabled;    
+}
+
+void Device::setRulesEnabled(bool enabled)
+{
+	m_rulesEnabled = enabled;
+}
+
+DeviceType Device::type() const
+{
+	return m_type;
+}
+
+void Device::setType(const DeviceType& type)
+{
+	m_type = type;
+}
+
+DeviceClass Device::deviceClass() const
+{
+	return m_deviceClass;
+}
+
+void Device::setDeviceClass(DeviceClass deviceClass)
+{
+	m_deviceClass = deviceClass;
+}
+
+const Metadata& Device::metadata() const
+{
+	return m_metadata;
+}
+
+void Device::setMetadata(const Metadata& metadata)
+{
+	m_metadata = metadata;
 }
 
 std::vector<std::shared_ptr<Rule>> Device::rules() const
@@ -118,7 +147,7 @@ std::vector<std::shared_ptr<Rule>> Device::rules() const
     std::vector<std::shared_ptr<Rule>> res;
 
     allRules.for_each([&res, this](auto id, auto rule) {
-        if (rule->getDevice() == m_Id) {
+        if (rule->getDevice() == m_id) {
             res.push_back(rule);
         }
     });
@@ -134,6 +163,26 @@ void Device::enableSupport(DeviceClass _class)
 bool Device::supports(DeviceClass _class) const
 {
     return m_implementation.find(_class) != m_implementation.end();
+}
+
+bool Device::parseFile(const std::string& file)
+{
+    std::ifstream ifs(file);
+    if(!ifs) return false;
+    nlohmann::json json;
+    ifs >> json;
+    *this = json;
+    return true;
+}
+
+bool Device::saveToFile(const std::string& file)
+{
+    std::ofstream ofs(file);
+    if(!ofs) return false;
+    nlohmann::json json;
+    json = *this;
+    ofs << json;
+    return true;
 }
 
 AbstractRelay::AbstractRelay()

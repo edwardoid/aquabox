@@ -22,6 +22,7 @@
 #include "sensor.h"
 #include "settings.h"
 #include <fstream>
+#include <log.h>
 
 using namespace aquabox;
 
@@ -77,7 +78,7 @@ std::unordered_map<std::string, std::shared_ptr<Device>> DeviceParser::parse(Pat
         }
 
         if(dev != nullptr && dev->parseFile(p))
-            devices.insert({ dev->getId(), std::dynamic_pointer_cast<Device>(dev) });
+            devices.insert({ dev->id(), std::dynamic_pointer_cast<Device>(dev) });
     }
     return devices;
 }

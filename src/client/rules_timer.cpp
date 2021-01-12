@@ -106,7 +106,7 @@ void RulesTimer::applyChanges()
         }
         bool isOn = relay->turnedOn();
         if(relay->performPendingAction()) {
-            LOG_DEBUG_IF_(1, true) << "Device" << (std::string)(relay->getName()) << " changed to Turned " << (relay->turnedOn() ? "ON" : "OFF");
+            LOG_DEBUG_IF_(1, true) << "Device" << relay->name() << " changed to Turned " << (relay->turnedOn() ? "ON" : "OFF");
         }
         if (isOn != relay->turnedOn()) {
             box->postUpdate(std::make_shared<RuleTriggeredEvent>(relay));
