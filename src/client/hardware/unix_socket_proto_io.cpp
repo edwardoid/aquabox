@@ -23,6 +23,7 @@
 #include <netdb.h>
 #include <sys/types.h>
 #include <sys/socket.h>
+#include <sys/ioctl.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <unistd.h>
@@ -38,67 +39,85 @@ UNIXSocketIO::UNIXSocketIO(int sc)
 {
     m_sfd = sc;
     
-    int flags = fcntl(m_sfd, F_GETFL, 0);
-    fcntl(m_sfd, F_SETFL, flags | O_NONBLOCK);
+    //int flags = fcntl(m_sfd, F_GETFL, 0);
+    //fcntl(m_sfd, F_SETFL, flags & ~O_NONBLOCK);
 
-    m_good = true;
-    m_thread = std::thread([this]{ routine(); });
-    m_thread.detach();
+    struct timeval timeout;      
+    timeout.tv_sec = 10;
+    timeout.tv_usec = 0;
+
+    m_good = setsockopt (m_sfd, SOL_SOCKET, SO_RCVTIMEO, (char *)&timeout, sizeof(timeout)) >= 0 &&
+             setsockopt (m_sfd, SOL_SOCKET, SO_SNDTIMEO, (char *)&timeout, sizeof(timeout)) >= 0;
+    if (!m_good) {
+        LOG_ERROR << "Can't set socket options!";
+    }
 }
 
 void UNIXSocketIO::close()
 {
-    LOG_DEBUG << "Closing socket ";
     ::close(m_sfd);
+}
+
+bool UNIXSocketIO::good() const
+{
+    return m_good;
 }
 
 buffer_length_t UNIXSocketIO::wait(buffer_length_t length) const
 {
-    while (available() < length)
-    {
-        std::this_thread::sleep_for(std::chrono::milliseconds(100));
+    if (!m_good) {
+        return 0;
     }
-    return available();
+    if (m_buffer.size() >= length) {
+        return length;
+    }
+    buffer_length_t remain = length - m_buffer.size();
+    buffer_length_t avail = available();
+    if (avail > remain) {
+        remain = avail;
+    }
+    m_buffer.resize(m_buffer.size() + remain);
+    
+    int count = ::read(m_sfd, m_buffer.data() + (m_buffer.size() - remain), remain);
+    
+    if (count < 0) {
+        m_good = false;
+    }
+
+    return m_buffer.size();
 }
 
 buffer_length_t UNIXSocketIO::available() const
 {
-    byte_t tmp[128];
-    while(1) {
-        int count = ::read(m_sfd, tmp, 128 * sizeof(byte_t));
-        if (count > 0) {
-            m_buffer.insert(m_buffer.end(), tmp, tmp + count);
-        } else {
-            break;
-        }
-        
+    int count;
+    if(ioctl(m_sfd, FIONREAD, &count) < 0)
+    {
+        m_good = false;
+        return 0;
     }
-    return m_buffer.size();
+
+    return static_cast<buffer_length_t>(count);
 }
 
 buffer_length_t UNIXSocketIO::write(const byte_t *buffer, buffer_length_t sz)
 {
-
-    // virtual size_t write(const uint8_t *buf, size_t size) override;
     int count = ::write(m_sfd, buffer, (size_t)sz);
     return count > 0 ? count : 0;
 }
 
 buffer_length_t UNIXSocketIO::read(buffer_length_t sz, byte_t *buffer)
 {
-    sz = sz < m_buffer.size() ? sz : m_buffer.size();
-    
-    if (sz > m_buffer.size()) {
-        size_t remaining = sz - m_buffer.size();
-        if (wait(remaining) != remaining) {
-            return 0;
-        }
+    if (m_buffer.size() < sz) {
+        buffer_length_t remain = sz - m_buffer.size();
+        wait(remain);
     }
-    
-    memcpy(buffer, m_buffer.data(), sz);
-    m_buffer.erase(m_buffer.begin(), m_buffer.begin() + sz);
-    
-    return sz;
+
+    buffer_length_t len = sz > m_buffer.size() ? m_buffer.size() : sz; 
+    if (len > 0) {
+        memcpy(buffer, m_buffer.data(), len);
+        m_buffer.erase(m_buffer.begin(), m_buffer.begin() + len);
+    }
+    return len;
 }
 
 bool UNIXSocketIO::makeRequest(const proto::Message& req, proto::Message& rsp)
@@ -106,23 +125,16 @@ bool UNIXSocketIO::makeRequest(const proto::Message& req, proto::Message& rsp)
     if (m_good)
 	{
 		std::lock_guard<std::mutex> lock(m_ioMx);
-		m_req = req;
-		m_ioRequestedCV.notify_one();
-		std::unique_lock<std::mutex> ioReady(m_ioReadyMx);
-		m_ioReadyCV.wait(ioReady);
-		rsp = m_res;
-	}
+        if (m_good) {
+            m_good = send(req);
+            if(!m_good) {
+            } else {
+                m_good = get(rsp);
+            }
+        }
+	} else {
+        LOG_WARNING << "Can't make request, socket is disconnected";
+    }
 
 	return m_good;
-}
-
-void UNIXSocketIO::routine()
-{
-	while(m_good)
-	{
-		std::unique_lock<std::mutex> ioRequested(m_ioRequestedMx);
-		m_ioRequestedCV.wait(ioRequested);
-		m_good = send(m_req) && get(m_res);
-		m_ioReadyCV.notify_one();
-	}
 }

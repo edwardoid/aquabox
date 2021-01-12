@@ -35,7 +35,6 @@
 using namespace aquabox;
 
 SocketBus::SocketBus()
-    : m_thread([this] { run(); })
 {
     Singleton<HermesIncubator>::i()->ready.connect([this](int id, std::shared_ptr<HermesMaster> master) {
         LOG_DEBUG << "Slave " << master->serial().to_string() << " index " << id << " is ready";
@@ -47,9 +46,14 @@ SocketBus::SocketBus()
     Singleton<HermesIncubator>::i()->dead.connect([this](int id, std::shared_ptr<HermesMaster> master) {
         LOG_DEBUG << "Slave " << master->serial().to_string() << " index " << id << " is dead";
         if (m_master.find(id) != m_master.end()) {
-            m_master[id]->master()->io()->close();
+            m_master.erase(id);
         }
     });
+
+    m_thread = std::thread([this] { run(); });
+    m_thread.detach();
+
+    signal(SIGPIPE, SIG_IGN);
 }
 
 void SocketBus::run()
@@ -116,7 +120,6 @@ void SocketBus::run()
 
 std::shared_ptr<Hardware> SocketBus::hw(const std::string& hw)
 {
-    LOG_DEBUG << "Looking up for dev " << hw;
     for(auto m : m_master)
     {
         if (m.second != nullptr && 
@@ -133,10 +136,10 @@ std::shared_ptr<Hardware> SocketBus::hw(const std::string& hw)
 
 void SocketBus::newClientConnection(int socket)
 {
-    auto socketIO = std::make_shared<UNIXSocketIO>(socket);
-    auto io = std::dynamic_pointer_cast<proto::MessageIO>(socketIO);
-    auto master = std::make_shared<HermesMaster>(io);
-    int id = Singleton<HermesIncubator>::i()->incubate(master);
+    auto master = std::make_shared<HermesMaster>(
+            std::make_shared<UNIXSocketIO>(socket)
+    );
     auto hw = std::make_shared<HermesHardware>(master);
-    m_master.insert({id, hw});
+    auto id = Singleton<HermesIncubator>::i()->incubate(master);
+    m_master[id] = hw;
 }

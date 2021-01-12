@@ -83,9 +83,8 @@ void HermesIncubator::routine()
                 }
             } else if (obj.state == Ready) {
                 if (round % 10 == 0) {
-
                     std::lock_guard<HermesMaster> objLock(*obj.object);
-                    if (obj.object->getPropertiesCount() < 1) {
+                    if (!obj.object->isConnected()) {
                         deadObjects.push_back(obj);
                         obj.state = ObjectInfoState::Dead;
                         toRemove.push_back(i);

@@ -41,6 +41,5 @@ namespace aquabox
         bool performPendingAction();
     private:
         std::map<int64_t, ActionType> m_pendingActions;
-        //std::shared_ptr<class RelayImplementation> m_impl;
     };
 }

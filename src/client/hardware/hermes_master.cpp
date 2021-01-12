@@ -41,6 +41,7 @@ std::string HermesSerial::to_string() const
 
 HermesMaster::HermesMaster(std::shared_ptr<proto::MessageIO> io)
     : proto::Master(io.get())
+    , m_io(io)
 {
 }
 
@@ -51,6 +52,9 @@ HermesSerial HermesMaster::serial() const
 
 bool HermesMaster::isConnected() const
 {
+    if (!m_io->good()) {
+        return false;
+    }
     HermesMaster* self = const_cast<HermesMaster*>(this);
     for(int i = 0; i < SERIAL_LEN; ++i) {
         if (m_serial[i] != 0) {

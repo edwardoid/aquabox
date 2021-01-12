@@ -20,9 +20,7 @@
 
 #include <message_io.h>
 #include <vector>
-#include <condition_variable>
 #include <mutex>
-#include <thread>
 
 namespace aquabox
 {
@@ -34,27 +32,14 @@ namespace aquabox
         virtual proto::buffer_length_t available() const override;
         virtual proto::buffer_length_t write(const proto::byte_t *buffer, proto::buffer_length_t sz) override;
         virtual proto::buffer_length_t read(proto::buffer_length_t sz, proto::byte_t *buffer) override;
-        virtual void close();
+        virtual bool good() const override;
+        virtual void close() override;
 
         virtual bool makeRequest(const proto::Message& req, proto::Message& rsp);
     private:
-        void routine();
-    private:
         int m_sfd;
-        mutable std::vector<proto::byte_t> m_buffer;
-
-        std::thread m_thread;
-
         std::mutex m_ioMx;
-
-        std::mutex m_ioRequestedMx;
-        std::mutex m_ioReadyMx;
-
-        std::condition_variable m_ioRequestedCV;
-        std::condition_variable m_ioReadyCV;
-
-        proto::Message m_req;
-        proto::Message m_res;
-        bool m_good;
+        mutable std::vector<proto::byte_t> m_buffer;
+        mutable bool m_good;
     };
 } // namespace aquabox

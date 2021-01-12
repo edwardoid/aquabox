@@ -33,26 +33,12 @@ namespace aquabox
         HermesSerial(const proto::byte_t serial[SERIAL_LEN]);
         std::string to_string() const;
     };
-    class HermesMaster: public proto::Master
+    class HermesMaster: public proto::Master, public std::recursive_mutex
     {
     public:
         HermesMaster(std::shared_ptr<proto::MessageIO> io);
         bool isConnected() const;
         HermesSerial serial() const;
-        inline void lock()
-        {
-            m_mx.lock();
-            char thread[128];
-            ::pthread_getname_np(::pthread_self(), thread, 128);
-            LOG_DEBUG << "Locked by " << thread; 
-        }
-        inline void unlock()
-        {
-            char thread[128];
-            ::pthread_getname_np(::pthread_self(), thread, 128);
-            LOG_DEBUG << "Unlocked by " << thread;
-            m_mx.unlock();
-        }
         inline std::shared_ptr<proto::IO> io() { return m_io; }
     private:
         std::shared_ptr<proto::MessageIO> m_io;
