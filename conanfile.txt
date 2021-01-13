@@ -29,7 +29,6 @@ mqtt_cpp:use_std_shared_ptr_array=False
 mqtt_cpp:build_tests=False
 tgbot:shared=True
 tgbot:use_curl=True
-libserial:shared=True
 
 [imports]
 lib, *.so* -> ./lib # Copies all dylib files from packages lib folder to my "lib" folder
