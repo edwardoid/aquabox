@@ -100,6 +100,16 @@
             },
             {
                 "action": "extract",
+                "source": "lib/libaquabox-proto.so",
+                "destination": "$LIB_DIR/libaquabox-proto.so"
+            },
+            {
+                "action": "extract",
+                "source": "lib/libaquabox-proto.so.1",
+                "destination": "$LIB_DIR/libaquabox-proto.so.1"
+            },
+            {
+                "action": "extract",
                 "source": "lib/libbson-1.0.so.0.0.0",
                 "destination": "$LIB_DIR/libbson-1.0.so.0.0.0"
             },
@@ -195,8 +205,18 @@
             },
             {
                 "action": "extract",
-                "source": "lib/libw1temp.so",
-                "destination": "$LIB_DIR/libw1temp.so"
+                "source": "lib/libserial.so",
+                "destination": "$LIB_DIR/libserial.so"
+            },
+            {
+                "action": "extract",
+                "source": "lib/libserial.so.1",
+                "destination": "$LIB_DIR/libserial.so.1"
+            },
+            {
+                "action": "extract",
+                "source": "lib/libserial.so.1.0.0",
+                "destination": "$LIB_DIR/libserial.so.1.0.0"
             },
             {
                 "action": "extract",
