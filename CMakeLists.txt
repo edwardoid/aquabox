@@ -130,6 +130,7 @@ find_package(simppl REQUIRED)
 find_package(dbus REQUIRED)
 find_package(JsonSchemaValidator REQUIRED)
 find_package(tgbot REQUIRED)
+find_package(libserial REQUIRED)
 
 include_directories(${PLOG_INCLUDE_DIR})
 include_directories(${THREAD_POOL_INCLUDE_DIR})

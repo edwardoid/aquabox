@@ -205,8 +205,8 @@
             },
             {
                 "action": "extract",
-                "source": "lib/libserial.so",
-                "destination": "$LIB_DIR/libserial.so"
+                "source": "lib/libserial.so.1.0.0",
+                "destination": "$LIB_DIR/libserial.so.1.0.0"
             },
             {
                 "action": "extract",
@@ -215,8 +215,8 @@
             },
             {
                 "action": "extract",
-                "source": "lib/libserial.so.1.0.0",
-                "destination": "$LIB_DIR/libserial.so.1.0.0"
+                "source": "lib/libserial.so",
+                "destination": "$LIB_DIR/libserial.so"
             },
             {
                 "action": "extract",
