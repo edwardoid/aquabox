@@ -128,6 +128,7 @@ DeviceClass Device::deviceClass() const
 void Device::setDeviceClass(DeviceClass deviceClass)
 {
 	m_deviceClass = deviceClass;
+    enableSupport(deviceClass);
 }
 
 const Metadata& Device::metadata() const
@@ -181,7 +182,7 @@ bool Device::saveToFile(const std::string& file)
     if(!ofs) return false;
     nlohmann::json json;
     json = *this;
-    ofs << json;
+    ofs << json.dump(4);
     return true;
 }
 

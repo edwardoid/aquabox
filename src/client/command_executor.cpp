@@ -446,8 +446,8 @@ bool CommandExecutor::TurnOn()
     auto relay = std::dynamic_pointer_cast<AbstractRelay>(dev);
 
     relay->turnOn();
-    nlohmann::json data;
-    to_json(data, *relay);
+    nlohmann::json data; 
+    data = *relay;
     data["isOn"] = relay->turnedOn();
     Singleton<AquaBox>::get()->postUpdate(std::make_shared<ManualStateChangedEvent>(relay));
 
@@ -473,6 +473,7 @@ bool CommandExecutor::TurnOff()
 
     if (!dev->supports(DeviceClass::Relay))
     {
+        LOG_ERROR << id << " is not relay";
         m_cmd.response(Result::BadCommand);
         return true;
     }

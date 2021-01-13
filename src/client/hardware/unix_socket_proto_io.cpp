@@ -43,8 +43,8 @@ UNIXSocketIO::UNIXSocketIO(int sc)
     //fcntl(m_sfd, F_SETFL, flags & ~O_NONBLOCK);
 
     struct timeval timeout;      
-    timeout.tv_sec = 10;
-    timeout.tv_usec = 0;
+    timeout.tv_sec = 1;
+    timeout.tv_usec = 500;
 
     m_good = setsockopt (m_sfd, SOL_SOCKET, SO_RCVTIMEO, (char *)&timeout, sizeof(timeout)) >= 0 &&
              setsockopt (m_sfd, SOL_SOCKET, SO_SNDTIMEO, (char *)&timeout, sizeof(timeout)) >= 0;
