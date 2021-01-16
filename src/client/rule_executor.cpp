@@ -36,22 +36,21 @@ void RuleExecutor::operator() ()
 {
     const TimeDetails now(Timer::Clock::to_time_t(m_now));
 
-    const RepeatUnit unit = m_rule->getRepeat().getUnit();
-    auto dev = std::dynamic_pointer_cast<Relay>(m_rule->getDevice().resolve());
+    auto dev = std::dynamic_pointer_cast<Relay>(m_rule->resolveDevice());
 
     if (dev == nullptr) {
         return;
     }
 
-    if (!(bool)(dev->rulesEnabled())) {
+    if (!dev->rulesEnabled()) {
         return;
     }
     
-    for(const Action& act : *(m_rule->getActions())) {
-        const TimeDetails at = act.getAt().getDetails();
+    for(const ValueChange& act : m_rule->actions()) {
+        const TimeDetails at(act.when);
 
-        int64_t priority = now.from(at, true, unit >= RepeatUnit::Hour, unit >= RepeatUnit::Day, unit >= RepeatUnit::Month);
+        int64_t priority = now.from(at, true, true, true, true);
         
-        dev->addPendingAction(priority, act.getType());
+        dev->addPendingAction(priority, act);
     }
 }

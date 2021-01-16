@@ -20,6 +20,7 @@
 #include "rule.h"
 #include "relay.h"
 #include "rule_executor.h"
+#include "time_details.h"
 #include "aquabox.h"
 #include <event.h>
 #include "events/update_events.h"
@@ -62,14 +63,13 @@ void RulesTimer::processRules(const Timer::ClockTimePoint& when)
     std::vector<std::string> rulesToExec;
     RulesMap& allRules = Singleton<AquaBox>::get()->rules();
     allRules.for_each([&rulesToDelete, &rulesToExec, &when](auto id, auto rule) {
-        const Time at = rule->getRepeat().getDeleteAfter();
-        const RepeatUnit unit = rule->getRepeat().getUnit();
-        if(at != 0 &&
-            at.getDetails().from(TimeDetails(Timer::Clock::to_time_t(when)),
-                                true, true, true, true) >=0) {
+        const TimeDetails at(rule->deleteAfter());
+        if(rule->deleteAfter() != 0 &&
+            at.from(TimeDetails(Timer::Clock::to_time_t(when)),
+                     true, true, true, true) >=0) {
             rulesToDelete.push_back(id);
         }
-        else if((bool) (rule->getEnabled())) {
+        else if(rule->enabled()) {
             rulesToExec.push_back(id);
         }
     });

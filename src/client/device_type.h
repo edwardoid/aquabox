@@ -27,7 +27,8 @@ namespace aquabox
         Unknown = 0,
         Relay,
         AnalogRelay,
-        Sensor
+        Sensor,
+        Step
     };
 
     enum class DeviceType: int

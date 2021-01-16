@@ -16,36 +16,20 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef REPEAT_TIMEOUT_H
-#define REPEAT_TIMEOUT_H
+#pragma once
 
 #include <nlohmann/json.hpp>
-#include "property.h"
-#include "enumerations.h"
-#include "time.h"
+#include <ctime>
 
 namespace aquabox
 {
-    enum class RepeatUnit: int
+    struct ValueChange
     {
-        Minute = 0,
-        Hour = 1,
-        Day = 2,
-        Week = 3,
-        Month = 4
+        std::string property;
+        std::time_t when;
+        double value;
     };
 
-    class RepeatTimeout: public ClassProperty
-    {
-    public:
-        RepeatTimeout(std::string name);
-        RepeatTimeout(const RepeatTimeout& src);
-        RepeatTimeout(RepeatTimeout&& src);
-        const RepeatTimeout& operator = (const RepeatTimeout& src);
-
-        property(Unit, EnumProperty<RepeatUnit>);
-        property(DeleteAfter, Time);
-    };
+    void to_json(nlohmann::json& j, const ValueChange& v);
+    void from_json(const nlohmann::json& j, ValueChange& v);
 }
-
-#endif // REPEAT_TIMEOU_H

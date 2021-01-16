@@ -1,6 +1,6 @@
 /*
  * AquaBox
- * Copyright (C) 2020  Eduard Sargsyan
+ * Copyright (C) 2019  Eduard Sargsyan
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,12 +16,29 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#pragma once
+#include "value_change.h"
+#include <log.h>
 
 namespace aquabox
 {
-    enum class ActionType : int {
-        TurnOn = 0,
-        TurnOff
-    };
-}
+    void to_json(nlohmann::json &j, const ValueChange &v)
+    {
+        j["property"] = v.property;
+        j["value"] = v.value;
+        j["when"] = (uint64_t)v.when;
+    }
+
+    void from_json(const nlohmann::json &j, ValueChange &v)
+    {
+        try
+        {
+            j.at("property").get_to(v.property);
+            j.at("value").get_to(v.value);
+            v.when = (uint64_t)(j.at("when"));
+        }
+        catch (const nlohmann::detail::exception &e)
+        {
+            LOG_ERROR << "Can't serialize Rule: " << e.what();
+        }
+    }
+} // namespace aquabox

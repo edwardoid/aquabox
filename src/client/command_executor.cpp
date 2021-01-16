@@ -259,8 +259,7 @@ bool CommandExecutor::GetRules()
     RulesMap &allRules = Singleton<AquaBox>::get()->rules();
     std::vector<nlohmann::json> all;
     allRules.for_each([&all](auto id, auto rule) {
-        nlohmann::json data;
-        rule->json(data);
+        nlohmann::json data = *rule;
         all.push_back(data);
     });
     nlohmann::json res = nlohmann::json::object();
@@ -289,8 +288,7 @@ bool CommandExecutor::GetRule()
     }
     else
     {
-        nlohmann::json data;
-        rule->json(data);
+        nlohmann::json data = *rule;
         m_cmd.response(data, Result::Ok);
     }
     return true;
@@ -323,11 +321,7 @@ bool CommandExecutor::CreateOrUpdateRule(bool update)
     auto r = std::make_shared<Rule>();
     try
     {
-        if (!r->parse(ruleData))
-        {
-            m_cmd.response(data, Result::BadCommand);
-            return true;
-        }
+        *r = ruleData;
     }
     catch (nlohmann::detail::parse_error &e)
     {
@@ -336,9 +330,7 @@ bool CommandExecutor::CreateOrUpdateRule(bool update)
         return true;
     }
 
-    auto device = r->getDevice().resolve();
-
-    if (device == nullptr)
+    if (r->resolveDevice() == nullptr)
     {
         data["data"] = m_cmd.body();
         data["error"] = "Can't find device";
@@ -394,10 +386,9 @@ bool CommandExecutor::DeviceRules()
     RulesMap &allRules = Singleton<AquaBox>::get()->rules();
 
     allRules.for_each([&all, &dev](auto id, auto rule) {
-        if (((std::string)rule->getDevice().Value) == dev)
+        if (rule->device() == dev)
         {
-            nlohmann::json data;
-            rule->json(data);
+            nlohmann::json data = *rule;
             all.push_back(data);
         }
     });
@@ -410,13 +401,8 @@ bool CommandExecutor::DeviceRules()
 
 bool CommandExecutor::SupportedRepeatTimeouts()
 {
-    std::vector<RepeatUnit> units;
-    for (auto u : Serializable<RepeatUnit>::val2Str)
-    {
-        units.push_back(u.first);
-    }
     nlohmann::json res;
-    res["units"] = Serializable<RepeatUnit>::val2Str;
+    res["units"] = std::vector<std::string>({ "hour" });
     m_cmd.response(res, Result::Ok);
     return true;
 }

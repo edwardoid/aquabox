@@ -19,6 +19,7 @@
 #include "relay.h"
 #include <log.h>
 #include "hardware/hardware.h"
+#include "rule.h"
 
 using namespace aquabox;
 
@@ -92,7 +93,7 @@ void Relay::turnOff()
     LOG_DEBUG << "Turned off";
 }
 
-void Relay::addPendingAction(uint64_t priority, ActionType action)
+void Relay::addPendingAction(uint64_t priority, ValueChange action)
 {
     m_pendingActions.insert({priority, action});
 }
@@ -105,7 +106,9 @@ bool Relay::performPendingAction()
 
     auto lb = m_pendingActions.lower_bound(0);
 
-    ActionType actionToPerform = ActionType::TurnOn;
+    ValueChange actionToPerform;
+    actionToPerform.property = "on";
+    actionToPerform.value = 1;
     if (lb == m_pendingActions.begin()) {
         actionToPerform = m_pendingActions.rbegin()->second;
     } else {
@@ -117,21 +120,15 @@ bool Relay::performPendingAction()
 
     m_pendingActions.clear();
 
-    if ((actionToPerform == ActionType::TurnOn) == turnedOn())
+    if ((actionToPerform.value == 1) == turnedOn())
     {
         return false;
     }
 
-    switch(actionToPerform)
-    {
-        case ActionType::TurnOn: {
-            turnOn();
-            break;
-        }
-        case ActionType::TurnOff: {
-            turnOff();
-            break;
-        }
+    if (actionToPerform.value == 1) {
+        turnOn();
+    } else {
+        turnOff();
     }
     return true;
 }

@@ -8,6 +8,6 @@
         "vendor": "eheim"
     },
     "name": "💧Water",
-    "rulesEnabled": true,
+    "rules_enabled": true,
     "type": "thermometer"
 }

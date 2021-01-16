@@ -199,32 +199,32 @@ bool AquaBox::addRule(std::shared_ptr<Rule> &rule, bool replace)
 
     bool replaceError = false;
 
-    if (m_rules.on(rule->getId(), [this, rule, &beforeUpdate, replace, &replaceError](auto &k, auto &v) {
+    if (m_rules.on(rule->id(), [this, rule, &beforeUpdate, replace, &replaceError](auto &k, auto &v) {
             replaceError = !replace;
 
             if (!replaceError)
             {
-                v->json(beforeUpdate);
+                *v = beforeUpdate;
                 v = rule;
             }
         }))
     {
         if (replaceError)
         {
-            LOG_ERROR << "Rule " << rule->getId() << " has already beed added, and replace flag was not set";
+            LOG_ERROR << "Rule " << rule->id() << " has already beed added, and replace flag was not set";
             return false;
         };
     }
     else
     {
-        m_rules.insert(rule->getId(), rule);
+        m_rules.insert(rule->id(), rule);
     }
 
     Path p = m_rulesDir;
 
-    auto device = rule->getDevice().resolve();
+    auto device = rule->resolveDevice();
 
-    bool pathOk = p.append((std::string)(rule->getId()) + ".json");
+    bool pathOk = p.append((std::string)(rule->id()) + ".json");
     if (!pathOk)
     {
         LOG_ERROR << "Can't form path for rule. Root: " << m_rulesDir.c_str() << " formed " << p.c_str() << " error " << strerror(errno);
@@ -234,7 +234,7 @@ bool AquaBox::addRule(std::shared_ptr<Rule> &rule, bool replace)
     bool saved = rule->saveToFile(p);
     if (!saved)
     {
-        m_rules.erase(rule->getId());
+        m_rules.erase(rule->id());
     }
 
     if (saved)
@@ -263,7 +263,7 @@ bool AquaBox::removeRule(const std::string &id)
     m_rules.on<std::shared_ptr<Device>>(
         id, [this](auto id, auto rule) {
             postUpdate(std::make_shared<RuleDeletedEvent>(rule));
-            return rule->getDevice().resolve();
+            return rule->resolveDevice();
         },
         device);
 

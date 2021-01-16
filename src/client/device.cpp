@@ -34,13 +34,13 @@ void to_json(nlohmann::json& j, const Device& d) {
             { "name", d.name() },
             { "index", d.index() },
             { "address", d.address() },
-            { "rulesEnabled", d.rulesEnabled() },
+            { "rules_nabled", d.rulesEnabled() },
             { "type", Serializable<DeviceType>::convert(d.type()) },
             { "class", Serializable<DeviceClass>::convert(d.deviceClass()) },
             { "meta", d.metadata() }
         };
-    } catch(nlohmann::detail::exception e) {
-        LOG_ERROR << "Can't serialize Device";
+    } catch(const nlohmann::detail::exception& e) {
+        LOG_ERROR << "Can't serialize Device: " << e.what();
     }
 }
 
@@ -49,7 +49,7 @@ void from_json(const nlohmann::json& j, Device& d) {
     d.setName(j.at("name"));
     d.setIndex(j.at("index"));
     d.setAddress(j.at("address"));
-    d.setRulesEnabled(j.at("rulesEnabled"));
+    d.setRulesEnabled(j.at("rules_enabled"));
     d.setType(Serializable<DeviceType>::convert((std::string)j.at("type")));
     d.setDeviceClass(Serializable<DeviceClass>::convert((std::string)j.at("class")));
     d.setMetadata(j.at("meta"));
@@ -148,7 +148,7 @@ std::vector<std::shared_ptr<Rule>> Device::rules() const
     std::vector<std::shared_ptr<Rule>> res;
 
     allRules.for_each([&res, this](auto id, auto rule) {
-        if (rule->getDevice() == m_id) {
+        if (rule->device() == m_id) {
             res.push_back(rule);
         }
     });

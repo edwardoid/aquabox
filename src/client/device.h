@@ -20,7 +20,7 @@
 
 #include <nlohmann/json.hpp>
 #include "device_type.h"
-#include "action_type.h"
+#include "value_change.h"
 #include <string>
 #include <set>
 
@@ -89,7 +89,7 @@ namespace aquabox
         virtual void turnOn() = 0;
         virtual void turnOff() = 0;
 
-        virtual void addPendingAction(uint64_t priority, ActionType action) = 0;
+        virtual void addPendingAction(uint64_t priority, ValueChange action) = 0;
         virtual bool performPendingAction() = 0;
     };
 

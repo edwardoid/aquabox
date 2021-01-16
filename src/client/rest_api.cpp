@@ -24,7 +24,6 @@
 #include "relay.h"
 #include "sensor.h"
 #include "user.h"
-#include "repeat_timeout.h"
 #include "enumerations.h"
 #include "events/update_events.h"
 #include "command_executor.h"

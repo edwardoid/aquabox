@@ -8,6 +8,6 @@
         "vendor": "daytime"
     },
     "name": "matrix 80.4",
-    "rulesEnabled": false,
+    "rules_enabled": false,
     "type": "light"
 }

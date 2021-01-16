@@ -11,7 +11,7 @@
 		"index",
 		"meta",
 		"name",
-		"rulesEnabled",
+		"rules_enabled",
 		"type"
 	],
 	"properties": {
@@ -97,9 +97,9 @@
 			],
 			"pattern": "^.*$"
 		},
-		"rulesEnabled": {
-			"$id": "#root/rulesEnabled", 
-			"title": "Rulesenabled", 
+		"rules_enabled": {
+			"$id": "#root/rules_enabled", 
+			"title": "rules_enabled", 
 			"type": "boolean",
 			"examples": [
 				true

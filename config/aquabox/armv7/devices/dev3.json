@@ -8,6 +8,6 @@
         "vendor": "jbl"
     },
     "name": "Pro Heat",
-    "rulesEnabled": true,
+    "rules_enabled": true,
     "type": "heater"
 }

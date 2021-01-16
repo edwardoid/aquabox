@@ -29,7 +29,7 @@ OnOffChangedEvent::OnOffChangedEvent(std::shared_ptr<AbstractRelay> device, std:
     setData({
         { "reason", reason },
         { "sender_full", device->name() },
-        { "action", Serializable<ActionType>::convert(device->turnedOn() ?  ActionType::TurnOff : ActionType::TurnOn) }
+        { "action", (device->turnedOn() ?  "turn_on" : "turn_off") }
     });
 
     setPropertiesUpdate({
@@ -62,28 +62,27 @@ ManualStateChangedEvent::ManualStateChangedEvent(std::shared_ptr<AbstractRelay> 
 
 RuleEnableChangedEvent::RuleEnableChangedEvent(std::shared_ptr<Rule> rule)
 {
-    setSender(rule->getId(), "rule");
+    setSender(rule->id(), "rule");
     setData({
-        { "sender_full", rule->getName().Value },
-        { "device", rule->getDevice().Value }
+        { "sender_full", rule->name() },
+        { "device", rule->device() },
     });
 
     setPropertiesUpdate({
-        { rule->getEnabled().name, rule->getEnabled().Value }
+        { "enabled", rule->enabled() }
     });
 }
 
 RuleCreatedEvent::RuleCreatedEvent(std::shared_ptr<Rule> rule)
 {
-    setSender(rule->getId(), "rule");
+    setSender(rule->id(), "rule");
     setData({
-        { "sender_full", rule->getName().Value },
-        { "device", rule->getDevice().Value },
+        { "sender_full", rule->name() },
+        { "device", rule->device() },
         { "action", "created"}
     });
 
-    nlohmann::json json;
-    rule->json(json);
+    nlohmann::json json = *rule;
     setPropertiesUpdate({
         { "*",  json }
     });
@@ -91,15 +90,14 @@ RuleCreatedEvent::RuleCreatedEvent(std::shared_ptr<Rule> rule)
 
 RuleUpdatedEvent::RuleUpdatedEvent(std::shared_ptr<Rule> rule, const nlohmann::json& before)
 {
-    setSender(rule->getId(), "rule");
+    setSender(rule->id(), "rule");
     setData({
-        { "sender_full", rule->getName().Value },
-        { "device", rule->getDevice().Value },
+        { "sender_full", rule->name() },
+        { "device", rule->device() },
         { "action", "updated"}
     });
 
-    nlohmann::json json;
-    rule->json(json);
+    nlohmann::json json = *rule;
 
     nlohmann::json res;
     for(auto i : json.items()) {
@@ -117,10 +115,10 @@ RuleUpdatedEvent::RuleUpdatedEvent(std::shared_ptr<Rule> rule, const nlohmann::j
 
 RuleDeletedEvent::RuleDeletedEvent(std::shared_ptr<Rule> rule)
 {
-    setSender(rule->getId(), "rule");
+    setSender(rule->id(), "rule");
     setData({
-        { "sender_full", rule->getName().Value },
-        { "device", rule->getDevice().Value },
+        { "sender_full", rule->name() },
+        { "device", rule->device() },
         { "action", "deleted"}
     });
 }
@@ -134,8 +132,7 @@ DeviceRulesChangedEvent::DeviceRulesChangedEvent(std::shared_ptr<Device> device)
 
     std::vector<nlohmann::json> rules;
     for(auto r : device->rules()) {
-        nlohmann::json ruleJson;
-        r->json(ruleJson);
+        nlohmann::json ruleJson = *r;
         rules.push_back(ruleJson);
     }
 

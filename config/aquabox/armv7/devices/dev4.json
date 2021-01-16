@@ -8,6 +8,6 @@
         "vendor": "dennerle"
     },
     "name": "CO2",
-    "rulesEnabled": true,
+    "rules_enabled": true,
     "type": "co2"
 }

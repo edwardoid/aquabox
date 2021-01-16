@@ -19,7 +19,6 @@
 #pragma once
 
 #include "device.h"
-#include "action_type.h"
 #include <map>
 
 namespace aquabox
@@ -37,9 +36,9 @@ namespace aquabox
         void turnOn();
         void turnOff();
 
-        void addPendingAction(uint64_t priority, ActionType action);
+        void addPendingAction(uint64_t priority, ValueChange action);
         bool performPendingAction();
     private:
-        std::map<int64_t, ActionType> m_pendingActions;
+        std::map<int64_t, ValueChange> m_pendingActions;
     };
 }

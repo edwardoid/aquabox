@@ -17,58 +17,139 @@
  */
 
 #include "rule.h"
-#include "log.h"
+#include <log.h>
+#include "aquabox.h"
 #include <fstream>
+
+namespace aquabox
+{
+
+void to_json(nlohmann::json& j, const Rule& r)
+{
+    j["id"] = r.id();
+    j["name"] = r.name();
+    j["index"] = r.index();
+    j["device"] = r.device();
+    j["enabled"] = r.enabled();
+    j["created_at"] = r.createdAt();
+    j["last_run"] = r.lastRun();
+    j["delete_after"] = (uint64_t) r.deleteAfter();
+    j["actions"] = r.actions();
+}
+
+void from_json(const nlohmann::json& j, Rule& r)
+{
+    try{
+        r.setId(j.at("id"));
+        r.setName(j.at("name"));
+        r.setIndex(j.at("index"));
+        r.setDevice(j.at("device"));
+        r.setEnabled(j.at("enabled"));
+        r.setCreatedAt(j.at("created_at"));
+        r.setLastRun(j.at("last_run"));
+        r.setDeleteAfter((std::time_t)j.at("delete_after"));
+        r.setActions(j.at("actions"));
+    } catch(const nlohmann::detail::exception& e) {
+        LOG_ERROR << "Can't serialize Rule: " << e.what();
+    }
+}
+}
 
 using namespace aquabox;
 
-Rule::Rule()
-    : ClassProperty("-class Rule", {&m_Id, &m_Name, &m_Index, &m_Device, &m_Enabled,&m_CreatedAt, &m_LastRunAt, &m_Repeat, &m_Actions} , false)
-    , m_Id("id")
-    , m_Name("name")
-    , m_Index("index", false)
-    , m_Device("device")
-    , m_Enabled("enabled")
-    , m_CreatedAt("created_at")
-    , m_LastRunAt("lastRun", false)
-    , m_Repeat("repeat")
-    , m_Actions("actions")
-{}
-
-Rule::Rule(const Rule& src)
-    : Rule()
+const std::string& Rule::id() const
 {
-    *this = src;
+    return m_id;
 }
 
-Rule::Rule(Rule&& src)
-    : Rule()
+void Rule::setId(const std::string& id)
 {
-    moveData(src);
-    moveProperty(Id);
-    moveProperty(Name);
-    moveProperty(Index);
-    moveProperty(Device);
-    moveProperty(Enabled);
-    moveProperty(CreatedAt);
-    moveProperty(LastRunAt);
-    moveProperty(Repeat);
-    moveProperty(Actions);
+    m_id = id;
 }
-        
-const Rule& Rule::operator = (const Rule& src)
+
+const std::string& Rule::name() const
 {
-    copyData(src);
-    copyProperty(Id);
-    copyProperty(Name);
-    copyProperty(Index);
-    copyProperty(Device);
-    copyProperty(Enabled);
-    copyProperty(CreatedAt);
-    copyProperty(LastRunAt);
-    copyProperty(Repeat);
-    copyProperty(Actions);
-    return *this;
+    return m_name;
+}
+
+void Rule::setName(const std::string& name)
+{
+    m_name = name;
+}
+
+uint32_t Rule::index() const
+{
+    return m_index;
+}
+
+void Rule::setIndex(const uint32_t index)
+{
+    m_index = index;
+}
+
+const std::string& Rule::device() const
+{
+    return m_device;
+}
+
+void Rule::setDevice(const std::string& device)
+{
+    m_device = device;
+}
+
+std::shared_ptr<class Device> Rule::resolveDevice() const
+{
+    return Singleton<AquaBox>::get()->devices().get(m_device, nullptr);
+}
+
+bool Rule::enabled() const
+{
+    return m_enabled;
+}
+
+void Rule::setEnabled(bool enabled)
+{
+    m_enabled = enabled;
+}
+
+uint32_t Rule::createdAt() const
+{
+    return m_createdAt;
+}
+
+void Rule::setCreatedAt(uint32_t createdAt)
+{
+    m_createdAt = createdAt;
+}
+
+uint32_t Rule::lastRun() const
+{
+    return m_lastRun;
+}
+
+void Rule::setLastRun(uint32_t lastRun)
+{
+    m_lastRun = lastRun;
+}
+
+std::time_t Rule::deleteAfter() const
+{
+    return m_deleteAfter;
+}
+
+void Rule::setDeleteAfter(std::time_t deleteAfter)
+{
+    m_deleteAfter = deleteAfter;
+}
+
+const std::vector<ValueChange>& Rule::actions() const
+{
+    return m_actions;
+}
+
+void Rule::setActions(const std::vector<ValueChange>& actions)
+{
+    m_actions = actions;
 }
 
 
@@ -84,17 +165,14 @@ bool Rule::parseFile(const std::string& file)
     try {
         nlohmann::json root = nlohmann::json::parse(content);
 
-        if(!parse(root)) {
-            LOG_ERROR << "Rule from " << file << " can not be parsed!";
-            return false; 
-        }
+        *this = root;
     }
     catch (nlohmann::detail::parse_error &e) {
         LOG_ERROR << "Can't parse rule file because " << e.what();
     }
 
-    if(nullptr == m_Device.resolve()) {
-        LOG_ERROR << "Device " << m_Device.Value << " can not be found";
+    if(nullptr == resolveDevice()) {
+        LOG_ERROR << "Device " << m_device << " can not be found";
         return false;
     }
     return true;
@@ -107,8 +185,7 @@ bool Rule::saveToFile(const std::string& file)
         LOG_ERROR << "Can't write to " << file << strerror(errno);
         return false;
     }
-    nlohmann::json data;
-    json(data);
+    nlohmann::json data = *this;
     os << data.dump(4);
     os.flush();
     os.close();

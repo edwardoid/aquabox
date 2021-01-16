@@ -19,9 +19,9 @@
 #pragma once
 
 #include <string>
-#include "repeat_timeout.h"
-#include "action.h"
-#include "time.h"
+#include <vector>
+#include <nlohmann/json.hpp>
+#include "value_change.h"
 #include "device_reference.h"
 #include "enumerations.h"
 #include "property.h"
@@ -52,26 +52,56 @@ namespace aquabox
         }
     */
 
-    class Rule: public ClassProperty
+    class Rule
     {
     public:
-        Rule();
-
-        Rule(const Rule& src);
-        Rule(Rule&& src);
-        const Rule& operator = (const Rule& src);
+        Rule() = default;
+        ~Rule() = default;
 
         bool parseFile(const std::string& file);
         bool saveToFile(const std::string& file);
 
-        property(Id, StringProperty)
-        property(Name, StringProperty)
-        property(Index, UnsignedNumberProperty)
-        property(Device, DeviceReference)
-        property(Enabled, BooleanProperty)
-        property(CreatedAt, Time)
-        property(LastRunAt, Time)
-        property(Repeat, RepeatTimeout)
-        property(Actions, ClassArrayProperty<Action>)
+        const std::string& id() const;
+        void setId(const std::string& id);
+ 
+        const std::string& name() const;
+        void setName(const std::string& name);
+
+        uint32_t index() const;
+        void setIndex(const uint32_t index);
+
+        const std::string& device() const;
+        void setDevice(const std::string& device);
+        std::shared_ptr<class Device> resolveDevice() const;
+
+        bool enabled() const;
+        void setEnabled(bool enabled);
+
+        uint32_t createdAt() const;
+        void setCreatedAt(uint32_t createdAt);
+
+        uint32_t lastRun() const;
+        void setLastRun(uint32_t lastRun);
+
+        std::time_t deleteAfter() const;
+        void setDeleteAfter(std::time_t deleteAfter);
+
+        const std::vector<ValueChange>& actions() const;
+        void setActions(const std::vector<ValueChange>& actions);
+
+    private:
+        std::string m_id;
+        std::string m_name;
+        uint32_t m_index;
+        std::string m_device;
+        bool m_enabled;
+        bool m_available;
+        uint32_t m_createdAt;
+        uint32_t m_lastRun;
+        std::time_t m_deleteAfter;
+        std::vector<ValueChange> m_actions;
     };
+
+    void to_json(nlohmann::json& j, const Rule& r);
+    void from_json(const nlohmann::json& j, Rule& r);
 }
