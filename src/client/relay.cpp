@@ -130,5 +130,6 @@ bool Relay::performPendingAction()
     } else {
         turnOff();
     }
+    
     return true;
 }

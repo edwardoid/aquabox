@@ -18,23 +18,18 @@
 
 #pragma once
 
-#include "bus.h"
+#include "hermes_bus.h"
 #include <thread>
 #include <memory>
 #include <map>
 
 namespace aquabox
 {
-    class SocketBus: public Bus
+    class SocketBus: public HermesBus
     {
     public:
         SocketBus();
-        std::shared_ptr<Hardware> hw(const std::string& hw);
     private:
-        void run();
-        void newClientConnection(int socket);
-    private:
-        std::thread m_thread;
-        std::map<int, std::shared_ptr<class HermesHardware>> m_master;
+        virtual void loop() override;
     };
 }

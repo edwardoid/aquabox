@@ -42,6 +42,7 @@ target_link_libraries(${PROJECT_NAME} dbus::dbus)
 target_link_libraries(${PROJECT_NAME} libserial::libserial)
 target_link_libraries(${PROJECT_NAME} dl)
 target_link_libraries(${PROJECT_NAME} rt)
+target_link_libraries(${PROJECT_NAME} rf24meshgw)
 
 
 set_target_properties(${PROJECT_NAME}

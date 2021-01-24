@@ -36,28 +36,11 @@ using namespace aquabox;
 
 SocketBus::SocketBus()
 {
-    Singleton<HermesIncubator>::i()->ready.connect([this](int id, std::shared_ptr<HermesMaster> master) {
-        LOG_DEBUG << "Slave " << master->serial().to_string() << " index " << id << " is ready";
-        if (m_master.find(id) != m_master.end()) {
-            m_master[id]->setMaster(master);
-        }
-    });
-
-    Singleton<HermesIncubator>::i()->dead.connect([this](int id, std::shared_ptr<HermesMaster> master) {
-        LOG_DEBUG << "Slave " << master->serial().to_string() << " index " << id << " is dead";
-        if (m_master.find(id) != m_master.end()) {
-            m_master.erase(id);
-        }
-    });
-
-    m_thread = std::thread([this] { run(); });
-    m_thread.detach();
-
-    signal(SIGPIPE, SIG_IGN);
 }
 
-void SocketBus::run()
+void SocketBus::loop()
 {
+    signal(SIGPIPE, SIG_IGN);
     int parentfd = ::socket(AF_INET, SOCK_STREAM, 0);
     if (parentfd < 0) {
         LOG_ERROR << "Can't open socket";
@@ -114,32 +97,6 @@ void SocketBus::run()
             LOG_INFO << "Got new slave connection!";
         }
 
-        newClientConnection(childfd);
+        newConnection(std::make_shared<UNIXSocketIO>(childfd));
     }
-}
-
-std::shared_ptr<Hardware> SocketBus::hw(const std::string& hw)
-{
-    for(auto m : m_master)
-    {
-        if (m.second != nullptr && 
-            m.second->master() != nullptr &&
-            m.second->master()->serial().to_string() == hw) {
-            return m.second;
-        } else {
-            LOG_DEBUG << "Hermes slave is not ready";
-        }
-    }
-
-    return nullptr;
-}
-
-void SocketBus::newClientConnection(int socket)
-{
-    auto master = std::make_shared<HermesMaster>(
-            std::make_shared<UNIXSocketIO>(socket)
-    );
-    auto hw = std::make_shared<HermesHardware>(master);
-    auto id = Singleton<HermesIncubator>::i()->incubate(master);
-    m_master[id] = hw;
 }

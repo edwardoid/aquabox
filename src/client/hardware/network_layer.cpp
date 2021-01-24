@@ -19,16 +19,31 @@
 #include "network_layer.h"
 #include "mqtt_bus.h"
 #include "socket_bus.h"
+#include "mesh_bus.h"
 #include <unordered_map>
 
 using namespace aquabox;
 
+struct AvailableBuses
+{
+    static std::unordered_map<std::string, std::shared_ptr<Bus> > buses() {
+        static std::unordered_map<std::string, std::shared_ptr<Bus> > buses({
+            { "MQTT", std::make_shared<Mqtt>() },
+            { "SCT", std::make_shared<SocketBus>() },
+            { "NRF", std::make_shared<MeshBus>() }
+        });
+        return buses;
+    }
+};
+
+void NetworkLayer::prepare()
+{
+    AvailableBuses::buses();
+}
+
 std::shared_ptr<Bus> NetworkLayer::bus(const std::string& bus)
 {
-    static std::unordered_map<std::string, std::shared_ptr<Bus> > buses({
-        { "MQTT", std::make_shared<Mqtt>() },
-        { "SCT", std::make_shared<SocketBus>() }
-    });
-
-    return buses.find(bus) == buses.end() ? nullptr : buses[bus];
+    return AvailableBuses::buses().find(bus) == AvailableBuses::buses().end()
+                ? nullptr
+                : AvailableBuses::buses()[bus];
 }

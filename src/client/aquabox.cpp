@@ -37,6 +37,7 @@
 #include "global_timer.h"
 #include "rules_timer.h"
 #include "cloud.h"
+#include "hardware/network_layer.h"
 #include <singleton.h>
 #include <pstream.h>
 #include <exception>
@@ -97,14 +98,20 @@ int AquaBox::start()
     procPath += std::to_string(static_cast<int>(getpid()));
     procPath += "/exe";
 
-    char cwd[1024];
-    memset(cwd, '\0', 1024);
+    char exePath[1024];
+    memset(exePath, '\0', 1024);
 
-    int bytes = std::min<size_t>(readlink(procPath.c_str(), cwd, 1024), 1024 - 1);
+    int bytes = std::min<size_t>(readlink(procPath.c_str(), exePath, 1024), 1024 - 1);
     if (bytes >= 0)
     {
-        cwd[bytes] = '\0';
+        exePath[bytes] = '\0';
     }
+
+    std::string cwd = exePath;
+
+    auto pos = cwd.find_last_of('/');
+    if (pos > 0)
+        cwd.erase(pos);
 
     m_wd = Settings::string(Settings::Keys::WORKING_DIRECTORY, cwd);
     if (!m_wd.normalize())
@@ -122,6 +129,8 @@ int AquaBox::start()
             LOG_INFO << "Changed working direcotry to " << m_wd;
         }
     }
+
+    NetworkLayer::prepare();
 
     readDevices(m_wd);
     readRules(m_wd);

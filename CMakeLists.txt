@@ -112,6 +112,7 @@ set(HEADER_SEARCH_PATHS ${PROJECT_INCLUDE_DIR} ${PLOG_INCLUDE_DIR})
 set(S2S_INCLUDE_DIR "${PROJECT_SOURCE_DIR}/3dp/s2s")
 set(NM_DBUS_INCLUDE_DIR "${PROJECT_SOURCE_DIR}/3dp/nm-dbus/include")
 set(LIBSTATS_INCLUDE_DIR "${PROJECT_SOURCE_DIR}/3dp/libstats/include")
+set(RF24_INCLUDE_DIR "${PROJECT_SOURCE_DIR}/3dp/rf24/include")
 set(AQUABOX_ROOT_DIR ${CMAKE_CURRENT_LIST_DIR})
 
 add_definitions(-DBOOST_STACKTRACE_USE_ADDR2LINE)
@@ -139,6 +140,7 @@ include_directories(${SWS_WS_INCLUDE_DIR})
 include_directories(${PSTREAMS_INCLUDE_DIR})
 include_directories(${S2S_INCLUDE_DIR})
 include_directories(${LIBSTATS_INCLUDE_DIR})
+include_directories(${RF24_INCLUDE_DIR})
 
 include_directories(${FB_INCLUDE_DIR})
 include_directories(${OWT_INCLUDE_DIR})
@@ -149,6 +151,7 @@ add_subdirectory("${THREE_DP_DIR}/libfb")
 add_subdirectory("${THREE_DP_DIR}/owt")
 add_subdirectory("${THREE_DP_DIR}/nm-dbus")
 add_subdirectory("${THREE_DP_DIR}/libstats")
+add_subdirectory("${THREE_DP_DIR}/rf24")
 
 execute_process(
   COMMAND git log -1 --format=%H

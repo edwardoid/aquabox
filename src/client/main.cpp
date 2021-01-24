@@ -30,6 +30,27 @@
 
 int main(int argc, char** argv)
 {
+    std::string procPath = "/proc/";
+    procPath += std::to_string(static_cast<int>(getpid()));
+    procPath += "/exe";
+
+    char exePath[1024];
+    memset(exePath, '\0', 1024);
+
+    int bytes = std::min<size_t>(readlink(procPath.c_str(), exePath, 1024), 1024 - 1);
+    if (bytes >= 0)
+    {
+        exePath[bytes] = '\0';
+    }
+
+    std::string cwd = exePath;
+
+    auto pos = cwd.find_last_of('/');
+    if (pos > 0)
+        cwd.erase(pos);
+
+    chdir(cwd.c_str());
+    
     aquabox::Settings::setDomain("aquabox");
 
     bool handleSignals = true;
