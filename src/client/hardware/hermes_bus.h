@@ -19,6 +19,7 @@
 #pragma once
 
 #include "bus.h"
+#include "hermes_master.h"
 #include <thread>
 #include <memory>
 #include <map>
@@ -33,11 +34,14 @@ namespace aquabox
     class HermesBus: public Bus
     {
     public:
-        HermesBus();
+        HermesBus(const std::string& address);
+        virtual ~HermesBus();
+        void start();
         std::shared_ptr<Hardware> hw(const std::string& hw) override;
     protected:
         virtual void loop() = 0;
-        virtual void newConnection(std::shared_ptr<proto::MessageIO> io);
+        virtual void newConnection(std::shared_ptr<proto::MessageIO> io, const HermesSerial& serial);
+        virtual void reconnected(const HermesSerial& serial);
     private:
         std::thread m_thread;
         std::map<int, std::shared_ptr<class HermesHardware>> m_master;

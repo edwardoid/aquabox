@@ -28,7 +28,8 @@ namespace aquabox
     class MeshBus: public HermesBus
     {
     public:
-        MeshBus();
+        MeshBus(const std::string& address);
+        virtual ~MeshBus();
     private:
         virtual void loop() override;
     };

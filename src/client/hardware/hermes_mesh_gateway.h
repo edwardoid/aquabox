@@ -3,6 +3,7 @@
 #include <vector>
 #include "RF24.h"
 #include "RF24Mesh.h"
+#include "hermes_master.h"
 #include <list>
 #include <unordered_map>
 #include "message.h"
@@ -18,15 +19,18 @@ namespace aquabox
     class HermesMeshIO : public proto::MessageIO
     {
     public:
-        HermesMeshIO();
+        HermesMeshIO(class HermesMeshGateway* gateway);
         virtual bool good() const override;
         virtual proto::buffer_length_t available() const override;
-        virtual bool makeRequest(const proto::Message& req, proto::Message& rsp) override;
         virtual proto::buffer_length_t read(proto::buffer_length_t sz, proto::byte_t* buffer) override;
         virtual proto::buffer_length_t write(const proto::byte_t* buffer, proto::buffer_length_t sz) override;
+        virtual proto::buffer_length_t wait(proto::buffer_length_t length) const;
 
         void newMessage(const RF24NetworkHeader& header, const proto::Message& msg);
-    private:
+        void clear();
+    protected:
+        friend class HermesMeshGateway;
+        class HermesMeshGateway* m_gateway;
         uint16_t m_lastId;
         std::vector<proto::Message> m_messages;
     };
@@ -38,23 +42,27 @@ namespace aquabox
         void lock() const;
         void unlock() const;
 
-        using serial_t = std::array<uint8_t, SERIAL_LEN>;
         struct serial_hasher
         {
-            size_t operator()(const serial_t& serial) const {
+            size_t operator()(const HermesSerial& serial) const {
                 return *(reinterpret_cast<const uint64_t*>(serial.data()));
             }
         };
 
-        SignalSlot::Signal<std::shared_ptr<HermesMeshIO>> newConnection;
+        SignalSlot::Signal<HermesSerial> reconnected;
+        SignalSlot::Signal<std::shared_ptr<HermesMeshIO>, const HermesSerial&> newConnection;
+        void remove(const HermesSerial& serial);
         void run();
     protected:
+        bool isAlive(uint16_t from);
+        bool write(uint16_t from, const proto::byte_t* buffer, proto::buffer_length_t sz);
         void handle(RF24NetworkHeader& header);
         inline RF24Network& network() { return m_network; }
         inline RF24Mesh& mesh() { return m_mesh; }
         void loop(bool processAll = true);
         bool waitForNext(std::chrono::seconds& timeout);
         void wait();
+
         friend class HermesMeshIO;
         
     private:
@@ -63,6 +71,6 @@ namespace aquabox
         RF24 m_radio;
         RF24Network m_network;
         RF24Mesh m_mesh;
-        std::unordered_map<serial_t, std::shared_ptr<HermesMeshIO> , serial_hasher> m_clients;
+        std::unordered_map<HermesSerial, std::shared_ptr<HermesMeshIO> , serial_hasher> m_clients;
     };
 } // namespace aquabox

@@ -22,6 +22,7 @@
 #include <map>
 #include <set>
 #include <mutex>
+#include <functional>
 
 namespace aquabox
 {
@@ -58,13 +59,27 @@ namespace aquabox
 
         ValueT &at(const KeyT &key) const
         {
-            std::lock_guard<Lock> lock(*this);
+            LockableAssociativeContainer* l = const_cast<LockableAssociativeContainer*>(this);
+            std::lock_guard<Lock> lock(*l);
             return m_container.at(key);
         }
         bool has(const KeyT &key) const
         {
-            std::lock_guard<Lock> lock(*this);
+            LockableAssociativeContainer* l = const_cast<LockableAssociativeContainer*>(this);
+            std::lock_guard<Lock> lock(*l);
             return m_container.find(key) != m_container.cend();
+        }
+        bool has(std::function<bool(const ValueT&)> filter) const
+        {
+            LockableAssociativeContainer* l = const_cast<LockableAssociativeContainer*>(this);
+            std::lock_guard<Lock> lock(*l);
+            for (auto &it : m_container)
+            {
+                if(filter(it.second)) {
+                    return true;
+                }
+            }
+            return false;
         }
         void for_each(std::function<void(const KeyT &, ValueT &)> cb)
         {

@@ -22,6 +22,11 @@
 
 using namespace aquabox;
 
+HermesSerial::HermesSerial()
+{
+    memset(data(), 0, SERIAL_LEN);
+}
+
 HermesSerial::HermesSerial(const proto::byte_t serial[])
 {
     memcpy(data(), serial, SERIAL_LEN);
@@ -39,6 +44,19 @@ std::string HermesSerial::to_string() const
     return ss.str();
 }
 
+
+bool HermesSerial::isValid() const
+{
+    for(int i = 0; i < SERIAL_LEN; ++i)
+    {
+        if(at(i) != 0) {
+            return true;
+        }
+    }
+
+    return false;
+}
+
 HermesMaster::HermesMaster(std::shared_ptr<proto::MessageIO> io)
     : proto::Master(io.get())
     , m_io(io)
@@ -48,6 +66,11 @@ HermesMaster::HermesMaster(std::shared_ptr<proto::MessageIO> io)
 HermesSerial HermesMaster::serial() const
 {
     return HermesSerial(m_serial);
+}
+
+void HermesMaster::setSerial(const HermesSerial& newSerial)
+{
+    memcpy(m_serial, newSerial.data(), SERIAL_LEN);
 }
 
 bool HermesMaster::isConnected() const
@@ -63,3 +86,66 @@ bool HermesMaster::isConnected() const
     }
     return false;
 }
+
+
+bool HermesMaster::getPropertyData(const char *property, proto::GetValueData &value)
+{
+    if (m_caching)
+    {
+        auto pos = m_properties.find(property);
+                       
+        if(pos == m_properties.end() ||
+           (std::chrono::system_clock::now() - pos->second.lastAccess > std::chrono::seconds(1)))
+        {
+            if(!proto::Master::getPropertyData(property, value)) {
+                return false;
+            }
+            m_properties[property].lastAccess = std::chrono::system_clock::now();
+            m_properties[property].value = value;
+        }
+        value = m_properties[property].value;
+        return true;
+    }
+
+    return proto::Master::getPropertyData(property, value);
+}
+
+bool HermesMaster::setPropertyData(const char *property, const proto::SetValueData &value)
+{
+    if(!proto::Master::setPropertyData(property, value)) {
+        m_properties.erase(property);
+        return false;
+    }
+
+    if (m_caching)
+    {
+        auto pos = m_properties.find(property);
+                       
+        if(pos != m_properties.end())
+        {
+            pos->second.value = static_cast<const proto::ValueData>(value);
+        }
+    }
+    return true;
+}
+
+template <>
+bool proto::Master::getProperty<std::string>(const char *property, std::string &value)
+{
+    char raw[32];
+    memset(raw, '\0', 32);
+    const char* p = raw;
+    if(getProperty(property, p)) {
+        value = raw;
+        return true;
+    }
+    return false;
+}
+
+template <>
+bool proto::Master::setProperty<std::string>(const char *property, const std::string &value)
+{
+    char* raw = const_cast<char*>(value.c_str());
+    return setProperty<const char*>(property, value.c_str());
+}
+

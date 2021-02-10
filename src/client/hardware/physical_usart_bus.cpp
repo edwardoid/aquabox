@@ -23,6 +23,13 @@
 
 using namespace aquabox;
 
+PhysicalUSARTBus::PhysicalUSARTBus(const std::string& address)
+    : Bus(address)
+{}
+
+PhysicalUSARTBus::~PhysicalUSARTBus()
+{}
+
 std::shared_ptr<Hardware> PhysicalUSARTBus::hw(const std::string& hw)
 {
     return nullptr;

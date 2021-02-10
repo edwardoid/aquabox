@@ -23,11 +23,18 @@
 
 using namespace aquabox;
 
+Layer::Layer(const std::string& address)
+    : m_address(address)
+{}
+
+Layer::~Layer()
+{}
+
 std::shared_ptr<Layer> Layer::get(const std::string& layer)
 {
     static std::unordered_map<std::string, std::shared_ptr<Layer>> availableLayers({
-        { "PHY", std::make_shared<Physical>() },
-        { "NET", std::make_shared<NetworkLayer>() }
+        { "PHY", std::make_shared<Physical>(std::string("PHY:")) },
+        { "NET", std::make_shared<NetworkLayer>(std::string("NET:")) }
     });
 
     auto pos = availableLayers.find(layer);

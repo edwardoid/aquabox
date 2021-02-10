@@ -25,13 +25,20 @@
 
 using namespace aquabox;
 
+Physical::Physical(const std::string& address)
+    : Layer(address)
+{}
+
+Physical::~Physical()
+{}
+
 std::shared_ptr<Bus> Physical::bus(const std::string& bus)
 {
     static std::unordered_map<std::string, std::shared_ptr<Bus> > availableBuses({
-        { "GPIO", std::make_shared<PhysicalGPIOBus>() },
-        { "MOCK_GPIO", std::make_shared<MockGPIOBus>() },
-        { "1W", std::make_shared<PhysicalOneWireBus>() },
-        { "SERIAL", std::make_shared<PhysicalUSARTBus>() }
+        { "GPIO", std::make_shared<PhysicalGPIOBus>(m_address + ":GPIO") },
+        { "MOCK_GPIO", std::make_shared<MockGPIOBus>(m_address + ":MOCK_GPIO") },
+        { "1W", std::make_shared<PhysicalOneWireBus>(m_address + ":1W") },
+        { "SERIAL", std::make_shared<PhysicalUSARTBus>(m_address + ":SERIAL") }
     });
 
     auto p = availableBuses.find(bus);

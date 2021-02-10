@@ -21,6 +21,10 @@
 
 using namespace aquabox;
 
+HermesIncubator::HermesObjectInfo::HermesObjectInfo()
+    : lastRequest(std::chrono::seconds(10))
+{}
+
 HermesIncubator::HermesIncubator()
 {
     m_routine = std::thread(std::bind(&HermesIncubator::routine, this));
@@ -31,11 +35,19 @@ int HermesIncubator::incubate(std::shared_ptr<HermesMaster> obj)
 {
     static int idx = 0;
     std::lock_guard<std::mutex> lock(m_mx);
+    if (obj->serial().isValid()) {
+        for(int i = 0; i < m_objects.size(); ++i) {
+            if(m_objects[i].object->serial() == obj->serial()) {
+                dead(m_objects[i].id, m_objects[i].object);
+                m_objects.erase(m_objects.begin() + i);
+                break;
+            }
+        }
+    }
     HermesObjectInfo info;
     info.id = ++idx;
     info.object = obj;
     info.state = ObjectInfoState::Incubating;
-    info.tp = std::chrono::high_resolution_clock::now();
     m_objects.push_back(info);
     LOG_DEBUG << "Added new hermes slave for incubation with index " << info.id;
     return info.id;
@@ -43,13 +55,10 @@ int HermesIncubator::incubate(std::shared_ptr<HermesMaster> obj)
 
 void HermesIncubator::routine()
 {
-    int round = 0;
     while(1) {
         std::this_thread::sleep_for(std::chrono::seconds(1));
 
         std::lock_guard<std::mutex> lock(m_mx);
-
-        ++round;
 
         if (m_objects.empty()) continue;
 
@@ -58,9 +67,11 @@ void HermesIncubator::routine()
         std::vector<size_t> toRemove;
 
         auto now = std::chrono::high_resolution_clock::now();
+        static int iter = 0;
+        ++iter;
         for(size_t i = 0; i < m_objects.size(); ++i) {
             HermesObjectInfo& obj = m_objects[i];
-            LOG_DEBUG << "Processing slave with state " << obj.state; 
+            LOG_DEBUG << "Polling " << m_objects.size() << " hermes slaves";
             if (obj.state == Incubating) {
                 std::lock_guard<HermesMaster> objLock(*obj.object);
                 if (obj.object->hasIncomingMessage()) {
@@ -75,19 +86,25 @@ void HermesIncubator::routine()
                         readyObjects.push_back(obj);
                         obj.state = ObjectInfoState::Ready;
                     }
-                } else if ((now - obj.tp) > std::chrono::seconds(10)) {
+                    obj.lastRequest.reset();
+                } else if (obj.lastRequest.expired()) {
                     LOG_DEBUG << "Waiting for handshake message";
                     deadObjects.push_back(obj);
                     obj.state = ObjectInfoState::Dead;
+                    obj.lastRequest.reset();
                     toRemove.push_back(i);
                 }
             } else if (obj.state == Ready) {
-                if (round % 10 == 0) {
+                if (obj.lastRequest.expired()) {
+                    LOG_DEBUG << "Checking if slave " << obj.id << " is connected";
+                    obj.lastRequest.reset();
                     std::lock_guard<HermesMaster> objLock(*obj.object);
                     if (!obj.object->isConnected()) {
                         deadObjects.push_back(obj);
                         obj.state = ObjectInfoState::Dead;
                         toRemove.push_back(i);
+                    } else {
+                        obj.lastRequest.reset();
                     }
                 }
             }

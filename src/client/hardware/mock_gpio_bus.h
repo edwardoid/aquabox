@@ -24,6 +24,8 @@ namespace aquabox
     class MockGPIOBus: public Bus
     {
     public:
+        MockGPIOBus(const std::string& address);
+        virtual ~MockGPIOBus();
         std::shared_ptr<Hardware> hw(const std::string& hw) override;
     };
 }

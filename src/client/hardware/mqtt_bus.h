@@ -23,10 +23,11 @@
 
 namespace aquabox
 {
-    class Mqtt: public Bus
+    class MQTTBus: public Bus
     {
     public:
-        Mqtt();
+        MQTTBus(const std::string& address);
+        virtual ~MQTTBus();
         virtual std::shared_ptr<Hardware> hw(const std::string& hw) override;
     private:
         MQTTBroker m_broker;

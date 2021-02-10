@@ -26,7 +26,7 @@ namespace aquabox
     struct ValueChange
     {
         std::string property;
-        std::time_t when;
+        uint64_t when = 0;
         double value;
     };
 

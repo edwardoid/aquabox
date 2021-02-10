@@ -38,17 +38,18 @@ using namespace aquabox::proto;
 UNIXSocketIO::UNIXSocketIO(int sc)
 {
     m_sfd = sc;
-    
+
     //int flags = fcntl(m_sfd, F_GETFL, 0);
     //fcntl(m_sfd, F_SETFL, flags & ~O_NONBLOCK);
 
-    struct timeval timeout;      
+    struct timeval timeout;
     timeout.tv_sec = 1;
     timeout.tv_usec = 500;
 
-    m_good = setsockopt (m_sfd, SOL_SOCKET, SO_RCVTIMEO, (char *)&timeout, sizeof(timeout)) >= 0 &&
-             setsockopt (m_sfd, SOL_SOCKET, SO_SNDTIMEO, (char *)&timeout, sizeof(timeout)) >= 0;
-    if (!m_good) {
+    m_good = setsockopt(m_sfd, SOL_SOCKET, SO_RCVTIMEO, (char *)&timeout, sizeof(timeout)) >= 0 &&
+             setsockopt(m_sfd, SOL_SOCKET, SO_SNDTIMEO, (char *)&timeout, sizeof(timeout)) >= 0;
+    if (!m_good)
+    {
         LOG_ERROR << "Can't set socket options!";
     }
 }
@@ -65,22 +66,26 @@ bool UNIXSocketIO::good() const
 
 buffer_length_t UNIXSocketIO::wait(buffer_length_t length) const
 {
-    if (!m_good) {
+    if (!m_good)
+    {
         return 0;
     }
-    if (m_buffer.size() >= length) {
+    if (m_buffer.size() >= length)
+    {
         return length;
     }
     buffer_length_t remain = length - m_buffer.size();
     buffer_length_t avail = available();
-    if (avail > remain) {
+    if (avail > remain)
+    {
         remain = avail;
     }
     m_buffer.resize(m_buffer.size() + remain);
-    
+
     int count = ::read(m_sfd, m_buffer.data() + (m_buffer.size() - remain), remain);
-    
-    if (count < 0) {
+
+    if (count < 0)
+    {
         m_good = false;
     }
 
@@ -90,7 +95,7 @@ buffer_length_t UNIXSocketIO::wait(buffer_length_t length) const
 buffer_length_t UNIXSocketIO::available() const
 {
     int count;
-    if(ioctl(m_sfd, FIONREAD, &count) < 0)
+    if (ioctl(m_sfd, FIONREAD, &count) < 0)
     {
         m_good = false;
         return 0;
@@ -107,13 +112,15 @@ buffer_length_t UNIXSocketIO::write(const byte_t *buffer, buffer_length_t sz)
 
 buffer_length_t UNIXSocketIO::read(buffer_length_t sz, byte_t *buffer)
 {
-    if (m_buffer.size() < sz) {
+    if (m_buffer.size() < sz)
+    {
         buffer_length_t remain = sz - m_buffer.size();
         wait(remain);
     }
 
-    buffer_length_t len = sz > m_buffer.size() ? m_buffer.size() : sz; 
-    if (len > 0) {
+    buffer_length_t len = sz > m_buffer.size() ? m_buffer.size() : sz;
+    if (len > 0)
+    {
         memcpy(buffer, m_buffer.data(), len);
         m_buffer.erase(m_buffer.begin(), m_buffer.begin() + len);
     }
@@ -122,9 +129,8 @@ buffer_length_t UNIXSocketIO::read(buffer_length_t sz, byte_t *buffer)
 
 bool UNIXSocketIO::makeRequest(const proto::Message& req, proto::Message& rsp)
 {
-    if (m_good)
-	{
-		std::lock_guard<std::mutex> lock(m_ioMx);
+    if (m_good) {
+        std::lock_guard<std::mutex> lock(m_ioMx);
         if (m_good) {
             m_good = send(req);
             if(!m_good) {
@@ -136,5 +142,5 @@ bool UNIXSocketIO::makeRequest(const proto::Message& req, proto::Message& rsp)
         LOG_WARNING << "Can't make request, socket is disconnected";
     }
 
-	return m_good;
+    return m_good;
 }

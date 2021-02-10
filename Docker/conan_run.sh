@@ -17,6 +17,8 @@ sudo docker run --privileged \
                 -p 5556:5556 \
                 -p 8974:8974 \
                 -p 2159:2159 \
+                -p 1800:1800 \
+                -p 1883:1883 \
                 --hostname $1 \
                 -v /var/run/dbus/system_bus_socket:/var/run/dbus/system_bus_socket \
                 -v $SOURCES_DIR:/sources \

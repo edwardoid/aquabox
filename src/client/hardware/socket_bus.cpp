@@ -34,9 +34,12 @@
 
 using namespace aquabox;
 
-SocketBus::SocketBus()
-{
-}
+SocketBus::SocketBus(const std::string& address)
+    : HermesBus(address)
+{}
+
+SocketBus::~SocketBus()
+{}
 
 void SocketBus::loop()
 {
@@ -97,6 +100,8 @@ void SocketBus::loop()
             LOG_INFO << "Got new slave connection!";
         }
 
-        newConnection(std::make_shared<UNIXSocketIO>(childfd));
+        static const HermesSerial empty;
+
+        newConnection(std::make_shared<UNIXSocketIO>(childfd), empty);
     }
 }

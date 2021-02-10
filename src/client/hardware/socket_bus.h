@@ -28,7 +28,8 @@ namespace aquabox
     class SocketBus: public HermesBus
     {
     public:
-        SocketBus();
+        SocketBus(const std::string& address);
+        virtual ~SocketBus();
     private:
         virtual void loop() override;
     };

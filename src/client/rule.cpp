@@ -18,7 +18,8 @@
 
 #include "rule.h"
 #include <log.h>
-#include "aquabox.h"
+#include <singleton.h>
+#include "devices_map.h"
 #include <fstream>
 
 namespace aquabox
@@ -33,7 +34,7 @@ void to_json(nlohmann::json& j, const Rule& r)
     j["enabled"] = r.enabled();
     j["created_at"] = r.createdAt();
     j["last_run"] = r.lastRun();
-    j["delete_after"] = (uint64_t) r.deleteAfter();
+    j["delete_after"] = r.deleteAfter();
     j["actions"] = r.actions();
 }
 
@@ -47,7 +48,7 @@ void from_json(const nlohmann::json& j, Rule& r)
         r.setEnabled(j.at("enabled"));
         r.setCreatedAt(j.at("created_at"));
         r.setLastRun(j.at("last_run"));
-        r.setDeleteAfter((std::time_t)j.at("delete_after"));
+        r.setDeleteAfter(j.at("delete_after"));
         r.setActions(j.at("actions"));
     } catch(const nlohmann::detail::exception& e) {
         LOG_ERROR << "Can't serialize Rule: " << e.what();
@@ -99,7 +100,7 @@ void Rule::setDevice(const std::string& device)
 
 std::shared_ptr<class Device> Rule::resolveDevice() const
 {
-    return Singleton<AquaBox>::get()->devices().get(m_device, nullptr);
+    return Singleton<DevicesMap>::i()->get(m_device);
 }
 
 bool Rule::enabled() const
@@ -112,22 +113,22 @@ void Rule::setEnabled(bool enabled)
     m_enabled = enabled;
 }
 
-uint32_t Rule::createdAt() const
+uint64_t Rule::createdAt() const
 {
     return m_createdAt;
 }
 
-void Rule::setCreatedAt(uint32_t createdAt)
+void Rule::setCreatedAt(uint64_t createdAt)
 {
     m_createdAt = createdAt;
 }
 
-uint32_t Rule::lastRun() const
+uint64_t Rule::lastRun() const
 {
     return m_lastRun;
 }
 
-void Rule::setLastRun(uint32_t lastRun)
+void Rule::setLastRun(uint64_t lastRun)
 {
     m_lastRun = lastRun;
 }

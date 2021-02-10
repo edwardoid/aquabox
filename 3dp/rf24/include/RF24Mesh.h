@@ -41,12 +41,12 @@
 #include "RF24Mesh_config.h"
 
 #if defined (__linux) && !defined(__ARDUINO_X86__)
-  #include "RF24.h"
-  #include "RF24Network.h"
+  #include <RF24.h>
+  #include <RF24Network.h>
   #define RF24_LINUX
 #else
-  #include "RF24.h"
-  #include "RF24Network.h"
+  #include <RF24.h>
+  #include <RF24Network.h>
 #endif
 
   #include <stddef.h>
@@ -307,7 +307,7 @@ public:
   bool addrMemAllocated; /**<Just ensures we don't re-allocate the memory buffer if restarting the mesh on master **/
   #endif
   void beginDefault(); /**< Starts up the network layer with default address **/
-  bool meshStarted;
+  bool meshStarted = false;
   uint8_t getLevel(uint16_t address); /**< Returns the number of digits in the specified address **/
 
  };

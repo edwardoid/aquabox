@@ -43,7 +43,6 @@ namespace aquabox
     class ThreadPool;
     class GlobalTimer;
 
-    using DevicesMap = LockableHashMap<std::string, std::shared_ptr<Device>>;
     using RulesMap = LockableHashMap<std::string, std::shared_ptr<Rule>>;
     using UsersMap = LockableHashMap<std::string, std::shared_ptr<User>>;
 
@@ -58,10 +57,8 @@ namespace aquabox
     public:
         int start();
         ~AquaBox();
-        std::shared_ptr<Device> findDevice(const std::string& id);
         std::shared_ptr<Rule> findRule(const std::string& id);
         const Path& workingDirectory() const;
-        DevicesMap& devices() const;
         UsersMap& users() const;
         RulesMap& rules() const;
         bool addRule(std::shared_ptr<Rule>& rule, bool replace = false);
@@ -83,7 +80,6 @@ namespace aquabox
         boost::asio::thread_pool m_pool;
         plog::ColorConsoleAppender<plog::TxtFormatter> m_consoleAppender;
         plog::RollingFileAppender<plog::TxtFormatter> m_fileAppender;
-        mutable DevicesMap m_devices;
         mutable UsersMap m_users;
         mutable RulesMap m_rules;
         WebServer* m_server;

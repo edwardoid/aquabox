@@ -18,17 +18,21 @@
 
 #pragma once
 
-#include <unordered_map>
+#include "lockablemap.h"
 #include <memory>
 #include <path.h>
 
 namespace aquabox
 {
-    class Device;
-
-    class DeviceParser
+    class DevicesMap: public LockableHashMap<std::string, std::shared_ptr<class Device>>
     {
-        public:
-        static std::unordered_map<std::string, std::shared_ptr<Device>> parse(Path& root);
+    public:
+
+        DevicesMap();
+        std::set<std::string> ids() const;
+        bool hasDevice(const std::string& address) const;
+        std::string nextId() const;
+        std::string addDevice(std::shared_ptr<class Device> device, bool pending = false);
+        bool parse(Path& root);
     };
 }

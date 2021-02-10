@@ -18,6 +18,7 @@
 
 #include "command_executor.h"
 #include "aquabox.h"
+#include "devices_map.h"
 #include "settings.h"
 #include "device.h"
 #include "rule.h"
@@ -152,7 +153,7 @@ bool CommandExecutor::GetStatus()
 bool CommandExecutor::GetDevices()
 {
     std::vector<nlohmann::json> all;
-    Singleton<AquaBox>::get()->devices().for_each([this, &all](auto key, auto dev) {
+    Singleton<DevicesMap>::get()->for_each([this, &all](auto key, auto dev) {
         nlohmann::json json = *dev;
         if (dev->supports(DeviceClass::Relay))
         {
@@ -180,7 +181,7 @@ bool CommandExecutor::GetDevice()
 
     std::string id = m_cmd.getParameter(":dev");
 
-    auto dev = Singleton<AquaBox>::get()->devices().get(id, nullptr);
+    auto dev = Singleton<DevicesMap>::i()->get(id);
     if (dev == nullptr)
     {
         LOG_ERROR << "No device " << dev << " not found";
@@ -228,13 +229,14 @@ bool CommandExecutor::UpdateDevice()
         return true;
     }
 
-    bool found = Singleton<AquaBox>::get()->devices().on(id, [this, d](auto id, auto dev) {
+    bool found = Singleton<DevicesMap>::i()->on(id, [this, d](auto id, auto dev) {
         nlohmann::json before = *dev;
         if (dev->supports(DeviceClass::Relay))
         {
             before["isOn"] = std::dynamic_pointer_cast<AbstractRelay>(dev)->turnedOn();
         }
 
+        LOG_DEBUG << "Updating device " << id;
         *dev = *d;
 
         auto box = Singleton<AquaBox>::get();
@@ -416,7 +418,7 @@ bool CommandExecutor::TurnOn()
         return true;
     }
     std::string id = m_cmd.getParameter(":dev");
-    auto dev = Singleton<AquaBox>::get()->devices().get(id, nullptr);
+    auto dev = Singleton<DevicesMap>::i()->get(id);
     if (dev == nullptr)
     {
         m_cmd.response(Result::NotFound);
@@ -450,7 +452,7 @@ bool CommandExecutor::TurnOff()
         return true;
     }
     std::string id = m_cmd.getParameter(":dev");
-    auto dev = Singleton<AquaBox>::get()->devices().get(id, nullptr);
+    auto dev = Singleton<DevicesMap>::i()->get(id);
     if (dev == nullptr)
     {
         m_cmd.response(Result::NotFound);

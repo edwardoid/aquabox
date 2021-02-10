@@ -28,17 +28,30 @@ struct AvailableBuses
 {
     static std::unordered_map<std::string, std::shared_ptr<Bus> > buses() {
         static std::unordered_map<std::string, std::shared_ptr<Bus> > buses({
-            { "MQTT", std::make_shared<Mqtt>() },
-            { "SCT", std::make_shared<SocketBus>() },
-            { "NRF", std::make_shared<MeshBus>() }
+            { "MQTT", std::make_shared<MQTTBus>("NET:MQTT") },
+            { "SCT", std::make_shared<SocketBus>("NET:SCT") },
+            { "NRF", std::make_shared<MeshBus>("NET:NRF") }
         });
         return buses;
     }
 };
 
+NetworkLayer::NetworkLayer(const std::string& address)
+    : Layer(address)
+{}
+
+NetworkLayer::~NetworkLayer()
+{}
+
 void NetworkLayer::prepare()
 {
-    AvailableBuses::buses();
+    for(auto& b : AvailableBuses::buses())
+    {
+        auto hb = std::dynamic_pointer_cast<HermesBus>(b.second);
+        if (hb) {
+            hb->start();
+        }
+    }
 }
 
 std::shared_ptr<Bus> NetworkLayer::bus(const std::string& bus)

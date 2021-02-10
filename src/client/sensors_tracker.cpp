@@ -19,6 +19,7 @@
 #include "sensors_tracker.h"
 #include "sensor.h"
 #include "aquabox.h"
+#include "devices_map.h"
 #include "events/update_events.h"
 #include <unordered_map>
 
@@ -28,9 +29,9 @@ void SensorsTracker::processUpdates() {
     static std::unordered_map<std::string, double> values;
 
     Singleton<AquaBox>::get()->doLater("seonsors_tracker", []() {
-        auto devices = Singleton<AquaBox>::get()->devices().keys();
+        auto devices = Singleton<DevicesMap>::i()->ids();
         for (auto id : devices) {
-            auto dev = Singleton<AquaBox>::get()->findDevice(id);
+            auto dev = Singleton<DevicesMap>::i()->get(id);
             if (dev == nullptr) {
                 continue;
             }

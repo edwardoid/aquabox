@@ -38,5 +38,7 @@ systemctl restart aquabox-client
 echo "Checking service"
 systemctl status aquabox-client
 
+journalctl -f -u aquabox-client
+
 echo "Version: "
 cat $AB_DIR/version.txt

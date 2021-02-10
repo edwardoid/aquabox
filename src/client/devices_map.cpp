@@ -16,7 +16,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "device_parser.h"
+#include "devices_map.h"
 #include "device.h"
 #include "relay.h"
 #include "sensor.h"
@@ -52,7 +52,26 @@ DeviceClass getClass(const Path& p)
     return DeviceClass::Unknown;
 }
 
-std::unordered_map<std::string, std::shared_ptr<Device>> DeviceParser::parse(Path& root)
+DevicesMap::DevicesMap()
+{}
+
+std::string DevicesMap::nextId() const
+{
+    static std::string prefix = "dev_";
+    std::string candidate = prefix + std::to_string(rand());
+    while(has(candidate)) {
+        candidate = prefix + std::to_string(rand());
+    }
+
+    return candidate;
+}
+
+bool DevicesMap::hasDevice(const std::string& address) const
+{
+    return this->has([&address](const std::shared_ptr<Device>& dev) { return dev->address() == address; });
+}
+
+bool DevicesMap::parse(Path& root)
 {
     std::unordered_map<std::string, std::shared_ptr<Device>> devices;
     for(Path p : root.children()) {
@@ -78,7 +97,28 @@ std::unordered_map<std::string, std::shared_ptr<Device>> DeviceParser::parse(Pat
         }
 
         if(dev != nullptr && dev->parseFile(p))
-            devices.insert({ dev->id(), std::dynamic_pointer_cast<Device>(dev) });
+            devices.insert({ dev->id(), dev });
     }
-    return devices;
+    this->set(devices);
+    return true;
+}
+
+std::set<std::string> DevicesMap::ids() const
+{
+    return keys();
+}
+
+std::string DevicesMap::addDevice(std::shared_ptr<Device> dev, bool pending)
+{
+    std::string id = dev->id();
+    int index = 0;
+    this->for_each([&index](const std::string&, const std::shared_ptr<Device> dev) {
+        if(dev->index() >= index) {
+            index = dev->index() + 1;
+        }
+    });
+    dev->setIndex(index);
+    LOG_INFO << "Adding device " << id;
+    insert(id, dev);
+    return id;
 }

@@ -34,7 +34,7 @@ void to_json(nlohmann::json& j, const Device& d) {
             { "name", d.name() },
             { "index", d.index() },
             { "address", d.address() },
-            { "rules_nabled", d.rulesEnabled() },
+            { "rules_enabled", d.rulesEnabled() },
             { "type", Serializable<DeviceType>::convert(d.type()) },
             { "class", Serializable<DeviceClass>::convert(d.deviceClass()) },
             { "meta", d.metadata() }
@@ -45,6 +45,9 @@ void to_json(nlohmann::json& j, const Device& d) {
 }
 
 void from_json(const nlohmann::json& j, Device& d) {
+    try
+    {
+    LOG_DEBUG << "Parsing: " << j.dump(4);
     d.setId(j.at("id"));
     d.setName(j.at("name"));
     d.setIndex(j.at("index"));
@@ -53,6 +56,14 @@ void from_json(const nlohmann::json& j, Device& d) {
     d.setType(Serializable<DeviceType>::convert((std::string)j.at("type")));
     d.setDeviceClass(Serializable<DeviceClass>::convert((std::string)j.at("class")));
     d.setMetadata(j.at("meta"));
+    LOG_DEBUG << "Done";
+    }
+    catch(std::exception& e) {
+        LOG_ERROR << "Parsing failed: " << e.what();
+    }
+    catch(...) {
+        LOG_ERROR << "Parsing failed";
+    }
 }
 
 }

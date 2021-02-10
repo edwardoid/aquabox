@@ -22,6 +22,13 @@
 
 using namespace aquabox;
 
+MockGPIOBus::MockGPIOBus(const std::string& address)
+    : Bus(address)
+{}
+
+MockGPIOBus::~MockGPIOBus()
+{}
+
 std::shared_ptr<Hardware> MockGPIOBus::hw(const std::string& hw)
 {
     static std::unordered_map<std::string, std::shared_ptr<MockedOnOffDevice> > pins({

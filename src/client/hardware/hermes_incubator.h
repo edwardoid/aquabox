@@ -19,6 +19,7 @@
 #pragma once
 
 #include "hermes_master.h"
+#include <timeout.h>
 #include <vector>
 #include <mutex>
 #include <memory>
@@ -45,10 +46,11 @@ namespace aquabox
         };
         struct HermesObjectInfo
         {
+            HermesObjectInfo();
             int id;
             std::shared_ptr<HermesMaster> object;
             ObjectInfoState state;
-            std::chrono::time_point<std::chrono::high_resolution_clock> tp;
+            Timeout lastRequest;
         };
 
         std::vector<HermesObjectInfo> m_objects;

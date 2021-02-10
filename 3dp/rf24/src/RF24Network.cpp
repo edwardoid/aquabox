@@ -19,7 +19,7 @@
   #include <unistd.h>
   #include <iostream>
   #include <algorithm>
-  #include "RF24.h"
+  #include <RF24.h>
   #include "RF24Network.h"
 #else
   #include "RF24.h"

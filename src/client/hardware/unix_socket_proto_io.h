@@ -35,7 +35,7 @@ namespace aquabox
         virtual bool good() const override;
         virtual void close() override;
 
-        virtual bool makeRequest(const proto::Message& req, proto::Message& rsp);
+        virtual bool makeRequest(const proto::Message& req, proto::Message& rsp) override;
     private:
         int m_sfd;
         std::mutex m_ioMx;

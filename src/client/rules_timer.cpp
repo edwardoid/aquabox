@@ -22,6 +22,7 @@
 #include "rule_executor.h"
 #include "time_details.h"
 #include "aquabox.h"
+#include "devices_map.h"
 #include <event.h>
 #include "events/update_events.h"
 #include "options.h"
@@ -93,10 +94,10 @@ void RulesTimer::processRules(const Timer::ClockTimePoint& when)
 void RulesTimer::applyChanges()
 {
     auto box = Singleton<AquaBox>::get();
-    auto devices = box->devices().keys();
+    auto devices = Singleton<DevicesMap>::i()->ids();
 
     for(auto id : devices) {
-        auto dev = box->findDevice(id);
+        auto dev = Singleton<DevicesMap>::i()->get(id);
         if (dev == nullptr) {
             continue;
         }

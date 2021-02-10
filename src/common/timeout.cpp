@@ -22,7 +22,9 @@ using namespace aquabox;
 
 Timeout::Timeout(std::chrono::milliseconds timeout)
     : m_timeout(timeout)
-{}
+{
+    reset();
+}
 
 size_t Timeout::expired() const
 {

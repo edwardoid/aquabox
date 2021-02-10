@@ -24,7 +24,7 @@
 #include "rule.h"
 #include "device.h"
 #include "rule_parser.h"
-#include "device_parser.h"
+#include "devices_map.h"
 #include "user.h"
 #include "events/update_events.h"
 #include "events/network_events.h"
@@ -152,7 +152,7 @@ void AquaBox::readDevices(const Path &p)
 {
     m_devicesDir = p;
     m_devicesDir.append("devices");
-    m_devices.set(DeviceParser::parse(m_devicesDir));
+    Singleton<DevicesMap>::i()->parse(m_devicesDir);
 }
 
 void AquaBox::readUsers()
@@ -177,11 +177,6 @@ void AquaBox::readRules(const Path &p)
     m_rules.set(RulesParser::parse(m_rulesDir));
 }
 
-std::shared_ptr<Device> AquaBox::findDevice(const std::string &id)
-{
-    return m_devices.get(id, nullptr);
-}
-
 std::shared_ptr<Rule> AquaBox::findRule(const std::string &id)
 {
     return m_rules.get(id, nullptr);
@@ -190,11 +185,6 @@ std::shared_ptr<Rule> AquaBox::findRule(const std::string &id)
 const Path &AquaBox::workingDirectory() const
 {
     return m_wd;
-}
-
-DevicesMap &AquaBox::devices() const
-{
-    return m_devices;
 }
 
 RulesMap &AquaBox::rules() const
@@ -309,7 +299,7 @@ bool AquaBox::updateDevice(std::string id)
         return false;
     }
 
-    return m_devices.on(id, [p] (auto id, auto dev) {
+    return Singleton<DevicesMap>::i()->on(id, [p] (auto id, auto dev) {
         dev->saveToFile(p);
     });
 }

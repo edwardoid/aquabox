@@ -25,7 +25,7 @@ namespace aquabox
     {
         j["property"] = v.property;
         j["value"] = v.value;
-        j["when"] = (uint64_t)v.when;
+        j["when"] = v.when;
     }
 
     void from_json(const nlohmann::json &j, ValueChange &v)
@@ -34,7 +34,7 @@ namespace aquabox
         {
             j.at("property").get_to(v.property);
             j.at("value").get_to(v.value);
-            v.when = (uint64_t)(j.at("when"));
+            v.when = j.at("when");
         }
         catch (const nlohmann::detail::exception &e)
         {

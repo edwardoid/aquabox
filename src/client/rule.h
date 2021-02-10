@@ -22,7 +22,6 @@
 #include <vector>
 #include <nlohmann/json.hpp>
 #include "value_change.h"
-#include "device_reference.h"
 #include "enumerations.h"
 #include "property.h"
 
@@ -77,11 +76,11 @@ namespace aquabox
         bool enabled() const;
         void setEnabled(bool enabled);
 
-        uint32_t createdAt() const;
-        void setCreatedAt(uint32_t createdAt);
+        uint64_t createdAt() const;
+        void setCreatedAt(uint64_t createdAt);
 
-        uint32_t lastRun() const;
-        void setLastRun(uint32_t lastRun);
+        uint64_t lastRun() const;
+        void setLastRun(uint64_t lastRun);
 
         std::time_t deleteAfter() const;
         void setDeleteAfter(std::time_t deleteAfter);
@@ -96,8 +95,8 @@ namespace aquabox
         std::string m_device;
         bool m_enabled;
         bool m_available;
-        uint32_t m_createdAt;
-        uint32_t m_lastRun;
+        uint64_t m_createdAt;
+        uint64_t m_lastRun;
         std::time_t m_deleteAfter;
         std::vector<ValueChange> m_actions;
     };

@@ -23,6 +23,8 @@ namespace aquabox
     class Physical: public Layer
     {
     public:
+        Physical(const std::string& address);
+        virtual ~Physical();
         std::shared_ptr<Bus> bus(const std::string& bus) override;
     };
 }

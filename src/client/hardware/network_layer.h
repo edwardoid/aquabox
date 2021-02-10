@@ -25,6 +25,8 @@ namespace aquabox
     class NetworkLayer: public Layer
     {
     public:
+        NetworkLayer(const std::string& address);
+        virtual ~NetworkLayer();
         static void prepare();
         virtual std::shared_ptr<Bus> bus(const std::string& bus) override;
     };
