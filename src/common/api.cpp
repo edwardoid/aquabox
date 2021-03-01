@@ -47,9 +47,7 @@ void API::init(std::shared_ptr<HttpServer> http, Route base)
 
     m_updateRule = base.sub().word("device").string(":dev").word("rule");
 
-    m_turnOn = base.sub().word("device").string(":dev").word("turn_on");
-
-    m_turnOff = base.sub().word("device").string(":dev").word("turn_off");
+    m_set = base.sub().word("device").string(":dev").word("set");
 
     m_rulesForDevice = base.sub().word("rules").string(":dev");
 
@@ -85,8 +83,7 @@ void API::init(std::shared_ptr<HttpServer> http, Route base)
     setup("GET", m_wifiNetworks, &API::ListNetworks);
     setup("GET", m_wifiScan, &API::ScanWiFiNetworks);
     setup("POST", m_wifiConnect, &API::ConnectToWiFi);
-    setup("PUT", m_turnOn, &API::TurnOn);
-    setup("PUT", m_turnOff, &API::TurnOff);
+    setup("PUT", m_set, &API::SetValue);
 }
 
 void API::defaultHandler(const Route& route, Request& request, Response& response, Headers& headers)

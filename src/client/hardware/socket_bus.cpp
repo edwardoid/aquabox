@@ -18,8 +18,8 @@
 
 #include "socket_bus.h"
 #include "../aquabox.h"
-#include "hermes_incubator.h"
-#include "hermes_hardware.h"
+#include "hermes/hermes_incubator.h"
+#include "hermes/hermes_hardware.h"
 #include "unix_socket_proto_io.h"
 #include <settings.h>
 #include <log.h>

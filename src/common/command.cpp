@@ -39,8 +39,7 @@ Serializable<Operation>::Enum2StrMap Serializable<Operation>::val2Str({
     { Operation::ConnectToWiFi, "connect" },
     { Operation::WiFiNetworks, "networks" },
     { Operation::SupportedRepeatTimeouts, "repeat_units" },
-    { Operation::TurnOn, "turn_on" },
-    { Operation::TurnOff, "turn_off" }
+    { Operation::Set, "set" }
 });
 
 template<>
@@ -59,8 +58,7 @@ Serializable<Operation>::Str2EnumMap Serializable<Operation>::str2Val({
     { "networks", Operation::WiFiNetworks },
     { "connect", Operation::ConnectToWiFi },
     { "repeat_units", Operation::SupportedRepeatTimeouts },
-    { "turn_on", Operation::TurnOn },
-    { "turn_off", Operation::TurnOff }
+    { "set", Operation::Set }
 });
 
 template<>
@@ -84,9 +82,8 @@ Serializable<Result>::Str2EnumMap Serializable<Result>::str2Val({
 Command::Command(const Command& src)
     : m_seqNum(src.m_seqNum)
     , m_params(src.m_params)
-    , m_body(src.m_body)
-    , m_data(src.m_data)
-    , m_dataJson(src.m_dataJson)
+    , m_request(src.m_request)
+    , m_response(src.m_response)
     , m_result(src.m_result)
     , m_operation(src.m_operation)
 {
@@ -96,9 +93,8 @@ const Command& Command::operator=(const Command& src)
 {
     m_seqNum = src.m_seqNum;
     m_params = src.m_params;
-    m_body = src.m_body;
-    m_data = src.m_data;
-    m_dataJson = src.m_dataJson;
+    m_request = src.m_request;
+    m_response = src.m_response;
     m_result = src.m_result;
     m_operation = src.m_operation;
 
@@ -123,14 +119,14 @@ int Command::seqNum() const
     return m_seqNum;
 }
 
-void Command::setBody(std::string body)
+void Command::setRequest(const nlohmann::json& request)
 {
-    m_body = body;
+    m_request = request;
 }
 
-const std::string& Command::body() const
+const nlohmann::json& Command::request() const
 {
-    return m_body;
+    return m_request;
 }
 
 void Command::setParameters(const std::unordered_map<std::string, std::string>& params)
@@ -175,10 +171,9 @@ Operation Command::operation() const
     return m_operation;
 }
 
-void Command::response(const nlohmann::json data, Result result)
+void Command::response(const nlohmann::json& response, Result result)
 {
-    m_data = data.dump(4);
-    m_dataJson = data;
+    m_response = response;
     m_result = result;
 }
 
@@ -188,9 +183,9 @@ void Command::response(Result result)
     response(NoData, result);
 }
 
-const std::string& Command::response() const
+const nlohmann::json& Command::response() const
 {
-    return m_data;
+    return m_response;
 }
 
 Result Command::result() const
@@ -198,7 +193,7 @@ Result Command::result() const
     return m_result;
 }
 
-nlohmann::json Command::toJSON() const
+nlohmann::json Command::responseJson() const
 {
     nlohmann::json obj({});
 
@@ -206,22 +201,8 @@ nlohmann::json Command::toJSON() const
     obj["params"] = m_params;
     obj["operation"] = Serializable<Operation>::convert(m_operation);
     obj["result"] = Serializable<Result>::convert(m_result);
-    if (m_dataJson.empty())
-        obj["body"] = m_body;
-    else
-        obj["body"] = m_dataJson;
-    return obj;
-}
-
-nlohmann::json Command::toResultJSON() const
-{
-    nlohmann::json obj({});
-
-    obj["seqNum"] = m_seqNum;
-    obj["params"] = m_params;
-    obj["operation"] = Serializable<Operation>::convert(m_operation);
-    obj["result"] = Serializable<Result>::convert(m_result);
-    obj["data"] = m_dataJson;
+    if (!m_response.is_null())
+        obj["response"] = m_response;
     return obj;
 }
 
@@ -233,18 +214,12 @@ bool Command::fromJSON(const nlohmann::json& obj)
         m_result = Serializable<Result>::convert(obj["result"].get<std::string>());
     }
 
-    if (obj.find("body") != obj.cend()) {
-        m_body = obj["body"].get<std::string>();
+    if (obj.find("respone") != obj.cend()) {
+        m_response = obj["response"];
     }
 
-    if (obj.find("data") != obj.cend()) {
-        if (obj["data"].is_string()) {
-            m_data = obj["data"].get<std::string>();
-        }
-        else {
-            m_dataJson = obj["data"];
-            m_data = m_dataJson.dump();
-        }
+    if (obj.find("request") != obj.cend()) {
+        m_request = obj["request"];
     }
 
     if (obj.find("params") != obj.cend()) {

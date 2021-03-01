@@ -38,11 +38,11 @@ void BoxConnection::runCommand(Command& cmd)
         cmd.response(Result::AccessDenied);
         return;
     }
-    nlohmann::json cmdJson = cmd.toJSON();
+    nlohmann::json response = cmd.responseJson();
 
-    LOG_DEBUG << "Executing command\n" << cmd.toJSON().dump();
+    LOG_DEBUG << "Executing command\n" << response.dump();
 
-    commands->send(cmdJson.dump());
+    commands->send(response.dump());
 
     if(!results.waitFor(cmd.seqNum(), cmd)) {
         cmd.response(Result::AccessDenied);

@@ -17,12 +17,12 @@
  */
 
 #include "hermes_bus.h"
-#include "../aquabox.h"
+#include "../../aquabox.h"
 #include "hermes_incubator.h"
 #include "hermes_hardware.h"
 #include "hermes_device_builder.h"
-#include "../device.h"
-#include "../devices_map.h"
+#include "../../device.h"
+#include "../../devices_map.h"
 #include <settings.h>
 #include <log.h>
 
@@ -73,7 +73,6 @@ HermesBus::~HermesBus()
 void HermesBus::start()
 {
     m_thread = std::thread([this] { loop(); });
-    //m_thread.detach();
 }
 
 std::shared_ptr<Hardware> HermesBus::hw(const std::string& hw)

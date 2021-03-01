@@ -28,5 +28,6 @@ namespace aquabox
         static bool AccessPoint;
         static bool EnableCloud;
         static bool UseNetworkManager;
+        static bool UseMesh;
     };
 }

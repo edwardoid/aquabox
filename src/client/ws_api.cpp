@@ -119,7 +119,7 @@ DEFINE_WS_API_IMPL(Commands)
     command.setOperation(op);
 
     if (body != request.end()) {
-        command.setBody(body.value().dump());
+        command.setRequest(body.value());
     }
 
     auto params = request.find("params");
@@ -130,12 +130,11 @@ DEFINE_WS_API_IMPL(Commands)
         }
     }
     
-    
     CommandExecutor exec;
     if(!exec.exec(command)) {
         LOG_ERROR << "Can't execute command! " << (int)(command.operation());
     } else {
-        LOG_DEBUG << "Command " << (int)(command.operation()) << " finished with " << (int)(command.result()) << " data: " << command.response();
+        LOG_DEBUG << "Command " << (int)(command.operation()) << " finished with " << (int)(command.result());
     }
 
     nlohmann::json resp;
@@ -143,10 +142,8 @@ DEFINE_WS_API_IMPL(Commands)
     resp["result"] = (int)command.result();
 
     try {
-        nlohmann::json resultData = nlohmann::json::parse(command.response());
-        resp["data"] = resultData;
-    } catch(...) {}
-    
+        resp["data"] = command.response();
+    } catch(...) {}    
 
     connection->send(resp.dump(4));
 }

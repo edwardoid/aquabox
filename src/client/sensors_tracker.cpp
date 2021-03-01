@@ -26,9 +26,9 @@
 using namespace aquabox;
 
 void SensorsTracker::processUpdates() {
-    static std::unordered_map<std::string, double> values;
+    static std::unordered_map<std::string, nlohmann::json> values;
 
-    Singleton<AquaBox>::get()->doLater("seonsors_tracker", []() {
+    Singleton<AquaBox>::get()->doLater("sensors_tracker", []() {
         auto devices = Singleton<DevicesMap>::i()->ids();
         for (auto id : devices) {
             auto dev = Singleton<DevicesMap>::i()->get(id);
@@ -40,19 +40,23 @@ void SensorsTracker::processUpdates() {
             if (sensor == nullptr) {
                 continue;
             }
-            auto newValue = sensor->value();
-            if (values.find(sensor->id()) != values.end()) {
-                if(values[sensor->id()] == newValue) {
-                    continue;
+            for (auto &p : sensor->properties())
+            {
+                std::string key = sensor->id() + p;
+                auto newValue = sensor->value(p);
+                if (values.find(sensor->id()) != values.end()) {
+                    if(values[sensor->id()] == newValue) {
+                        continue;
+                    }
+
+                    values[key] = newValue;
+                }
+                else {
+                    values.insert( {key, newValue} );
                 }
 
-                values[sensor->id()] = newValue;
+                Singleton<AquaBox>::get()->postUpdate(std::make_shared<ValueChangedEvent>(sensor, p, "regular_check"));
             }
-            else {
-                values.insert( {sensor->id(), newValue} );
-            }
-
-            Singleton<AquaBox>::get()->postUpdate(std::make_shared<SensorChangedEvent>(sensor, "regular_check"));
         }
     });
 }

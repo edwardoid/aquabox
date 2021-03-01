@@ -18,7 +18,7 @@
 
 #pragma once
 
-#include "bus.h"
+#include "../bus.h"
 #include "hermes_master.h"
 #include <thread>
 #include <memory>

@@ -18,7 +18,7 @@ include_directories(${NM_DBUS_INCLUDE_DIR})
 include_directories(${AQUABOX_COMMON_PATH})
 include_directories(${AQUABOX_PROTO_PATH})
 
-file(GLOB AQUABOX_SOURCES "*.cpp" "*/*.cpp")
+file(GLOB AQUABOX_SOURCES "*.cpp" "*/*.cpp" "*/hermes/*.cpp")
 
 add_executable(${PROJECT_NAME} ${AQUABOX_SOURCES})
 target_compile_definitions(${PROJECT_NAME} PUBLIC AB_VERSION_MAJOR=${AB_V})

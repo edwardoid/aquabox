@@ -19,7 +19,7 @@
 #pragma once
 
 #include <memory>
-#include "hardware.h"
+#include "../hardware.h"
 #include "hermes_master.h"
 
 namespace aquabox

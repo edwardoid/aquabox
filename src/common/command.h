@@ -50,8 +50,7 @@ namespace aquabox
         WiFiNetworks = 12,
         ConnectToWiFi = 13,
         SupportedRepeatTimeouts = 14,
-        TurnOn = 15,
-        TurnOff = 16
+        Set = 15
     };
 
     class Command
@@ -63,8 +62,8 @@ namespace aquabox
         static bool validate(const nlohmann::json& obj);
         void setSeqNum(int num);
         int seqNum() const;
-        void setBody(std::string body);
-        const std::string& body() const;
+        void setRequest(const nlohmann::json& body);
+        const nlohmann::json& request() const;
         void setParameters(const std::unordered_map<std::string, std::string>& params);
         const std::unordered_map<std::string, std::string>& parameters() const;
         void setParameter(std::string name, std::string value);
@@ -72,19 +71,17 @@ namespace aquabox
         std::string getParameter(std::string name) const;
         void setOperation(Operation op);
         Operation operation() const;
-        void response(const nlohmann::json data, Result result);
+        void response(const nlohmann::json& data, Result result);
         void response(Result result);
-        const std::string& response() const;
+        const nlohmann::json& response() const;
         Result result() const;
-        nlohmann::json toJSON() const;
-        nlohmann::json toResultJSON() const;
+        nlohmann::json responseJson() const;
         bool fromJSON(const nlohmann::json& obj);
     private:
         int m_seqNum = 0;
         std::unordered_map<std::string, std::string> m_params;
-        std::string m_body;
-        std::string m_data;
-        nlohmann::json m_dataJson;
+        nlohmann::json m_request;
+        nlohmann::json m_response;
         Result m_result = Result::Ok;
         Operation m_operation;
     };

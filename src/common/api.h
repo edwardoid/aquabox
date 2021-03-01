@@ -49,9 +49,7 @@ namespace aquabox
             virtual void DeleteRule(const Route& route, Request& request, Response& response, Headers& headers) = 0;
             virtual void DeviceRules(const Route& route, Request& request, Response& response, Headers& headers) = 0;
             virtual void SupportedRepeatTimeouts(const Route& route, Request& request, Response& response, Headers& headers) = 0;
-            virtual void TurnOn(const Route& route, Request& request, Response& response, Headers& headers) = 0;
-            virtual void TurnOff(const Route& route, Request& request, Response& response, Headers& headers) = 0;
-
+            virtual void SetValue(const Route& route, Request& request, Response& response, Headers& headers) = 0;
 
             using APiInterfaceCallback = void (API::*)(const Route&, Request&, Response&, Headers&);
 
@@ -99,9 +97,7 @@ namespace aquabox
             Route m_updateRule;
             Route m_rulesForDevice;
             Route m_repeatUnits;
-
-            Route m_turnOn;
-            Route m_turnOff;
+            Route m_set;
         };
     }
 }

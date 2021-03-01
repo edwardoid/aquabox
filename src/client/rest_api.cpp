@@ -44,7 +44,12 @@ Command createCommand(Operation operation, Web::Request request, bool body, std:
     command.setOperation(operation);
     command.setParameters(params);
     if (body) {
-        command.setBody(request->content.string());
+        try {
+            command.setRequest(nlohmann::json::parse(request->content.string()));
+        }
+        catch (...) {
+            LOG_ERROR << "Can't set request data for operation " << (int) operation;
+        }
     }
     return command;
 }
@@ -55,7 +60,7 @@ void execCommand(Command& cmd, Web::Response response, Web::Headers headers)
     if(!exec.exec(cmd)) {
         LOG_ERROR << "Can't execute command! " << (int)(cmd.operation());
     } else {
-        LOG_DEBUG << "Command " << (int)(cmd.operation()) << " finished with " << (int)(cmd.result()) << " data: " << cmd.response();
+        LOG_DEBUG << "Command " << (int)(cmd.operation()) << " finished with " << (int)(cmd.result()) << " data: " << cmd.response().dump();
     }
     SimpleWeb::StatusCode code = SimpleWeb::StatusCode::server_error_not_implemented;
     switch (cmd.result())
@@ -73,7 +78,7 @@ void execCommand(Command& cmd, Web::Response response, Web::Headers headers)
     if (cmd.response().empty())
         response->write(code, headers);
     else
-        response->write(code, cmd.response(), headers);
+        response->write(code, cmd.response().dump(), headers);
 }
 
 nlohmann::json getStatusInfo(bool detailed)
@@ -167,7 +172,7 @@ void REST::StatusQR(const Route& route, Web::Request& request, Web::Response& re
 
 void REST::Status(const Route& route, Web::Request& request, Web::Response& response, Web::Headers& headers)
 {
-    auto cmd = createCommand(Operation::GetStatus, request, true);
+    auto cmd = createCommand(Operation::GetStatus, request, false);
     execCommand(cmd, response, headers);
 }
 
@@ -256,15 +261,9 @@ void REST::SupportedRepeatTimeouts(const Route& route, Web::Request& request, We
     execCommand(cmd, response, headers);
 }
 
-void REST::TurnOn(const Route& route, Web::Request& request, Web::Response& response, Headers& headers)
+void REST::SetValue(const Route& route, Web::Request& request, Web::Response& response, Headers& headers)
 {
-    auto cmd = createCommand(Operation::TurnOn, request, false, route.extract(request->path));
-    execCommand(cmd, response, headers);
-}
-
-void REST::TurnOff(const Route& route, Web::Request& request, Web::Response& response, Headers& headers)
-{
-    auto cmd = createCommand(Operation::TurnOff, request, false, route.extract(request->path));
+    auto cmd = createCommand(Operation::Set, request, true, route.extract(request->path));
     execCommand(cmd, response, headers);
 }
 

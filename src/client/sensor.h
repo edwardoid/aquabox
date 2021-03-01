@@ -29,6 +29,6 @@ namespace aquabox
         Sensor(const Sensor& src) = default;
         Sensor(Sensor&& src) = default;
 
-        virtual double value() const override;
+        virtual nlohmann::json value(std::string) const override;
     };
 }

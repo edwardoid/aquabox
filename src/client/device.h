@@ -21,8 +21,14 @@
 #include <nlohmann/json.hpp>
 #include "device_type.h"
 #include "value_change.h"
+#include <boost/variant.hpp>
 #include <string>
 #include <set>
+
+
+#define ON_OFF_PROPERTY "on"
+
+#define SENSOR_PROPERTY "measurement"
 
 namespace aquabox
 {
@@ -63,6 +69,10 @@ namespace aquabox
         const Metadata& metadata() const;
         void setMetadata(const Metadata& metadata);
 
+        virtual std::vector<std::string> properties() const { return {}; }
+        virtual nlohmann::json value(std::string property) const { return nlohmann::json(); };
+        virtual void setValue(std::string property, const nlohmann::json& value) {};
+
         bool supports(DeviceClass _class) const;
     protected:
         void enableSupport(DeviceClass _class);
@@ -84,23 +94,19 @@ namespace aquabox
     struct AbstractRelay: public Device
     {
         AbstractRelay();
-        virtual bool turnedOn() const = 0;
-
-        virtual void turnOn() = 0;
-        virtual void turnOff() = 0;
-
         virtual void addPendingAction(uint64_t priority, ValueChange action) = 0;
-        virtual bool performPendingAction() = 0;
+        virtual bool performPendingAction(ValueChange& action) = 0;
+        virtual std::vector<std::string> properties() const override { return { ON_OFF_PROPERTY }; }
     };
 
     struct AbstractSensor: public Device
     {
         AbstractSensor();
-        virtual double value() const = 0;
+        virtual std::vector<std::string> properties() const { return { SENSOR_PROPERTY }; }
     };
 
-    struct AbstractFeeder: public Device
+    struct AbstractStep: public Device
     {
-        virtual void feed(uint8_t times = 1) = 0;
+        virtual void makeSteps(uint8_t times = 1) = 0;
     };
 }

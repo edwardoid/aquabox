@@ -33,7 +33,7 @@ namespace aquabox
         try
         {
             j.at("property").get_to(v.property);
-            j.at("value").get_to(v.value);
+            v.value = j.at("value");
             v.when = j.at("when");
         }
         catch (const nlohmann::detail::exception &e)

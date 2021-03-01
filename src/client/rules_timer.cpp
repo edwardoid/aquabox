@@ -105,12 +105,12 @@ void RulesTimer::applyChanges()
         if (relay == nullptr) {
             continue;
         }
-        bool isOn = relay->turnedOn();
-        if(relay->performPendingAction()) {
-            LOG_DEBUG_IF_(1, true) << "Device" << relay->name() << " changed to Turned " << (relay->turnedOn() ? "ON" : "OFF");
+        ValueChange action;
+        if(relay->performPendingAction(action)) {
+            LOG_DEBUG_IF_(1, true) << "Device" << relay->name() << " changed to Turned " << relay->value(relay->properties()[0]).dump();
         }
-        if (isOn != relay->turnedOn()) {
-            box->postUpdate(std::make_shared<RuleTriggeredEvent>(relay));
+        if (action.value != dev->value(action.property)) {
+            box->postUpdate(std::make_shared<ValueChangedEvent>(relay, action.property, "rule"));
         }
     }
 }

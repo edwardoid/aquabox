@@ -27,7 +27,7 @@ namespace aquabox
     {
         std::string property;
         uint64_t when = 0;
-        double value;
+        nlohmann::json value;
     };
 
     void to_json(nlohmann::json& j, const ValueChange& v);

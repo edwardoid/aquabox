@@ -90,14 +90,9 @@ bool CommandExecutor::exec(const Command &cmd)
         ok = SupportedRepeatTimeouts();
         break;
     }
-    case Operation::TurnOn:
+    case Operation::Set:
     {
-        ok = TurnOn();
-        break;
-    }
-    case Operation::TurnOff:
-    {
-        ok = TurnOff();
+        ok = SetValue();
         break;
     }
     case Operation::ScanWiFiNetworks:
@@ -155,13 +150,8 @@ bool CommandExecutor::GetDevices()
     std::vector<nlohmann::json> all;
     Singleton<DevicesMap>::get()->for_each([this, &all](auto key, auto dev) {
         nlohmann::json json = *dev;
-        if (dev->supports(DeviceClass::Relay))
-        {
-            json["isOn"] = std::dynamic_pointer_cast<AbstractRelay>(dev)->turnedOn();
-        }
-        if (dev->supports(DeviceClass::Sensor))
-        {
-            json["value"] = std::dynamic_pointer_cast<AbstractSensor>(dev)->value();
+        for (auto p : dev->properties()) {
+            json[p] = dev->value(p);
         }
         all.push_back(json);
     });
@@ -190,13 +180,8 @@ bool CommandExecutor::GetDevice()
     }
 
     nlohmann::json data = *dev;
-    if (dev->supports(DeviceClass::Relay))
-    {
-        data["isOn"] = std::dynamic_pointer_cast<AbstractRelay>(dev)->turnedOn();
-    }
-    if (dev->supports(DeviceClass::Sensor))
-    {
-        data["value"] = std::dynamic_pointer_cast<AbstractSensor>(dev)->value();
+    for (auto p : dev->properties()) {
+        data[p] = dev->value(p);
     }
 
     m_cmd.response(data, Result::Ok);
@@ -214,15 +199,15 @@ bool CommandExecutor::UpdateDevice()
 
     std::string id = m_cmd.getParameter(":dev");
 
-    nlohmann::json data;
     std::shared_ptr<Device> d = std::make_shared<Device>();
     try
     {
-        *d = nlohmann::json::parse(m_cmd.body());
+        *d = m_cmd.request();
     }
     catch (nlohmann::detail::parse_error &e)
     {
-        data["data"] = m_cmd.body();
+        nlohmann::json data;
+        data["request"] = m_cmd.request();
         data["error"] = e.what();
         data["cause"] = "Parse Error";
         m_cmd.response(data, Result::BadCommand);
@@ -231,9 +216,9 @@ bool CommandExecutor::UpdateDevice()
 
     bool found = Singleton<DevicesMap>::i()->on(id, [this, d](auto id, auto dev) {
         nlohmann::json before = *dev;
-        if (dev->supports(DeviceClass::Relay))
+        for (auto& p : dev->properties())
         {
-            before["isOn"] = std::dynamic_pointer_cast<AbstractRelay>(dev)->turnedOn();
+            before[p] = dev->value(p);
         }
 
         LOG_DEBUG << "Updating device " << id;
@@ -305,51 +290,31 @@ bool CommandExecutor::CreateOrUpdateRule(bool update)
         return true;
     }
     std::string dev = m_cmd.getParameter(":dev");
-    nlohmann::json data;
-    nlohmann::json ruleData;
-    try
-    {
-        ruleData = nlohmann::json::parse(m_cmd.body());
-    }
-    catch (nlohmann::detail::parse_error &e)
-    {
-        data["data"] = m_cmd.body();
-        data["error"] = e.what();
-        data["cause"] = "Parse Error";
-        m_cmd.response(data, Result::BadCommand);
-        return true;
-    }
-
     auto r = std::make_shared<Rule>();
     try
     {
-        *r = ruleData;
+        *r = m_cmd.request();
     }
     catch (nlohmann::detail::parse_error &e)
     {
         LOG_ERROR << "Rule can not be parsed because: " << e.what();
-        m_cmd.response(data, Result::BadCommand);
+        m_cmd.response( e.what(), Result::BadCommand);
         return true;
     }
 
     if (r->resolveDevice() == nullptr)
     {
-        data["data"] = m_cmd.body();
-        data["error"] = "Can't find device";
-        m_cmd.response(data, Result::BadCommand);
+        m_cmd.response( "Can't find device", Result::BadCommand);
         return true;
     }
 
     if (!Singleton<AquaBox>::get()->addRule(r, update))
     {
-        data["cause"] = "Wrong method or internal data";
-        m_cmd.response(data, Result::BadCommand);
+        m_cmd.response("Wrong method or internal data", Result::BadCommand);
         return true;
     }
 
-    data["rule"] = ruleData;
-    data["cause"] = "ok";
-    m_cmd.response(data, Result::Ok);
+    m_cmd.response(m_cmd.request(), Result::Ok);
     return true;
 }
 
@@ -409,7 +374,7 @@ bool CommandExecutor::SupportedRepeatTimeouts()
     return true;
 }
 
-bool CommandExecutor::TurnOn()
+bool CommandExecutor::SetValue()
 {
     if (!m_cmd.hasParameter(":dev"))
     {
@@ -417,6 +382,12 @@ bool CommandExecutor::TurnOn()
         m_cmd.response(Result::BadCommand);
         return true;
     }
+
+    auto changes = m_cmd.request()["changes"];
+    if (!changes.is_array()) {
+        LOG_ERROR << "Set value should be array";
+    }
+
     std::string id = m_cmd.getParameter(":dev");
     auto dev = Singleton<DevicesMap>::i()->get(id);
     if (dev == nullptr)
@@ -425,54 +396,14 @@ bool CommandExecutor::TurnOn()
         return true;
     }
 
-    if (!dev->supports(DeviceClass::Relay))
-    {
-        m_cmd.response(Result::BadCommand);
-        return true;
+    nlohmann::json data = *dev;
+    for (auto v : changes) {
+        std::string property = v["property"].get<std::string>();
+        LOG_ERROR << "Setting value for " << property << " to be " << v["value"].dump();
+        dev->setValue(property, v["value"]);
+        data[property] = dev->value(property);
+        Singleton<AquaBox>::get()->postUpdate(std::make_shared<ValueChangedEvent>(dev, property, "user"));
     }
-
-    auto relay = std::dynamic_pointer_cast<AbstractRelay>(dev);
-
-    relay->turnOn();
-    nlohmann::json data; 
-    data = *relay;
-    data["isOn"] = relay->turnedOn();
-    Singleton<AquaBox>::get()->postUpdate(std::make_shared<ManualStateChangedEvent>(relay));
-
-    m_cmd.response(data, Result::Ok);
-    return true;
-}
-
-bool CommandExecutor::TurnOff()
-{
-    if (!m_cmd.hasParameter(":dev"))
-    {
-        LOG_ERROR << "No dev id parameter in URL";
-        m_cmd.response(Result::BadCommand);
-        return true;
-    }
-    std::string id = m_cmd.getParameter(":dev");
-    auto dev = Singleton<DevicesMap>::i()->get(id);
-    if (dev == nullptr)
-    {
-        m_cmd.response(Result::NotFound);
-        return true;
-    }
-
-    if (!dev->supports(DeviceClass::Relay))
-    {
-        LOG_ERROR << id << " is not relay";
-        m_cmd.response(Result::BadCommand);
-        return true;
-    }
-
-    auto relay = std::dynamic_pointer_cast<AbstractRelay>(dev);
-
-    relay->turnOff();
-    nlohmann::json data = *relay;
-    data["isOn"] = relay->turnedOn();
-
-    Singleton<AquaBox>::get()->postUpdate(std::make_shared<ManualStateChangedEvent>(relay));
 
     m_cmd.response(data, Result::Ok);
     return true;
@@ -520,16 +451,7 @@ bool CommandExecutor::ListNetworks()
 
 bool CommandExecutor::ConnectToWiFi()
 {
-    nlohmann::json networkInfo;
-    try
-    {
-        networkInfo = nlohmann::json::parse(m_cmd.body());
-    }
-    catch (...)
-    {
-        m_cmd.response(Result::BadCommand);
-        return true;
-    }
+    const nlohmann::json& networkInfo = m_cmd.request();
 
     auto ssid = networkInfo.find("ssid");
     auto password = networkInfo.find("password");

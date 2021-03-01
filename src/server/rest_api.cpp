@@ -39,7 +39,12 @@ Command createCommand(Operation operation, Web::Request request, bool body, std:
     }
     command.setParameters(params);
     if (body) {
-        command.setBody(request->content.string());
+        try {
+            command.setRequest(nlohmann::json::parse(request->content.string()));
+        }
+        catch (...) {
+            LOG_ERROR << "Can't set request data for operation " << (int) operation;
+        }
     }
     return command;
 }
@@ -77,10 +82,10 @@ void execCommand(Command& cmd, Web::Response response, Web::Headers headers)
         code =  SimpleWeb::StatusCode::success_ok;
     }
 
-    if (cmd.response().empty()) {
+    if (cmd.response().is_null()) {
         response->write(code, headers);
     } else {
-        response->write(code, cmd.response(), headers);
+        response->write(code, cmd.response().dump(4), headers);
     }
 }
 
@@ -97,7 +102,7 @@ bool REST::IsAuthorized(const Route& route, Request& request, Response& response
 
 void REST::Status(const Route& route, Web::Request& request, Web::Response& response, Web::Headers& headers)
 {
-    auto cmd = createCommand(Operation::GetStatus, request, true);
+    auto cmd = createCommand(Operation::GetStatus, request, false);
     execCommand(cmd, response, headers);
 }
 
@@ -157,15 +162,9 @@ void REST::SupportedRepeatTimeouts(const Route& route, Web::Request& request, We
     execCommand(cmd, response, headers);
 }
 
-void REST::TurnOn(const Route& route, Web::Request& request, Web::Response& response, Web::Headers& headers)
+void REST::SetValue(const Route& route, Web::Request& request, Web::Response& response, Web::Headers& headers)
 {
-    auto cmd = createCommand(Operation::TurnOn, request, false, route.extract(request->path));
-    execCommand(cmd, response, headers);
-}
-
-void REST::TurnOff(const Route& route, Web::Request& request, Web::Response& response, Web::Headers& headers)
-{
-    auto cmd = createCommand(Operation::TurnOff, request, false, route.extract(request->path));
+    auto cmd = createCommand(Operation::Set, request, true, route.extract(request->path));
     execCommand(cmd, response, headers);
 }
 

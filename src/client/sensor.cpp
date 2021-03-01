@@ -23,9 +23,11 @@
 using namespace aquabox;
 
 
-double Sensor::value() const
+nlohmann::json Sensor::value(std::string prop) const
 {
-
+    if (prop != SENSOR_PROPERTY) {
+        return 0.;
+    }
     auto hw = Hardware::resolve(m_address);
     if (hw == nullptr) {
         LOG_ERROR << "Can't find device " << m_address;

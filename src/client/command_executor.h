@@ -37,8 +37,7 @@ namespace aquabox
         bool DeleteRule();
         bool DeviceRules();
         bool SupportedRepeatTimeouts();
-        bool TurnOn();
-        bool TurnOff();
+        bool SetValue();
         bool ScanWiFiNetworks();
         bool ListNetworks();
         bool ConnectToWiFi();

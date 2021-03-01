@@ -27,6 +27,30 @@ Relay::Relay()
 {
 }
 
+nlohmann::json Relay::value(std::string property) const
+{
+    if (property == ON_OFF_PROPERTY) {
+        return turnedOn() ? 1 : 0;
+    }
+
+    return Device::value(property);
+};
+
+void Relay::setValue(std::string property, const nlohmann::json& value)
+{
+    if (property == ON_OFF_PROPERTY)
+    {
+        if (value.is_number())
+        {
+            if (value == 0) {
+                turnOff();
+            } else if (value == 1) {
+                turnOn();
+            }
+        }
+    }
+}
+
 bool Relay::turnedOn() const
 {
     auto hw = Hardware::resolve(m_address);
@@ -98,7 +122,7 @@ void Relay::addPendingAction(uint64_t priority, ValueChange action)
     m_pendingActions.insert({priority, action});
 }
 
-bool Relay::performPendingAction()
+bool Relay::performPendingAction(ValueChange& action)
 {
     if (m_pendingActions.empty()) {
         return false;
@@ -107,7 +131,7 @@ bool Relay::performPendingAction()
     auto lb = m_pendingActions.lower_bound(0);
 
     ValueChange actionToPerform;
-    actionToPerform.property = "on";
+    actionToPerform.property = ON_OFF_PROPERTY;
     actionToPerform.value = 1;
     if (lb == m_pendingActions.begin()) {
         actionToPerform = m_pendingActions.rbegin()->second;
@@ -130,6 +154,8 @@ bool Relay::performPendingAction()
     } else {
         turnOff();
     }
+
+    action = actionToPerform;
     
     return true;
 }

@@ -17,9 +17,9 @@
  */
 
 #include "hermes_device_builder.h"
-#include "../device.h"
-#include "../relay.h"
-#include "../sensor.h"
+#include "../../device.h"
+#include "../../relay.h"
+#include "../../sensor.h"
 #include "hermes_hardware.h"
 
 #include <enumerations.h>

@@ -23,6 +23,7 @@
 #include "ui/screen_manager.h"
 #include "cloud.h"
 #include "networking/network_manager.h"
+#include "hardware/hermes/hermes_mesh_gateway.h"
 #include <iostream>
 #include <framebuffer.h>
 #include <singleton.h>
@@ -76,6 +77,9 @@ int main(int argc, char** argv)
         else if(strcmp(argv[i], "--standalone") == 0) {
             aquabox::Options::EnableCloud = false;
         }
+        else if(strcmp(argv[i], "--disable-mesh") == 0) {
+            aquabox::Options::UseMesh = false;
+        }
         else if(strcmp(argv[i], "--debug") == 0) {
             aquabox::Options::Render = false;
             aquabox::Options::Lock = false;
@@ -94,6 +98,7 @@ int main(int argc, char** argv)
                       << " --standalone             Do not connect to remote service\n"
                       << " --ignore-networking      Do not connect to NetworkManager\n"
                       << " --ignore-signals         Dump stack traces on errors\n"
+                      << " --disable-mesh           Disable NRF24L01 support\n"
                       << " --help                   Show this help"
                       << std::endl;
             return 0;
@@ -107,5 +112,6 @@ int main(int argc, char** argv)
     aquabox::Singleton<aquabox::ScreenManager>::available = aquabox::Singleton<LIBFB_NS::FrameBuffer>::available;
     aquabox::Singleton<aquabox::Cloud>::available = aquabox::Options::EnableCloud;
     aquabox::Singleton<aquabox::NetworkManager>::available = aquabox::Options::UseNetworkManager;
+    aquabox::Singleton<aquabox::HermesMeshGateway>::available = aquabox::Options::UseMesh;
     return aquabox::Singleton<aquabox::AquaBox>::get()->start();
 }

@@ -37,7 +37,7 @@ nlohmann::json CommandsStream::messageReceived(const nlohmann::json& message)
         if(exe.exec(cmd)) {
         }
 
-        return cmd.toResultJSON().dump();
+        return cmd.response();
     } catch (nlohmann::json::parse_error err) {
         return nlohmann::json({ "error", err.what()}).dump(4);
     } catch (std::exception err) {

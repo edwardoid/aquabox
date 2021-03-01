@@ -31,13 +31,16 @@ namespace aquabox
         Relay(const Relay& src) = default;
         Relay(Relay&& src) = default;
 
-        bool turnedOn() const;
+        void addPendingAction(uint64_t priority, ValueChange action);
+        bool performPendingAction(ValueChange& action);
 
+        virtual nlohmann::json value(std::string property) const override;
+        virtual void setValue(std::string property, const nlohmann::json& value) override;
+    protected:
         void turnOn();
         void turnOff();
 
-        void addPendingAction(uint64_t priority, ValueChange action);
-        bool performPendingAction();
+        bool turnedOn() const;
     private:
         std::map<int64_t, ValueChange> m_pendingActions;
     };

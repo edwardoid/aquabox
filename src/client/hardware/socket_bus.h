@@ -18,7 +18,7 @@
 
 #pragma once
 
-#include "hermes_bus.h"
+#include "hermes/hermes_bus.h"
 #include <thread>
 #include <memory>
 #include <map>

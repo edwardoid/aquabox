@@ -23,41 +23,17 @@
 
 using namespace aquabox;
 
-OnOffChangedEvent::OnOffChangedEvent(std::shared_ptr<AbstractRelay> device, std::string reason)
+ValueChangedEvent::ValueChangedEvent(std::shared_ptr<Device> device, std::string property, std::string reason)
 {
     setSender(device->id(), "device");
     setData({
         { "reason", reason },
         { "sender_full", device->name() },
-        { "action", (device->turnedOn() ?  "turn_on" : "turn_off") }
     });
 
     setPropertiesUpdate({
-        { "isOn", device->turnedOn() }
+        { property, device->value(property) }
     });
-}
-
-SensorChangedEvent::SensorChangedEvent(std::shared_ptr<AbstractSensor> sensor, std::string reason)
-{
-    setSender(sensor->id(), "device");
-    setData({
-        { "reason", reason },
-        { "sender_full", sensor->name() },
-    });
-
-    setPropertiesUpdate({
-        { "value", sensor->value() }
-    });
-}
-
-RuleTriggeredEvent::RuleTriggeredEvent(std::shared_ptr<AbstractRelay> device)
-    : OnOffChangedEvent(device, "rule")
-{
-}
-
-ManualStateChangedEvent::ManualStateChangedEvent(std::shared_ptr<AbstractRelay> device)
-    : OnOffChangedEvent(device, "manual")
-{
 }
 
 RuleEnableChangedEvent::RuleEnableChangedEvent(std::shared_ptr<Rule> rule)
