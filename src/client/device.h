@@ -30,6 +30,8 @@
 
 #define SENSOR_PROPERTY "measurement"
 
+#define STEP_PROPERTY "times"
+
 namespace aquabox
 {
     using Metadata = nlohmann::json::object_t;
@@ -107,6 +109,9 @@ namespace aquabox
 
     struct AbstractStep: public Device
     {
-        virtual void makeSteps(uint8_t times = 1) = 0;
+        AbstractStep();
+        virtual int steps() const = 0;
+        virtual void makeSteps(int times = 1) = 0;
+        virtual std::vector<std::string> properties() const override { return { STEP_PROPERTY }; }
     };
 }

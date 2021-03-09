@@ -93,14 +93,39 @@ bool HermesMaster::getPropertyData(const char *property, proto::GetValueData &va
     if (m_caching)
     {
         auto pos = m_properties.find(property);
+
+        std::chrono::milliseconds updateTimeout = std::chrono::milliseconds(1000);
+        if (pos == m_properties.end())
+        {
+            std::string timeout = "_";
+            timeout += property;
+            LOG_DEBUG << "Requesting timeout " << timeout;
+            aquabox::proto::GetValueData timeoutData;
+            timeoutData.type = aquabox::proto::ValueType::UnsignedInteger;
+            if (proto::Master::getPropertyData(timeout.c_str(), timeoutData))
+            {
+                if (timeoutData.type == aquabox::proto::ValueType::UnsignedInteger)
+                {
+                    updateTimeout = std::chrono::milliseconds(timeoutData.value.U);
+                }
+                LOG_DEBUG << "Update time out for " << property << " updated to " << updateTimeout.count() << "ms";
+            } else {
+                LOG_ERROR << "Timeout request failed!";
+            }
+        } else {
+            updateTimeout = m_properties[property].updateTimeout;
+        }
                        
         if(pos == m_properties.end() ||
-           (std::chrono::system_clock::now() - pos->second.lastAccess > std::chrono::seconds(1)))
+           (std::chrono::system_clock::now() - pos->second.lastAccess > updateTimeout))
         {
             if(!proto::Master::getPropertyData(property, value)) {
+                LOG_ERROR << "Can't get property " << property;
                 return false;
             }
+            
             m_properties[property].lastAccess = std::chrono::system_clock::now();
+            m_properties[property].updateTimeout = updateTimeout;
             m_properties[property].value = value;
         }
         value = m_properties[property].value;

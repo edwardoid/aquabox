@@ -64,3 +64,29 @@ bool HermesHardware::isOn()
     }
     return false;
 }
+
+bool HermesHardware::set(int32_t val)
+{
+    if (m_impl == nullptr) {
+        return false;
+    }
+
+    std::lock_guard<HermesMaster> lock(*m_impl);
+    m_impl->setProperty<int32_t>("times", val);
+}
+
+int32_t HermesHardware::get()
+{
+    if (m_impl == nullptr) {
+        return 0;
+    }
+
+    std::lock_guard<HermesMaster> lock(*m_impl);
+    
+    int32_t val = 0;
+    if(m_impl->getProperty<int32_t>("times", val))
+    {
+        return val;
+    }
+    return 0;
+}

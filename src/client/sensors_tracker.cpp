@@ -37,25 +37,44 @@ void SensorsTracker::processUpdates() {
             }
 
             auto sensor = std::dynamic_pointer_cast<AbstractSensor>(dev);
-            if (sensor == nullptr) {
-                continue;
-            }
-            for (auto &p : sensor->properties())
-            {
-                std::string key = sensor->id() + p;
-                auto newValue = sensor->value(p);
-                if (values.find(sensor->id()) != values.end()) {
-                    if(values[sensor->id()] == newValue) {
-                        continue;
+            if (sensor != nullptr) {
+                for (auto &p : sensor->properties())
+                {
+                    std::string key = sensor->id() + p;
+                    auto newValue = sensor->value(p);
+                    if (values.find(key) != values.end()) {
+                        if(values[key] == newValue) {
+                            continue;
+                        }
+
+                        values[key] = newValue;
+                    }
+                    else {
+                        values.insert( {key, newValue} );
                     }
 
-                    values[key] = newValue;
+                    Singleton<AquaBox>::get()->postUpdate(std::make_shared<ValueChangedEvent>(sensor, p, "regular_check"));
                 }
-                else {
-                    values.insert( {key, newValue} );
-                }
+            }
+            auto step = std::dynamic_pointer_cast<AbstractStep>(dev);
+            if (step != nullptr) {
+                for (auto &p : step->properties())
+                {
+                    std::string key = step->id() + p;
+                    auto newValue = step->steps();
+                    if (values.find(key) != values.end()) {
+                        if(values[key] == newValue) {
+                            continue;
+                        }
 
-                Singleton<AquaBox>::get()->postUpdate(std::make_shared<ValueChangedEvent>(sensor, p, "regular_check"));
+                        values[key] = newValue;
+                    }
+                    else {
+                        values.insert( {key, newValue} );
+                    }
+
+                    Singleton<AquaBox>::get()->postUpdate(std::make_shared<ValueChangedEvent>(step, p, "regular_check"));
+                }
             }
         }
     });

@@ -26,6 +26,8 @@ namespace aquabox
     {
     public:
         Timeout(std::chrono::milliseconds timeout);
+        void setTimeout(std::chrono::milliseconds timeout);
+        const std::chrono::milliseconds timeout() const;
         size_t expired() const;
         void reset();
     private:

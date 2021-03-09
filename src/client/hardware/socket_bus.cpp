@@ -20,7 +20,7 @@
 #include "../aquabox.h"
 #include "hermes/hermes_incubator.h"
 #include "hermes/hermes_hardware.h"
-#include "unix_socket_proto_io.h"
+#include <unix_socket_proto_io.h>
 #include <settings.h>
 #include <log.h>
 
@@ -102,6 +102,6 @@ void SocketBus::loop()
 
         static const HermesSerial empty;
 
-        newConnection(std::make_shared<UNIXSocketIO>(childfd), empty);
+        newConnection(std::make_shared<proto::UNIXSocketIO>(childfd), empty);
     }
 }

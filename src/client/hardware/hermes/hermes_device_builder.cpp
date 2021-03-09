@@ -20,6 +20,7 @@
 #include "../../device.h"
 #include "../../relay.h"
 #include "../../sensor.h"
+#include "../../step.h"
 #include "hermes_hardware.h"
 
 #include <enumerations.h>
@@ -71,6 +72,11 @@ std::shared_ptr<class Device> HermesDeviceBuilder::build(std::string address, st
         case DeviceClass::Sensor: {
             dev = std::make_shared<Sensor>();
             dev->setName("Sensor");
+            break;
+        }
+        case DeviceClass::Step: {
+            dev = std::make_shared<Step>();
+            dev->setName("Step");
             break;
         }
         default: {

@@ -53,6 +53,7 @@ namespace aquabox
         struct CachedProperty
         {
             std::chrono::system_clock::time_point lastAccess;
+            std::chrono::milliseconds updateTimeout;
             proto::ValueData value;
         };
         std::shared_ptr<proto::MessageIO> m_io;

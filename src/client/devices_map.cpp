@@ -20,6 +20,7 @@
 #include "device.h"
 #include "relay.h"
 #include "sensor.h"
+#include "step.h"
 #include "settings.h"
 #include <fstream>
 #include <log.h>
@@ -89,6 +90,10 @@ bool DevicesMap::parse(Path& root)
             }
             case DeviceClass::Sensor: {
                 dev = std::make_shared<Sensor>();
+                break;
+            }
+            case DeviceClass::Step: {
+                dev = std::make_shared<Step>();
                 break;
             }
             default: {

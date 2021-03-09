@@ -206,3 +206,9 @@ AbstractSensor::AbstractSensor()
 {
     enableSupport(DeviceClass::Sensor);
 }
+
+AbstractStep::AbstractStep()
+{
+    enableSupport(DeviceClass::Step);
+}
+

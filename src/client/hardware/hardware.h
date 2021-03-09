@@ -82,7 +82,9 @@ namespace aquabox
         }
     };
 
-    struct OnOffDevice: public Hardware, public OnOff {};
+    struct OnOffDevice: public virtual Hardware, public OnOff {};
+
+    struct IntegerDevice: public virtual Hardware, public Value<int32_t> {};
 
     struct FloatValueDevice: public Hardware, public Value<double> {};
 }

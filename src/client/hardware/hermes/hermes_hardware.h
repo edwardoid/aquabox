@@ -24,7 +24,7 @@
 
 namespace aquabox
 {
-    class HermesHardware: public Hardware, public OnOff
+    class HermesHardware: public virtual Hardware, public virtual OnOff, public virtual IntegerDevice
     {
     public:
         HermesHardware(std::shared_ptr<HermesMaster> impl);
@@ -40,6 +40,10 @@ namespace aquabox
         virtual void setOn() override;
         virtual void setOff() override;
         virtual bool isOn() override;
+
+        // IntegerDevice
+        virtual bool set(int32_t type) override;
+        virtual int32_t get() override;
     private:
         mutable std::shared_ptr<HermesMaster> m_impl;
     };

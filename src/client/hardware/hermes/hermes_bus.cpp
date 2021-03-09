@@ -34,8 +34,17 @@ HermesBus::HermesBus(const std::string& address)
     Singleton<HermesIncubator>::i()->ready.connect([this](int id, std::shared_ptr<HermesMaster> master) {
         if (m_master.find(id) != m_master.end()) {
             LOG_DEBUG << "Slave " << master->serial().to_string() << " index " << id << " is ready";
-
-            master->enableCaching();
+            bool enableCaching = false;
+            if (master->getProperty<bool>("_cache", enableCaching))
+            {
+                if (enableCaching) {
+                    master->enableCaching();
+                } else {
+                    master->disableCaching();
+                }
+            } else {
+                master->disableCaching();
+            }
             std::string address = m_address + ":";
             address += master->serial().to_string();
 
