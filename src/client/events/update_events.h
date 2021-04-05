@@ -25,7 +25,7 @@ namespace aquabox
     class ValueChangedEvent: public Event
     {
     public:
-        ValueChangedEvent(std::shared_ptr<class Device> device, std::string property, std::string reason);
+        ValueChangedEvent(std::shared_ptr<class Device> device, std::string property, const nlohmann::json& value, std::string reason);
     };
     class RuleEnableChangedEvent: public Event
     {

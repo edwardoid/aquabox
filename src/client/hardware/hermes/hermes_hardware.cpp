@@ -87,6 +87,8 @@ int32_t HermesHardware::get()
     if(m_impl->getProperty<int32_t>("times", val))
     {
         return val;
+    } else {
+        LOG_WARNING << "Can't get property 'times'.";
     }
     return 0;
 }

@@ -84,6 +84,8 @@ int main(int argc, char** argv)
             aquabox::Options::Render = false;
             aquabox::Options::Lock = false;
             aquabox::Options::AccessPoint = false;
+            aquabox::Options::UseMesh = false;
+            aquabox::Options::UseNetworkManager = false;
             break;
         }
         else if(strcmp(argv[i], "--ignore-signals") == 0) {

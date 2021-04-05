@@ -113,8 +113,7 @@ bool Step::performPendingAction(ValueChange& action)
 
     m_pendingActions.clear();
 
-    if ((actionToPerform.value == 1) == steps())
-    {
+    if (actionToPerform.value != 0 && steps() > 0) {
         return false;
     }
 

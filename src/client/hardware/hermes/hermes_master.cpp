@@ -90,6 +90,7 @@ bool HermesMaster::isConnected() const
 
 bool HermesMaster::getPropertyData(const char *property, proto::GetValueData &value)
 {
+    LOG_DEBUG << "Requested property " << property << " Caching enabled: " << m_caching;
     if (m_caching)
     {
         auto pos = m_properties.find(property);

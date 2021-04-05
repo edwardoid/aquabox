@@ -93,21 +93,25 @@ namespace aquabox
     void to_json(nlohmann::json& j, const Device& d);
     void from_json(const nlohmann::json& j, Device& d);
 
-    struct AbstractRelay: public Device
+    struct ValueChangableDevice: public Device
     {
-        AbstractRelay();
         virtual void addPendingAction(uint64_t priority, ValueChange action) = 0;
         virtual bool performPendingAction(ValueChange& action) = 0;
+    };
+
+    struct AbstractRelay: public ValueChangableDevice
+    {
+        AbstractRelay();
         virtual std::vector<std::string> properties() const override { return { ON_OFF_PROPERTY }; }
     };
 
     struct AbstractSensor: public Device
     {
         AbstractSensor();
-        virtual std::vector<std::string> properties() const { return { SENSOR_PROPERTY }; }
+        virtual std::vector<std::string> properties() const override { return { SENSOR_PROPERTY }; }
     };
 
-    struct AbstractStep: public Device
+    struct AbstractStep: public ValueChangableDevice
     {
         AbstractStep();
         virtual int steps() const = 0;

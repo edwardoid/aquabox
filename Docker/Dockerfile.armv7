@@ -55,10 +55,7 @@ RUN conan profile new default --detect && \
     conan profile update settings.compiler=gcc default && \
     conan profile update settings.compiler.version=7 default && \
     conan profile update settings.compiler.cppstd=14 default && \
-    conan remote add iot https://api.bintray.com/conan/edwardoid/iot && \
-    conan remote add bincrafters https://api.bintray.com/conan/bincrafters/public-conan && \
-    conan remote add devcodeone https://api.bintray.com/conan/devcodeone/public-conan
-
+    conan remote add aquabox http://aquabox.me:9300
 
 RUN echo "export PATH=/opt/pyenv/shims:/opt/pyenv/bin:/opt/toolchain/bin:$PATH" >> /root/.profile && \
     echo "export CC=arm-linux-gnueabihf-gcc" >> /root/.profile && \

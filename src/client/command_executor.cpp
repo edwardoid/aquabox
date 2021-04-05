@@ -402,7 +402,7 @@ bool CommandExecutor::SetValue()
         LOG_ERROR << "Setting value for " << property << " to be " << v["value"].dump();
         dev->setValue(property, v["value"]);
         data[property] = dev->value(property);
-        Singleton<AquaBox>::get()->postUpdate(std::make_shared<ValueChangedEvent>(dev, property, "user"));
+        Singleton<AquaBox>::get()->postUpdate(std::make_shared<ValueChangedEvent>(dev, property, data[property], "user"));
     }
 
     m_cmd.response(data, Result::Ok);

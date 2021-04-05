@@ -1,0 +1,28 @@
+FROM ubuntu:18.04
+
+ENV DEBIAN_FRONTEND noninteractive
+ARG RELEASE
+LABEL maintainer="Edward Sargsyan <edward.sarkisyan@gmail.com>"
+
+USER root
+
+RUN apt-get update && \
+    apt-get install -y wget tar python3 python3-pip
+
+ENV LD_LIBRARY_PATH=/aquabox/lib
+
+RUN wget -c http://aquabox.me:8081/x86_64/aquabox-server-$RELEASE.tar.gz && \
+    mkdir -p /aquabox && \
+    tar xvf aquabox-server-$RELEASE.tar.gz -C /aquabox && \
+    cd /aquabox/bin && \
+    chmod +x /aquabox/bin/aquabox-server
+
+WORKDIR /aquabox/bin
+
+EXPOSE 1213
+EXPOSE 1214
+EXPOSE 5555
+EXPOSE 5556
+
+
+CMD /aquabox/bin/aquabox-server

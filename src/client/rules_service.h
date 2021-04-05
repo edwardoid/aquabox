@@ -18,22 +18,17 @@
 
 #pragma once
 
-#include "timer.h"
 #include "rule.h"
-
-#include <memory>
+#include <cron_scheduler.h>
 
 namespace aquabox
 {
-    class RuleExecutor
+    class RulesService: protected Scheduler<std::string>
     {
     public:
-        RuleExecutor(std::shared_ptr<class Rule>& rule, Timer::ClockTimePoint now);
-        RuleExecutor(const RuleExecutor&) = default;
-        RuleExecutor(RuleExecutor&& src) = default;
-        void operator() ();
-    private:
-        const Timer::ClockTimePoint m_now;
-        std::shared_ptr<class Rule> m_rule;
+        RulesService();
+        void recover();
+        void add(const Rule& rule);
+        void remove(const Rule& rule);
     };
 }

@@ -31,8 +31,8 @@ namespace aquabox
         Relay(const Relay& src) = default;
         Relay(Relay&& src) = default;
 
-        void addPendingAction(uint64_t priority, ValueChange action);
-        bool performPendingAction(ValueChange& action);
+        virtual void addPendingAction(uint64_t priority, ValueChange action) override;
+        virtual bool performPendingAction(ValueChange& action) override;
 
         virtual nlohmann::json value(std::string property) const override;
         virtual void setValue(std::string property, const nlohmann::json& value) override;

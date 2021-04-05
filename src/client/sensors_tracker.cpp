@@ -53,7 +53,7 @@ void SensorsTracker::processUpdates() {
                         values.insert( {key, newValue} );
                     }
 
-                    Singleton<AquaBox>::get()->postUpdate(std::make_shared<ValueChangedEvent>(sensor, p, "regular_check"));
+                    Singleton<AquaBox>::get()->postUpdate(std::make_shared<ValueChangedEvent>(sensor, p, newValue, "regular_check"));
                 }
             }
             auto step = std::dynamic_pointer_cast<AbstractStep>(dev);
@@ -73,7 +73,7 @@ void SensorsTracker::processUpdates() {
                         values.insert( {key, newValue} );
                     }
 
-                    Singleton<AquaBox>::get()->postUpdate(std::make_shared<ValueChangedEvent>(step, p, "regular_check"));
+                    Singleton<AquaBox>::get()->postUpdate(std::make_shared<ValueChangedEvent>(step, p, newValue, "regular_check"));
                 }
             }
         }

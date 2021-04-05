@@ -96,9 +96,7 @@ RUN mkdir -p /root/.conan && \
     conan profile update settings.arch=armv7hf default && \
     conan profile update settings.compiler=gcc default && \
     conan profile update settings.compiler.version=8 default && \
-    conan remote add iot https://api.bintray.com/conan/edwardoid/iot && \
-    conan remote add bincrafters https://api.bintray.com/conan/bincrafters/public-conan && \
-    conan remote add devcodeone https://api.bintray.com/conan/devcodeone/public-conan && \
+    conan remote add aquabox http://aquabox.me:9300 && \
     update-alternatives --install /usr/bin/gcc gcc /usr/bin/arm-linux-gnueabihf-gcc 100 && \
     update-alternatives --install /usr/bin/g++ g++ /usr/bin/arm-linux-gnueabihf-g++ 100 && \
     update-alternatives --install /usr/bin/ld ld /usr/bin/arm-linux-gnueabihf-ld 100 && \

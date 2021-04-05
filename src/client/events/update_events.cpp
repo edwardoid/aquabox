@@ -23,7 +23,7 @@
 
 using namespace aquabox;
 
-ValueChangedEvent::ValueChangedEvent(std::shared_ptr<Device> device, std::string property, std::string reason)
+ValueChangedEvent::ValueChangedEvent(std::shared_ptr<Device> device, std::string property, const nlohmann::json& value, std::string reason)
 {
     setSender(device->id(), "device");
     setData({
@@ -32,7 +32,7 @@ ValueChangedEvent::ValueChangedEvent(std::shared_ptr<Device> device, std::string
     });
 
     setPropertiesUpdate({
-        { property, device->value(property) }
+        { property, value }
     });
 }
 

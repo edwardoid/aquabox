@@ -19,7 +19,6 @@
 #include "rules_timer.h"
 #include "rule.h"
 #include "relay.h"
-#include "rule_executor.h"
 #include "time_details.h"
 #include "aquabox.h"
 #include "devices_map.h"
@@ -80,8 +79,23 @@ void RulesTimer::processRules(const Timer::ClockTimePoint& when)
         auto rule = Singleton<AquaBox>::get()->findRule(id);
         if (rule && rulesInProgress.find(id) == rulesInProgress.end()) {
             rulesInProgress.insert(id);
-            RuleExecutor re(rule, when);
-            re();
+
+            const TimeDetails now(Timer::Clock::to_time_t(when));
+
+            auto dev = std::dynamic_pointer_cast<ValueChangableDevice>(rule->resolveDevice());
+
+            if (dev == nullptr || !dev->rulesEnabled()) {
+                continue;
+            }
+
+            for(const ValueChange& act : rule->actions()) {
+                const TimeDetails at(act.when);
+
+                int64_t priority = now.from(at, true, true, true, true);
+                
+                dev->addPendingAction(priority, act);
+            }
+
             rulesInProgress.erase(id);
         }
     }
@@ -101,16 +115,16 @@ void RulesTimer::applyChanges()
         if (dev == nullptr) {
             continue;
         }
-        auto relay = std::dynamic_pointer_cast<Relay>(dev);
-        if (relay == nullptr) {
+        auto vcdev = std::dynamic_pointer_cast<ValueChangableDevice>(dev);
+        if (vcdev == nullptr) {
             continue;
         }
         ValueChange action;
-        if(relay->performPendingAction(action)) {
-            LOG_DEBUG_IF_(1, true) << "Device" << relay->name() << " changed to Turned " << relay->value(relay->properties()[0]).dump();
+        if(vcdev->performPendingAction(action)) {
+            LOG_DEBUG_IF_(1, true) << "Device" << vcdev->name() << " changed '" << action.property << "' to " << action.value.dump();
         }
         if (action.value != dev->value(action.property)) {
-            box->postUpdate(std::make_shared<ValueChangedEvent>(relay, action.property, "rule"));
+            box->postUpdate(std::make_shared<ValueChangedEvent>(dev, action.property, action.value, "rule"));
         }
     }
 }
