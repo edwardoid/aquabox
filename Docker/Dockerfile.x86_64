@@ -47,6 +47,9 @@ ENV CC=gcc \
     BUILD_PLATFORM=x86_64 \
     LD_LIBRARY_PATH=/build/lib
 
+RUN pip install pip --upgrade && \
+    pip install conan --upgrade
+
 # tools
 RUN conan profile new default --detect && \
     conan profile update settings.compiler.libcxx=libstdc++11 default && \

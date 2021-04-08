@@ -44,6 +44,9 @@ ENV PATH="/opt/toolchain/bin:${PATH}" \
     LDFLAGS=-pthread \
     BUILD_PLATFORM=armv7
 
+RUN pip install pip --upgrade && \
+    pip install conan --upgrade
+
 # tools
 RUN conan profile new default --detect && \
     conan profile update settings.compiler.libcxx=libstdc++11 default && \

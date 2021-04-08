@@ -86,6 +86,9 @@ ENV CC=arm-linux-gnueabihf-gcc \
     RANLIB=arm-linux-gnueabihf-ranlib \
     BUILD_PLATFORM=armv6
 
+RUN pip install pip --upgrade && \
+    pip install conan --upgrade
+
 RUN mkdir -p /root/.conan && \
     printf 'export PYENV_ROOT=/opt/pyenv' >> /root/.profile && \
     printf 'eval "$(pyenv init -)"\n' >> /root/.profile && \

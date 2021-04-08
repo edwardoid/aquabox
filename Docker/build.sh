@@ -57,6 +57,7 @@ function create_version {
     echo "Machine: $(uname -a)" >> version.txt
     echo "Bild started at $(date)" >> version.txt
     conan --version >> version.txt
+    return $?
 }
 
 function pack_server {
@@ -84,13 +85,12 @@ function pack_client {
 
 cd /build
 
-clean_build
-prepare_build
-create_version
-do_build
-pack_server
-pack_client
-
+clean_build && \
+prepare_build && \
+create_version && \
+do_build && \
+pack_server && \
+pack_client && \
 echo "Done"
 
 #exit
