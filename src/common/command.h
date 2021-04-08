@@ -16,8 +16,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef COMMAND_H
-#define COMMAND_H
+#pragma once
 
 #include <string>
 #include <nlohmann/json.hpp>
@@ -86,5 +85,3 @@ namespace aquabox
         Operation m_operation;
     };
 }
-
-#endif // COMMAND_H

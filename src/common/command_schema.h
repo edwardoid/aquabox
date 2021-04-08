@@ -16,8 +16,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef COMMAND_VALIDATOR_H
-#define COMMAND_VALIDATOR_H
+#pragma once
 
 #include <nlohmann/json-schema.hpp>
 
@@ -29,5 +28,3 @@ namespace aquabox
         static nlohmann::json_schema::json_validator& validator(); 
     };
 }
-
-#endif // COMMAND_VALIDATOR_H
