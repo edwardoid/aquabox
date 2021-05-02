@@ -9,5 +9,6 @@
     },
     "name": "Pro Heat",
     "rules_enabled": true,
-    "type": "heater"
+    "type": "heater",
+    "accepted": true
 }

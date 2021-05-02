@@ -50,6 +50,12 @@ namespace aquabox
     public:
         RuleUpdatedEvent(std::shared_ptr<class Rule> rule, const nlohmann::json& before);
     };
+    
+    class TemporaryRuleRemainEvent: public Event
+    {
+    public:
+        TemporaryRuleRemainEvent(std::shared_ptr<class Rule> rule);
+    };
 
     class DeviceRulesChangedEvent: public Event
     {
@@ -61,5 +67,11 @@ namespace aquabox
     {
     public:
         DeviceUpdatedEvent(std::shared_ptr<class Device> device, const nlohmann::json& before);
+    };
+
+    class DevicePropertyUpdateEvent: public Event
+    {
+    public:
+        DevicePropertyUpdateEvent(std::shared_ptr<class Device> device, const nlohmann::json& updates);
     };
 }

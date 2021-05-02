@@ -26,6 +26,7 @@ namespace aquabox
     struct ValueChange
     {
         std::string property;
+        std::string cron;
         uint64_t when = 0;
         nlohmann::json value;
     };

@@ -133,14 +133,28 @@ void Rule::setLastRun(uint64_t lastRun)
     m_lastRun = lastRun;
 }
 
-std::time_t Rule::deleteAfter() const
+uint64_t Rule::deleteAfter() const
 {
     return m_deleteAfter;
 }
 
-void Rule::setDeleteAfter(std::time_t deleteAfter)
+void Rule::setDeleteAfter(uint64_t deleteAfter)
 {
     m_deleteAfter = deleteAfter;
+}
+
+bool Rule::expired() const
+{
+    if (isTemporary()) {
+        auto deleteAt = m_createdAt + m_deleteAfter;
+        return std::chrono::system_clock::to_time_t(std::chrono::system_clock::now()) > deleteAt;
+    }
+    return false;
+}
+
+bool Rule::isTemporary() const
+{
+    return m_deleteAfter > 0;
 }
 
 const std::vector<ValueChange>& Rule::actions() const

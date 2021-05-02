@@ -9,5 +9,6 @@
     },
     "name": "matrix 80.4",
     "rules_enabled": true,
-    "type": "light"
+    "type": "light",
+    "accepted": true
 }

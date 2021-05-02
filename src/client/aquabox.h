@@ -62,6 +62,7 @@ namespace aquabox
         UsersMap& users() const;
         RulesMap& rules() const;
         bool addRule(std::shared_ptr<Rule>& rule, bool replace = false);
+        bool saveRule(const std::string &id);
         bool removeRule(const std::string& id);
         bool updateDevice(std::string id);
         void doLater(const std::string& name, std::function<void(void)>&& task);

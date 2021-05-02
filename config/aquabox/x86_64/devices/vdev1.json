@@ -9,5 +9,6 @@
     },
     "name": "virtual 2",
     "rules_enabled": true,
-    "type": "heater"
+    "type": "heater",
+    "accepted": true
 }

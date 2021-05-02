@@ -29,6 +29,10 @@ using namespace aquabox;
 
 std::shared_ptr<class Device> HermesDeviceBuilder::build(std::string address, std::shared_ptr<class HermesMaster> master)
 {
+    if (!master->serial().isValid()) {
+        LOG_ERROR << "Serial for Hermes device to build is invalid";
+        return nullptr;
+    }
     std::string tp;
     if(master->getProperty("type", tp))
     {
@@ -88,6 +92,7 @@ std::shared_ptr<class Device> HermesDeviceBuilder::build(std::string address, st
     dev->setAddress(address);
     dev->setType(type);
     dev->setDeviceClass(clazz);
+    dev->setMetadata({ { "serial", master->serial().to_string() } });
 
     return dev;
 }

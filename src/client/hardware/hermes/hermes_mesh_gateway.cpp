@@ -1,4 +1,5 @@
 #include "hermes_mesh_gateway.h"
+#include <settings.h>
 #include <timeout.h>
 #include <log.h>
 #include <thread>
@@ -76,7 +77,11 @@ void HermesMeshIO::clear()
 }
 
 HermesMeshGateway::HermesMeshGateway()
-    : m_radio(25, 1), m_network(m_radio), m_mesh(m_radio, m_network)
+    : m_radio(
+        Settings::integer(Settings::Keys::RF24_RADIO_PIN, Settings::Defaults::RF24_RADIO_PIN),
+        Settings::integer(Settings::Keys::RF24_BUS, Settings::Defaults::RF24_BUS))
+    , m_network(m_radio)
+    , m_mesh(m_radio, m_network)
 {
 }
 
@@ -159,6 +164,8 @@ void HermesMeshGateway::run()
     m_mesh.setNodeID(0);
     if(!m_mesh.begin()) {
         LOG_ERROR << "Can't start mesh network!";
+    } else {
+        LOG_INFO << "Mesh network started";
     }
 
     while(!m_stop) {

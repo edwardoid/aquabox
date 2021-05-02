@@ -19,16 +19,31 @@
 #pragma once
 
 #include "rule.h"
+#include "value_change.h"
+#include <set>
 #include <cron_scheduler.h>
 
 namespace aquabox
 {
-    class RulesService: protected Scheduler<std::string>
+    class RulesService: protected Scheduler<std::pair<std::string, ValueChange>>
     {
     public:
         RulesService();
         void recover();
         void add(const Rule& rule);
         void remove(const Rule& rule);
+    private:
+        virtual void begin() override;
+        virtual void finish() override;
+
+        virtual bool ready(const int& id, std::pair<std::string, ValueChange>& data) override;
+    private:
+        enum State {
+            Recovering,
+            Working
+        } m_state = State::Recovering;
+
+        std::unordered_map<std::string, ValueChange> m_changes;
+        std::set<std::string> m_rulesToDelete;
     };
 }

@@ -28,4 +28,18 @@ namespace aquabox
     public:
         BoxEvent();
     };
+
+
+    class DeviceAddedEvent: public BoxEvent
+    {
+    public:
+        DeviceAddedEvent(std::shared_ptr<class Device> device);
+    };
+
+
+    class DeviceDeletedEvent: public BoxEvent
+    {
+    public:
+        DeviceDeletedEvent(std::shared_ptr<class Device> device);
+    };
 }

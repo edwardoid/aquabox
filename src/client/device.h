@@ -62,6 +62,12 @@ namespace aquabox
         bool rulesEnabled() const;
         void setRulesEnabled(bool enabled);
 
+        bool accepted() const;
+        void accept(bool accept);
+
+        bool available() const;
+        bool setAvailable(bool available);
+
         DeviceType type() const;
         void setType(const DeviceType& type);
 
@@ -84,6 +90,8 @@ namespace aquabox
         int32_t m_index = -1;
         std::string m_address;
         bool m_rulesEnabled = true;
+        bool m_accepted = true;
+        bool m_available = true;
         DeviceType m_type = DeviceType::Generic;
         DeviceClass m_deviceClass = DeviceClass::Unknown;
         Metadata m_metadata;

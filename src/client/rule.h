@@ -82,8 +82,10 @@ namespace aquabox
         uint64_t lastRun() const;
         void setLastRun(uint64_t lastRun);
 
-        std::time_t deleteAfter() const;
-        void setDeleteAfter(std::time_t deleteAfter);
+        uint64_t deleteAfter() const;
+        void setDeleteAfter(uint64_t deleteAfter);
+        bool expired() const;
+        bool isTemporary() const;
 
         const std::vector<ValueChange>& actions() const;
         void setActions(const std::vector<ValueChange>& actions);
@@ -97,7 +99,7 @@ namespace aquabox
         bool m_available;
         uint64_t m_createdAt;
         uint64_t m_lastRun;
-        std::time_t m_deleteAfter;
+        uint64_t m_deleteAfter;
         std::vector<ValueChange> m_actions;
     };
 

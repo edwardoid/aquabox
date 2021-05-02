@@ -49,6 +49,7 @@ namespace aquabox
     protected:
         virtual bool setPropertyData(const char *property, const proto::SetValueData &value) override;
         virtual bool getPropertyData(const char *property, proto::GetValueData &value) override;
+        virtual bool acceptConnectionFrom(const proto::byte_t* serial) const;
     private:
         struct CachedProperty
         {

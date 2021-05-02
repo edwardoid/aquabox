@@ -47,6 +47,7 @@ MeshBus::~MeshBus()
 
 void MeshBus::loop()
 {
-    if (Singleton<HermesMeshGateway>::available)
+    if (Singleton<HermesMeshGateway>::available) {
         Singleton<HermesMeshGateway>::i()->run();
+    }
 }

@@ -12,6 +12,7 @@ libserial/latest@edwardoid/iot
 nlohmann_json/3.7.3
 JsonSchemaValidator/2.1.0@conan/stable
 zlib/1.2.11
+bzip2/1.0.6@conan/stable
 simppl/0.3.0@edwardoid/stable
 croncpp/0.1.0@edwardoid/stable
 tgbot/9535023@edwardoid/iot

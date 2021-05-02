@@ -13,8 +13,12 @@ RUN apt-get update --fix-missing && \
     automake automake-1.15 \
     pkg-config make cmake \
     tar vim ssh \
-    python-pip git sshpass && \
+    python-pip git sshpass tzdata && \
     pip install conan --upgrade
+
+RUN wget -c https://ipapi.co/timezone -O /timezone_info && \
+    export TZ=$(cat /timezone_info) && \
+    ln -sfn /usr/share/zoneinfo/$TZ /etc/timezone
 
 RUN TOOLCHAIN="arm-linux-gnueabihf"; \
     MAJOR="7.5"; \

@@ -49,6 +49,7 @@ void NetworkLayer::prepare()
     {
         auto hb = std::dynamic_pointer_cast<HermesBus>(b.second);
         if (hb) {
+            LOG_INFO << "Starting Hermes bus " << b.first;
             hb->start();
         }
     }

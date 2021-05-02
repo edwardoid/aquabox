@@ -67,6 +67,8 @@ const std::string Settings::Keys::SCT_BUS_PORT = "sct";
 const std::string Settings::Keys::DEBUG = "debug";
 const std::string Settings::Keys::MAX_MEM = "maxMemory";
 const std::string Settings::Keys::TELEGRAM_BOT_API = "telegramBotAPIKey";
+const std::string Settings::Keys::RF24_BUS = "rf24Bus";
+const std::string Settings::Keys::RF24_RADIO_PIN = "rf24Pin";
 
 const std::string Settings::Defaults::GIT_HASH = AB_GIT_HASH ;
 const std::string Settings::Defaults::APPLICATION = "aquabox";
@@ -98,6 +100,8 @@ const int Settings::Defaults::SCT_BUS_PORT = 1800;
 const bool Settings::Defaults::DEBUG = false;
 const int Settings::Defaults::MAX_MEM = 80;
 const std::string Settings::Defaults::TELEGRAM_BOT_API = "";
+const int Settings::Defaults::RF24_BUS = 1;
+const int Settings::Defaults::RF24_RADIO_PIN = 25;
 
 bool Settings::dataToWrite = false;
 bool Settings::ready = false;

@@ -72,6 +72,20 @@ bool DevicesMap::hasDevice(const std::string& address) const
     return this->has([&address](const std::shared_ptr<Device>& dev) { return dev->address() == address; });
 }
 
+std::string DevicesMap::deviceIdByAddress(const std::string& address) const
+{
+    std::string id;
+    bool found = this->has([&address, &id](const std::shared_ptr<Device>& dev) {
+        if(dev->address() == address) {
+            id = dev->id();
+            return true;
+        }
+        return false;
+    });
+
+    return found ? id : "";
+}
+
 bool DevicesMap::parse(Path& root)
 {
     std::unordered_map<std::string, std::shared_ptr<Device>> devices;

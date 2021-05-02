@@ -44,6 +44,8 @@
 #include <chrono>
 #include <random>
 
+#include "rules_service.h"
+
 #define LOG_FILE_SIZE_IN_MB 10
 #define BYTES_IN_MB 1000000
 #define MAX_LOG_FILES 50
@@ -140,7 +142,8 @@ int AquaBox::start()
 
     m_globalTimer = std::make_unique<GlobalTimer>();
 
-    m_rulesTimer->start();
+    //m_rulesTimer->start();
+    Singleton<RulesService>::i()->recover();
     m_server->start();
 
     m_globalTimer->waitToFinish();
@@ -153,6 +156,12 @@ void AquaBox::readDevices(const Path &p)
     m_devicesDir = p;
     m_devicesDir.append("devices");
     Singleton<DevicesMap>::i()->parse(m_devicesDir);
+    Singleton<DevicesMap>::i()->for_each([this](std::string id, std::shared_ptr<Device>& dev) {
+        bool avail = Hardware::resolve(dev->address()) != nullptr;
+        dev->setAvailable(avail);
+        nlohmann::json upd = { { "available", true} };
+        postUpdate(std::make_shared<DevicePropertyUpdateEvent>(dev, avail));
+    });
 }
 
 void AquaBox::readUsers()
@@ -219,26 +228,15 @@ bool AquaBox::addRule(std::shared_ptr<Rule> &rule, bool replace)
         m_rules.insert(rule->id(), rule);
     }
 
-    Path p = m_rulesDir;
-
-    auto device = rule->resolveDevice();
-
-    bool pathOk = p.append((std::string)(rule->id()) + ".json");
-    if (!pathOk)
-    {
-        LOG_ERROR << "Can't form path for rule. Root: " << m_rulesDir.c_str() << " formed " << p.c_str() << " error " << strerror(errno);
-        return false;
+    if (replace) {
+        Singleton<RulesService>::i()->remove(*rule);
     }
+    rule->setLastRun(std::chrono::system_clock::to_time_t(std::chrono::system_clock::now()) - 1);
+    Singleton<RulesService>::i()->add(*rule);
 
-    bool saved = rule->saveToFile(p);
-    if (!saved)
+    if (saveRule(rule->id()))
     {
-        m_rules.erase(rule->id());
-    }
-
-    if (saved)
-    {
-        postUpdate(std::make_shared<DeviceRulesChangedEvent>(device));
+        postUpdate(std::make_shared<DeviceRulesChangedEvent>(rule->resolveDevice()));
         if (replace)
         {
             postUpdate(std::make_shared<RuleUpdatedEvent>(rule, beforeUpdate));
@@ -247,7 +245,34 @@ bool AquaBox::addRule(std::shared_ptr<Rule> &rule, bool replace)
         {
             postUpdate(std::make_shared<RuleCreatedEvent>(rule));
         }
+        return true;
     }
+
+    return false;
+}
+
+bool AquaBox::saveRule(const std::string &id)
+{
+    bool saved = false;
+    m_rules.on<bool>(id, [this](auto id, auto rule) {
+        Path p = m_rulesDir;
+
+        bool pathOk = p.append((std::string)(rule->id()) + ".json");
+        if (!pathOk)
+        {
+            LOG_ERROR << "Can't form path for rule. Root: " << m_rulesDir.c_str() << " formed " << p.c_str() << " error " << strerror(errno);
+            return false;
+        }
+
+        if(!rule->saveToFile(p))
+        {
+            m_rules.erase(rule->id());
+            return false;
+        }
+
+        return true;
+    }, saved);
+
     return saved;
 }
 
@@ -262,6 +287,7 @@ bool AquaBox::removeRule(const std::string &id)
     m_rules.on<std::shared_ptr<Device>>(
         id, [this](auto id, auto rule) {
             postUpdate(std::make_shared<RuleDeletedEvent>(rule));
+            Singleton<RulesService>::i()->remove(*rule);
             return rule->resolveDevice();
         },
         device);

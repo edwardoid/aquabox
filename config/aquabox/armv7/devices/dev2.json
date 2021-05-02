@@ -9,5 +9,6 @@
     },
     "name": "classicLED",
     "rules_enabled": false,
-    "type": "light"
+    "type": "light",
+    "accepted": true
 }

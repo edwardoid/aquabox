@@ -17,10 +17,28 @@
  */
 
 #include "box_event.h"
+#include "../device.h"
 
 using namespace aquabox;
 
 BoxEvent::BoxEvent()
 {
     setSender(SERIAL_NUMBER, "aquabox");
+}
+
+
+DeviceAddedEvent::DeviceAddedEvent(std::shared_ptr<Device> device)
+{
+    setData({
+        { "action", "device_added" },
+        { "device", device->id() }
+    });
+}
+
+DeviceDeletedEvent::DeviceDeletedEvent(std::shared_ptr<Device> device)
+{
+    setData({
+        { "action", "device_deleted" },
+        { "device", device->id() }
+    });
 }

@@ -9,5 +9,6 @@
     },
     "name": "💧Water",
     "rules_enabled": true,
-    "type": "thermometer"
+    "type": "thermometer",
+    "accepted": true
 }

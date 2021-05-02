@@ -155,6 +155,11 @@ bool HermesMaster::setPropertyData(const char *property, const proto::SetValueDa
     return true;
 }
 
+bool HermesMaster::acceptConnectionFrom(const proto::byte_t *serial) const
+{
+    return true;
+}
+
 template <>
 bool proto::Master::getProperty<std::string>(const char *property, std::string &value)
 {

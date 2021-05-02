@@ -9,6 +9,8 @@
 #include <queue>
 #include <croncpp.h>
 
+#include <log.h>
+
 namespace aquabox
 {
     template <typename TaskData>
@@ -76,11 +78,11 @@ namespace aquabox
         void start();
         int add(std::string cronexpr, TaskData data, std::time_t from = clock_t::to_time_t(clock_t::now()));
         void remove(int id);
-        void removeIf(std::function<bool(const int&, const TaskData&)> cb);
+        void removeIf(std::function<bool(const int&, TaskData&)> cb);
 
-        virtual bool ready(const int& id, TaskData& data);
-        virtual void begin();
-        virtual void finish();
+        virtual bool ready(const int& id, TaskData& data) = 0;
+        virtual void begin() = 0;
+        virtual void finish() = 0;
 
     private:
         void loop();
@@ -116,12 +118,18 @@ namespace aquabox
             m_sleep.interrupt();
             return ref.id;
         }
-        catch (const cron::bad_cronexpr &)
-        {}
-        catch (const std::runtime_error &)
-        {}
-        catch (const std::exception &)
-        {}
+        catch (const cron::bad_cronexpr & e)
+        {
+            LOG_ERROR << e.what();
+        }
+        catch (const std::runtime_error & e)
+        {
+            LOG_ERROR << e.what();
+        }
+        catch (const std::exception & e)
+        {
+            LOG_ERROR << e.what();
+        }
 
         return 0;
     }
@@ -135,12 +143,12 @@ namespace aquabox
     }
 
     template <typename TaskData>
-    void Scheduler<TaskData>::removeIf(std::function<bool(const int&, const TaskData&)> cb)
+    void Scheduler<TaskData>::removeIf(std::function<bool(const int&, TaskData&)> cb)
     {
         std::lock_guard<std::mutex> lock(m_mx);
         std::vector<int> idsToRemove;
         for (auto& t : m_tasks) {
-            if (cb(t.first, t.second)) {
+            if (cb(t.first, t.second.data)) {
                 idsToRemove.push_back(t.first);
             }
         }
@@ -157,25 +165,40 @@ namespace aquabox
         while (1)
         {
             if (!m_queue.empty()) {
+                std::tm* moment = std::localtime(&m_queue.top().when);
+                LOG_DEBUG << "Sleeping till " << moment->tm_hour << ":" << moment->tm_min << ":" << moment->tm_sec;
                 m_sleep.sleep_until(clock_t::from_time_t(m_queue.top().when));
             } else {
+                LOG_DEBUG << "Sleeping...";
                 m_sleep.sleep();
             }
 
+            LOG_DEBUG << "Working... Queue size: " << m_queue.size();
+            if (!m_queue.empty()) {
+                std::tm* moment = std::localtime(&m_queue.top().when);
+                LOG_DEBUG << "Next action expected on " << moment->tm_hour << ":" << moment->tm_min << ":" << moment->tm_sec;
+            }
+
             bool emit = false;
-            std::lock_guard<std::mutex> lock(m_mx);
-            while (!m_queue.empty() && m_queue.top().when <= clock_t::to_time_t(clock_t::now())) {
-                if (!emit) {
-                    begin();
-                    emit = true;
+            {
+                std::lock_guard<std::mutex> lock(m_mx);
+                LOG_DEBUG << "Checking...";
+                while (!m_queue.empty() && m_queue.top().when <= clock_t::to_time_t(clock_t::now())) {
+                    if (!emit) {
+                        begin();
+                        emit = true;
+                    }
+                    int id = m_queue.top().id;
+                    LOG_DEBUG << "Task " << id << " is ready";
+                    m_queue.pop();
+                    exec(id);
                 }
-                int id = m_queue.top().id;
-                m_queue.pop();
-                exec(id);
             }
 
             if(emit) {
                 finish();
+            } else {
+                LOG_DEBUG << "Nothing is ready.";
             }
         }
     }
@@ -200,22 +223,6 @@ namespace aquabox
             catch (...)
             {}
         }
-    }
-
-    template <typename TaskData>
-    bool Scheduler<TaskData>::ready(const int& id, TaskData& data)
-    {
-        return true;
-    }
-
-    template <typename TaskData>
-    void Scheduler<TaskData>::begin()
-    {
-    }
-
-    template <typename TaskData>
-    void Scheduler<TaskData>::finish()
-    {
     }
 }
 

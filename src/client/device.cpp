@@ -37,7 +37,9 @@ void to_json(nlohmann::json& j, const Device& d) {
             { "rules_enabled", d.rulesEnabled() },
             { "type", Serializable<DeviceType>::convert(d.type()) },
             { "class", Serializable<DeviceClass>::convert(d.deviceClass()) },
-            { "meta", d.metadata() }
+            { "meta", d.metadata() },
+            { "accepted", d.accepted() },
+            { "available", d.available()}
         };
     } catch(const nlohmann::detail::exception& e) {
         LOG_ERROR << "Can't serialize Device: " << e.what();
@@ -47,16 +49,15 @@ void to_json(nlohmann::json& j, const Device& d) {
 void from_json(const nlohmann::json& j, Device& d) {
     try
     {
-    LOG_DEBUG << "Parsing: " << j.dump(4);
-    d.setId(j.at("id"));
-    d.setName(j.at("name"));
-    d.setIndex(j.at("index"));
-    d.setAddress(j.at("address"));
-    d.setRulesEnabled(j.at("rules_enabled"));
-    d.setType(Serializable<DeviceType>::convert((std::string)j.at("type")));
-    d.setDeviceClass(Serializable<DeviceClass>::convert((std::string)j.at("class")));
-    d.setMetadata(j.at("meta"));
-    LOG_DEBUG << "Done";
+        d.setId(j.at("id"));
+        d.setName(j.at("name"));
+        d.setIndex(j.at("index"));
+        d.setAddress(j.at("address"));
+        d.setRulesEnabled(j.at("rules_enabled"));
+        d.setType(Serializable<DeviceType>::convert((std::string)j.at("type")));
+        d.setDeviceClass(Serializable<DeviceClass>::convert((std::string)j.at("class")));
+        d.setMetadata(j.at("meta"));
+        d.accept(j.at("accepted"));
     }
     catch(std::exception& e) {
         LOG_ERROR << "Parsing failed: " << e.what();
@@ -119,6 +120,26 @@ bool Device::rulesEnabled() const
 void Device::setRulesEnabled(bool enabled)
 {
 	m_rulesEnabled = enabled;
+}
+
+bool Device::accepted() const
+{
+    return m_accepted;
+}
+
+void Device::accept(bool a)
+{
+    m_accepted = a;
+}
+
+bool Device::available() const
+{
+    return m_available;
+}
+
+bool Device::setAvailable(bool available)
+{
+    return m_available = available;
 }
 
 DeviceType Device::type() const

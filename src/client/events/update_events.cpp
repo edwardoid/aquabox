@@ -17,6 +17,7 @@
  */
 
 #include "update_events.h"
+#include <chrono>
 #include "../device.h"
 #include "../rule.h"
 #include <enumerations.h>
@@ -89,6 +90,17 @@ RuleUpdatedEvent::RuleUpdatedEvent(std::shared_ptr<Rule> rule, const nlohmann::j
     setPropertiesUpdate(res);
 }
 
+TemporaryRuleRemainEvent::TemporaryRuleRemainEvent(std::shared_ptr<Rule> rule)
+{
+    setSender(rule->id(), "rule");
+    auto now = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
+    auto deleteAt = rule->createdAt() + rule->deleteAfter();
+    auto remain = (now < deleteAt) ? (deleteAt - now) : 0;
+    setData({
+        { "remain", remain }
+    });
+}
+
 RuleDeletedEvent::RuleDeletedEvent(std::shared_ptr<Rule> rule)
 {
     setSender(rule->id(), "rule");
@@ -138,4 +150,15 @@ DeviceUpdatedEvent::DeviceUpdatedEvent(std::shared_ptr<Device> device, const nlo
     }
 
     setPropertiesUpdate(res);
+}
+
+DevicePropertyUpdateEvent::DevicePropertyUpdateEvent(std::shared_ptr<Device> device, const nlohmann::json& update)
+{
+    setSender(device->id(), "device");
+    setData({
+        { "sender_full", device->name() },
+        { "action", "updated"}
+    });
+    
+    setPropertiesUpdate(update);
 }

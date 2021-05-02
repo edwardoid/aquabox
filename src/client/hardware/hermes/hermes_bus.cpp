@@ -23,6 +23,8 @@
 #include "hermes_device_builder.h"
 #include "../../device.h"
 #include "../../devices_map.h"
+#include "../../events/box_event.h"
+#include "../../events/update_events.h"
 #include <settings.h>
 #include <log.h>
 
@@ -47,21 +49,30 @@ HermesBus::HermesBus(const std::string& address)
             }
             std::string address = m_address + ":";
             address += master->serial().to_string();
+            std::string devId = Singleton<DevicesMap>::i()->deviceIdByAddress(address);
 
-            if(!Singleton<DevicesMap>::i()->hasDevice(address))
+            if(devId.empty())
             {
                 auto dev = HermesDeviceBuilder::build(address, master);
                 if (dev != nullptr) {
-                    dev->setId(Singleton<DevicesMap>::i()->nextId());
+                    devId = Singleton<DevicesMap>::i()->nextId();
+                    dev->setId(devId);
+                    dev->accept(false);
+                    dev->setAvailable(true);
                     std::string newDevId = Singleton<DevicesMap>::i()->addDevice(dev);
                     if(!newDevId.empty()) {
-                        Singleton<AquaBox>::i()->updateDevice(newDevId);
+                        Singleton<AquaBox>::i()->postUpdate(std::make_shared<DeviceAddedEvent>(dev));
                     }
                 } else {
                     LOG_ERROR << "Can't build Hermes Device " << address;
                 }
             } else {
                 LOG_DEBUG << "Device " << address << " already exists";
+                Singleton<DevicesMap>::i()->on(devId, [address](const std::string&, std::shared_ptr<Device> dev) {
+                    dev->setAvailable(true);
+                    nlohmann::json upd = { { "available", true} };
+                    Singleton<AquaBox>::i()->postUpdate(std::make_shared<DevicePropertyUpdateEvent>(dev, upd ));
+                });
             }
 
             m_master[id]->setMaster(master);
@@ -71,6 +82,15 @@ HermesBus::HermesBus(const std::string& address)
     Singleton<HermesIncubator>::i()->dead.connect([this](int id, std::shared_ptr<HermesMaster> master) {
         if (m_master.find(id) != m_master.end()) {
             LOG_DEBUG << "Slave " << master->serial().to_string() << " index " << id << " is dead";
+            std::string address = m_address + ":";
+            address += master->serial().to_string();
+
+            std::string devId = Singleton<DevicesMap>::i()->deviceIdByAddress(address);
+            Singleton<DevicesMap>::i()->on(devId, [](const std::string&, std::shared_ptr<Device> dev) {
+                dev->setAvailable(false);
+                nlohmann::json upd = { { "available", false} };
+                Singleton<AquaBox>::i()->postUpdate(std::make_shared<DevicePropertyUpdateEvent>(dev, upd ));
+            });
             m_master.erase(id);
         }
     });

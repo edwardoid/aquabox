@@ -64,6 +64,8 @@ namespace aquabox
             static const std::string DEBUG;
             static const std::string MAX_MEM;
             static const std::string TELEGRAM_BOT_API;
+            static const std::string RF24_BUS;
+            static const std::string RF24_RADIO_PIN;
         };
 
         struct Defaults {
@@ -98,6 +100,8 @@ namespace aquabox
             static const int SCT_BUS_PORT;
             static const bool DEBUG;
             static const int MAX_MEM;
+            static const int RF24_BUS;
+            static const int RF24_RADIO_PIN;
         };
 
         static void set(std::string key, bool value);
