@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-package aquabox;
+package aquabox.services;
 
-import public "cloud.proto"
-import public "network.proto"
+import public "cloud.proto";
+import public "network.proto";

@@ -34,8 +34,15 @@ RUN wget -q --show-progress https://liquidtelecom.dl.sourceforge.net/project/ras
     cp -R cross-pi-gcc-8.3.0-0/* /toolchain/armv6 && \
     rm -rf cross-pi-gcc-8.3.0-0*
 
-RUN wget -q --show-progress https://github.com/protocolbuffers/protobuf/releases/download/v3.17.1/protoc-3.17.1-linux-$(arch).zip && \
-    unzip protoc-3.17.1-linux-$(arch).zip -d /usr
+RUN PROTO_VER="1.38.0" && \
+    git clone --recurse-submodules --depth=1 -b v${PROTO_VER} https://github.com/grpc/grpc && \
+    cd grpc && \
+    mkdir -p cmake/build && cd cmake/build && \
+    cmake -DCMAKE_BUILD_TYPE=Release -DgRPC_INSTALL=ON -DgRPC_BUILD_TESTS=OFF -DgRPC_SSL_PROVIDER=module ../.. && \
+    make && make install && \
+    cd ../../.. && \
+    rm -rf grpc
+
 
 RUN TOOLCHAIN="arm-linux-gnueabihf" && \
     MAJOR="7.5" && \

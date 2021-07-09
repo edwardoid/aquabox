@@ -12,6 +12,7 @@ libserial/latest
 simppl/0.3.0
 croncpp/0.1.0
 freetype/2.10.4
+protobuf/3.15.5
 grpc/1.38.0
 
 [generators]
@@ -34,6 +35,12 @@ tgbot:use_curl=True
 #json-schema-validator:shared=True
 libqrencode:shared=True
 grpc:codegen=False
+grpc:csharp_plugin=False
+grpc:node_plugin=False
+grpc:objective_c_plugin=False
+grpc:php_plugin=False
+grpc:python_plugin=False
+grpc:ruby_plugin=False
 
 [imports]
 lib, *.so* -> ./lib # Copies all dylib files from packages lib folder to my "lib" folder
