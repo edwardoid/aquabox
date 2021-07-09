@@ -18,6 +18,6 @@ echo "Build will be done in $BUILD_DIR"
 echo "Logs will be $LOG_FILE"
 
 
-export IMAGE=conan_$1
+export IMAGE=conan_base
 
-sudo docker image build -t $IMAGE - < $DIR/Dockerfile.$1
+sudo docker image build -t $IMAGE - < $DIR/Dockerfile.base

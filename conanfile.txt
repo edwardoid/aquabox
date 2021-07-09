@@ -1,22 +1,18 @@
 [requires]
-
-cmake_findboost_modular/1.69.0@bincrafters/stable
-boost_stacktrace/1.69.0@bincrafters/stable
-freetype/2.9.1@bincrafters/stable
+boost/1.76.0
+zstd/1.5.0
+nlohmann_json/3.9.1
+json-schema-validator/2.1.0
+libqrencode/4.1.1
 libpng/1.6.37
-libqrencode/4.0.0@bincrafters/stable
-mongo-c-driver/1.16.1@bincrafters/stable
-mongo-cxx-driver/3.2.0@bincrafters/stable
-mqtt_cpp/8.latest@edwardoid/iot
-libserial/latest@edwardoid/iot
-nlohmann_json/3.7.3
-JsonSchemaValidator/2.1.0@conan/stable
-zlib/1.2.11
-bzip2/1.0.6@conan/stable
-simppl/0.3.0@edwardoid/stable
-croncpp/0.1.0@edwardoid/stable
-tgbot/9535023@edwardoid/iot
-OpenSSL/1.1.1@conan/stable
+mongo-cxx-driver/3.6.2
+tgbot/latest
+mqtt_cpp/10.0.0
+libserial/latest
+simppl/0.3.0
+croncpp/0.1.0
+freetype/2.10.4
+grpc/1.38.0
 
 [generators]
 cmake
@@ -29,8 +25,15 @@ mqtt_cpp:use_std_string_view=False
 mqtt_cpp:use_std_any=False
 mqtt_cpp:use_std_shared_ptr_array=False
 mqtt_cpp:build_tests=False
+mqtt_cpp:build_examples=False
+mongo-c-driver:with_icu=False
+mongo-c-driver:with_zstd=False
+mongo-cxx-driver:shared=True
 tgbot:shared=True
 tgbot:use_curl=True
+#json-schema-validator:shared=True
+libqrencode:shared=True
+grpc:codegen=False
 
 [imports]
 lib, *.so* -> ./lib # Copies all dylib files from packages lib folder to my "lib" folder

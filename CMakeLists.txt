@@ -83,7 +83,7 @@ set(ENV{PKG_CONFIG_PATH}  "/usr/lib/arm-linux-gnueabihf/pkgconfig")
 
 include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
 set(CMAKE_MODULE_PATH ${CMAKE_BINARY_DIR} ${CMAKE_MODULE_PATH})
-conan_basic_setup()
+conan_basic_setup(TARGETS)
 
 if(("$ENV{BUILD_PLATFORM}" EQUAL "armv6") OR ("$ENV{BUILD_PLATFORM}" EQUAL "armv7"))
   option(TARGET_DEVICE ON)
@@ -123,13 +123,14 @@ if (NOT CLOUD_ONLY)
   option(FREETYPE ON)
 endif()
 
+find_package(Boost REQUIRED)
 find_package(OpenSSL REQUIRED)
 find_package(Threads REQUIRED)
 find_package(nlohmann_json REQUIRED)
 find_package(libqrencode REQUIRED)
 find_package(simppl REQUIRED)
-find_package(dbus REQUIRED)
-find_package(JsonSchemaValidator REQUIRED)
+find_package(DBus1 REQUIRED)
+find_package(nlohmann_json_schema_validator REQUIRED)
 find_package(tgbot REQUIRED)
 find_package(libserial REQUIRED)
 
@@ -163,9 +164,9 @@ execute_process(
 find_package(PkgConfig REQUIRED)
 find_package(Boost REQUIRED COMPONENTS system stacktrace)
 find_package(OpenSSL)
-find_package(mongo-cxx-driver REQUIRED)
+find_package(mongocxx REQUIRED)
 find_package(PNG REQUIRED)
-find_package(freetype REQUIRED)
+find_package(Freetype REQUIRED)
 
 link_directories(${Boost_LIBRARY_DIRS})
 

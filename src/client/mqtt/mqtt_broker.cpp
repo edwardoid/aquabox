@@ -49,6 +49,7 @@ void MQTTBroker::onError(MQTT_NS::error_code c)
 
 void MQTTBroker::onAccept(MQTTSlavePtr slavePtr)
 {
+    /*
     auto& slave = *slavePtr;
     std::weak_ptr<MQTTSlave> slaveRef(slavePtr);
 
@@ -154,7 +155,7 @@ void MQTTBroker::onAccept(MQTTSlavePtr slavePtr)
             slaveRef.lock()->unsuback(packet_id);
             return true;
         }
-    );
+    ); */
 }
 
 void MQTTBroker::disconnectSlave(MQTTSlavePtr slave)

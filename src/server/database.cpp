@@ -68,10 +68,10 @@ bool Database::connect()
         const auto uri = mongocxx::uri(Settings::string(Settings::Keys::DATABASE_URI, Settings::Defaults::DATABASE_URI));
 
         mongocxx::options::client client_options;
-        if (uri.ssl()) {
-            mongocxx::options::ssl ssl_options;
-            ssl_options.allow_invalid_certificates(true);
-            client_options.ssl_opts(ssl_options);
+        if (uri.tls()) {
+            mongocxx::options::tls tls_options;
+            tls_options.allow_invalid_certificates(true);
+            client_options.tls_opts(tls_options);
         }
 
         m_client = std::move(mongocxx::client(uri, client_options));

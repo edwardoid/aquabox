@@ -1,0 +1,15 @@
+syntax = "proto3";
+
+package aquabox;
+
+
+enum CloudConnectionState {
+    DISABLED;
+    CONNECTING;
+    DISCONNECTED;
+    FAILED;
+};
+
+service Cloud {
+    rpc GetConenctionState() returns (CloudConnectionState) {}
+};

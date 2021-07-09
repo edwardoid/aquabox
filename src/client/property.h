@@ -25,6 +25,7 @@
 #include "log.h"
 #include "enumerations.h"
 
+/*
 #define property_name(name) m_ ## name
 
 #define property(name, type) private:                                           \
@@ -42,7 +43,7 @@
 #define copyProperty(name) this -> property_name(name) = src.property_name(name);
 #define moveProperty(name) this -> property_name(name) = std::move(src.property_name(name));
 
-
+*/
 namespace aquabox
 {
     class Convertable

@@ -37,27 +37,25 @@ class HermesFeeder
     Slave::SlavePropertyPtr Props[6];
     Slave Impl;
     
-public:  
-    static aquabox::proto::byte_t* FEEDER_TOKEN;
-    static aquabox::proto::byte_t FEEDER_SERIAL[SERIAL_LEN];
-    HermesFeeder(Times& TimesProperty, aquabox::proto::IO* io)
+public:
+    HermesFeeder(Times& TimesProperty, aquabox::proto::IO* io, aquabox::proto::byte_t* Token, aquabox::proto::byte_t* Serial)
       : TimesTimeoutProperty("_times", 1000)
       , ClassProperty("class", "step")
       , TypeProperty("type", "feeder")
       , CacheProperty("_cache", false)
       , PingTimeoutProperty("_timeout", 5000)
       , Props({ &TimesProperty, &TimesTimeoutProperty, &ClassProperty, &TypeProperty, &CacheProperty, &PingTimeoutProperty })
-      , Impl(Props, io, FEEDER_SERIAL, FEEDER_TOKEN)
+      , Impl(Props, io, Serial, Token)
     {}
 
     inline bool handshake() { return Impl.handshake(); }
     inline bool processNextMessage() { return Impl.processNextMessage(); }
 };
 
-aquabox::proto::byte_t* HermesFeeder::FEEDER_TOKEN = (aquabox::proto::byte_t*)("allow me");
-aquabox::proto::byte_t HermesFeeder::FEEDER_SERIAL[] PROGMEM = { 't', 's', 't', 'f', 'e', 'e', 'd', 'r' };
+//aquabox::proto::byte_t* HermesFeeder::FEEDER_TOKEN = (aquabox::proto::byte_t*)("allow me");
+//aquabox::proto::byte_t HermesFeeder::FEEDER_SERIAL[] PROGMEM = { 't', 's', 't', 'f', 'e', 'e', 'd', 'r' };
 
-aquabox::proto::ArduinoStreamIO HermesIO = aquabox::proto::ArduinoStreamIO();
-HermesFeeder Feeder(TimesProperty, &HermesIO);
+//aquabox::proto::ArduinoStreamIO HermesIO = aquabox::proto::ArduinoStreamIO();
+//HermesFeeder Feeder(TimesProperty, &HermesIO);
 
 #endif // HERMES_FEEDER_H

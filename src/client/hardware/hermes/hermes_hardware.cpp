@@ -72,7 +72,7 @@ bool HermesHardware::set(int32_t val)
     }
 
     std::lock_guard<HermesMaster> lock(*m_impl);
-    m_impl->setProperty<int32_t>("times", val);
+    return m_impl->setProperty<int32_t>("times", val);
 }
 
 int32_t HermesHardware::get()

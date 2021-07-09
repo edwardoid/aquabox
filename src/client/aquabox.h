@@ -23,7 +23,7 @@
 #include "log.h"
 #include "lockablemap.h"
 #include "performance_metrics.h"
-#include <boost/asio.hpp>
+#include <boost/asio/thread_pool.hpp>
 #include <memory>
 #include <singleton.h>
 

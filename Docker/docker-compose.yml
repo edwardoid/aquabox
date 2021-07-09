@@ -18,17 +18,23 @@ services:
         volumes:
             - '/root/ci:/sources:ro'
             - '/root/artifactory:/artefacts'
+            - '/root/ci/Docker/conan_armv6:/root/.conan/profiles/armv6'
         build:
             context: .
-            dockerfile: Dockerfile.armv6
+            dockerfile: Dockerfile.base
+        environment:
+            - 'BUILD_PLATFORM=armv6'
     armv7:
         user: 'root'
         volumes:
             - '/root/ci:/sources:ro'
             - '/root/artifactory:/artefacts'
+            - '/root/ci/Docker/conan_armv6:/root/.conan/profiles/armv7'
         build:
             context: .
-            dockerfile: Dockerfile.armv7
+            dockerfile: Dockerfile.base
+        environment:
+            - 'BUILD_PLATFORM=armv7'
     x86:
         user: 'root'
         volumes:
@@ -36,7 +42,9 @@ services:
             - '/root/artifactory:/artefacts'
         build:
             context: .
-            dockerfile: Dockerfile.x86_64
+            dockerfile: Dockerfile.base
+        environment:
+                - 'BUILD_PLATFORM=x86_64'
 
     artifactory:
         volumes:

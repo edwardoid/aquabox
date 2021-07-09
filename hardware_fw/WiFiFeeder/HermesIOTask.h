@@ -5,6 +5,8 @@
 #include <ESP8266WiFi.h>
 #include <WiFiClient.h>
 #include "GlobalConfigs.h"
+#include "Channel.h"
+
 
 
 class HermesIOTask : public Task {
