@@ -1,4 +1,4 @@
-# ![](https://raw.githubusercontent.com/edwardoid/aquabox-frontend/master/resources/package.svg =50x50) AquaBox System 	![](https://raw.githubusercontent.com/edwardoid/aquabox-frontend/master/resources/icon.png =50x50)
+# AquaBox System
 
 AquaBox is a cloud based system for controlling aquarium equipment.
 
