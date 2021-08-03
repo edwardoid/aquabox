@@ -23,9 +23,9 @@ NetworkManagerServer::~NetworkManagerServer()
     return ::grpc::Status(grpc::StatusCode::ALREADY_EXISTS, "Connectivity checked!", "Check details");
 }
 
-::grpc::Status NetworkManagerServer::Connect(::grpc::ServerContext* context, const ::aquabox::services::NetworkConnectRequest* request, ::grpc::ServerWriter< ::aquabox::services::ConnectionStatus>* writer)
+::grpc::Status NetworkManagerServer::Connect(::grpc::ServerContext* context, const ::aquabox::services::NetworkConnect* request, ::grpc::ServerWriter< ::aquabox::services::ConnectionStatus>* writer)
 {
-    
+
     return ::grpc::Status::OK;
 }
 

@@ -17,7 +17,7 @@
  */
 
 #include "devices_map.h"
-#include "device.h"
+#include "../types/device.h"
 #include "relay.h"
 #include "sensor.h"
 #include "step.h"

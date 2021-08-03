@@ -21,7 +21,6 @@
 #include <nlohmann/json.hpp>
 #include "device_type.h"
 #include "value_change.h"
-#include <boost/variant.hpp>
 #include <string>
 #include <set>
 

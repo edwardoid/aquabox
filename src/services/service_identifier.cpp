@@ -1,6 +1,6 @@
 /*
  * AquaBox
- * Copyright (C) 2020  Eduard Sargsyan
+ * Copyright (C) 2019  Eduard Sargsyan
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,39 +16,8 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#pragma once
+#include "service_identifier.h"
 
-#include "enumerations.h"
-
-namespace aquabox
-{
-    enum class DeviceClass: int
-    {
-        Unknown = 0,
-        Relay,
-        AnalogRelay,
-        Sensor,
-        Step
-    };
-
-    enum class DeviceType: int
-    {
-        Generic = 0,
-        Light,
-        AirPump,
-        WaterPump,
-        InternalFilter,
-        ExternalFilter,
-        AirliftFilter,
-        SUMP,
-        Heater,
-        Cooler,
-        Feeder,
-        Dosator,
-        CO2,
-        UV,
-        PHController,
-        PHMeter,
-        Thermometer
-    };
-}
+const std::string aquabox::services::Identifier::SETTINGS = "SettingsService";
+const std::string aquabox::services::Identifier::RULES_MANAGER = "RulesManagerService";
+const std::string aquabox::services::Identifier::DEVICES_MANAGER = "DevicesManagerService";

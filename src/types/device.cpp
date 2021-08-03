@@ -17,11 +17,9 @@
  */
 
 #include "device.h"
-#include "aquabox.h"
-#include "rule.h"
-#include <log.h>
-#include <event.h>
-#include "hardware/hardware.h"
+#include "../types/rule.h"
+#include "../common/log.h"
+#include "../common/enumerations.h"
 #include <time.h>
 #include <fstream>
 #include <nlohmann/json.hpp>
@@ -175,6 +173,7 @@ void Device::setMetadata(const Metadata& metadata)
 
 std::vector<std::shared_ptr<Rule>> Device::rules() const
 {
+    /*
     RulesMap& allRules = Singleton<AquaBox>::get()->rules();
 
     std::vector<std::shared_ptr<Rule>> res;
@@ -185,7 +184,8 @@ std::vector<std::shared_ptr<Rule>> Device::rules() const
         }
     });
 
-    return res;
+    return res;*/
+    return {};
 }
 
 void Device::enableSupport(DeviceClass _class)

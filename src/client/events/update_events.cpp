@@ -18,8 +18,8 @@
 
 #include "update_events.h"
 #include <chrono>
-#include "../device.h"
-#include "../rule.h"
+#include "../../types/device.h"
+#include "../../types/rule.h"
 #include <enumerations.h>
 
 using namespace aquabox;

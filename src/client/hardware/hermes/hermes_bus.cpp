@@ -21,7 +21,7 @@
 #include "hermes_incubator.h"
 #include "hermes_hardware.h"
 #include "hermes_device_builder.h"
-#include "../../device.h"
+#include "../../types/device.h"
 #include "../../devices_map.h"
 #include "../../events/box_event.h"
 #include "../../events/update_events.h"

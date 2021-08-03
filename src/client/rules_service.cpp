@@ -17,8 +17,8 @@
  */
 
 #include "rules_service.h"
-#include "rule.h"
-#include "device.h"
+#include "../types/rule.h"
+#include "../types/device.h"
 #include "devices_map.h"
 #include "aquabox.h"
 #include "events/update_events.h"

@@ -18,8 +18,7 @@
 
 #pragma once
 
-#include "rule.h"
-#include "value_change.h"
+#include "../types/rule.h"
 #include <set>
 #include <cron_scheduler.h>
 

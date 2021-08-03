@@ -17,7 +17,8 @@
  */
 
 #include "rule_parser.h"
-#include "rule.h"
+#include "../common/log.h"
+#include "../types/rule.h"
 #include "path.h"
 
 using namespace aquabox;

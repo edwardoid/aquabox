@@ -18,7 +18,7 @@
 
 #pragma once
 
-#include "device.h"
+#include "../types/device.h"
 #include <map>
 
 namespace aquabox

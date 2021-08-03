@@ -17,7 +17,7 @@
  */
 
 #include "rules_timer.h"
-#include "rule.h"
+#include "../types/rule.h"
 #include "relay.h"
 #include "time_details.h"
 #include "aquabox.h"

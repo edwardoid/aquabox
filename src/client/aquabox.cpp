@@ -21,8 +21,8 @@
 #include "lock_file.h"
 #include "log.h"
 #include "rest_api.h"
-#include "rule.h"
-#include "device.h"
+#include "../types/rule.h"
+#include "../types/device.h"
 #include "rule_parser.h"
 #include "devices_map.h"
 #include "user.h"
@@ -294,7 +294,7 @@ bool AquaBox::removeRule(const std::string &id)
 
     if (m_rules.erase(id))
     {
-        postUpdate(std::make_shared<DeviceRulesChangedEvent>(device));
+    postUpdate(std::make_shared<DeviceRulesChangedEvent>(device));
     }
 
     Path p = m_rulesDir;

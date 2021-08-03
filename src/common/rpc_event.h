@@ -15,32 +15,24 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+#pragma once
 
-#include "value_change.h"
-#include <log.h>
+#include <string>
 
 namespace aquabox
 {
-    void to_json(nlohmann::json &j, const ValueChange &v)
+    namespace services
     {
-        j["property"] = v.property;
-        j["value"] = v.value;
-        j["when"] = v.when;
-        j["cron"] = v.cron;
-    }
-
-    void from_json(const nlohmann::json &j, ValueChange &v)
-    {
-        try
+        struct RPCEvent
         {
-            j.at("property").get_to(v.property);
-            v.value = j.at("value");
-            v.when = j.at("when");
-            v.cron = j.at("cron");
-        }
-        catch (const nlohmann::detail::exception &e)
-        {
-            LOG_ERROR << "Can't serialize Rule: " << e.what();
-        }
+            std::string sender; // service service.service_full_name()
+            int instance; // any unique identifier
+            std::string recipient;
+            int recipientInstance;
+            std::string event; // 
+            std::string to_string() const;
+            bool from_string(const std::string& serialized);
+        };
+        
     }
-} // namespace aquabox
+}

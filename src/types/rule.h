@@ -22,8 +22,6 @@
 #include <vector>
 #include <nlohmann/json.hpp>
 #include "value_change.h"
-#include "enumerations.h"
-#include "property.h"
 
 namespace aquabox
 {

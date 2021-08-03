@@ -16,7 +16,7 @@ message NetworkInfo {
     Mode mode = 4;
 }
 
-message NetworkConnectRequest {
+message NetworkConnect {
     string SSID = 1;
     string Password = 2;
 }
@@ -38,7 +38,7 @@ message ConnectionStatus {
 service NetworkManager {
     rpc GetCurrentNetwork(google.protobuf.Empty) returns (NetworkInfo) {};
     rpc IsConnectedToInternet(google.protobuf.Empty) returns (google.protobuf.BoolValue) {};
-    rpc Connect(NetworkConnectRequest) returns (stream ConnectionStatus) {};
+    rpc Connect(NetworkConnect) returns (stream ConnectionStatus) {};
     rpc StartHotspot(google.protobuf.Empty) returns (google.protobuf.Empty) {};
     rpc StopHotspot(google.protobuf.Empty) returns (google.protobuf.Empty) {};
     rpc CurrentNetworkChanged(google.protobuf.Empty) returns (stream NetworkInfo) {};

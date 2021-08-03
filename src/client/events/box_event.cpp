@@ -17,7 +17,7 @@
  */
 
 #include "box_event.h"
-#include "../device.h"
+#include "../../types/device.h"
 
 using namespace aquabox;
 

@@ -17,9 +17,8 @@
  */
 
 #include "rule.h"
-#include <log.h>
-#include <singleton.h>
-#include "devices_map.h"
+#include "../common/log.h"
+#include "../common/singleton.h"
 #include <fstream>
 
 namespace aquabox
@@ -100,7 +99,7 @@ void Rule::setDevice(const std::string& device)
 
 std::shared_ptr<class Device> Rule::resolveDevice() const
 {
-    return Singleton<DevicesMap>::i()->get(m_device);
+    return nullptr; //Singleton<DevicesMap>::i()->get(m_device);
 }
 
 bool Rule::enabled() const

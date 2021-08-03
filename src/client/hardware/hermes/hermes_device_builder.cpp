@@ -17,7 +17,7 @@
  */
 
 #include "hermes_device_builder.h"
-#include "../../device.h"
+#include "../../../types/device.h"
 #include "../../relay.h"
 #include "../../sensor.h"
 #include "../../step.h"

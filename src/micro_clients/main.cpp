@@ -2,12 +2,12 @@
 
 #include <network.grpc.pb.h>
 #include <grpcpp/client_context.h>
-#include "MicroService.h"
+#include "micro_service.h"
 #include <iostream>
-
+/*
 int main()
 {
-    aquabox::services::MicroService<aquabox::services::NetworkManager> client;
+    aquabox::services::MicroService<aquabox::services::NetworkManager> client("123");
     grpc::ClientContext cxt;
     ::google::protobuf::Empty request;
     ::google::protobuf::BoolValue response;
@@ -15,3 +15,4 @@ int main()
     std::cout << "Connected? " << response.value() << " status: " << status.error_message();
     return 0;
 }
+*/

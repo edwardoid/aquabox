@@ -19,7 +19,6 @@
 #include "step.h"
 #include <log.h>
 #include "hardware/hardware.h"
-#include "rule.h"
 
 using namespace aquabox;
 
