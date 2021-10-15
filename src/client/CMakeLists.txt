@@ -14,13 +14,11 @@ file(COPY ${AQUABOX_ROOT_DIR}/config/aquabox/$ENV{BUILD_PLATFORM}/assets DESTINA
 file(COPY ${AQUABOX_ROOT_DIR}/config/aquabox/$ENV{BUILD_PLATFORM}/devices DESTINATION ${CMAKE_BINARY_DIR}/bin)
 file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/bin/rules)
 
-include_directories(${NM_DBUS_INCLUDE_DIR})
-include_directories(${AQUABOX_COMMON_PATH})
-include_directories(${AQUABOX_PROTO_PATH})
-
 file(GLOB AQUABOX_SOURCES "*.cpp" "*/*.cpp" "*/hermes/*.cpp")
 
 add_executable(${PROJECT_NAME} ${AQUABOX_SOURCES})
+target_include_directories(${PROJECT_NAME} PUBLIC ${CMAKE_CURRENT_LIST_DIR}/.. ${NM_DBUS_INCLUDE_DIR})
+
 target_compile_definitions(${PROJECT_NAME} PUBLIC AB_VERSION_MAJOR=${AB_V})
 target_compile_definitions(${PROJECT_NAME} PUBLIC AB_VERSION_MINOR=${AB_v})
 target_compile_definitions(${PROJECT_NAME} PUBLIC AB_VERSION=\"${AB_V}.${AB_v}\")
@@ -31,12 +29,10 @@ find_package(libqrencode REQUIRED)
 
 target_link_libraries(${PROJECT_NAME} NMDBus fb w1temp stats)
 target_link_libraries(${PROJECT_NAME} aquabox-common)
-target_link_libraries(${PROJECT_NAME} aquabox-proto)
 target_link_libraries(${PROJECT_NAME} CONAN_PKG::tgbot)
 target_link_libraries(${PROJECT_NAME} libqrencode::libqrencode)
-target_link_libraries(${PROJECT_NAME} CONAN_PKG::mqtt_cpp)
 target_link_libraries(${PROJECT_NAME} CONAN_PKG::json-schema-validator)
-target_link_libraries(${PROJECT_NAME} ${Boost_LIBRARIES})
+target_link_libraries(${PROJECT_NAME} CONAN_PKG::boost)
 target_link_libraries(${PROJECT_NAME} OpenSSL::OpenSSL)
 target_link_libraries(${PROJECT_NAME} PNG::PNG)
 target_link_libraries(${PROJECT_NAME} CONAN_PKG::freetype)

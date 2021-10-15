@@ -11,11 +11,6 @@ message ConsumerIdentifier {
     string Address = 3;
 }
 
-message EventDescriptor {
-    string Sender = 1;
-    string SenderInstance = 2;
-}
-
 message EventData {
     string Sender = 1;
     string SenderInstance = 2;
@@ -27,9 +22,8 @@ service EventsBus {
     rpc Notify(EventData) returns (google.protobuf.Empty) {};
     rpc Subscribe(ConsumerIdentifier) returns (google.protobuf.Empty) {};
     rpc Unsubscribe(ConsumerIdentifier) returns (google.protobuf.Empty) {};
-    rpc GetUpdates(ConsumerIdentifier) returns (stream EventData) {};
 }
 
 service EventConsumer {
-    rpc NewEventAvailable(EventDescriptor) returns (google.protobuf.BoolValue) {};
+    rpc On(EventData) returns (google.protobuf.Empty) {};
 }

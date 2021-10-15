@@ -18,24 +18,22 @@
 
 #pragma once
 
-#include <string>
 #include <list>
+#include <string>
 
-namespace aquabox
-{
-    class Path: public std::string
-    {
-    public:
-        Path(std::string str = "");
-        std::string lastToken() const;
-        bool isRelative() const;
-        bool normalize();
-        bool append(std::string sub);
-        bool isDirectory() const;
-        bool exists() const;
-        std::list<Path> children() const;
-        bool contains(const Path& subPath) const;
-        Path subPath(const Path& to) const;
-        std::string extension() const;
-    };
+namespace aquabox {
+class Path : public std::string {
+public:
+    Path(std::string str = "");
+    std::string lastToken() const;
+    bool isRelative() const;
+    bool normalize();
+    bool append(std::string sub);
+    bool isDirectory() const;
+    bool exists() const;
+    std::list<Path> children() const;
+    bool contains(const Path& subPath) const;
+    Path subPath(const Path& to) const;
+    std::string extension() const;
+};
 }

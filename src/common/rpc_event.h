@@ -19,20 +19,17 @@
 
 #include <string>
 
-namespace aquabox
-{
-    namespace services
-    {
-        struct RPCEvent
-        {
-            std::string sender; // service service.service_full_name()
-            int instance; // any unique identifier
-            std::string recipient;
-            int recipientInstance;
-            std::string event; // 
-            std::string to_string() const;
-            bool from_string(const std::string& serialized);
-        };
-        
-    }
+namespace aquabox {
+namespace services {
+    struct RPCEvent {
+        std::string sender; // service service.service_full_name()
+        int instance; // any unique identifier
+        std::string recipient;
+        int recipientInstance;
+        std::string event; //
+        std::string to_string() const;
+        bool from_string(const std::string& serialized);
+    };
+
+}
 }

@@ -18,16 +18,14 @@
 
 #pragma once
 
-#include <fstream>
 #include "iot_definitions.h"
 #include "path.h"
+#include <fstream>
 
-namespace aquabox
-{
-    class HttpHelpers
-    {
-    public:
+namespace aquabox {
+class HttpHelpers {
+public:
     static void serveFile(Web::Response response, Path path, Web::Headers& headers, bool removeWhenFinished);
     static void serveStream(Web::Response response, Path path, std::shared_ptr<std::ifstream> ifs, size_t length, bool removeWhenFinished);
-    };
+};
 }

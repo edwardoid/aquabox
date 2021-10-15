@@ -9,6 +9,11 @@ message SettingsSetIntRequest {
     int32 value = 2;
 }
 
+message SettingsSetBoolRequest {
+    string key = 1;
+    bool value = 2;
+}
+
 message SettingsSetStringRequest {
     string key = 1;
     string value = 2;
@@ -20,6 +25,9 @@ service SettingsProvider {
 
     rpc GetString(google.protobuf.StringValue) returns (google.protobuf.StringValue);
     rpc SetString(SettingsSetStringRequest) returns (google.protobuf.Empty);
+
+    rpc GetBool(google.protobuf.StringValue) returns (google.protobuf.BoolValue);
+    rpc SetBool(SettingsSetBoolRequest) returns (google.protobuf.Empty);
 
     rpc AllocatePort(google.protobuf.StringValue) returns (google.protobuf.UInt32Value) {};
     rpc GetPort(google.protobuf.StringValue) returns (google.protobuf.UInt32Value) {};

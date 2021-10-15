@@ -24,12 +24,14 @@ fi
 
 echo "Running conan with args: $DOCKER_EXTRA_ARGS_INT"
 
-sudo docker run --privileged \
-                -v $SOURCES_DIR:/sources \
-                -v $BUILD_DIR:/build \
-                $DOCKER_EXTRA_ARGS_INT \
-                -e BUILD_PLATFORM=$1 \
-                -e CONAN_CPU_COUNT=4 \
-                -it --rm $IMAGE:latest \
-                /bin/bash
+docker run --privileged \
+           -v $SOURCES_DIR:/sources \
+           -v $BUILD_DIR:/build \
+           -v /etc/timezone:/etc/timezone:ro \
+           -v /etc/localtime:/etc/localtime:ro \
+           $DOCKER_EXTRA_ARGS_INT \
+           -e BUILD_PLATFORM=$1 \
+           -e CONAN_CPU_COUNT=$CPU_COUNT \
+           -it --rm $IMAGE:latest \
+            /bin/bash
 

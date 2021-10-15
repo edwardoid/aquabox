@@ -6,12 +6,12 @@
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
@@ -21,8 +21,8 @@
 #include "../cloud.h"
 #include "../networking/network_manager.h"
 #include <rotate.h>
+#include <common/singleton.h>
 #include <sprite.h>
-#include <singleton.h>
 
 #define ASSISTANT_X 132
 #define ASSISTANT_Y 97
@@ -38,24 +38,21 @@
 
 using namespace aquabox;
 
-
-std::size_t StatusBarScreen::height() const
-{
-    return 24;
-}
+std::size_t StatusBarScreen::height() const { return 24; }
 
 void StatusBarScreen::draw()
 {
     auto fb = Singleton<LIBFB_NS::FrameBuffer>::i();
-    if (fb == nullptr)
-    {
+    if (fb == nullptr) {
         return;
     }
 
     std::vector<int> elements;
 
     int wifiIndex = 10;
-    int signalStrength = Singleton<NetworkManager>::available ?  Singleton<NetworkManager>::i()->currentConnection.value.signal : 0;
+    int signalStrength = Singleton<NetworkManager>::available
+        ? Singleton<NetworkManager>::i()->currentConnection.value.signal
+        : 0;
     if (signalStrength > 0) {
         wifiIndex = signalStrength / 25;
     }
@@ -67,9 +64,7 @@ void StatusBarScreen::draw()
     int cloudIndex = isRegistered ? 7 : 6;
     elements.push_back(cloudIndex);
 
-
-    int assistantIndex = Singleton<AquaBox>::get()->assistantIsConnected() ? 8
-                                                             : 9;
+    int assistantIndex = Singleton<AquaBox>::get()->assistantIsConnected() ? 8 : 9;
 
     elements.push_back(assistantIndex);
 
@@ -78,17 +73,13 @@ void StatusBarScreen::draw()
     fb->fillRect(0, 0, fb->width(), 24, 0x81bf2a);
     fb->drawLine(0, height(), fb->width(), 24, 0xebeb8c);
 
-
-    static const uint32_t live[] = {
-        0xff0000, 0x00ff00, 0x0000ff
-    };
+    static const uint32_t live[] = { 0xff0000, 0x00ff00, 0x0000ff };
 
     fb->fillRect(0, 0, 5, 5, live[time(NULL) % 3]);
-    
+
     int spacing = (fb->width() - 24 * elements.size()) / (elements.size() + 1);
 
-    for(int i = 0; i < elements.size(); ++i)
-    {
+    for (int i = 0; i < elements.size(); ++i) {
         statusBar.jump(elements[i]);
         statusBar.mapTo(i * (24 + spacing) + spacing, 0);
         fb->draw(&statusBar);

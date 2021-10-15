@@ -6,23 +6,23 @@
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 #include "cloud_screen.h"
-#include <log.h>
 #include "../cloud.h"
-#include "settings.h"
+#include <micro_clients/settings.h>
 #include <framebuffer.h>
-#include <singleton.h>
 #include <libfb_globals.h>
+#include <common/log.h>
+#include <common/singleton.h>
 using namespace aquabox;
 
 CloudScreen::CloudScreen()
@@ -56,7 +56,8 @@ void CloudScreen::draw()
 
     m_stateImage.mapTo((fb->width() - m_stateImage.width()) / 2, y);
 
-    m_text.mapTo((fb->width() - m_text.width()) / 2, y + m_stateImage.height() + 4);
+    m_text.mapTo((fb->width() - m_text.width()) / 2,
+        y + m_stateImage.height() + 4);
 
     fb->draw(&m_text);
     fb->draw(&m_stateImage);
@@ -64,11 +65,9 @@ void CloudScreen::draw()
 
 bool CloudScreen::hasUpdate()
 {
-    if (Singleton<Cloud>::available)
-    {
-        if (m_lastState != (bool) Singleton<Cloud>::i()->isRegistered)
-        {
-            m_lastState = (bool) Singleton<Cloud>::i()->isRegistered;
+    if (Singleton<Cloud>::available) {
+        if (m_lastState != (bool)Singleton<Cloud>::i()->isRegistered) {
+            m_lastState = (bool)Singleton<Cloud>::i()->isRegistered;
             m_stateImage.jump(m_lastState ? 1 : 0);
             m_timeout.reset();
         }
@@ -78,4 +77,3 @@ bool CloudScreen::hasUpdate()
 
     return false;
 }
-

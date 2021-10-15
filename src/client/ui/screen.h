@@ -18,22 +18,21 @@
 
 #pragma once
 
-#include <pngprovider.h>
 #include <framebuffer.h>
 #include <pngimage.h>
+#include <pngprovider.h>
 
-namespace aquabox
-{
-    class Screen
-    {
-    public:
-        Screen() = default;
-        static std::string resource(std::string name);
-        static std::string asset(std::string name);
-        static std::string font(std::string name);
-        static std::shared_ptr<LIBFB_NS::PNGImage> pixmap(std::string name);
-        void show();
-    protected:
-        virtual void draw() = 0;
-    };
+namespace aquabox {
+class Screen {
+public:
+    Screen() = default;
+    static std::string resource(std::string name);
+    static std::string asset(std::string name);
+    static std::string font(std::string name);
+    static std::shared_ptr<LIBFB_NS::PNGImage> pixmap(std::string name);
+    void show();
+
+protected:
+    virtual void draw() = 0;
+};
 }

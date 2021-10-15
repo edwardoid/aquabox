@@ -6,21 +6,21 @@
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 #include "ws_api.h"
-#include "event.h"
-#include "enumerations.h"
-#include "command.h"
+#include <common/command.h>
 #include "command_executor.h"
+#include <common/enumerations.h>
+#include <types/event.h>
 
 using namespace aquabox::ws;
 
@@ -30,12 +30,13 @@ void API::onOpen(const std::string& route, Connection connection)
 
     auto connections = m_connections.find(route);
     if (connections == m_connections.end()) {
-        m_connections.insert({ route, std::vector<Connection>({ connection })});
-    } else  {
+        m_connections.insert({ route, std::vector<Connection>({ connection }) });
+    } else {
         connections->second.push_back(connection);
     }
 }
-void API::onClose(const std::string& route, Connection connection, Status status, const std::string& reason) 
+void API::onClose(const std::string& route, Connection connection,
+    Status status, const std::string& reason)
 {
     std::lock_guard<std::mutex> guard(m_lock);
 
@@ -44,10 +45,9 @@ void API::onClose(const std::string& route, Connection connection, Status status
         return;
     }
 
-    for(auto i = connections->second.begin(); i != connections->second.end(); ++i)
-    {
-        if(i->get() == connection.get())
-        {
+    for (auto i = connections->second.begin(); i != connections->second.end();
+         ++i) {
+        if (i->get() == connection.get()) {
             connections->second.erase(i);
             break;
         }
@@ -64,23 +64,19 @@ void API::postEvent(Event event)
         return;
     }
 
-    for(auto& connection : connections->second) {
+    for (auto& connection : connections->second) {
         connection->send(data);
     }
 }
 
-DEFINE_WS_API_IMPL(Updates)
-{
-    connection->send("Updates");
-}
+DEFINE_WS_API_IMPL(Updates) { connection->send("Updates"); }
 
 DEFINE_WS_API_IMPL(Commands)
 {
     nlohmann::json request;
     try {
         request = nlohmann::json::parse(response->string());
-    }
-    catch(nlohmann::json::parse_error& e) {
+    } catch (nlohmann::json::parse_error& e) {
         LOG_ERROR << "Can't parse command: " << e.what();
         return;
     }
@@ -123,18 +119,18 @@ DEFINE_WS_API_IMPL(Commands)
     }
 
     auto params = request.find("params");
-    if (params != request.end() && params->is_object())
-    {
-        for(auto& x : params.value().items()) {
+    if (params != request.end() && params->is_object()) {
+        for (auto& x : params.value().items()) {
             command.setParameter(x.key(), x.value());
         }
     }
-    
+
     CommandExecutor exec;
-    if(!exec.exec(command)) {
+    if (!exec.exec(command)) {
         LOG_ERROR << "Can't execute command! " << (int)(command.operation());
     } else {
-        LOG_DEBUG << "Command " << (int)(command.operation()) << " finished with " << (int)(command.result());
+        LOG_DEBUG << "Command " << (int)(command.operation()) << " finished with "
+                  << (int)(command.result());
     }
 
     nlohmann::json resp;
@@ -143,7 +139,8 @@ DEFINE_WS_API_IMPL(Commands)
 
     try {
         resp["data"] = command.response();
-    } catch(...) {}    
+    } catch (...) {
+    }
 
     connection->send(resp.dump(4));
 }

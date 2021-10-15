@@ -6,28 +6,28 @@
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 #include "cloud.h"
-#include <log.h>
 #include "aquabox.h"
-#include "serial.h"
-#include <settings.h>
-#include <event.h>
-#include "events/cloud_event.h"
 #include "commands_stream.h"
+#include <types/cloud_event.h>
 #include "events_stream.h"
 #include "networking/network_manager.h"
-#include <singleton.h>
+#include <types/serial.h>
+#include <types/event.h>
+#include <common/log.h>
+#include <common/singleton.h>
 #include <nlohmann/json.hpp>
+#include <micro_clients/settings.h>
 
 #define AUTH_URL "/hw/api/v1/register"
 
@@ -38,7 +38,8 @@ Cloud::Cloud()
     , isRegistered(false)
 {
     isRegistered.connect([](bool registered) {
-        Singleton<aquabox::AquaBox>::get()->postUpdate(std::make_shared<CloudEvent>(registered));
+        Singleton<aquabox::AquaBox>::get()->postUpdate(
+            std::make_shared<CloudEvent>(registered));
     });
 }
 
@@ -48,24 +49,21 @@ void Cloud::connect()
         return;
     }
     m_updateTimeout.reset();
-    m_streams.for_each([](const std::string& name, std::shared_ptr<CloudStream>& stream) {
-        try
-        {
-            if (!stream->isAttached()) {
-                stream->attach();
+    m_streams.for_each(
+        [](const std::string& name, std::shared_ptr<CloudStream>& stream) {
+            try {
+                if (!stream->isAttached()) {
+                    stream->attach();
+                }
+            } catch (std::exception& e) {
+                LOG_ERROR << "Can't connect to stream " << name << ": " << e.what();
+            } catch (...) {
+                LOG_ERROR << "Can't connect to stream " << name;
             }
-        }
-        catch (std::exception& e) {
-            LOG_ERROR << "Can't connect to stream " << name << ": " << e.what();
-        } catch(...) {
-            LOG_ERROR << "Can't connect to stream " << name;
-        }
-    });
+        });
 }
 
-void Cloud::disconnect()
-{
-}
+void Cloud::disconnect() { }
 
 bool Cloud::checkIfRegistered()
 {
@@ -83,26 +81,22 @@ bool Cloud::requestStreams()
 {
     bool streamsAreOk = true;
 
-    m_streams.for_each([&streamsAreOk](auto& name, auto& stream){
+    m_streams.for_each([&streamsAreOk](auto& name, auto& stream) {
         streamsAreOk &= stream->isAttached();
     });
 
     if (streamsAreOk && !m_streams.empty()) {
         return streamsAreOk;
     }
-    const auto cloudBaseUrl = Settings::string(Settings::Keys::CLOUD_URL, Settings::Defaults::CLOUD_URL);
+    const auto cloudBaseUrl = Settings::string(Settings::Keys::CLOUD_URL,
+        Settings::Defaults::CLOUD_URL);
     const std::string cloudHttpUrl = cloudBaseUrl + ":" + std::to_string(Settings::integer(Settings::Keys::CLOUD_PORT, Settings::Defaults::CLOUD_PORT));
-    const std::string cloudWSUrl =  cloudBaseUrl + ":" + std::to_string(Settings::integer(Settings::Keys::CLOUD_WS_PORT, Settings::Defaults::CLOUD_WS_PORT));
+    const std::string cloudWSUrl = cloudBaseUrl + ":" + std::to_string(Settings::integer(Settings::Keys::CLOUD_WS_PORT, Settings::Defaults::CLOUD_WS_PORT));
     LOG_INFO << "Checking if device is registered on " << cloudHttpUrl;
     HttpClient client(cloudHttpUrl);
 
     static const nlohmann::json authData(
-        {
-            { "type", "box" },
-            { "id", SERIAL_NUMBER },
-            { "version", "1.0"}
-        }
-    );
+        { { "type", "box" }, { "id", SERIAL_NUMBER }, { "version", "1.0" } });
 
     try {
         auto response = client.request("POST", AUTH_URL, authData.dump(4));
@@ -118,22 +112,21 @@ bool Cloud::requestStreams()
                 for (size_t i = 0; i < streamsAvailable.value().size(); ++i) {
                     auto stream = streamsAvailable.value().at(i);
                     if (stream.is_string()) {
-                        auto name  = stream.get<std::string>();
+                        auto name = stream.get<std::string>();
                         std::string url = cloudWSUrl;
                         url += "/hw/api/v1/stream/";
                         url += SERIAL_NUMBER;
                         url += "/";
                         url += name;
                         std::shared_ptr<CloudStream> existingStream = m_streams.get(name, nullptr);
-                        
+
                         if (existingStream) {
-                            if (!existingStream->isAttached())
-                            {
-                                LOG_DEBUG << "Stream " << name << " exists but not attached. Reattaching...";
+                            if (!existingStream->isAttached()) {
+                                LOG_DEBUG << "Stream " << name
+                                          << " exists but not attached. Reattaching...";
                                 existingStream->attach();
                             }
-                        }
-                        else {
+                        } else {
                             std::shared_ptr<CloudStream> stream;
                             LOG_DEBUG << "Creating stream" << name;
                             if (name == "commands") {
@@ -151,25 +144,20 @@ bool Cloud::requestStreams()
             return true;
         } else {
             disconnect();
-            LOG_ERROR << "Device is not registered. " << response->status_code << " cause: " << response->content.string();
+            LOG_ERROR << "Device is not registered. " << response->status_code
+                      << " cause: " << response->content.string();
             return false;
         }
-    }
-    catch(std::exception& e) {
-        LOG_ERROR << e.what() << " was connected to " << m_streams.size() << " streams";
+    } catch (std::exception& e) {
+        LOG_ERROR << e.what() << " was connected to " << m_streams.size()
+                  << " streams";
         return false;
     }
 }
 
-void Cloud::doRegister()
-{
-    checkIfRegistered();
-}
+void Cloud::doRegister() { checkIfRegistered(); }
 
-bool Cloud::isConnected()
-{
-    return false;
-}
+bool Cloud::isConnected() { return false; }
 
 void Cloud::heartheat()
 {
@@ -178,7 +166,7 @@ void Cloud::heartheat()
         return;
     }
     m_working = true;
-    Singleton<AquaBox>::get()->doLater("cloud_connection_manager", [this](){
+    Singleton<AquaBox>::get()->doLater("cloud_connection_manager", [this]() {
         do {
             if (isConnected()) {
                 break;
@@ -194,8 +182,7 @@ void Cloud::heartheat()
             } else {
                 doRegister();
             }
-        }
-        while(false);
+        } while (false);
 
         m_working = false;
     });

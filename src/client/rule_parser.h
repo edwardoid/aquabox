@@ -21,14 +21,12 @@
 #include <memory>
 #include <unordered_map>
 
-namespace aquabox
-{
-    class Rule;
-    class Path;
+namespace aquabox {
+class Rule;
+class Path;
 
-    class RulesParser
-    {
-    public:
-        static std::unordered_map<std::string, std::shared_ptr<Rule>> parse(Path& root);
-    };
+class RulesParser {
+public:
+    static std::unordered_map<std::string, std::shared_ptr<Rule>> parse(Path& root);
+};
 }

@@ -21,20 +21,19 @@
 #include <chrono>
 #include <functional>
 
-namespace aquabox
-{
-    class RepetiveTask
-    {
-    public:
-        using Resolution = std::chrono::milliseconds;
-        using Clock = std::chrono::system_clock;
-        RepetiveTask(Resolution timeout,
-                     std::function<void(void)> = nullptr);
-        void setTask(std::function<void(void)> task);
-        void operator() ();
-    private:
-        Clock::time_point m_last;
-        Resolution m_timeout;
-        std::function<void(void)> m_task;
-    };
+namespace aquabox {
+class RepetiveTask {
+public:
+    using Resolution = std::chrono::milliseconds;
+    using Clock = std::chrono::system_clock;
+    RepetiveTask(Resolution timeout,
+        std::function<void(void)> = nullptr);
+    void setTask(std::function<void(void)> task);
+    void operator()();
+
+private:
+    Clock::time_point m_last;
+    Resolution m_timeout;
+    std::function<void(void)> m_task;
+};
 }

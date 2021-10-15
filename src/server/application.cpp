@@ -1,13 +1,10 @@
 #include "application.h"
-#include "database.h"
 #include "boxes_manager.h"
+#include "database.h"
 
 using namespace aquabox;
 
-bool Application::isAuthorized(std::string boxId)
-{
-    return true;
-}
+bool Application::isAuthorized(std::string boxId) { return true; }
 
 Command& Application::runCommand(std::string boxId, Command& command)
 {

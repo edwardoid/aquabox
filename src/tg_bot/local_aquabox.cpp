@@ -17,51 +17,53 @@
  */
 
 #include "local_aquabox.h"
-#include "../micro_clients/services.h"
 #include "../common/log.h"
+#include "../micro_clients/services.h"
 
 using namespace aquabox;
 
 LocalAquaboxAPI::LocalAquaboxAPI()
-    : EventsBus("LocalAPI")
 {
 }
 
-std::vector<Device> LocalAquaboxAPI::devices()
+std::vector<DeviceRef> LocalAquaboxAPI::devices()
 {
     return Singleton<IDevicesManager>::i()->all();
 }
 
-std::vector<Rule> LocalAquaboxAPI::rules()
+std::vector<RuleRef> LocalAquaboxAPI::rules()
 {
-    return Singleton<IRulesManager>::i()->all();
+    return {}; //Singleton<IRulesManager>::i()->all();
 }
 
 void LocalAquaboxAPI::start()
 {
-    std::string api_key = Singleton<ISettings>::i()->get("TG_API_KEY", "1406003356:AAGsrEfW77j7oUbApyev6ulmjWlPuHahrv8");
+    std::string api_key = Singleton<ISettings>::i()->get(
+        "TG_API_KEY", std::string("1406003356:AAGsrEfW77j7oUbApyev6ulmjWlPuHahrv8"));
     m_bot = std::make_shared<TgBot::Bot>(api_key);
-    m_bot->getEvents().onCommand("list_devices", [this](TgBot::Message::Ptr message) {
-        std::string reply = "You have ";
-        LOG_DEBUG << "Requesting devices";
-        reply += std::to_string(devices().size());
-        LOG_DEBUG << "Done";
-        reply += " devices!";
-        m_bot->getApi().sendMessage(message->chat->id, reply);
-    });
+    m_bot->getEvents().onCommand(
+        "list_devices", [this](TgBot::Message::Ptr message) {
+            std::string reply = "You have ";
+            LOG_DEBUG << "Requesting devices";
+            reply += std::to_string(devices().size());
+            LOG_DEBUG << "Done";
+            reply += " devices!";
+            m_bot->getApi().sendMessage(message->chat->id, reply);
+        });
 
-    m_bot->getEvents().onCommand("list_rules", [this](TgBot::Message::Ptr message) {
-        std::string reply = "You have ";
-        reply += std::to_string(rules().size());
-        reply += " rules!";
-        m_bot->getApi().sendMessage(message->chat->id, reply);
-    });
+    m_bot->getEvents().onCommand(
+        "list_rules", [this](TgBot::Message::Ptr message) {
+            std::string reply = "You have ";
+            reply += std::to_string(rules().size());
+            reply += " rules!";
+            m_bot->getApi().sendMessage(message->chat->id, reply);
+        });
 
-    m_bot->getEvents().onCommand("subscribe", [this](TgBot::Message::Ptr message) {
-        m_chats.insert(message->chat->id);
-        m_bot->getApi().sendMessage(message->chat->id, "Subscribed!");
-    });
-
+    m_bot->getEvents().onCommand(
+        "subscribe", [this](TgBot::Message::Ptr message) {
+            m_chats.insert(message->chat->id);
+            m_bot->getApi().sendMessage(message->chat->id, "Subscribed!");
+        });
 
     try {
         printf("Bot username: %s\n", m_bot->getApi().getMe()->username.c_str());

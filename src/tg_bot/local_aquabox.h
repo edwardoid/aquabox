@@ -18,21 +18,19 @@
 
 #pragma once
 
-#include "../services/aquabox_api.h"
-#include "../common/events_listener.h"
+#include <services/aquabox_api.h>
 #include <tgbot/tgbot.h>
 
-namespace aquabox
-{
-    class LocalAquaboxAPI final: public IAquaboxApi, protected EventsBus
-    {
-    public:
-        LocalAquaboxAPI();
-        void start();
-        virtual std::vector<Device> devices() override;
-        virtual std::vector<Rule> rules() override;
-    private:
-        std::shared_ptr<TgBot::Bot> m_bot;
-        std::set<std::int64_t> m_chats;
-    };
+namespace aquabox {
+class LocalAquaboxAPI final : public IAquaboxApi {
+public:
+    LocalAquaboxAPI();
+    void start();
+    virtual std::vector<DeviceRef> devices() override;
+    virtual std::vector<RuleRef> rules() override;
+
+private:
+    std::shared_ptr<TgBot::Bot> m_bot;
+    std::set<std::int64_t> m_chats;
+};
 }

@@ -16,12 +16,14 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <iostream>
-#include <grpcpp/server_builder.h>
-#include "../micro_clients/settings.h"
-#include "../common/singleton.h"
+#include <common/singleton.h>
+#include <micro_clients/settings.h>
+#include <services/events.h>
 #include "AquaboxClientServer.h"
+#include <grpcpp/server_builder.h>
+#include <iostream>
 
+const std::string aquabox::IEvents::APPLICATION("ab_client");
 
 int main()
 {
@@ -31,14 +33,16 @@ int main()
     std::string server_address("0.0.0.0:");
 
     {
-        server_address += std::to_string(Singleton<ISettings>::i()->port(services::AquaboxAPI::service_full_name(), true));
+        server_address += std::to_string(Singleton<ISettings>::i()->port(
+            services::AquaboxAPI::service_full_name(), true));
     }
 
     grpc::ServerBuilder builder;
     builder.AddListeningPort(server_address, grpc::InsecureServerCredentials());
     builder.RegisterService(&service);
     std::unique_ptr<grpc::Server> server(builder.BuildAndStart());
-    std::cout << "Server " << services::AquaboxAPI::service_full_name() << " listening on " << server_address << std::endl;
+    std::cout << "Server " << services::AquaboxAPI::service_full_name()
+              << " listening on " << server_address << std::endl;
     server->Wait();
     return 0;
 }

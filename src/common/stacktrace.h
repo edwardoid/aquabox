@@ -22,11 +22,9 @@
 #include <string>
 #include <vector>
 
-namespace aquabox
-{
-    struct StackTrace
-    {
-        StackTrace();
-        static std::vector<std::string> st();
-    };
+namespace aquabox {
+struct StackTrace {
+    StackTrace();
+    static std::vector<std::string> st();
+};
 }

@@ -6,19 +6,19 @@
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 #include "route.h"
-#include <sstream>
 #include <regex>
+#include <sstream>
 
 using namespace aquabox;
 
@@ -51,17 +51,13 @@ Route& Route::string(std::string name)
     return *this;
 }
 
-Route Route::sub() const
-{
-    return *this;
-}
+Route Route::sub() const { return *this; }
 
 std::string Route::url() const
 {
     std::stringstream ss;
     ss << '^';
-    for (auto& token : m_components)
-    {
+    for (auto& token : m_components) {
         ss << '/' << token;
     }
     ss << '$';
@@ -88,12 +84,13 @@ std::vector<std::string> Route::parse(std::string& url) const
     return tokens;
 }
 
-std::unordered_map<std::string, std::string> Route::extract(std::string& url) const
+std::unordered_map<std::string, std::string>
+Route::extract(std::string& url) const
 {
     std::vector<std::string> c = parse(url);
     std::unordered_map<std::string, std::string> extracted;
 
-    for(auto& pv : m_component2Indx) {
+    for (auto& pv : m_component2Indx) {
         if (pv.second < c.size()) {
             extracted.insert({ pv.first, c[pv.second] });
         }

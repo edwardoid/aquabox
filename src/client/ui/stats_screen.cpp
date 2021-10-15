@@ -6,20 +6,20 @@
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 #include "stats_screen.h"
 
-#include <singleton.h>
-#include <performance_metrics.h>
+#include <common/performance_metrics.h>
+#include <common/singleton.h>
 #include <sstream>
 
 using namespace aquabox;
@@ -35,11 +35,9 @@ StatsScreen::StatsScreen()
 void StatsScreen::draw()
 {
     auto fb = Singleton<LIBFB_NS::FrameBuffer>::i();
-    if (fb == nullptr)
-    {
+    if (fb == nullptr) {
         return;
     }
-
 
     StatusBarScreen::draw();
 
@@ -54,15 +52,15 @@ void StatsScreen::draw()
     if (h.count() / 24 > 0) {
         ss << " " << h.count() / 24 << "d";
     }
-    
+
     if (h.count() % 24 > 0) {
         ss << " " << h.count() % 24 << "h";
     }
-    
+
     if (m.count() % 60 > 0) {
         ss << " " << m.count() % 60 << "m";
     }
-    
+
     ss << " " << s.count() % 60 << "s";
 
     m_uptime.setText(ss.str());

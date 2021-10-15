@@ -21,26 +21,25 @@
 #include "command.h"
 #include "results_map.h"
 #include <memory>
-#include <string>
 #include <server_ws.hpp>
+#include <string>
 #include <unordered_map>
 
-namespace aquabox
-{
-    class BoxConnection
-    {
-    public:
-        BoxConnection(const std::string& id, ResultsMap<Command>& results);
-        using WSServer = SimpleWeb::SocketServer<SimpleWeb::WS>;
-        const std::string& id() const;
-        bool empty() const;
-        void ready(std::string data);
-        void runCommand(Command& cmd);
-        ResultsMap<Command>& results;
-        std::shared_ptr<WSServer::Connection> logs;
-        std::shared_ptr<WSServer::Connection> events;
-        std::shared_ptr<WSServer::Connection> commands;
-    private:
-        std::string m_id;
-    };
+namespace aquabox {
+class BoxConnection {
+public:
+    BoxConnection(const std::string& id, ResultsMap<Command>& results);
+    using WSServer = SimpleWeb::SocketServer<SimpleWeb::WS>;
+    const std::string& id() const;
+    bool empty() const;
+    void ready(std::string data);
+    void runCommand(Command& cmd);
+    ResultsMap<Command>& results;
+    std::shared_ptr<WSServer::Connection> logs;
+    std::shared_ptr<WSServer::Connection> events;
+    std::shared_ptr<WSServer::Connection> commands;
+
+private:
+    std::string m_id;
+};
 }

@@ -17,34 +17,28 @@
  */
 
 #include "aquabox.h"
-#include "settings.h"
-#include "lock_file.h"
-#include "log.h"
-#include "rest_api.h"
-#include "../types/rule.h"
-#include "../types/device.h"
-#include "rule_parser.h"
-#include "devices_map.h"
-#include "user.h"
-#include "events/update_events.h"
-#include "events/network_events.h"
-#include "options.h"
-#include "repetive_task.h"
+#include <types/types.h>
+#include <types/rule.h>
 #include "cloud.h"
-#include "web_server.h"
-#include "networking/network_manager.h"
-#include "ui/screen_manager.h"
+#include <types/network_events.h>
+#include <types/update_events.h>
 #include "global_timer.h"
-#include "rules_timer.h"
-#include "cloud.h"
-#include "hardware/network_layer.h"
-#include <singleton.h>
-#include <pstream.h>
-#include <exception>
+#include "lock_file.h"
+#include <common/log.h>
+#include "networking/network_manager.h"
+#include "options.h"
+#include <common/repetive_task.h>
+#include "rest_api.h"
+#include <common/singleton.h>
+#include <micro_clients/settings.h>
+#include <micro_clients/events.h>
+#include "ui/screen_manager.h"
+#include "user.h"
+#include "web_server.h"
 #include <chrono>
+#include <exception>
+#include <pstream.h>
 #include <random>
-
-#include "rules_service.h"
 
 #define LOG_FILE_SIZE_IN_MB 10
 #define BYTES_IN_MB 1000000
@@ -53,14 +47,17 @@
 using namespace aquabox;
 
 AquaBox::AquaBox()
-    : m_pool(Settings::integer(Settings::Keys::THREADS, std::thread::hardware_concurrency())), m_fileAppender("./../log/aquabox.log", LOG_FILE_SIZE_IN_MB * BYTES_IN_MB, MAX_LOG_FILES), m_rulesTimer(new RulesTimer()), m_server(new WebServer)
+    : m_pool(Settings::integer(Settings::Keys::THREADS,
+        std::thread::hardware_concurrency()))
+    , m_fileAppender("./../log/aquabox.log", LOG_FILE_SIZE_IN_MB * BYTES_IN_MB,
+          MAX_LOG_FILES)
+    , m_server(new WebServer)
 {
-    //PerformanceMetrics::update();
+    // PerformanceMetrics::update();
 }
 
 AquaBox::~AquaBox()
 {
-    delete m_rulesTimer;
     delete m_server;
 }
 
@@ -68,29 +65,41 @@ int AquaBox::start()
 {
     Lockfile lock;
 
-    plog::init(plog::severityFromString(Settings::string(Settings::Keys::LOG_LEVEL, plog::severityToString(plog::Severity::info)).c_str()),
-               &m_consoleAppender);
+    plog::init(plog::severityFromString(
+                   Settings::string(Settings::Keys::LOG_LEVEL,
+                       plog::severityToString(plog::Severity::info))
+                       .c_str()),
+        &m_consoleAppender);
 
-    if (!Options::Service)
-    {
-        plog::init(plog::severityFromString(Settings::string(Settings::Keys::LOG_LEVEL, plog::severityToString(plog::Severity::info)).c_str()),
-                   &m_fileAppender);
+    if (!Options::Service) {
+        plog::init(
+            plog::severityFromString(
+                Settings::string(Settings::Keys::LOG_LEVEL,
+                    plog::severityToString(plog::Severity::info))
+                    .c_str()),
+            &m_fileAppender);
     }
 
-    if (Singleton<NetworkManager>::available)
-    {
+    if (Singleton<NetworkManager>::available) {
         NetworkManager* nm = Singleton<NetworkManager>::i();
-        nm->setInterface(Settings::string(Settings::Keys::CLIENT_INTERFACE, Settings::Defaults::CLIENT_INTERFACE));
-        nm->currentConnection.connect([this](Connection c) { postUpdate(std::make_shared<NetworkChangedEvent>(c)); });
-        LOG_DEBUG << "Signal id: " << nm->deviceState.connect([this](NetworkDeviceState state) { postUpdate(std::make_shared<NetworkDeviceStateEvent>(state)); });
+        nm->setInterface(Settings::string(Settings::Keys::CLIENT_INTERFACE,
+            Settings::Defaults::CLIENT_INTERFACE));
+        nm->currentConnection.connect([this](Connection c) {
+            postUpdate(std::make_shared<NetworkChangedEvent>(c));
+        });
+        LOG_DEBUG << "Signal id: "
+                  << nm->deviceState.connect([this](NetworkDeviceState state) {
+                         postUpdate(std::make_shared<NetworkDeviceStateEvent>(state));
+                     });
     }
 
-    LOG_INFO << "Starting " << Settings::Defaults::APPLICATION << " ver. " << std::hex << Settings::Defaults::VERSION_MAJOR << "." << Settings::Defaults::VERSION_MINOR;
-    if (Options::Lock)
-    {
-        if (!lock.create())
-        {
-            LOG_FATAL << "Another instance of " << Settings::Defaults::APPLICATION << " is running...";
+    LOG_INFO << "Starting " << Settings::Defaults::APPLICATION << " ver. "
+             << std::hex << Settings::Defaults::VERSION_MAJOR << "."
+             << Settings::Defaults::VERSION_MINOR;
+    if (Options::Lock) {
+        if (!lock.create()) {
+            LOG_FATAL << "Another instance of " << Settings::Defaults::APPLICATION
+                      << " is running...";
             std::exit(EXIT_FAILURE);
         }
     }
@@ -104,8 +113,7 @@ int AquaBox::start()
     memset(exePath, '\0', 1024);
 
     int bytes = std::min<size_t>(readlink(procPath.c_str(), exePath, 1024), 1024 - 1);
-    if (bytes >= 0)
-    {
+    if (bytes >= 0) {
         exePath[bytes] = '\0';
     }
 
@@ -116,34 +124,33 @@ int AquaBox::start()
         cwd.erase(pos);
 
     m_wd = Settings::string(Settings::Keys::WORKING_DIRECTORY, cwd);
-    if (!m_wd.normalize())
-    {
+    if (!m_wd.normalize()) {
         LOG_ERROR << "Bad working directory path " << m_wd;
-    }
-    else
-    {
-        if (0 != chdir(m_wd.c_str()))
-        {
-            LOG_ERROR << "Can't change working directory to " << m_wd << " errno: " << errno << " : " << strerror(errno);
-        }
-        else
-        {
+    } else {
+        if (0 != chdir(m_wd.c_str())) {
+            LOG_ERROR << "Can't change working directory to " << m_wd
+                      << " errno: " << errno << " : " << strerror(errno);
+        } else {
             LOG_INFO << "Changed working direcotry to " << m_wd;
         }
     }
 
-    NetworkLayer::prepare();
+    Singleton<IEvents>::i()->subscribe("rules_manager", [this](const std::shared_ptr<Event> e) {
+        LOG_ERROR << e->serialize().dump();
+        postUpdate(e);
+    });
 
-    readDevices(m_wd);
-    readRules(m_wd);
+    Singleton<IEvents>::i()->subscribe("devices_manager", [this](const std::shared_ptr<Event> e) {
+        LOG_ERROR << e->serialize().dump();
+        postUpdate(e);
+    });
+
     readUsers();
 
     Singleton<ScreenManager>::i(); // Create manager if needed!
 
     m_globalTimer = std::make_unique<GlobalTimer>();
 
-    //m_rulesTimer->start();
-    Singleton<RulesService>::i()->recover();
     m_server->start();
 
     m_globalTimer->waitToFinish();
@@ -151,191 +158,25 @@ int AquaBox::start()
     return EXIT_SUCCESS;
 }
 
-void AquaBox::readDevices(const Path &p)
-{
-    m_devicesDir = p;
-    m_devicesDir.append("devices");
-    Singleton<DevicesMap>::i()->parse(m_devicesDir);
-    Singleton<DevicesMap>::i()->for_each([this](std::string id, std::shared_ptr<Device>& dev) {
-        bool avail = Hardware::resolve(dev->address()) != nullptr;
-        dev->setAvailable(avail);
-        nlohmann::json upd = { { "available", true} };
-        postUpdate(std::make_shared<DevicePropertyUpdateEvent>(dev, avail));
-    });
-}
-
 void AquaBox::readUsers()
 {
     auto users = Settings::array(Settings::Keys::USERS);
 
     LOG_INFO << "Loading " << users.size() << " users...";
-    for (auto u : users)
-    {
+    for (auto u : users) {
         auto usr = std::make_shared<User>();
-        if (usr->init(u))
-        {
+        if (usr->init(u)) {
             m_users.insert(usr->user(), usr);
         }
     }
 }
 
-void AquaBox::readRules(const Path &p)
-{
-    m_rulesDir = p;
-    m_rulesDir.append("rules");
-    m_rules.set(RulesParser::parse(m_rulesDir));
-}
+const Path& AquaBox::workingDirectory() const { return m_wd; }
 
-std::shared_ptr<Rule> AquaBox::findRule(const std::string &id)
-{
-    return m_rules.get(id, nullptr);
-}
+UsersMap& AquaBox::users() const { return m_users; }
 
-const Path &AquaBox::workingDirectory() const
-{
-    return m_wd;
-}
-
-RulesMap &AquaBox::rules() const
-{
-    return m_rules;
-}
-
-bool AquaBox::addRule(std::shared_ptr<Rule> &rule, bool replace)
-{
-    nlohmann::json beforeUpdate;
-
-    bool replaceError = false;
-
-    if (m_rules.on(rule->id(), [this, rule, &beforeUpdate, replace, &replaceError](auto &k, auto &v) {
-            replaceError = !replace;
-
-            if (!replaceError)
-            {
-                *v = beforeUpdate;
-                v = rule;
-            }
-        }))
-    {
-        if (replaceError)
-        {
-            LOG_ERROR << "Rule " << rule->id() << " has already beed added, and replace flag was not set";
-            return false;
-        };
-    }
-    else
-    {
-        m_rules.insert(rule->id(), rule);
-    }
-
-    if (replace) {
-        Singleton<RulesService>::i()->remove(*rule);
-    }
-    rule->setLastRun(std::chrono::system_clock::to_time_t(std::chrono::system_clock::now()) - 1);
-    Singleton<RulesService>::i()->add(*rule);
-
-    if (saveRule(rule->id()))
-    {
-        postUpdate(std::make_shared<DeviceRulesChangedEvent>(rule->resolveDevice()));
-        if (replace)
-        {
-            postUpdate(std::make_shared<RuleUpdatedEvent>(rule, beforeUpdate));
-        }
-        else
-        {
-            postUpdate(std::make_shared<RuleCreatedEvent>(rule));
-        }
-        return true;
-    }
-
-    return false;
-}
-
-bool AquaBox::saveRule(const std::string &id)
-{
-    bool saved = false;
-    m_rules.on<bool>(id, [this](auto id, auto rule) {
-        Path p = m_rulesDir;
-
-        bool pathOk = p.append((std::string)(rule->id()) + ".json");
-        if (!pathOk)
-        {
-            LOG_ERROR << "Can't form path for rule. Root: " << m_rulesDir.c_str() << " formed " << p.c_str() << " error " << strerror(errno);
-            return false;
-        }
-
-        if(!rule->saveToFile(p))
-        {
-            m_rules.erase(rule->id());
-            return false;
-        }
-
-        return true;
-    }, saved);
-
-    return saved;
-}
-
-bool AquaBox::removeRule(const std::string &id)
-{
-    if (!m_rules.erase(id))
-    {
-        return false;
-    }
-
-    std::shared_ptr<Device> device;
-    m_rules.on<std::shared_ptr<Device>>(
-        id, [this](auto id, auto rule) {
-            postUpdate(std::make_shared<RuleDeletedEvent>(rule));
-            Singleton<RulesService>::i()->remove(*rule);
-            return rule->resolveDevice();
-        },
-        device);
-
-    if (m_rules.erase(id))
-    {
-    postUpdate(std::make_shared<DeviceRulesChangedEvent>(device));
-    }
-
-    Path p = m_rulesDir;
-    p.append(id + ".json");
-    if (!p.exists())
-    {
-        LOG_ERROR << "Can't find rule " << id << " tried: " << p.c_str();
-        return false;
-    }
-    std::remove(p.c_str());
-
-    if (p.exists())
-    {
-        LOG_ERROR << "Can't remove file " << p.c_str();
-        return false;
-    }
-    return true;
-}
-
-bool AquaBox::updateDevice(std::string id)
-{
-    Path p = m_devicesDir;
-
-    bool pathOk = p.append(id + ".json");
-    if (!pathOk)
-    {
-        LOG_ERROR << "Can't form path for device. Root: " << m_devicesDir.c_str() << " formed " << p.c_str() << " error " << strerror(errno);
-        return false;
-    }
-
-    return Singleton<DevicesMap>::i()->on(id, [p] (auto id, auto dev) {
-        dev->saveToFile(p);
-    });
-}
-
-UsersMap &AquaBox::users() const
-{
-    return m_users;
-}
-
-void AquaBox::doLater(const std::string &name, std::function<void(void)> &&task)
+void AquaBox::doLater(const std::string& name,
+    std::function<void(void)>&& task)
 {
     auto id = m_perfomance.taskStarted(name);
     boost::asio::post(m_pool, [this, id, t = std::move(task)] {
@@ -350,8 +191,7 @@ void AquaBox::postUpdate(std::shared_ptr<Event> event)
 
     auto c = Singleton<Cloud>::i();
 
-    if (c != nullptr)
-    {
+    if (c != nullptr) {
         c->postUpdate(event);
     }
 }
@@ -372,10 +212,12 @@ double AquaBox::systemTemperature() const
 std::string AquaBox::configurationData() const
 {
     std::string configurationDataString;
-    configurationDataString += std::to_string(Settings::integer(Settings::Keys::HTTP_PORT, Settings::Defaults::REST_PORT));
+    configurationDataString += std::to_string(Settings::integer(
+        Settings::Keys::HTTP_PORT, Settings::Defaults::REST_PORT));
     configurationDataString += ";";
 
-    configurationDataString += std::to_string(Settings::integer(Settings::Keys::STREAM_PORT, Settings::Defaults::WS_PORT));
+    configurationDataString += std::to_string(Settings::integer(
+        Settings::Keys::STREAM_PORT, Settings::Defaults::WS_PORT));
     configurationDataString += ";";
 
     configurationDataString += SERIAL_NUMBER;

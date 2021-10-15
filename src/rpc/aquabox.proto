@@ -4,6 +4,7 @@ import "google/protobuf/wrappers.proto";
 
 package aquabox.services;
 
+import public "types.proto";
 import public "cloud.proto";
 import public "events.proto";
 import public "network.proto";

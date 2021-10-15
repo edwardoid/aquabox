@@ -16,34 +16,34 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "service.h"
 #include "rpc_event.h"
+#include "service.h"
 #include <functional>
-#include <unordered_map>
-#include <queue>
 #include <mutex>
+#include <queue>
+#include <unordered_map>
 
-namespace aquabox
-{
-    namespace services 
-    {
-        class RPCEventService: public Service<class RPCEventService>
+namespace aquabox {
+namespace services {
+    class RPCEventService : public Service<class RPCEventService> {
+    public:
+        RPCEventService() = default;
+
+        virtual ~RPCEventService()
         {
-        public:
-            RPCEventService() = default;
+        }
 
-            virtual ~RPCEventService()
-            {}
+        void notify(const std::string& sender, int instance, const std::string& receipent, int receipentInstance, const std::string& event);
+        void notify(const std::string& sender, const std::string& event);
+        void on(const std::string& sender, std::string event, std::function<void(const std::string)> cb);
 
-            void notify(const std::string& sender, int instance, const std::string& receipent, int receipentInstance, const std::string& event);
-            void notify(const std::string& sender, const std::string& event);
-            void on(const std::string& sender, std::string event, std::function<void(const std::string)> cb);
-        private:
-            std::string id(const std::string sender, const std::string& event) const;
-            void dispatch(const RPCEvent& ev);
-        private:
-            std::unordered_multimap<std::string, std::function<void(const std::string)>> m_callbacks;
-            std::queue<RPCEvent> m_queue;
-        };
-    }
+    private:
+        std::string id(const std::string sender, const std::string& event) const;
+        void dispatch(const RPCEvent& ev);
+
+    private:
+        std::unordered_multimap<std::string, std::function<void(const std::string)>> m_callbacks;
+        std::queue<RPCEvent> m_queue;
+    };
+}
 }

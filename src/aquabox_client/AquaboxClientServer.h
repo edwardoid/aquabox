@@ -20,41 +20,39 @@
 
 #include <aquabox.grpc.pb.h>
 
+#include "../micro_clients/micro_service.h"
+#include "../rpc/server_base.h"
 #include <mutex>
 #include <string>
 #include <unordered_map>
-#include "../rpc/server_base.h"
-#include "../micro_clients/micro_service.h"
 
-namespace aquabox
-{
-    namespace services
-    {
-        class RulesService;
-        class DevicesService;
-        class NetworkManager;
+namespace aquabox {
+namespace services {
+    class RulesService;
+    class DevicesService;
+    class NetworkManager;
 
-        class AquaboxClientServer final: public ServerBase<AquaboxAPI>
-        {
-        public:
-            AquaboxClientServer();
-            virtual ~AquaboxClientServer();
-            virtual ::grpc::Status devices(::grpc::ServerContext* context, const ::google::protobuf::Empty* request, ::grpc::ServerWriter<DeviceData>* writer) override;
-            virtual ::grpc::Status rules(::grpc::ServerContext* context, const ::google::protobuf::Empty* request, ::grpc::ServerWriter<RuleData>* writer) override;
-            virtual ::grpc::Status device(::grpc::ServerContext* context, const ::google::protobuf::StringValue* id, DeviceData* response) override;
-            virtual ::grpc::Status authorize(::grpc::ServerContext* context, const ::google::protobuf::StringValue* request, ::google::protobuf::BoolValue* response) override;
-            virtual ::grpc::Status rule(::grpc::ServerContext* context, const ::google::protobuf::StringValue* id, RuleData* response) override;
-            virtual ::grpc::Status addRule(::grpc::ServerContext* context, const RuleData* request, ::google::protobuf::BoolValue* response) override;
-            virtual ::grpc::Status updateRule(::grpc::ServerContext* context, const RuleData* request, ::google::protobuf::BoolValue* response) override;
-            virtual ::grpc::Status updateDevice(::grpc::ServerContext* context, const DeviceData* request, ::google::protobuf::BoolValue* response) override;
-            virtual ::grpc::Status scan(::grpc::ServerContext* context, const ::google::protobuf::Empty* request, ::google::protobuf::BoolValue* response) override;
-            virtual ::grpc::Status networks(::grpc::ServerContext* context, const ::google::protobuf::Empty* request, ::grpc::ServerWriter<NetworkInfo>* writer) override;
-            virtual ::grpc::Status connect(::grpc::ServerContext* context, const NetworkConnect* request, ::google::protobuf::BoolValue* response) override;
-            virtual ::grpc::Status status(::grpc::ServerContext* context, const ::google::protobuf::Empty* request, StatusInfo* response) override;
-        private:
-            std::unique_ptr<services::MicroService<services::RulesService>> m_rules;
-            std::unique_ptr<services::MicroService<services::DevicesService>> m_devices;
-            std::unique_ptr<services::MicroService<services::NetworkManager>> m_network;
-        };
-    }
+    class AquaboxClientServer final : public ServerBase<AquaboxAPI> {
+    public:
+        AquaboxClientServer();
+        virtual ~AquaboxClientServer();
+        virtual ::grpc::Status devices(::grpc::ServerContext* context, const ::google::protobuf::Empty* request, ::grpc::ServerWriter<DeviceData>* writer) override;
+        virtual ::grpc::Status rules(::grpc::ServerContext* context, const ::google::protobuf::Empty* request, ::grpc::ServerWriter<RuleData>* writer) override;
+        virtual ::grpc::Status device(::grpc::ServerContext* context, const ::google::protobuf::StringValue* id, DeviceData* response) override;
+        virtual ::grpc::Status authorize(::grpc::ServerContext* context, const ::google::protobuf::StringValue* request, ::google::protobuf::BoolValue* response) override;
+        virtual ::grpc::Status rule(::grpc::ServerContext* context, const ::google::protobuf::StringValue* id, RuleData* response) override;
+        virtual ::grpc::Status addRule(::grpc::ServerContext* context, const RuleData* request, ::google::protobuf::BoolValue* response) override;
+        virtual ::grpc::Status updateRule(::grpc::ServerContext* context, const RuleData* request, ::google::protobuf::BoolValue* response) override;
+        virtual ::grpc::Status updateDevice(::grpc::ServerContext* context, const DeviceData* request, ::google::protobuf::BoolValue* response) override;
+        virtual ::grpc::Status scan(::grpc::ServerContext* context, const ::google::protobuf::Empty* request, ::google::protobuf::BoolValue* response) override;
+        virtual ::grpc::Status networks(::grpc::ServerContext* context, const ::google::protobuf::Empty* request, ::grpc::ServerWriter<NetworkInfo>* writer) override;
+        virtual ::grpc::Status connect(::grpc::ServerContext* context, const NetworkConnect* request, ::google::protobuf::BoolValue* response) override;
+        virtual ::grpc::Status status(::grpc::ServerContext* context, const ::google::protobuf::Empty* request, StatusInfo* response) override;
+
+    private:
+        std::unique_ptr<services::MicroService<services::RulesService>> m_rules;
+        std::unique_ptr<services::MicroService<services::DevicesService>> m_devices;
+        std::unique_ptr<services::MicroService<services::NetworkManager>> m_network;
+    };
+}
 }

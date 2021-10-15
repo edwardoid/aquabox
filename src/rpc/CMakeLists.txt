@@ -19,6 +19,7 @@ target_link_libraries(${PROJECT_NAME}
     PUBLIC
         protobuf::libprotobuf
         CONAN_PKG::nlohmann_json
+        CONAN_PKG::boost
         gRPC::grpc
         gRPC::grpc++
 )

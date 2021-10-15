@@ -1,34 +1,30 @@
 #include "box_connection.h"
-#include <nlohmann/json.hpp>
 #include "enumerations.h"
 #include "log.h"
+#include <nlohmann/json.hpp>
 
 using namespace aquabox;
 
-BoxConnection::BoxConnection(const std::string& id, ResultsMap<Command>& resutsMap)
+BoxConnection::BoxConnection(const std::string& id,
+    ResultsMap<Command>& resutsMap)
     : results(resutsMap)
     , m_id(id)
 {
 }
 
-const std::string& BoxConnection::id() const
-{
-    return m_id;
-}
+const std::string& BoxConnection::id() const { return m_id; }
 
 void BoxConnection::ready(std::string body)
 {
     Command cmd;
     cmd.response(Result::ServerError);
-    try 
-    {
+    try {
         nlohmann::json data = nlohmann::json::parse(body);
         cmd.fromJSON(data);
-    }
-    catch(nlohmann::json::parse_error ex ) {
+    } catch (nlohmann::json::parse_error ex) {
 
+    } catch (...) {
     }
-    catch(...) {}
     results.ready(cmd.seqNum(), cmd);
 }
 
@@ -40,11 +36,12 @@ void BoxConnection::runCommand(Command& cmd)
     }
     nlohmann::json response = cmd.responseJson();
 
-    LOG_DEBUG << "Executing command\n" << response.dump();
+    LOG_DEBUG << "Executing command\n"
+              << response.dump();
 
     commands->send(response.dump());
 
-    if(!results.waitFor(cmd.seqNum(), cmd)) {
+    if (!results.waitFor(cmd.seqNum(), cmd)) {
         cmd.response(Result::AccessDenied);
     }
 }

@@ -20,12 +20,10 @@
 
 #include "timer.h"
 
-namespace aquabox
-{
-    class GlobalTimer: protected Timer
-    {
-    public:
-        GlobalTimer();
-        void waitToFinish();
-    };
+namespace aquabox {
+class GlobalTimer : protected Timer {
+public:
+    GlobalTimer();
+    void waitToFinish();
+};
 }

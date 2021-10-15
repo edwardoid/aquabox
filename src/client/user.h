@@ -18,22 +18,20 @@
 
 #pragma once
 
-#include <string>
 #include <nlohmann/json.hpp>
+#include <string>
 
-namespace aquabox
-{
-    class User
-    {
-    public:
-        bool init(const nlohmann::json& data);
+namespace aquabox {
+class User {
+public:
+    bool init(const nlohmann::json& data);
 
-        const std::string& user() const;
-        const std::string& password() const;
-        std::string token() const;
+    const std::string& user() const;
+    const std::string& password() const;
+    std::string token() const;
 
-    private:
-        std::string m_user;
-        std::string m_password;
-    };
+private:
+    std::string m_user;
+    std::string m_password;
+};
 }

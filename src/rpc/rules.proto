@@ -2,26 +2,10 @@ syntax = "proto3";
 
 package aquabox.services;
 
+import public "types.proto";
 import "google/protobuf/empty.proto";
 import "google/protobuf/wrappers.proto";
 import "google/protobuf/any.proto";
-
-message RuleAction {
-    string property = 1;
-    string cron = 2;
-    double value = 3;
-}
-
-message RuleData {
-    string id = 1;
-    string name = 2;
-    uint64 index = 3;
-    string device = 4;
-    bool enabled = 5;
-    uint64 createdAt = 6;
-    uint64 deleteAfter = 7;
-    repeated RuleAction actions = 8;
-}
 
 service RulesService {
     rpc Add(RuleData) returns (google.protobuf.BoolValue);

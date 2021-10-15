@@ -6,12 +6,12 @@
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
@@ -26,12 +26,14 @@ TimeDetails::TimeDetails(std::time_t when)
     m_internal = *std::localtime(&m_when);
 }
 
-int64_t TimeDetails::from(const TimeDetails& src, bool mins, bool hours, bool day, bool month) const
+int64_t TimeDetails::from(const TimeDetails& src, bool mins, bool hours,
+    bool day, bool month) const
 {
     return src.seconds(mins, hours, day, month) - this->seconds(mins, hours, day, month);
 }
 
-int64_t TimeDetails::seconds(bool mins, bool hours, bool day, bool month) const
+int64_t TimeDetails::seconds(bool mins, bool hours, bool day,
+    bool month) const
 {
     int64_t res = 0;
 

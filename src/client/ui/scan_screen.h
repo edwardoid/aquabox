@@ -21,12 +21,10 @@
 #include "status_bar_screen.h"
 #include <string>
 
-namespace aquabox
-{
-    class ScanScreen: public StatusBarScreen
-    {
-    public:
-        ScanScreen() = default;
-        virtual void draw() override;
-    };
+namespace aquabox {
+class ScanScreen : public StatusBarScreen {
+public:
+    ScanScreen() = default;
+    virtual void draw() override;
+};
 }

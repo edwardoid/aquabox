@@ -1,13 +1,19 @@
 #/bin/bash
 
+USABLE_COU_COUNT=$(($CPU_COUNT - 2))
+J_ARG=$(( $USABLE_COU_COUNT < 0 ? 1 : $USABLE_COU_COUNT ))
+export CONAN_CPU_COUNT=$J_ARG
+
 function clean_build {
+    touch build.log
     rm build.log && \
     rm -rf /build/* |& tee -a build.log
     return $?
 }
 
 function do_build {
-    make -j6 |& tee -a build.log && \
+    CPU_COUNT=$(grep -c ^processor /proc/cpuinfo)
+    make -j$J_ARG |& tee -a build.log && \
     chmod +rw -R /build |& tee -a build.log
     return $?
 }
@@ -15,7 +21,7 @@ function do_build {
 function prepare_build {
     if [ "$BUILD_PLATFORM" = "x86_64" ]; then
         export CONAN_EXTRA_ARGS="-pr default"
-        export CMAKE_EXTRA_ARGS="-DCMAKE_BUILD_TYPE=Release"
+        export CMAKE_EXTRA_ARGS="-DCMAKE_BUILD_TYPE=Debug"
     fi
 
     if [ "$BUILD_PLATFORM" = "armv6" ]; then

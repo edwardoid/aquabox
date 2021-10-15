@@ -2,24 +2,27 @@ syntax = "proto3";
 
 package aquabox.services;
 
+import public "types.proto";
 import "google/protobuf/empty.proto";
 import "google/protobuf/wrappers.proto";
 import "google/protobuf/any.proto";
 
-message DeviceData {
-    string id = 1;
-    string name = 2;
-    string address = 3;
-    bool rulesEnabled = 4;
-    string type = 5;
-    string clazz = 6;
-    map<string, string> meta = 7;
-    bool accepted = 8;
-    bool available = 9;
+message SetValueRequest {
+    string deviceId = 1;
+    string property = 2;
+    double value = 3;
+}
+
+message GetPropertyValueRequest {
+    string deviceId = 1;
+    string property = 2;
 }
 
 service DevicesService {
     rpc Update(DeviceData) returns (google.protobuf.BoolValue);
     rpc Get(google.protobuf.StringValue) returns (DeviceData);
+    rpc Set(SetValueRequest) returns (google.protobuf.BoolValue);
     rpc GetAll(google.protobuf.Empty) returns (stream DeviceData);
+    rpc FetchProperties(google.protobuf.StringValue) returns (stream google.protobuf.StringValue);
+    rpc PropertyValue(GetPropertyValueRequest) returns (google.protobuf.DoubleValue);
 }

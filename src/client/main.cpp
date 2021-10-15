@@ -6,28 +6,31 @@
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 #include "aquabox.h"
-#include "options.h"
-#include "settings.h"
-#include <stacktrace.h>
-#include "ui/screen_manager.h"
 #include "cloud.h"
 #include "networking/network_manager.h"
-#include "hardware/hermes/hermes_mesh_gateway.h"
-#include <iostream>
+#include "options.h"
+#include <micro_clients/settings.h>
+#include <common/performance_metrics.h>
+#include <common/singleton.h>
+#include <common/stacktrace.h>
+
+#include "ui/screen_manager.h"
 #include <framebuffer.h>
-#include <singleton.h>
-#include <performance_metrics.h>
+#include <iostream>
+
+#include <services/events.h>
+const std::string aquabox::IEvents::APPLICATION("aquabox");
 
 int main(int argc, char** argv)
 {
@@ -39,8 +42,7 @@ int main(int argc, char** argv)
     memset(exePath, '\0', 1024);
 
     int bytes = std::min<size_t>(readlink(procPath.c_str(), exePath, 1024), 1024 - 1);
-    if (bytes >= 0)
-    {
+    if (bytes >= 0) {
         exePath[bytes] = '\0';
     }
 
@@ -51,58 +53,52 @@ int main(int argc, char** argv)
         cwd.erase(pos);
 
     chdir(cwd.c_str());
-    
+
     aquabox::Settings::setDomain("aquabox");
 
     bool handleSignals = true;
 
     aquabox::PerformanceMetrics::uptime();
     aquabox::StackTrace();
-    for(int i = 1; i < argc; ++i)
-    {
-        if(strcmp(argv[i], "--service") == 0) {
+    for (int i = 1; i < argc; ++i) {
+        if (strcmp(argv[i], "--service") == 0) {
             aquabox::Options::Service = true;
-        } else if(strcmp(argv[i], "--nodraw") == 0) {
+        } else if (strcmp(argv[i], "--nodraw") == 0) {
             aquabox::Options::Render = false;
-        }
-        else if(strcmp(argv[i], "--lock") == 0) {
+        } else if (strcmp(argv[i], "--lock") == 0) {
             aquabox::Options::Lock = true;
-        }
-        else if(strcmp(argv[i], "--disable-access-point") == 0) {
+        } else if (strcmp(argv[i], "--disable-access-point") == 0) {
             aquabox::Options::AccessPoint = false;
-        }
-        else if(strcmp(argv[i], "--ignore-networking") == 0) {
+        } else if (strcmp(argv[i], "--ignore-networking") == 0) {
             aquabox::Options::UseNetworkManager = false;
-        }
-        else if(strcmp(argv[i], "--standalone") == 0) {
+        } else if (strcmp(argv[i], "--standalone") == 0) {
             aquabox::Options::EnableCloud = false;
-        }
-        else if(strcmp(argv[i], "--disable-mesh") == 0) {
+        } else if (strcmp(argv[i], "--disable-mesh") == 0) {
             aquabox::Options::UseMesh = false;
-        }
-        else if(strcmp(argv[i], "--debug") == 0) {
+        } else if (strcmp(argv[i], "--debug") == 0) {
             aquabox::Options::Render = false;
             aquabox::Options::Lock = false;
             aquabox::Options::AccessPoint = false;
             aquabox::Options::UseMesh = false;
             aquabox::Options::UseNetworkManager = false;
             break;
-        }
-        else if(strcmp(argv[i], "--ignore-signals") == 0) {
+        } else if (strcmp(argv[i], "--ignore-signals") == 0) {
             handleSignals = false;
-        }
-        else if(strcmp(argv[i], "--help") == 0) {
-            std::cout << "aquabox [OPTIONS]\n"
-                      << " --service                Applications will be runned as part of Linux service\n"
-                      << " --nodraw                 Applications will not render on display\n"
-                      << " --ignore-lock            Do not create lock/runfiles\n"
-                      << " --disable-access-point   Do not switch to AP mode if there is no internet connection\n"
-                      << " --standalone             Do not connect to remote service\n"
-                      << " --ignore-networking      Do not connect to NetworkManager\n"
-                      << " --ignore-signals         Dump stack traces on errors\n"
-                      << " --disable-mesh           Disable NRF24L01 support\n"
-                      << " --help                   Show this help"
-                      << std::endl;
+        } else if (strcmp(argv[i], "--help") == 0) {
+            std::cout
+                << "aquabox [OPTIONS]\n"
+                << " --service                Applications will be runned as part of "
+                   "Linux service\n"
+                << " --nodraw                 Applications will not render on "
+                   "display\n"
+                << " --ignore-lock            Do not create lock/runfiles\n"
+                << " --disable-access-point   Do not switch to AP mode if there is "
+                   "no internet connection\n"
+                << " --standalone             Do not connect to remote service\n"
+                << " --ignore-networking      Do not connect to NetworkManager\n"
+                << " --ignore-signals         Dump stack traces on errors\n"
+                << " --disable-mesh           Disable NRF24L01 support\n"
+                << " --help                   Show this help" << std::endl;
             return 0;
         }
     }
@@ -114,6 +110,6 @@ int main(int argc, char** argv)
     aquabox::Singleton<aquabox::ScreenManager>::available = aquabox::Singleton<LIBFB_NS::FrameBuffer>::available;
     aquabox::Singleton<aquabox::Cloud>::available = aquabox::Options::EnableCloud;
     aquabox::Singleton<aquabox::NetworkManager>::available = aquabox::Options::UseNetworkManager;
-    aquabox::Singleton<aquabox::HermesMeshGateway>::available = aquabox::Options::UseMesh;
+    //aquabox::Singleton<aquabox::HermesMeshGateway>::available = aquabox::Options::UseMesh;
     return aquabox::Singleton<aquabox::AquaBox>::get()->start();
 }

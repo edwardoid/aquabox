@@ -18,16 +18,14 @@
 
 #pragma once
 
-namespace aquabox
-{
-    struct Options
-    {
-        static bool Service ;
-        static bool Lock;
-        static bool Render;
-        static bool AccessPoint;
-        static bool EnableCloud;
-        static bool UseNetworkManager;
-        static bool UseMesh;
-    };
+namespace aquabox {
+struct Options {
+    static bool Service;
+    static bool Lock;
+    static bool Render;
+    static bool AccessPoint;
+    static bool EnableCloud;
+    static bool UseNetworkManager;
+    static bool UseMesh;
+};
 }

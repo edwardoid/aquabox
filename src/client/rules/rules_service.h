@@ -18,16 +18,14 @@
 
 #pragma once
 
-namespace aquabox
-{
-    class Rule;
+namespace aquabox {
+class Rule;
 
-    class RulesService
-    {
-    public:
-        std::shared_ptr<Rule> rule(const std::string& id);
-        std::shared_ptr<Rule> add(const std::string& id, std::shared_ptr<Rule> rule);
-        std::shared_ptr<Rule> remove(const std::string& id);
-        std::vector<std::string> rules() const;
-    };
+class RulesService {
+public:
+    std::shared_ptr<Rule> rule(const std::string& id);
+    std::shared_ptr<Rule> add(const std::string& id, std::shared_ptr<Rule> rule);
+    std::shared_ptr<Rule> remove(const std::string& id);
+    std::vector<std::string> rules() const;
+};
 }
