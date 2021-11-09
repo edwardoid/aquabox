@@ -17,33 +17,12 @@
  */
 
 #include "RulesServiceServer.h"
-#include <rules.grpc.pb.h>
-#include <grpcpp/server_builder.h>
-#include <iostream>
-
-#include <micro_clients/settings.h>
-#include <services/events.h>
-const std::string aquabox::IEvents::APPLICATION("rules_manager");
+#include <services/rpc_application.h>
 
 using namespace aquabox;
 
-int main()
+int main(int argc, char** argv)
 {
-    services::RulesServiceServer service;
-
-    std::string server_address("0.0.0.0:");
-
-    {
-        server_address += std::to_string(Singleton<ISettings>::i()->port(
-            services::RulesService::service_full_name(), true));
-    }
-
-    grpc::ServerBuilder builder;
-    builder.AddListeningPort(server_address, grpc::InsecureServerCredentials());
-    builder.RegisterService(&service);
-    std::unique_ptr<grpc::Server> server(builder.BuildAndStart());
-    std::cout << "Server " << services::RulesService::service_full_name()
-              << " listening on " << server_address << std::endl;
-    server->Wait();
-    return 0;
+    RPCApplication<services::RulesServiceServer> app("rules_manager");
+    return app.exec(argc, argv);
 }

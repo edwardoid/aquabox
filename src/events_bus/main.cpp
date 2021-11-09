@@ -17,34 +17,13 @@
  */
 
 #include "EventsBusServer.h"
-#include <grpcpp/server_builder.h>
-#include <iostream>
-#include <settings.grpc.pb.h>
-#include <common/stacktrace.h>
 
-#include <services/events.h>
-const std::string aquabox::IEvents::APPLICATION("events");
+#include <services/rpc_application.h>
 
 using namespace aquabox;
 
-StackTrace st;
-
-int main()
+int main(int argc, char** argv)
 {
-    services::EventsBusServer service;
-
-    std::string server_address("0.0.0.0:");
-
-    {
-        server_address += std::to_string(Singleton<ISettings>::i()->port(
-            services::EventsBus::service_full_name(), true));
-    }
-
-    grpc::ServerBuilder builder;
-    builder.AddListeningPort(server_address, grpc::InsecureServerCredentials());
-    builder.RegisterService(&service);
-    std::unique_ptr<grpc::Server> server(builder.BuildAndStart());
-    LOG_INFO << "Server listening on " << server_address;
-    server->Wait();
-    return 0;
+    RPCApplication<services::EventsBusServer> app("events");
+    return app.exec(argc, argv);
 }

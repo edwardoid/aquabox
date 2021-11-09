@@ -27,13 +27,10 @@
 #include <common/log.h>
 #include "networking/network_manager.h"
 #include "options.h"
-#include <common/repetive_task.h>
 #include "rest_api.h"
 #include <common/singleton.h>
 #include <micro_clients/settings.h>
 #include <micro_clients/events.h>
-#include "ui/screen_manager.h"
-#include "user.h"
 #include "web_server.h"
 #include <chrono>
 #include <exception>
@@ -47,10 +44,9 @@
 using namespace aquabox;
 
 AquaBox::AquaBox()
-    : m_pool(Settings::integer(Settings::Keys::THREADS,
+    : Application("client")
+    , m_pool(Settings::integer(Settings::Keys::THREADS,
         std::thread::hardware_concurrency()))
-    , m_fileAppender("./../log/aquabox.log", LOG_FILE_SIZE_IN_MB * BYTES_IN_MB,
-          MAX_LOG_FILES)
     , m_server(new WebServer)
 {
     // PerformanceMetrics::update();
@@ -63,22 +59,14 @@ AquaBox::~AquaBox()
 
 int AquaBox::start()
 {
-    Lockfile lock;
+    Singleton<NetworkManager>::available = !optionsIsSet("ignore-networking");
+    Singleton<Cloud>::available = !optionsIsSet("standalone");
 
     plog::init(plog::severityFromString(
                    Settings::string(Settings::Keys::LOG_LEVEL,
                        plog::severityToString(plog::Severity::info))
                        .c_str()),
         &m_consoleAppender);
-
-    if (!Options::Service) {
-        plog::init(
-            plog::severityFromString(
-                Settings::string(Settings::Keys::LOG_LEVEL,
-                    plog::severityToString(plog::Severity::info))
-                    .c_str()),
-            &m_fileAppender);
-    }
 
     if (Singleton<NetworkManager>::available) {
         NetworkManager* nm = Singleton<NetworkManager>::i();
@@ -96,13 +84,6 @@ int AquaBox::start()
     LOG_INFO << "Starting " << Settings::Defaults::APPLICATION << " ver. "
              << std::hex << Settings::Defaults::VERSION_MAJOR << "."
              << Settings::Defaults::VERSION_MINOR;
-    if (Options::Lock) {
-        if (!lock.create()) {
-            LOG_FATAL << "Another instance of " << Settings::Defaults::APPLICATION
-                      << " is running...";
-            std::exit(EXIT_FAILURE);
-        }
-    }
 
     srand(time(NULL));
     std::string procPath = "/proc/";
@@ -123,18 +104,6 @@ int AquaBox::start()
     if (pos > 0)
         cwd.erase(pos);
 
-    m_wd = Settings::string(Settings::Keys::WORKING_DIRECTORY, cwd);
-    if (!m_wd.normalize()) {
-        LOG_ERROR << "Bad working directory path " << m_wd;
-    } else {
-        if (0 != chdir(m_wd.c_str())) {
-            LOG_ERROR << "Can't change working directory to " << m_wd
-                      << " errno: " << errno << " : " << strerror(errno);
-        } else {
-            LOG_INFO << "Changed working direcotry to " << m_wd;
-        }
-    }
-
     Singleton<IEvents>::i()->subscribe("rules_manager", [this](const std::shared_ptr<Event> e) {
         LOG_ERROR << e->serialize().dump();
         postUpdate(e);
@@ -145,10 +114,6 @@ int AquaBox::start()
         postUpdate(e);
     });
 
-    readUsers();
-
-    Singleton<ScreenManager>::i(); // Create manager if needed!
-
     m_globalTimer = std::make_unique<GlobalTimer>();
 
     m_server->start();
@@ -157,21 +122,6 @@ int AquaBox::start()
 
     return EXIT_SUCCESS;
 }
-
-void AquaBox::readUsers()
-{
-    auto users = Settings::array(Settings::Keys::USERS);
-
-    LOG_INFO << "Loading " << users.size() << " users...";
-    for (auto u : users) {
-        auto usr = std::make_shared<User>();
-        if (usr->init(u)) {
-            m_users.insert(usr->user(), usr);
-        }
-    }
-}
-
-const Path& AquaBox::workingDirectory() const { return m_wd; }
 
 UsersMap& AquaBox::users() const { return m_users; }
 

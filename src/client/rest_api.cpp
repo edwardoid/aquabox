@@ -24,10 +24,8 @@
 #include <common/log.h>
 #include "networking/network_manager.h"
 #include "qr.h"
-#include "user.h"
 #include <common/http_helpers.h>
 #include <nlohmann/json.hpp>
-#include <common/path.h>
 #include <random>
 #include <common/singleton.h>
 #include <micro_clients/settings.h>
@@ -59,7 +57,7 @@ void execCommand(Command& cmd, Web::Response response, Web::Headers headers)
         LOG_ERROR << "Can't execute command! " << (int)(cmd.operation());
     } else {
         LOG_DEBUG << "Command " << (int)(cmd.operation()) << " finished with "
-                  << (int)(cmd.result()) << " data: " << cmd.response().dump();
+                  << (int)(cmd.result()) << " data: " << cmd.response().dump() << "seqNum " << cmd.seqNum();
     }
     SimpleWeb::StatusCode code = SimpleWeb::StatusCode::server_error_not_implemented;
     switch (cmd.result()) {
@@ -290,6 +288,18 @@ void REST::SetValue(const Route& route, Web::Request& request,
 {
     auto cmd = createCommand(Operation::Set, request, true,
         route.extract(request->path));
+    execCommand(cmd, response, headers);
+}
+
+void REST::Call(const Route& route, Request& request, Response& response, Headers& headers)
+{
+    auto cmd = createCommand(Operation::Call, request, false);
+    execCommand(cmd, response, headers);
+}
+
+void REST::GetHistory(const Route& route, Request& request, Response& response, Headers& headers)
+{
+    auto cmd = createCommand(Operation::GetHistory, request, false);
     execCommand(cmd, response, headers);
 }
 

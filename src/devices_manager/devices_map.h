@@ -20,7 +20,6 @@
 
 #include <common/lockablemap.h>
 #include <memory>
-#include <common/path.h>
 
 namespace aquabox {
 class DevicesMap : public LockableHashMap<std::string, std::shared_ptr<class Device>> {
@@ -31,6 +30,5 @@ public:
     std::string deviceIdByAddress(const std::string& address) const;
     std::string nextId() const;
     std::string addDevice(std::shared_ptr<class Device> device, bool pending = false);
-    bool parse(Path& root);
 };
 }

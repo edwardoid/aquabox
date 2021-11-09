@@ -91,3 +91,30 @@ int32_t HermesHardware::get()
     }
     return 0;
 }
+
+bool HermesHardware::call(const std::string& method)
+{
+    if (m_impl == nullptr) {
+        return false;
+    }
+
+    std::lock_guard<HermesMaster> lock(*m_impl);
+    return m_impl->setProperty<bool>(method.c_str(), true);
+}
+
+bool HermesHardware::callInProgress(const std::string& method)
+{
+    if (m_impl == nullptr) {
+        return false;
+    }
+
+    std::lock_guard<HermesMaster> lock(*m_impl);
+
+    bool val = false;
+    if (m_impl->getProperty<bool>(method.c_str(), val)) {
+        return val;
+    } else {
+        LOG_WARNING << "Can't get property 'times'.";
+    }
+    return false;
+}

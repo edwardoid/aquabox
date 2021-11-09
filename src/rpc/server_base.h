@@ -33,6 +33,8 @@ namespace services {
             plog::init(plog::Severity::debug, &m_consoleAppender);
         }
 
+        static std::string service_full_name() { return Interface::service_full_name(); }
+
         virtual bool init()
         {
             return true;

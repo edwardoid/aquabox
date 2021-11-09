@@ -21,6 +21,7 @@
 #include "../relay.h"
 #include "../sensor.h"
 #include "../step.h"
+#include "hermes_device.h"
 #include "hermes_hardware.h"
 
 #include <common/enumerations.h>
@@ -68,23 +69,46 @@ HermesDeviceBuilder::build(std::string address,
     std::shared_ptr<Device> dev;
     switch (clazz) {
     case DeviceClass::Relay: {
-        dev = std::make_shared<Relay>();
+        dev = std::make_shared<HermesDevice<Relay>>();
         dev->setName("Relay");
         break;
     }
     case DeviceClass::Sensor: {
-        dev = std::make_shared<Sensor>();
+        dev = std::make_shared<HermesDevice<Sensor>>();
         dev->setName("Sensor");
         break;
     }
     case DeviceClass::Step: {
-        dev = std::make_shared<Step>();
+        dev = std::make_shared<HermesDevice<Step>>();
         dev->setName("Step");
         break;
     }
     default: {
         LOG_ERROR << "Unknown device type in " << cs;
         return nullptr;
+    }
+    }
+
+    std::vector<std::string> additionalProperties;
+    for(int i  = 0; i < master->getPropertiesCount(); ++i) {
+        char name[32] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+        memset(name, 9, 32);
+        if (master->getPropertyName(i, name))
+            additionalProperties.push_back(name);
+    }
+
+    switch (clazz) {
+    case DeviceClass::Relay: {
+        std::dynamic_pointer_cast<HermesDevice<Relay>>(dev)->setupProperties(additionalProperties);
+        break;
+    }
+    case DeviceClass::Sensor: {
+        std::dynamic_pointer_cast<HermesDevice<Sensor>>(dev)->setupProperties(additionalProperties);
+        break;
+    }
+    case DeviceClass::Step: {
+        std::dynamic_pointer_cast<HermesDevice<Step>>(dev)->setupProperties(additionalProperties);
+        break;
     }
     }
 

@@ -1,7 +1,7 @@
 #/bin/bash
 
-USABLE_COU_COUNT=$(($CPU_COUNT - 2))
-J_ARG=$(( $USABLE_COU_COUNT < 0 ? 1 : $USABLE_COU_COUNT ))
+USABLE_CPU_COUNT=$(($CPU_COUNT - 2))
+J_ARG=$(( $USABLE_CPU_COUNT < 0 ? 1 : $USABLE_CPU_COUNT ))
 export CONAN_CPU_COUNT=$J_ARG
 
 function clean_build {
@@ -102,6 +102,16 @@ function pack_client {
                     lib \
                     bin/aquabox-client \
                     bin/aquabox-client.service \
+                    bin/ab_devices_manager \
+                    bin/ab_devices_manager.service \
+                    bin/ab_events_bus \
+                    bin/ab_events_bus.service \
+                    bin/ab_network_manager \
+                    bin/ab_network_manager.service \
+                    bin/ab_rules_manager \
+                    bin/ab_rules_manager.service \
+                    bin/ab_settings_provider \
+                    bin/ab_settings_provider.service \
                     bin/assets \
                     bin/config.json \
                     bin/devices \

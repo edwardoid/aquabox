@@ -17,38 +17,14 @@
  */
 
 #include "DevicesServiceServer.h"
-#include <devices.grpc.pb.h>
-#include <grpcpp/server_builder.h>
-#include <iostream>
 
-#include <micro_clients/settings.h>
-#include <micro_clients/events.h>
-#include <services/events.h>
-const std::string aquabox::IEvents::APPLICATION("devices_manager");
+#include <services/rpc_application.h>
 
 using namespace aquabox;
 
-int main()
+int main(int argc, char** argv)
 {
-    services::DevicesServiceServer service;
-
-    std::string server_address("0.0.0.0:");
-
-    {
-        server_address += std::to_string(Singleton<ISettings>::i()->port(
-            services::DevicesService::service_full_name(), true));
-    }
-
-    Singleton<IEvents>::i()->subscribe("rules_manager", [](const std::shared_ptr<Event> e) {
-        LOG_ERROR << e->serialize().dump();
-    });
-
-    grpc::ServerBuilder builder;
-    builder.AddListeningPort(server_address, grpc::InsecureServerCredentials());
-    builder.RegisterService(&service);
-    std::unique_ptr<grpc::Server> server(builder.BuildAndStart());
-    std::cout << "Server " << services::DevicesService::service_full_name()
-              << " listening on " << server_address << std::endl;
-    server->Wait();
-    return 0;
+    RPCApplication<services::DevicesServiceServer> app("devices_manager");
+    app.addOption("no-spi, ns", "Disables SPI communication protocols");
+    return app.exec(argc, argv);
 }

@@ -49,6 +49,10 @@ void API::init(std::shared_ptr<HttpServer> http, Route base)
 
     m_set = base.sub().word("device").string(":dev").word("set");
 
+    m_call = base.sub().word("device").string(":dev").word("call");
+
+    m_history = base.sub().word("sensor").string(":dev").word("history");
+
     m_rulesForDevice = base.sub().word("rules").string(":dev");
 
     m_repeatUnits = base.sub().word("config").word("repeat_units");
@@ -89,6 +93,8 @@ void API::init(std::shared_ptr<HttpServer> http, Route base)
     setup("GET", m_wifiScan, &API::ScanWiFiNetworks);
     setup("POST", m_wifiConnect, &API::ConnectToWiFi);
     setup("PUT", m_set, &API::SetValue);
+    setup("PUT", m_call, &API::Call);
+    setup("GET", m_history, &API::GetHistory);
 }
 
 void API::defaultHandler(const Route& route, Request& request,

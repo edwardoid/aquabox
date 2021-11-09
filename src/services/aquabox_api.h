@@ -27,5 +27,6 @@ class IAquaboxApi {
 public:
     virtual std::vector<DeviceRef> devices() = 0;
     virtual std::vector<RuleRef> rules() = 0;
+    virtual std::string configurationData() = 0;
 };
 }

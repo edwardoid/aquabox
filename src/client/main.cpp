@@ -23,14 +23,8 @@
 #include <micro_clients/settings.h>
 #include <common/performance_metrics.h>
 #include <common/singleton.h>
-#include <common/stacktrace.h>
-
-#include "ui/screen_manager.h"
-#include <framebuffer.h>
+// #include <common/stacktrace.h>
 #include <iostream>
-
-#include <services/events.h>
-const std::string aquabox::IEvents::APPLICATION("aquabox");
 
 int main(int argc, char** argv)
 {
@@ -59,57 +53,9 @@ int main(int argc, char** argv)
     bool handleSignals = true;
 
     aquabox::PerformanceMetrics::uptime();
-    aquabox::StackTrace();
-    for (int i = 1; i < argc; ++i) {
-        if (strcmp(argv[i], "--service") == 0) {
-            aquabox::Options::Service = true;
-        } else if (strcmp(argv[i], "--nodraw") == 0) {
-            aquabox::Options::Render = false;
-        } else if (strcmp(argv[i], "--lock") == 0) {
-            aquabox::Options::Lock = true;
-        } else if (strcmp(argv[i], "--disable-access-point") == 0) {
-            aquabox::Options::AccessPoint = false;
-        } else if (strcmp(argv[i], "--ignore-networking") == 0) {
-            aquabox::Options::UseNetworkManager = false;
-        } else if (strcmp(argv[i], "--standalone") == 0) {
-            aquabox::Options::EnableCloud = false;
-        } else if (strcmp(argv[i], "--disable-mesh") == 0) {
-            aquabox::Options::UseMesh = false;
-        } else if (strcmp(argv[i], "--debug") == 0) {
-            aquabox::Options::Render = false;
-            aquabox::Options::Lock = false;
-            aquabox::Options::AccessPoint = false;
-            aquabox::Options::UseMesh = false;
-            aquabox::Options::UseNetworkManager = false;
-            break;
-        } else if (strcmp(argv[i], "--ignore-signals") == 0) {
-            handleSignals = false;
-        } else if (strcmp(argv[i], "--help") == 0) {
-            std::cout
-                << "aquabox [OPTIONS]\n"
-                << " --service                Applications will be runned as part of "
-                   "Linux service\n"
-                << " --nodraw                 Applications will not render on "
-                   "display\n"
-                << " --ignore-lock            Do not create lock/runfiles\n"
-                << " --disable-access-point   Do not switch to AP mode if there is "
-                   "no internet connection\n"
-                << " --standalone             Do not connect to remote service\n"
-                << " --ignore-networking      Do not connect to NetworkManager\n"
-                << " --ignore-signals         Dump stack traces on errors\n"
-                << " --disable-mesh           Disable NRF24L01 support\n"
-                << " --help                   Show this help" << std::endl;
-            return 0;
-        }
-    }
 
-    if (handleSignals) {
-        aquabox::StackTrace();
-    }
-    aquabox::Singleton<LIBFB_NS::FrameBuffer>::available = aquabox::Options::Render;
-    aquabox::Singleton<aquabox::ScreenManager>::available = aquabox::Singleton<LIBFB_NS::FrameBuffer>::available;
-    aquabox::Singleton<aquabox::Cloud>::available = aquabox::Options::EnableCloud;
-    aquabox::Singleton<aquabox::NetworkManager>::available = aquabox::Options::UseNetworkManager;
-    //aquabox::Singleton<aquabox::HermesMeshGateway>::available = aquabox::Options::UseMesh;
-    return aquabox::Singleton<aquabox::AquaBox>::get()->start();
+    aquabox::Singleton<aquabox::AquaBox>::get()->addOption("ignore-networking", "Disables interaction with NetworkManager");
+    aquabox::Singleton<aquabox::AquaBox>::get()->addOption("standalone", "Disables Cloud support");
+    aquabox::Singleton<aquabox::AquaBox>::get()->addOption("help", "Show this help");
+    return aquabox::Singleton<aquabox::AquaBox>::get()->exec(argc, argv);
 }

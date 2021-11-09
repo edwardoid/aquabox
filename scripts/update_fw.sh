@@ -12,6 +12,29 @@ TMP_DIR=$(mktemp -d -t aquabox-XXXXXXXXXX)
 echo "Temporary dir: $TMP_DIR Update: $UPDATE_ARCHIVE. Extracting update archive"
 tar xvf $UPDATE_ARCHIVE -C $TMP_DIR
 
+function install_service {
+    if test -f "$TMP_DIR/bin/$1.service"; then
+        systemctl stop $1
+        echo "Updating service"
+        cp $TMP_DIR/bin/$1.service /etc/systemd/system/$1.service
+        systemctl daemon-reload
+    fi
+}
+
+install_service aquabox-client
+install_service ab_rules_manager
+install_service ab_devices_manager
+install_service ab_network_manager
+install_service ab_events_bus
+install_service ab_settings_provider
+
+systemctl start ab_settings_provider
+systemctl start ab_events_bus
+systemctl start ab_network_manager
+systemctl start ab_devices_manager
+systemctl start ab_rules_manager
+systemctl start aquabox-client
+
 if test -f "$TMP_DIR/bin/aquabox-client.service"; then
     echo "Updating service"
     cp $TMP_DIR/bin/aquabox-client.service /etc/systemd/system/aquabox.service

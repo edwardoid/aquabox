@@ -23,6 +23,7 @@
 #include <events.grpc.pb.h>
 #include <grpcpp/server_builder.h>
 #include <thread>
+#include <services/application.h>
 #include "micro_service.h"
 #include "settings.h"
 
@@ -40,7 +41,7 @@ std::shared_ptr<services::MicroService<services::EventsBus>> client()
 std::string identifier()
 {
     std::stringstream ss;
-    ss << IEvents::APPLICATION << "@" << services::EventsBus::service_full_name();
+    ss << Application::app()->identifier() << "@" << services::EventsBus::service_full_name();
     return ss.str();
 }
 
@@ -109,7 +110,7 @@ EventsBaseImpl::EventsBaseImpl()
 void EventsBaseImpl::subscribe(const std::string& sender, std::function<void (const std::shared_ptr<Event>)>&& handler)
 {
     services::ConsumerIdentifier id;
-    id.set_interface(IEvents::APPLICATION);
+    id.set_interface(Application::app()->identifier());
     id.set_instance(identifier());
     id.set_address(address());
 
@@ -125,7 +126,7 @@ void EventsBaseImpl::subscribe(const std::string& sender, std::function<void (co
 void EventsBaseImpl::notify(const std::shared_ptr<const Event> event)
 {
     services::EventData e;
-    e.set_sender(IEvents::APPLICATION);
+    e.set_sender(Application::app()->identifier());
     e.set_event(event->serialize().dump());
 
     google::protobuf::Empty v;

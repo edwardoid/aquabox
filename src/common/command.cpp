@@ -187,7 +187,7 @@ bool Command::fromJSON(const nlohmann::json& obj)
         m_result = Serializable<Result>::convert(obj["result"].get<std::string>());
     }
 
-    if (obj.find("respone") != obj.cend()) {
+    if (obj.find("response") != obj.cend()) {
         m_response = obj["response"];
     }
 

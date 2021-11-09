@@ -203,6 +203,22 @@ void REST::SetValue(const Route& route, Web::Request& request,
     execCommand(cmd, response, headers);
 }
 
+void REST::Call(const Route& route, Web::Request& request,
+    Web::Response& response, Web::Headers& headers)
+{
+    auto cmd = createCommand(Operation::Call, request, true,
+        route.extract(request->path));
+    execCommand(cmd, response, headers);
+}
+
+void REST::GetHistory(const Route& route, Web::Request& request,
+    Web::Response& response, Web::Headers& headers)
+{
+    auto cmd = createCommand(Operation::Call, request, true,
+        route.extract(request->path));
+    execCommand(cmd, response, headers);
+}
+
 void REST::ScanWiFiNetworks(const Route& route, Web::Request& request,
     Web::Response& response, Web::Headers& headers)
 {

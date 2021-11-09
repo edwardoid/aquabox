@@ -34,9 +34,12 @@ RUN wget -q --show-progress https://liquidtelecom.dl.sourceforge.net/project/ras
     cp -R cross-pi-gcc-8.3.0-0/* /toolchain/armv6 && \
     rm -rf cross-pi-gcc-8.3.0-0*
 
-RUN PROTO_VER="1.38.0" && \
-    git clone --recurse-submodules --depth=1 -b v${PROTO_VER} https://github.com/grpc/grpc && \
+RUN GRPC_VER="1.39.1" && PROTO_VER="v3.17.1" && \
+    git clone --recurse-submodules --depth=1 -b v${GRPC_VER} https://github.com/grpc/grpc && \
     cd grpc && \
+    cd third_party/protobuf && \
+    git checkout $PROTO_VER && \
+    cd - && \
     mkdir -p cmake/build && cd cmake/build && \
     cmake -DCMAKE_BUILD_TYPE=Release -DgRPC_INSTALL=ON -DgRPC_BUILD_TESTS=OFF -DgRPC_SSL_PROVIDER=module ../.. && \
     make && make install && \

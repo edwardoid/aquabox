@@ -18,6 +18,7 @@
 
 #pragma once
 #include <mutex>
+#include <rpc/server_base.h>
 #include <network.grpc.pb.h>
 
 namespace nm {
@@ -26,7 +27,7 @@ class NetworkManager;
 
 namespace aquabox {
 namespace services {
-    class NetworkManagerServer final : public NetworkManager::Service {
+    class NetworkManagerServer final : public ServerBase<NetworkManager> {
     public:
         NetworkManagerServer();
         virtual ~NetworkManagerServer();

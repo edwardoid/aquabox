@@ -26,7 +26,6 @@ namespace aquabox {
 
 class IEvents {
 public:
-    static const std::string APPLICATION;
     virtual void subscribe(const std::string& sender, std::function<void (const std::shared_ptr<Event>)>&& handler) = 0;
     virtual void notify(const std::shared_ptr<const Event> event) = 0;
 };

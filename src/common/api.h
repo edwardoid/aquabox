@@ -18,9 +18,9 @@
 
 #pragma once
 
-#include "iot_definitions.h"
+#include <common/iot_definitions.h>
 #include <common/log.h>
-#include "route.h"
+#include <common/route.h>
 
 namespace aquabox {
 using namespace Web;
@@ -46,6 +46,8 @@ namespace v1 {
         virtual void DeviceRules(const Route& route, Request& request, Response& response, Headers& headers) = 0;
         virtual void SupportedRepeatTimeouts(const Route& route, Request& request, Response& response, Headers& headers) = 0;
         virtual void SetValue(const Route& route, Request& request, Response& response, Headers& headers) = 0;
+        virtual void Call(const Route& route, Request& request, Response& response, Headers& headers) = 0;
+        virtual void GetHistory(const Route& route, Request& request, Response& response, Headers& headers) = 0;
 
         using APiInterfaceCallback = void (API::*)(const Route&, Request&, Response&, Headers&);
 
@@ -96,6 +98,8 @@ namespace v1 {
         Route m_rulesForDevice;
         Route m_repeatUnits;
         Route m_set;
+        Route m_call;
+        Route m_history;
     };
 }
 }

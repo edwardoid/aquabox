@@ -18,14 +18,9 @@
 
 #include "cloud_service.h"
 #include <micro_clients/settings.h>
-#include <stacktrace.h>
-
-#include <services/events.h>
-const std::string aquabox::IEvents::APPLICATION("server");
 
 int main(int argc, char** argv)
 {
-    aquabox::StackTrace();
     aquabox::Settings::setDomain("cloud");
     if (aquabox::CloudService::i().start())
         return EXIT_SUCCESS;

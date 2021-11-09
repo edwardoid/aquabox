@@ -17,22 +17,10 @@
  */
 
 #include "NetworkManagerServer.h"
-#include <grpcpp/server_builder.h>
-#include <iostream>
+#include <services/rpc_application.h>
 
-#include <services/events.h>
-const std::string aquabox::IEvents::APPLICATION("network_manager");
-
-int main()
+int main(int argc, char** argv)
 {
-    aquabox::services::NetworkManagerServer service;
-    std::string server_address("0.0.0.0:50051");
-
-    grpc::ServerBuilder builder;
-    builder.AddListeningPort(server_address, grpc::InsecureServerCredentials());
-    builder.RegisterService(&service);
-    std::unique_ptr<grpc::Server> server(builder.BuildAndStart());
-    std::cout << "Server listening on " << server_address << std::endl;
-    server->Wait();
-    return 0;
+    aquabox::RPCApplication<aquabox::services::NetworkManagerServer> app("network-manager");
+    return app.exec(argc, argv);
 }

@@ -4,6 +4,7 @@
 #include <rpc/converters.h>
 #include <common/thread_pool.h>
 #include <common/singleton.h>
+#include <services/application.h>
 #include "events/device_events.h"
 #include "layer/network_layer.h"
 #include "hermes/hermes_mesh_gateway.h"
@@ -58,7 +59,8 @@ DevicesServiceServer::~DevicesServiceServer() { }
 
 bool DevicesServiceServer::init()
 {
-    Singleton<aquabox::HermesMeshGateway>::available = Singleton<ISettings>::i()->get(Settings::Keys::MESH_ENABLED, Settings::Defaults::MESH_ENABLED);
+    Singleton<aquabox::HermesMeshGateway>::available = !Application::app()->optionsIsSet("no-spi") &&
+                                                       Singleton<ISettings>::i()->get(Settings::Keys::MESH_ENABLED, Settings::Defaults::MESH_ENABLED);
 
     boost::filesystem::path root = Singleton<ISettings>::i()->path("devices", "./devices");
     if (!boost::filesystem::exists(root)) {
@@ -126,7 +128,7 @@ bool DevicesServiceServer::init()
     m_sensorPollingThread = std::thread([this] {
         LOG_INFO << "Senor poiing thread started";
         while (1) {
-            std::this_thread::sleep_for(std::chrono::seconds(5));
+            std::this_thread::sleep_for(std::chrono::milliseconds(200));
             processSensorUpdates();
         }
     });

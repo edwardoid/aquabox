@@ -14,7 +14,7 @@ BoxConnection::BoxConnection(const std::string& id,
 
 const std::string& BoxConnection::id() const { return m_id; }
 
-void BoxConnection::ready(std::string body)
+void BoxConnection::ready(const std::string& body)
 {
     Command cmd;
     cmd.response(Result::ServerError);

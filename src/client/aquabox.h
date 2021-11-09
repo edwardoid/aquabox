@@ -20,12 +20,12 @@
 
 #include <common/lockablemap.h>
 #include <common/log.h>
-#include <common/path.h>
 #include <common/performance_metrics.h>
 #include <types/serial.h>
 #include <boost/asio/thread_pool.hpp>
 #include <memory>
 #include <common/singleton.h>
+#include <services/application.h>
 
 #define LOG_FILE_SIZE_IN_MB 10
 #define BYTES_IN_MB 1000000
@@ -44,7 +44,7 @@ class GlobalTimer;
 
 using UsersMap = LockableHashMap<std::string, std::shared_ptr<User>>;
 
-class AquaBox {
+class AquaBox: public Application {
 protected:
     AquaBox(const AquaBox&) = delete;
     AquaBox(AquaBox&&) = delete;
@@ -55,7 +55,6 @@ protected:
 public:
     int start();
     ~AquaBox();
-    const Path& workingDirectory() const;
     UsersMap& users() const;
     void doLater(const std::string& name, std::function<void(void)>&& task);
     void postUpdate(std::shared_ptr<Event> event);
@@ -65,20 +64,13 @@ public:
 
 private:
     void onCurrentNetworkChanged(const class CurrentNetworkState& state);
-    void trackSensors();
-    void readUsers();
-    void readRules(const Path& root);
 
 private:
     PerformanceMetrics m_perfomance;
     boost::asio::thread_pool m_pool;
     plog::ColorConsoleAppender<plog::TxtFormatter> m_consoleAppender;
-    plog::RollingFileAppender<plog::TxtFormatter> m_fileAppender;
     mutable UsersMap m_users;
     WebServer* m_server;
-    Path m_wd;
-    Path m_devicesDir;
-    Path m_rulesDir;
     std::unique_ptr<GlobalTimer> m_globalTimer;
 };
 }

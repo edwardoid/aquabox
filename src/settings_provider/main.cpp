@@ -18,21 +18,30 @@
 
 #include "SettingsProviderServer.h"
 #include <grpcpp/server_builder.h>
-#include <iostream>
+#include <services/application.h>
 
-#include <services/events.h>
-const std::string aquabox::IEvents::APPLICATION("settings_provider");
-
-int main()
+class SettingsApp: public aquabox::Application
 {
-    aquabox::services::SettingsProviderServer service(500500);
-    std::string server_address("0.0.0.0:500500");
+public:
+    SettingsApp(): aquabox::Application("settings") {}
+    virtual int start() override
+    {
+        aquabox::services::SettingsProviderServer service(500500);
 
-    grpc::ServerBuilder builder;
-    builder.AddListeningPort(server_address, grpc::InsecureServerCredentials());
-    builder.RegisterService(&service);
-    std::unique_ptr<grpc::Server> server(builder.BuildAndStart());
-    std::cout << "SettingsProvider listening on " << server_address << std::endl;
-    server->Wait();
-    return 0;
+        std::string server_address("0.0.0.0:500500");
+
+        grpc::ServerBuilder builder;
+        builder.AddListeningPort(server_address, grpc::InsecureServerCredentials());
+        builder.RegisterService(&service);
+        std::unique_ptr<grpc::Server> server(builder.BuildAndStart());
+        LOG_INFO << "Server " << service.service_full_name() << " listening on " << server_address;
+        server->Wait();
+        return EXIT_SUCCESS;
+    }
+};
+
+int main(int argc, char** argv)
+{
+    SettingsApp app;
+    return app.exec(argc, argv);
 }

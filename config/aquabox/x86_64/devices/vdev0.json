@@ -1,6 +1,6 @@
 {
     "address": "NET:SCT:74-73-74-72-65-6c-61-79",
-    "class": "relay",
+    "class": "step",
     "id": "vdev0",
     "index": 0,
     "meta": {
@@ -9,6 +9,6 @@
     },
     "name": "VIRTUAL",
     "rules_enabled": true,
-    "type": "heater",
+    "type": "feeder",
     "accepted": true
 }

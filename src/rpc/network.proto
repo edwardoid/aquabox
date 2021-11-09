@@ -28,8 +28,10 @@ message ConnectionStatus {
         Disconnecting = 0;
         Connecting = 1;
         Authentificating = 2;
-        Connected = 3;
-        Failed = 4;
+        OptainingIP = 3;
+        Connected = 4;
+        Disconnected = 5;
+        Failed = 6;
     };
 
     Status status = 2;
@@ -37,6 +39,7 @@ message ConnectionStatus {
 
 service NetworkManager {
     rpc GetCurrentNetwork(google.protobuf.Empty) returns (NetworkInfo) {};
+    rpc GetCurrentStatus(google.protobuf.Empty) returns (ConnectionStatus) {};
     rpc IsConnectedToInternet(google.protobuf.Empty) returns (google.protobuf.BoolValue) {};
     rpc Connect(NetworkConnect) returns (stream ConnectionStatus) {};
     rpc StartHotspot(google.protobuf.Empty) returns (google.protobuf.Empty) {};

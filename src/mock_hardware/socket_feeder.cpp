@@ -19,18 +19,25 @@ void error(const char* msg)
     exit(1);
 }
 
+void calibrate(bool) {
+    fprintf(stderr, "#                                                 #");
+    fprintf(stderr, "#                RUNNING CALLBACK                 #");
+    fprintf(stderr, "#                                                 #");
+}
+
 CachedSlaveProperty<int32_t> m_times("times", 1);
-CachedSlaveProperty<uint32_t> m_timesTimeout("_times", 10000);
+CachedSlaveProperty<uint32_t> m_timesTimeout("_times", 100);
 CachedSlaveProperty<char*> m_class("class", "step");
 CachedSlaveProperty<char*> m_type("type", "feeder");
+Method m_calibrate("+calibrate", &calibrate);
 CachedSlaveProperty<bool> m_cache("_cache", true);
 CachedSlaveProperty<int32_t> m_pingTimeout("_timeout", 5000);
 SlaveProperty* allProperties[] = { &m_times, &m_timesTimeout, &m_class,
-    &m_type, &m_cache, &m_pingTimeout };
+    &m_type, &m_calibrate, &m_cache, &m_pingTimeout };
 
 aquabox::proto::byte_t* FEEDER_SERIAL = (aquabox::proto::byte_t*)("tstrelay");
 
-class MockFeeder : public EasySlave<6> {
+class MockFeeder : public EasySlave<7> {
 public:
     MockFeeder(int scfd)
         : EasySlave(allProperties, &m_io, FEEDER_SERIAL,
@@ -38,7 +45,7 @@ public:
         , m_io(scfd)
     {
         MockFeeder::SlavePropertyPtr props[] = {
-            &m_times, &m_timesTimeout, &m_class, &m_type, &m_cache, &m_pingTimeout
+            &m_times, &m_timesTimeout, &m_class, &m_calibrate, &m_type, &m_cache, &m_pingTimeout
         };
     }
 
@@ -93,7 +100,7 @@ int main()
     serveraddr.sin_family = AF_INET;
     bcopy((char*)server->h_addr, (char*)&serveraddr.sin_addr.s_addr,
         server->h_length);
-    serveraddr.sin_port = htons(500704);
+    serveraddr.sin_port = htons(500503);
 
     /* connect: create a connection with the server */
     if (connect(sockfd, reinterpret_cast<sockaddr*>(&serveraddr),

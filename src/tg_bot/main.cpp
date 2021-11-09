@@ -17,17 +17,16 @@
  */
 
 #include <common/log.h>
-#include "local_aquabox.h"
+#include "telegram_bot.h"
 #include <iostream>
 
 #include <services/events.h>
-const std::string aquabox::IEvents::APPLICATION("telegram_bot");
 
 int main(int argc, char** argv)
 {
     plog::ColorConsoleAppender<plog::TxtFormatter> consoleAppender;
     plog::init(plog::Severity::debug, &consoleAppender);
-    aquabox::LocalAquaboxAPI api;
+    aquabox::TelegramBot api;
     api.start();
     return 0;
 }

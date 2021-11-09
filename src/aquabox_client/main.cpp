@@ -18,31 +18,12 @@
 
 #include <common/singleton.h>
 #include <micro_clients/settings.h>
-#include <services/events.h>
+#include <services/rpc_application.h>
 #include "AquaboxClientServer.h"
 #include <grpcpp/server_builder.h>
-#include <iostream>
 
-const std::string aquabox::IEvents::APPLICATION("ab_client");
-
-int main()
+int main(int argc, const char** argv)
 {
-    using namespace aquabox;
-    services::AquaboxClientServer service;
-
-    std::string server_address("0.0.0.0:");
-
-    {
-        server_address += std::to_string(Singleton<ISettings>::i()->port(
-            services::AquaboxAPI::service_full_name(), true));
-    }
-
-    grpc::ServerBuilder builder;
-    builder.AddListeningPort(server_address, grpc::InsecureServerCredentials());
-    builder.RegisterService(&service);
-    std::unique_ptr<grpc::Server> server(builder.BuildAndStart());
-    std::cout << "Server " << services::AquaboxAPI::service_full_name()
-              << " listening on " << server_address << std::endl;
-    server->Wait();
-    return 0;
+    aquabox::RPCApplication<aquabox::services::AquaboxClientServer> app("ab_client");
+    return app.exec(argc, argv);
 }

@@ -21,7 +21,7 @@
 
 using namespace aquabox;
 
-void HttpHelpers::serveStream(Web::Response response, Path path,
+void HttpHelpers::serveStream(Web::Response response, const boost::filesystem::path& path,
     std::shared_ptr<std::ifstream> ifs, size_t length,
     bool removeWhenFinished)
 {
@@ -49,34 +49,34 @@ void HttpHelpers::serveStream(Web::Response response, Path path,
     }
 }
 
-void HttpHelpers::serveFile(Web::Response response, Path path,
+void HttpHelpers::serveFile(Web::Response response, const boost::filesystem::path& path,
     Web::Headers& headers, bool removeWhenFinished)
 {
     static const std::unordered_map<std::string, std::string> ext2ContentType(
-        { { "js", "application/javascript" },
-            { "ogg", "application/ogg" },
-            { "pdf", "application/pdf" },
-            { "xhtml", "application/xhtml+xml" },
-            { "json", "application/json" },
-            { "zip", "application/zip" },
-            { "gif", "image/gif" },
-            { "jpeg", "image/jpeg" },
-            { "jpg", "image/jpeg" },
-            { "png", "image/png" },
-            { "tif", "image/tiff" },
-            { "tiff", "image/tiff" },
-            { "ico", "image/x-icon" },
-            { "djvu", "image/vnd.djvu" },
-            { "svg", "image/svg+xml" },
-            { "css", "text/css" },
-            { "csv", "text/csv" },
-            { "html", "text/html" },
-            { "htm", "text/html" },
-            { "txt", "text/plain" },
-            { "xml", "text/xml" } });
+        { { ".js", "application/javascript" },
+            { ".ogg", "application/ogg" },
+            { ".pdf", "application/pdf" },
+            { ".xhtml", "application/xhtml+xml" },
+            { ".json", "application/json" },
+            { ".zip", "application/zip" },
+            { ".gif", "image/gif" },
+            { ".jpeg", "image/jpeg" },
+            { ".jpg", "image/jpeg" },
+            { ".png", "image/png" },
+            { ".tif", "image/tiff" },
+            { ".tiff", "image/tiff" },
+            { ".ico", "image/x-icon" },
+            { ".djvu", "image/vnd.djvu" },
+            { ".svg", "image/svg+xml" },
+            { ".css", "text/css" },
+            { ".csv", "text/csv" },
+            { ".html", "text/html" },
+            { ".htm", "text/html" },
+            { ".txt", "text/plain" },
+            { ".xml", "text/xml" } });
 
     auto ifs = std::make_shared<std::ifstream>(
-        path, std::ifstream::in | std::ios::binary | std::ios::ate);
+        path.c_str(), std::ifstream::in | std::ios::binary | std::ios::ate);
     if (ifs->bad()) {
         LOG_DEBUG << "File '" << path << "'can't be found/opened so send over http";
         response->write(SimpleWeb::StatusCode::client_error_not_found, headers);
@@ -86,7 +86,7 @@ void HttpHelpers::serveFile(Web::Response response, Path path,
     auto length = ifs->tellg();
     ifs->seekg(0, std::ios::beg);
 
-    auto mime = ext2ContentType.find(path.extension());
+    auto mime = ext2ContentType.find(boost::filesystem::extension(path));
 
     if (mime == ext2ContentType.end()) {
         headers.find("Content-Type")->second = "application/octet-stream";

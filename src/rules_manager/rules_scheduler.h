@@ -19,7 +19,7 @@
 #pragma once
 
 #include <types/rule.h>
-#include <common/cron_scheduler.h>
+#include "cron_scheduler.h"
 #include <set>
 
 namespace aquabox {

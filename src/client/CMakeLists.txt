@@ -24,10 +24,9 @@ target_compile_definitions(${PROJECT_NAME} PUBLIC AB_VERSION_MINOR=${AB_v})
 target_compile_definitions(${PROJECT_NAME} PUBLIC AB_VERSION=\"${AB_V}.${AB_v}\")
 target_compile_definitions(${PROJECT_NAME} PUBLIC AB_GIT_HASH=\"${GIT_COMMIT_HASH}\")
 
-find_package(mqtt_cpp REQUIRED)
 find_package(libqrencode REQUIRED)
 
-target_link_libraries(${PROJECT_NAME} NMDBus fb w1temp stats)
+target_link_libraries(${PROJECT_NAME} NMDBus stats)
 target_link_libraries(${PROJECT_NAME} aquabox-common)
 target_link_libraries(${PROJECT_NAME} CONAN_PKG::tgbot)
 target_link_libraries(${PROJECT_NAME} libqrencode::libqrencode)
@@ -35,7 +34,6 @@ target_link_libraries(${PROJECT_NAME} CONAN_PKG::json-schema-validator)
 target_link_libraries(${PROJECT_NAME} CONAN_PKG::boost)
 target_link_libraries(${PROJECT_NAME} OpenSSL::OpenSSL)
 target_link_libraries(${PROJECT_NAME} PNG::PNG)
-target_link_libraries(${PROJECT_NAME} CONAN_PKG::freetype)
 target_link_libraries(${PROJECT_NAME} Threads::Threads)
 target_link_libraries(${PROJECT_NAME} CONAN_PKG::simppl)
 target_link_libraries(${PROJECT_NAME} CONAN_PKG::libserial)
@@ -43,28 +41,3 @@ target_link_libraries(${PROJECT_NAME} dl)
 target_link_libraries(${PROJECT_NAME} rt)
 target_link_libraries(${PROJECT_NAME} rf24meshgw)
 target_link_libraries(${PROJECT_NAME} types)
-
-
-set_target_properties(${PROJECT_NAME}
-    PROPERTIES
-    ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib"
-    LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib"
-    RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin"
-)
-
-set(CPACK_GENERATOR "DEB")
-set(CPACK_PACKAGE_NAME "AquaBoxClient")
-set(CPACK_PACKAGE_VENDOR "aquabox.me")
-set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "Client Service for aquabox")
-set(CPACK_DEBIAN_PACKAGE_MAINTAINER "Eduard Sargsyan") # required
-set(CPACK_COMPONENTS_ALL_IN_ONE_PACKAGE 1)
-set(CPACK_PACKAGE_VERSION "1.0.0")
-set(CPACK_PACKAGE_VERSION_MAJOR "1")
-set(CPACK_PACKAGE_VERSION_MINOR "0")
-set(CPACK_PACKAGE_VERSION_PATCH "0")
-
-
-include(CPack)
-
-
-#install(TARGETS ${PROJECT_NAME} DESTINATION bin)
