@@ -1,0 +1,34 @@
+syntax = "proto3";
+
+import "google/protobuf/wrappers.proto";
+
+package aquabox.services;
+
+import public "types.proto";
+import public "cloud.proto";
+import public "events.proto";
+import public "network.proto";
+import public "settings.proto";
+import public "rules.proto";
+import public "devices.proto";
+
+import "google/protobuf/empty.proto";
+
+message StatusInfo {
+  string serial = 1;
+}
+
+service AquaboxAPI {
+    rpc devices(google.protobuf.Empty) returns (stream DeviceData);
+    rpc rules(google.protobuf.Empty) returns (stream RuleData);
+    rpc device(google.protobuf.StringValue) returns (DeviceData);
+    rpc authorize(google.protobuf.StringValue) returns (google.protobuf.BoolValue);
+    rpc rule(google.protobuf.StringValue) returns (RuleData);
+    rpc addRule(RuleData) returns (google.protobuf.BoolValue);
+    rpc updateRule(RuleData) returns (google.protobuf.BoolValue);
+    rpc updateDevice(DeviceData) returns (google.protobuf.BoolValue);
+    rpc scan(google.protobuf.Empty) returns (google.protobuf.BoolValue);
+    rpc networks(google.protobuf.Empty) returns (stream NetworkInfo);
+    rpc connect(NetworkConnect) returns (google.protobuf.BoolValue);
+    rpc status(google.protobuf.Empty) returns (StatusInfo);
+}

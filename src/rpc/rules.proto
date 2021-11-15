@@ -1,0 +1,17 @@
+syntax = "proto3";
+
+package aquabox.services;
+
+import public "types.proto";
+import "google/protobuf/empty.proto";
+import "google/protobuf/wrappers.proto";
+import "google/protobuf/any.proto";
+
+service RulesService {
+    rpc Add(RuleData) returns (google.protobuf.BoolValue);
+    rpc Update(RuleData) returns (google.protobuf.BoolValue);
+    rpc Remove(google.protobuf.StringValue) returns (google.protobuf.BoolValue);
+    rpc Get(google.protobuf.StringValue) returns (RuleData);
+    rpc GetAll(google.protobuf.Empty) returns (stream RuleData);
+    rpc GetByDevice(google.protobuf.StringValue) returns (RuleData);
+}

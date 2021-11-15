@@ -20,48 +20,46 @@
 
 #include <mutex>
 
-namespace  aquabox
-{
-    template<class T>
-    struct Singleton
+namespace aquabox {
+template <class T>
+struct Singleton {
+    Singleton(const Singleton&) = delete;
+    Singleton(Singleton&&) = delete;
+    Singleton& operator=(const Singleton&) = delete;
+    Singleton();
+
+    static bool available;
+    static T* instance;
+    static T* get()
     {
-        Singleton(const Singleton&) = delete;
-        Singleton(Singleton&&) = delete;
-        Singleton& operator = (const Singleton&) = delete;
-        Singleton();
-
-        static bool available;
-        static T* instance;
-        static T* get()
-        {
-            static std::mutex lock;
-            std::lock_guard<std::mutex> guard(lock);
-            if (!available) {
-                return nullptr;
-            }
-            if (instance == nullptr)
-            {
-                instance = create();
-            }
-
-            return instance;
+        static std::mutex lock;
+        std::lock_guard<std::mutex> guard(lock);
+        if (!available) {
+            return nullptr;
+        }
+        if (instance == nullptr) {
+            instance = create();
         }
 
-        inline static T* i() { return get(); }
+        return instance;
+    }
 
-        static void destroy()
-        {
-            if (instance != nullptr)
-                delete instance;
-            instance = nullptr;
-        }
-    protected:
-        static T* create() { return new T(); }
-    };
+    inline static T* i() { return get(); }
 
-    template<class T>
-    bool Singleton<T>::available = true;
+    static void destroy()
+    {
+        if (instance != nullptr)
+            delete instance;
+        instance = nullptr;
+    }
 
-    template<class T>
-    T* Singleton<T>::instance = nullptr;
+protected:
+    static T* create() { return new T(); }
+};
+
+template <class T>
+bool Singleton<T>::available = true;
+
+template <class T>
+T* Singleton<T>::instance = nullptr;
 }

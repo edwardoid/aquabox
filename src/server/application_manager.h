@@ -18,13 +18,11 @@
 
 #pragma once
 
-namespace aquabox
-{
-    class Application;
+namespace aquabox {
+class Application;
 
-    class ApplicationManager
-    {
-    public:
-        static Application* getAppication(std::string id);
-    };
+class ApplicationManager {
+public:
+    static Application* getAppication(std::string id);
+};
 }

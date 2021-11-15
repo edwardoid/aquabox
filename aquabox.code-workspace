@@ -84,7 +84,11 @@
 			"hash_set": "cpp",
 			"filesystem": "cpp",
 			"bit": "cpp",
-			"variant": "cpp"
+			"variant": "cpp",
+			"any": "cpp",
+			"charconv": "cpp",
+			"source_location": "cpp",
+			"*.inc": "cpp"
 		}
 	}
 }

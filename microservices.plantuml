@@ -1,0 +1,59 @@
+@startuml
+rectangle Client {
+    interface Aquabox {}
+    interface EventsBus {}
+    interface DeviceManager {}
+    interface HermesBus {}
+    interface MeshGateway {}
+    interface UARTGateway {}
+    interface OneWire {}
+    interface GPIOBus {}
+    interface ClientREST {}
+    interface MQTTClient {}
+
+    ClientREST <--> Aquabox
+
+    HermesBus <--> DeviceManager
+    GPIOBus <--> DeviceManager
+    OneWire <--> DeviceManager
+
+    MeshGateway <--> HermesBus
+    UARTGateway <--> HermesBus
+
+    interface RulesManager {}
+
+    interface NetworkManager {}
+
+    EventsBus <--> DeviceManager
+    EventsBus <--> RulesManager
+    NetworkManager <--> Aquabox
+    DeviceManager <--> Aquabox
+    RulesManager <--> Aquabox
+    Aquabox <..> GoogleAssistant
+    Aquabox <..> AmazonAlexa
+}
+
+rectangle Cloud {
+    interface AquaboxCloud {}
+    interface APICallAuthorization {}
+    interface CloudREST {}
+    interface MongoDB {}
+    interface TelegramBot {}
+    interface MQTTBroker {}
+
+    AquaboxCloud <-- APICallAuthorization
+    AquaboxCloud <-- MongoDB
+    AquaboxCloud <--> CloudREST
+    AquaboxCloud <--> MQTTBroker
+        MQTTBroker <--> MQTTClient
+    AquaboxCloud <--> TelegramBot
+}
+
+rectangle User {
+    interface MobileApp {}
+    interface TelegramApp
+    MobileApp <--> CloudREST
+    MobileApp <--> ClientREST
+    TelegramApp <--> TelegramBot
+}
+@enduml

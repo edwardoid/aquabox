@@ -6,12 +6,12 @@
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
@@ -49,6 +49,10 @@ void API::init(std::shared_ptr<HttpServer> http, Route base)
 
     m_set = base.sub().word("device").string(":dev").word("set");
 
+    m_call = base.sub().word("device").string(":dev").word("call");
+
+    m_history = base.sub().word("sensor").string(":dev").word("history");
+
     m_rulesForDevice = base.sub().word("rules").string(":dev");
 
     m_repeatUnits = base.sub().word("config").word("repeat_units");
@@ -62,11 +66,16 @@ void API::init(std::shared_ptr<HttpServer> http, Route base)
     m_updates = base.sub().word("updates");
 
     if (m_allowCORS) {
-        m_server->default_resource["OPTIONS"] = std::bind(&API::CORSOptions, this, std::placeholders::_2, std::placeholders::_1);
-        m_server->default_resource["GET"] = std::bind(&API::CORSOptions, this, std::placeholders::_2, std::placeholders::_1);
-        m_server->default_resource["POST"] = std::bind(&API::CORSOptions, this, std::placeholders::_2, std::placeholders::_1);
-        m_server->default_resource["PUT"] = std::bind(&API::CORSOptions, this, std::placeholders::_2, std::placeholders::_1);
-        m_server->default_resource["DELETE"] = std::bind(&API::CORSOptions, this, std::placeholders::_2, std::placeholders::_1);
+        m_server->default_resource["OPTIONS"] = std::bind(
+            &API::CORSOptions, this, std::placeholders::_2, std::placeholders::_1);
+        m_server->default_resource["GET"] = std::bind(
+            &API::CORSOptions, this, std::placeholders::_2, std::placeholders::_1);
+        m_server->default_resource["POST"] = std::bind(
+            &API::CORSOptions, this, std::placeholders::_2, std::placeholders::_1);
+        m_server->default_resource["PUT"] = std::bind(
+            &API::CORSOptions, this, std::placeholders::_2, std::placeholders::_1);
+        m_server->default_resource["DELETE"] = std::bind(
+            &API::CORSOptions, this, std::placeholders::_2, std::placeholders::_1);
     }
 
     setup("GET", m_status, &API::Status);
@@ -84,12 +93,12 @@ void API::init(std::shared_ptr<HttpServer> http, Route base)
     setup("GET", m_wifiScan, &API::ScanWiFiNetworks);
     setup("POST", m_wifiConnect, &API::ConnectToWiFi);
     setup("PUT", m_set, &API::SetValue);
+    setup("PUT", m_call, &API::Call);
+    setup("GET", m_history, &API::GetHistory);
 }
 
-void API::defaultHandler(const Route& route, Request& request, Response& response, Headers& headers)
-{
-
-}
+void API::defaultHandler(const Route& route, Request& request,
+    Response& response, Headers& headers) { }
 
 void API::CORSOptions(Web::Request request, Web::Response response)
 {
@@ -102,33 +111,36 @@ void API::addCORSHeaders(Web::Headers& headers)
 {
     headers.emplace("Content-Type", "application/json");
     headers.emplace(Access_Control_Allow_Origin, "*");
-    headers.emplace(Access_Control_Allow_Headers, "Origin, X-Requested-With, Content-Type, Accept, boxId, appId");
-    headers.emplace(Access_Control_Allow_Methods, "POST, GET, PUT, PATCH, DELETE, OPTIONS");
+    headers.emplace(
+        Access_Control_Allow_Headers,
+        "Origin, X-Requested-With, Content-Type, Accept, boxId, appId");
+    headers.emplace(Access_Control_Allow_Methods,
+        "POST, GET, PUT, PATCH, DELETE, OPTIONS");
 }
 
-void API::enableCORS(bool enable)
-{
-    m_allowCORS = enable;
-}
+void API::enableCORS(bool enable) { m_allowCORS = enable; }
 
-void API::setup(std::string method, const Route& route, void (API::* Callback)(const Route&, Request&, Response&, Headers&))
+void API::setup(std::string method, const Route& route,
+    void (API::*Callback)(const Route&, Request&, Response&,
+        Headers&))
 {
-    m_server->resource[route.url()][method] = std::bind(&API::dispatcher, this, route, Callback,
-                                                        std::placeholders::_2,
-                                                        std::placeholders::_1);
+    m_server->resource[route.url()][method] = std::bind(&API::dispatcher, this, route, Callback, std::placeholders::_2,
+        std::placeholders::_1);
     if (m_allowCORS) {
-        m_server->resource[route.url()]["OPTIONS"] = std::bind(&API::CORSOptions, this,
-                                                        std::placeholders::_2,
-                                                        std::placeholders::_1);
+        m_server->resource[route.url()]["OPTIONS"] = std::bind(
+            &API::CORSOptions, this, std::placeholders::_2, std::placeholders::_1);
     }
 }
 
-void API::dispatcher(const Route& route, void (API::* Callback)(const Route&, Request&, Response&, Headers&), Request request, Response response)
+void API::dispatcher(const Route& route,
+    void (API::*Callback)(const Route&, Request&, Response&,
+        Headers&),
+    Request request, Response response)
 {
     Headers headers;
     if (m_allowCORS) {
         addCORSHeaders(headers);
     }
 
-    (this ->* Callback)(route, request, response, headers);
+    (this->*Callback)(route, request, response, headers);
 }

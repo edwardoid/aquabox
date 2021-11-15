@@ -19,32 +19,33 @@
 #pragma once
 
 #include <client_ws.hpp>
-#include <thread>
 #include <nlohmann/json.hpp>
+#include <thread>
 
-namespace aquabox
-{
-    class CloudStream: SimpleWeb::SocketClient<SimpleWeb::WS>
-    {
-    public:
-        CloudStream(const std::string& url);
-        void attach();
-        bool isAttached() const;
-        ~CloudStream();
-        virtual void sendMessage(const nlohmann::json& message);
-        virtual nlohmann::json messageReceived(const nlohmann::json& message) = 0;
-    protected:
-        virtual void onOpen(std::shared_ptr<class Connection> connection);
-        virtual void onClose(std::shared_ptr<class Connection> connection, int, const std::string &);
-        virtual void onError(std::shared_ptr<class Connection>, const SimpleWeb::error_code &);
-    private:
-        virtual void onMessage(std::shared_ptr<class Connection> connection, std::shared_ptr<class InMessage> message);
-        void send(std::string data);
-    private:
-        std::shared_ptr<CloudStream::Connection> m_connection;
-        std::thread m_thread;
-        std::atomic_bool m_reattach;
-        std::string m_url;
-        bool m_attached;
-    };
+namespace aquabox {
+class CloudStream : SimpleWeb::SocketClient<SimpleWeb::WS> {
+public:
+    CloudStream(const std::string& url);
+    void attach();
+    bool isAttached() const;
+    ~CloudStream();
+    virtual void sendMessage(const nlohmann::json& message);
+    virtual nlohmann::json messageReceived(const nlohmann::json& message) = 0;
+
+protected:
+    virtual void onOpen(std::shared_ptr<class Connection> connection);
+    virtual void onClose(std::shared_ptr<class Connection> connection, int, const std::string&);
+    virtual void onError(std::shared_ptr<class Connection>, const SimpleWeb::error_code&);
+
+private:
+    virtual void onMessage(std::shared_ptr<class Connection> connection, std::shared_ptr<class InMessage> message);
+    void send(std::string data);
+
+private:
+    std::shared_ptr<CloudStream::Connection> m_connection;
+    std::thread m_thread;
+    std::atomic_bool m_reattach;
+    std::string m_url;
+    bool m_attached;
+};
 }

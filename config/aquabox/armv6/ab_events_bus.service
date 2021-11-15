@@ -1,0 +1,16 @@
+[Unit]
+Description=Aquabox Events Bus service.
+StartLimitIntervalSec=500
+StartLimitBurst=5
+After=ab_settings_provider.service
+Requires=ab_settings_provider.service
+
+[Service]
+Type=simple
+Environment="LD_LIBRARY_PATH=${AQUABOX_RUN_PATH_LIB}"
+WorkingDirectory=${AQUABOX_RUN_PATH_BIN}
+ExecStart=${AQUABOX_RUN_PATH_BIN}/${PROJECT_NAME}
+Restart=always
+RestartSec=5s
+
+[Install]

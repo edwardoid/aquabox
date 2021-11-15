@@ -1,0 +1,18 @@
+[Unit]
+Description=Aquabox Network Manager Manager service.
+StartLimitIntervalSec=500
+StartLimitBurst=5
+After=ab_events_bus.service
+After=NetworkManager.service
+Requires=ab_settings_provider.service ab_events_bus.service NetworkManager.service
+
+[Service]
+Type=simple
+Environment="DBUS_SYSTEM_BUS_ADDRESS=unix:path=/var/run/dbus/system_bus_socket"
+Environment="LD_LIBRARY_PATH=${AQUABOX_RUN_PATH_LIB}"
+WorkingDirectory=${AQUABOX_RUN_PATH_BIN}
+ExecStart=${AQUABOX_RUN_PATH_BIN}/${PROJECT_NAME}
+Restart=always
+RestartSec=5s
+
+[Install]

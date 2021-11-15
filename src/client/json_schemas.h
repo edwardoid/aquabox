@@ -19,16 +19,13 @@
 #ifndef JSON_SCHEMES_H
 #define JSON_SCHEMES_H
 
-
 #include <nlohmann/json.hpp>
 
-namespace aquabox
-{
-    class JsonEntity
-    {
-        public:
-        static bool isValidCommand(const nlohmann::json& obj);
-    };
+namespace aquabox {
+class JsonEntity {
+public:
+    static bool isValidCommand(const nlohmann::json& obj);
+};
 }
 
 #endif // JSON_SCHEMES_H

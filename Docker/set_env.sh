@@ -7,6 +7,7 @@ while [ -h "$SOURCE" ]; do # resolve $SOURCE until the file is no longer a symli
   [[ $SOURCE != /* ]] && SOURCE="$DIR/$SOURCE" # if $SOURCE was a relative symlink, we need to resolve it relative to the path where the symlink file was located
 done
 DIR="$( cd -P "$( dirname "$SOURCE" )" >/dev/null 2>&1 && pwd )"
+#CPU_COUNT="grep -c ^processor /proc/cpuinfo"
 
 export SOURCES_DIR=$DIR/..
 export BUILD_DIR=$SOURCES_DIR/build/$1
@@ -20,4 +21,4 @@ echo "Logs will be $LOG_FILE"
 
 export IMAGE=conan_base
 
-sudo docker image build -t $IMAGE - < $DIR/Dockerfile.base
+docker image build -t $IMAGE - < $DIR/Dockerfile.base

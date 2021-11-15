@@ -1,0 +1,29 @@
+syntax = "proto3";
+
+package aquabox.services;
+import "google/protobuf/empty.proto";
+import "google/protobuf/struct.proto";
+import "google/protobuf/wrappers.proto";
+
+message ConsumerIdentifier {
+    string Interface = 1;
+    string Instance = 2;
+    string Address = 3;
+}
+
+message EventData {
+    string Sender = 1;
+    string SenderInstance = 2;
+    string Event = 3;
+    google.protobuf.Struct Details = 4;
+}
+
+service EventsBus {
+    rpc Notify(EventData) returns (google.protobuf.Empty) {};
+    rpc Subscribe(ConsumerIdentifier) returns (google.protobuf.Empty) {};
+    rpc Unsubscribe(ConsumerIdentifier) returns (google.protobuf.Empty) {};
+}
+
+service EventConsumer {
+    rpc On(EventData) returns (google.protobuf.Empty) {};
+}

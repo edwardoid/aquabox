@@ -1,13 +1,19 @@
 #/bin/bash
 
+USABLE_CPU_COUNT=$(($CPU_COUNT - 2))
+J_ARG=$(( $USABLE_CPU_COUNT < 0 ? 1 : $USABLE_CPU_COUNT ))
+export CONAN_CPU_COUNT=$J_ARG
+
 function clean_build {
+    touch build.log
     rm build.log && \
     rm -rf /build/* |& tee -a build.log
     return $?
 }
 
 function do_build {
-    make -j6 |& tee -a build.log && \
+    CPU_COUNT=$(grep -c ^processor /proc/cpuinfo)
+    make -j$J_ARG |& tee -a build.log && \
     chmod +rw -R /build |& tee -a build.log
     return $?
 }
@@ -15,7 +21,7 @@ function do_build {
 function prepare_build {
     if [ "$BUILD_PLATFORM" = "x86_64" ]; then
         export CONAN_EXTRA_ARGS="-pr default"
-        export CMAKE_EXTRA_ARGS="-DCMAKE_BUILD_TYPE=Release"
+        export CMAKE_EXTRA_ARGS="-DCMAKE_BUILD_TYPE=Debug"
     fi
 
     if [ "$BUILD_PLATFORM" = "armv6" ]; then
@@ -96,6 +102,16 @@ function pack_client {
                     lib \
                     bin/aquabox-client \
                     bin/aquabox-client.service \
+                    bin/ab_devices_manager \
+                    bin/ab_devices_manager.service \
+                    bin/ab_events_bus \
+                    bin/ab_events_bus.service \
+                    bin/ab_network_manager \
+                    bin/ab_network_manager.service \
+                    bin/ab_rules_manager \
+                    bin/ab_rules_manager.service \
+                    bin/ab_settings_provider \
+                    bin/ab_settings_provider.service \
                     bin/assets \
                     bin/config.json \
                     bin/devices \

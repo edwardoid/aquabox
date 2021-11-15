@@ -6,7 +6,8 @@ using namespace aquabox;
 
 BoxesManager BoxesManager::self;
 
-std::shared_ptr<Box> BoxesManager::get(const std::string& id, bool createIfNotExists)
+std::shared_ptr<Box> BoxesManager::get(const std::string& id,
+    bool createIfNotExists)
 {
     std::lock_guard<std::mutex> ready(self.m_mx);
 
@@ -15,7 +16,7 @@ std::shared_ptr<Box> BoxesManager::get(const std::string& id, bool createIfNotEx
 
     if (box == nullptr && Database::i().wasProduced(id)) {
         box = std::make_shared<Box>(id, self.m_results);
-        self.m_connections.insert({id, box});
+        self.m_connections.insert({ id, box });
     }
 
     return box;

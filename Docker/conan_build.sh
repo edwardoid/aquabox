@@ -18,7 +18,7 @@ else
     export DOCKER_EXTRA_ARGS="-v $SOURCES_DIR/Docker/conan_armv7:/root/.conan/profiles/armv7"
 fi
 
-sudo docker run -v $SOURCES_DIR:/sources \
+docker run -v $SOURCES_DIR:/sources \
 				-v $BUILD_DIR:/build \
         $DOCKER_EXTRA_ARGS \
         -e BUILD_PLATFORM=$1 \

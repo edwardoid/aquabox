@@ -6,23 +6,21 @@
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 #include "cloud_service.h"
-#include <settings.h>
-#include <stacktrace.h>
+#include <micro_clients/settings.h>
 
 int main(int argc, char** argv)
 {
-    aquabox::StackTrace();
     aquabox::Settings::setDomain("cloud");
     if (aquabox::CloudService::i().start())
         return EXIT_SUCCESS;

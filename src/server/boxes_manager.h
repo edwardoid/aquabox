@@ -18,23 +18,22 @@
 
 #pragma once
 
-#include <unordered_map>
-#include <mutex>
-#include "results_map.h"
 #include "command.h"
+#include "results_map.h"
+#include <mutex>
+#include <unordered_map>
 
-namespace aquabox
-{
-    class BoxesManager
-    {
-    public:
-        static std::shared_ptr<class Box> get(const std::string& id, bool createIfNotExists = false);
-        static bool eraseIfNeed(std::string id);
-    private:
-        static BoxesManager self;
+namespace aquabox {
+class BoxesManager {
+public:
+    static std::shared_ptr<class Box> get(const std::string& id, bool createIfNotExists = false);
+    static bool eraseIfNeed(std::string id);
 
-        ResultsMap<Command> m_results;
-        std::unordered_map<std::string, std::shared_ptr<class Box>> m_connections;
-        std::mutex m_mx;
-    };
+private:
+    static BoxesManager self;
+
+    ResultsMap<Command> m_results;
+    std::unordered_map<std::string, std::shared_ptr<class Box>> m_connections;
+    std::mutex m_mx;
+};
 }

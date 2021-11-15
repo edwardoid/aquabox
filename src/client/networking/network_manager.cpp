@@ -6,25 +6,25 @@
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 #include "network_manager.h"
-#include "settings.h"
-#include "log.h"
-#include <nmdbus/Device.h>
-#include <nmdbus/WirelessDevice.h>
-#include <nmdbus/ActiveConnection.h>
-#include <nmdbus/Ip4Config.h>
-#include <nmdbus/Connection.h>
+#include <common/log.h>
+#include <micro_clients/settings.h>
 #include <mutex>
+#include <nmdbus/ActiveConnection.h>
+#include <nmdbus/Connection.h>
+#include <nmdbus/Device.h>
+#include <nmdbus/Ip4Config.h>
+#include <nmdbus/WirelessDevice.h>
 #include <thread>
 
 using namespace aquabox;
@@ -35,25 +35,23 @@ NetworkManager::NetworkManager()
     , currentState(NetworkingState::Unknown)
     , deviceState(NetworkDeviceState::NM_DEVICE_STATE_UNKNOWN)
 {
-    m_nm.ActiveConnectionsChanged.connect(std::bind(&NetworkManager::onActiveConnectionChanged, this, std::placeholders::_1));
+    m_nm.ActiveConnectionsChanged.connect(std::bind(
+        &NetworkManager::onActiveConnectionChanged, this, std::placeholders::_1));
 
     m_nm.StateChanged.connect(currentState);
     pthread_setname_np(m_reconnectThread.native_handle(), "ReconnectMonitor");
 }
 
-NetworkManager::~NetworkManager()
-{
-    m_reconnectThread.join();
-}
+NetworkManager::~NetworkManager() { m_reconnectThread.join(); }
 
 void NetworkManager::reconnect()
 {
-    while(1) {
-        std::this_thread::sleep_for (std::chrono::minutes(1));
-        if(Settings::has(Settings::Keys::NETWORK) && currentState == NetworkingState::Disconnected && m_changeReason != NetworkChangeReason::Reconnect)
-        {
+    while (1) {
+        std::this_thread::sleep_for(std::chrono::minutes(1));
+        if (Settings::has(Settings::Keys::NETWORK) && currentState == NetworkingState::Disconnected && m_changeReason != NetworkChangeReason::Reconnect) {
             m_changeReason = NetworkChangeReason::Reconnect;
-            auto uuid = Settings::string(Settings::Keys::NETWORK, currentConnection.value.uuid);
+            auto uuid = Settings::string(Settings::Keys::NETWORK,
+                currentConnection.value.uuid);
             if (uuid.empty()) {
                 continue;
             }
@@ -61,11 +59,9 @@ void NetworkManager::reconnect()
             try {
                 LOG_INFO << "Reconnecting...";
                 activateConnection(uuid);
-            }
-            catch(std::exception& ex) {
+            } catch (std::exception& ex) {
                 LOG_ERROR << "Reconnect failed: " << ex.what();
-            }
-            catch(...) {
+            } catch (...) {
                 LOG_ERROR << "Reconnect failed...";
             }
         }
@@ -132,13 +128,12 @@ void NetworkManager::updateCurrentState(bool notify)
             }
 
             newValue.ip = ipv4->ip();
-        }
-        catch (std::exception& ex) {
+        } catch (std::exception& ex) {
             LOG_ERROR << ex.what();
             break;
         }
-    
-    } while(false);
+
+    } while (false);
 
     currentConnection.blockSignals(!notify);
     currentConnection.set(newValue);
@@ -158,12 +153,15 @@ void NetworkManager::setInterface(std::string interface)
     }
     m_dev = m_nm.getDevice(m_interface);
     if (m_dev != nullptr) {
-        m_dev->StateChanged.connect(std::bind(&NetworkManager::onDeviceStateChanged, this, std::placeholders::_1, std::placeholders::_2));
+        m_dev->StateChanged.connect(std::bind(&NetworkManager::onDeviceStateChanged,
+            this, std::placeholders::_1,
+            std::placeholders::_2));
     }
     updateCurrentState(true);
 }
 
-void NetworkManager::onDeviceStateChanged(nm::NMDeviceState newState, nm::NMDeviceState oldState)
+void NetworkManager::onDeviceStateChanged(nm::NMDeviceState newState,
+    nm::NMDeviceState oldState)
 {
     updateCurrentState(newState == nm::NMDeviceState::NM_DEVICE_STATE_ACTIVATED);
     deviceState.set(newState);
@@ -173,11 +171,11 @@ void NetworkManager::onDeviceStateChanged(nm::NMDeviceState newState, nm::NMDevi
     } else if (newState == nm::NM_DEVICE_STATE_FAILED) {
         ConnectingFailed.emit();
     } else if (newState == nm::NM_DEVICE_STATE_ACTIVATED) {
-        
     }
 }
 
-void NetworkManager::onActiveConnectionChanged(const std::vector<std::shared_ptr<nm::ActiveConnection>>&)
+void NetworkManager::onActiveConnectionChanged(
+    const std::vector<std::shared_ptr<nm::ActiveConnection>>&)
 {
     if (m_dev == nullptr) {
         LOG_ERROR << "Can't find device " << m_interface;
@@ -217,7 +215,7 @@ std::vector<WifiNetwork> NetworkManager::networks()
         return networks;
     }
 
-    for(auto ap : wifi->accessPoints()) {
+    for (auto ap : wifi->accessPoints()) {
         WifiNetwork net;
         net.ssid = ap->ssid();
         net.auth = ap->security();
@@ -229,7 +227,8 @@ std::vector<WifiNetwork> NetworkManager::networks()
     return networks;
 }
 
-std::string NetworkManager::connect(const std::string& ssid, const std::string& password)
+std::string NetworkManager::connect(const std::string& ssid,
+    const std::string& password)
 {
     m_changeReason = NetworkChangeReason::SwitchNework;
     return m_nm.connect(m_interface, ssid, password);

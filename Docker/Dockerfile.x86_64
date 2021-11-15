@@ -15,7 +15,6 @@ RUN apt-get update --fix-missing && \
     intltool \
     autoconf \
     automake \
-    automake-1.15 \
     pkg-config \
     make \
     tar \

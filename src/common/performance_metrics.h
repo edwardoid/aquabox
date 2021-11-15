@@ -19,23 +19,22 @@
 #pragma once
 
 #include <chrono>
+#include <mutex>
 #include <unordered_map>
 #include <vector>
-#include <mutex>
 
-namespace aquabox
-{
-    class PerformanceMetrics
-    {
-    public:
-        static std::chrono::seconds uptime();
-        uint32_t taskStarted(const std::string& task);
-        void taskFinished(uint32_t taskId);
-        std::size_t pendingTasks() const;
-        std::unordered_map<std::string, std::size_t> tasks() const;
-    private:
-        std::unordered_map<std::string, std::vector<uint32_t> > m_tasks;
-        uint32_t m_nextTaskId = 0;
-        mutable std::mutex m_taskMapLock;
-    };
+namespace aquabox {
+class PerformanceMetrics {
+public:
+    static std::chrono::seconds uptime();
+    uint32_t taskStarted(const std::string& task);
+    void taskFinished(uint32_t taskId);
+    std::size_t pendingTasks() const;
+    std::unordered_map<std::string, std::size_t> tasks() const;
+
+private:
+    std::unordered_map<std::string, std::vector<uint32_t>> m_tasks;
+    uint32_t m_nextTaskId = 0;
+    mutable std::mutex m_taskMapLock;
+};
 }

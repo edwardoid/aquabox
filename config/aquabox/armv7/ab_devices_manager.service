@@ -1,0 +1,16 @@
+[Unit]
+Description=Aquabox Devices Manager service.
+StartLimitIntervalSec=500
+StartLimitBurst=5
+Requires=ab_settings_provider.service ab_events_bus.service
+
+[Service]
+Type=simple
+Environment="LD_LIBRARY_PATH=${AQUABOX_RUN_PATH_LIB}"
+WorkingDirectory=${AQUABOX_RUN_PATH_BIN}
+ExecStart=${AQUABOX_RUN_PATH_BIN}/${PROJECT_NAME}
+Restart=always
+RestartSec=5s
+
+[Install]
+WantedBy=ab_rules_manager.service

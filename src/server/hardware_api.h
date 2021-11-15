@@ -18,31 +18,32 @@
 
 #pragma once
 
-#include <route.h>
 #include <iot_definitions.h>
+#include <route.h>
 
-namespace aquabox
-{
-    class HardwareApi
-    {
-        HardwareApi() {};
-        HardwareApi(const HardwareApi&) = delete;
-        HardwareApi(HardwareApi&&) = delete;
-        HardwareApi& operator = (const HardwareApi&) = delete;
-        HardwareApi& operator = (HardwareApi&&) = delete;
-    public:
-        static bool start();
-    private:
-        bool acceptConnectionFromHW(std::string id, std::shared_ptr<Web::WSConnection> connection);
-        void setupRoutes();
-    private:
-        static HardwareApi self;
-        Web::HttpServer m_http;
-        Web::WSServer m_ws;
-        Route m_register;
-        Route m_login;
-        Route m_firmware;
-        Route m_events;
-        Route m_commands;
-    };
+namespace aquabox {
+class HardwareApi {
+    HardwareApi() {};
+    HardwareApi(const HardwareApi&) = delete;
+    HardwareApi(HardwareApi&&) = delete;
+    HardwareApi& operator=(const HardwareApi&) = delete;
+    HardwareApi& operator=(HardwareApi&&) = delete;
+
+public:
+    static bool start();
+
+private:
+    bool acceptConnectionFromHW(std::string id, std::shared_ptr<Web::WSConnection> connection);
+    void setupRoutes();
+
+private:
+    static HardwareApi self;
+    Web::HttpServer m_http;
+    Web::WSServer m_ws;
+    Route m_register;
+    Route m_login;
+    Route m_firmware;
+    Route m_events;
+    Route m_commands;
+};
 }

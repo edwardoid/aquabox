@@ -1,0 +1,39 @@
+syntax = "proto3";
+
+package aquabox.services;
+
+import "google/protobuf/empty.proto";
+import "google/protobuf/wrappers.proto";
+import "google/protobuf/any.proto";
+
+message DeviceData {
+    string id = 1;
+    string name = 2;
+    string address = 3;
+    int32 index = 4;
+    bool rulesEnabled = 5;
+    string type = 6;
+    string clazz = 7;
+    map<string, string> meta = 8;
+    bool accepted = 9;
+    bool available = 10;
+}
+
+
+message RuleAction {
+    string property = 1;
+    string cron = 2;
+    double value = 3;
+}
+
+message RuleData {
+    string id = 1;
+    string name = 2;
+    uint64 index = 3;
+    string device = 4;
+    bool enabled = 5;
+    uint64 createdAt = 6;
+    uint64 deleteAfter = 7;
+    repeated RuleAction actions = 8;
+}
+

@@ -1,0 +1,48 @@
+syntax = "proto3";
+import "google/protobuf/empty.proto";
+import "google/protobuf/wrappers.proto";
+package aquabox.services;
+
+message NetworkInfo {
+    string UUID = 1;
+    string SSID = 2;
+    int32 strength = 3;
+
+    enum Mode {
+        Unsecure = 0;
+        Secure = 1;
+    }
+
+    Mode mode = 4;
+}
+
+message NetworkConnect {
+    string SSID = 1;
+    string Password = 2;
+}
+
+message ConnectionStatus {
+    string SSID = 1;
+
+    enum Status {
+        Disconnecting = 0;
+        Connecting = 1;
+        Authentificating = 2;
+        OptainingIP = 3;
+        Connected = 4;
+        Disconnected = 5;
+        Failed = 6;
+    };
+
+    Status status = 2;
+}
+
+service NetworkManager {
+    rpc GetCurrentNetwork(google.protobuf.Empty) returns (NetworkInfo) {};
+    rpc GetCurrentStatus(google.protobuf.Empty) returns (ConnectionStatus) {};
+    rpc IsConnectedToInternet(google.protobuf.Empty) returns (google.protobuf.BoolValue) {};
+    rpc Connect(NetworkConnect) returns (stream ConnectionStatus) {};
+    rpc StartHotspot(google.protobuf.Empty) returns (google.protobuf.Empty) {};
+    rpc StopHotspot(google.protobuf.Empty) returns (google.protobuf.Empty) {};
+    rpc CurrentNetworkChanged(google.protobuf.Empty) returns (stream NetworkInfo) {};
+}

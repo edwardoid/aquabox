@@ -20,31 +20,31 @@
 
 #include <mongocxx/client.hpp>
 #include <mongocxx/database.hpp>
-#include <string>
 #include <nlohmann/json.hpp>
 #include <set>
-namespace aquabox
-{
-    class Database
-    {
-    public:
-        static Database& i();
-        bool wasProduced(const std::string& id);
-        bool isApplicationAuthorized(const std::string& app, const std::string& box);
-        void setConnectedApps(const std::string& id, const std::vector<std::string>& appId);
-        void setStreamAvailable(const std::string& id, const std::string& stream, bool available);
-        nlohmann::json firmwareVersions(const std::string& version);
-        std::set<int64_t> telegramChats(const std::string& id);
-    protected:
-        Database();
-        Database(const Database&) = delete;
-        Database(Database&&) = delete;
-        Database& operator = (const Database) = delete;
-        Database& operator = (Database&&) = delete;
+#include <string>
+namespace aquabox {
+class Database {
+public:
+    static Database& i();
+    bool wasProduced(const std::string& id);
+    bool isApplicationAuthorized(const std::string& app, const std::string& box);
+    void setConnectedApps(const std::string& id, const std::vector<std::string>& appId);
+    void setStreamAvailable(const std::string& id, const std::string& stream, bool available);
+    nlohmann::json firmwareVersions(const std::string& version);
+    std::set<int64_t> telegramChats(const std::string& id);
 
-        bool connect();
-    private:
-        mongocxx::client m_client;
-        mongocxx::database m_aquabox;
-    };
+protected:
+    Database();
+    Database(const Database&) = delete;
+    Database(Database&&) = delete;
+    Database& operator=(const Database) = delete;
+    Database& operator=(Database&&) = delete;
+
+    bool connect();
+
+private:
+    mongocxx::client m_client;
+    mongocxx::database m_aquabox;
+};
 }

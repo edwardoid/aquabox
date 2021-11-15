@@ -1,0 +1,17 @@
+syntax = "proto3";
+import "google/protobuf/empty.proto";
+package aquabox.services;
+
+message CloudConnectionStateResponse {
+    enum CloudConnectionState {
+        DISABLED = 0;
+        CONNECTING = 1;
+        DISCONNECTED = 2;
+        FAILED = 3;
+    };
+    CloudConnectionState state = 1;
+}
+
+service Cloud {
+    rpc GetConenctionState(google.protobuf.Empty) returns (CloudConnectionStateResponse) {};
+};
