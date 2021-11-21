@@ -13,4 +13,4 @@ Restart=always
 RestartSec=5s
 
 [Install]
-WantedBy=ab_rules_manager.service
+WantedBy=multi-user.target

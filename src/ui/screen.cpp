@@ -37,7 +37,7 @@ void Screen::show()
 
 boost::filesystem::path Screen::resource(std::string name)
 {
-    return boost::filesystem::current_path() / "assets/";
+    return boost::filesystem::current_path() / "assets/" / name;
 }
 
 boost::filesystem::path Screen::asset(std::string name)

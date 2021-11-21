@@ -13,4 +13,5 @@ ExecStart=${AQUABOX_RUN_PATH_BIN}/${PROJECT_NAME} $APP_ARGS
 Restart=always
 RestartSec=5s
 
-[Install]ab_network-manager
+[Install]
+WantedBy=multi-user.target
