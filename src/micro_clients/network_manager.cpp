@@ -30,6 +30,10 @@ public:
     virtual ~NetworkManagerImpl() { }
     virtual NetworkState currentState() override;
     virtual NetworkInfo currentNetwork() override;
+    virtual bool hasInternetConnection() override;
+    virtual bool startScan() override;
+    virtual std::vector<NetworkInfo> availableNetworks() override;
+    virtual std::string connect(const std::string ssid, const std::string password) override;
 };
 
 namespace {
@@ -65,15 +69,85 @@ NetworkState NetworkManagerImpl::currentState()
 NetworkInfo NetworkManagerImpl::currentNetwork()
 {
     NetworkInfo info;
+    info.strength = -1;
     google::protobuf::Empty e;
     services::NetworkInfo data;
 
+    LOG_DEBUG << "services::NetworkManager::Stub::GetCurrentNetwork";
     if (client()->call(&services::NetworkManager::Stub::GetCurrentNetwork, e, &data).ok()) {
         info.uuid = data.uuid();
         info.ssid = data.ssid();
         info.strength = data.strength();
         info.secure = data.mode() == services::NetworkInfo::Secure;
+        info.ip = data.ip();
+        info.auth = data.auth();
+        LOG_INFO << "IP: " << data.ip();
+    } else {
+        LOG_ERROR << "services::NetworkManager::Stub::GetCurrentNetwork FAILED!";
     }
 
     return info;
+}
+
+bool NetworkManagerImpl::startScan()
+{
+    google::protobuf::Empty e;
+    google::protobuf::BoolValue b;
+
+    if (client()->call(&services::NetworkManager::Stub::StartScan, e, &b).ok()) {
+        return b.value();
+    }
+
+    return false;
+}
+
+bool NetworkManagerImpl::hasInternetConnection()
+{
+    google::protobuf::Empty e;
+    google::protobuf::BoolValue b;
+
+    if (client()->call(&services::NetworkManager::Stub::IsConnectedToInternet, e, &b).ok()) {
+        return b.value();
+    }
+
+    return false;
+}
+
+std::vector<NetworkInfo> NetworkManagerImpl::availableNetworks()
+{
+    grpc::ClientContext cxt;
+    auto c = client();
+    std::vector<NetworkInfo> res;
+    google::protobuf::Empty e;
+    std::unique_ptr<grpc::ClientReader<services::NetworkInfo>> reader(
+        (*c)->GetAvailableNetworks(&cxt, e));
+    services::NetworkInfo data;
+    while (reader->Read(&data)) {
+        NetworkInfo info;
+        info.uuid = data.uuid();
+        info.ssid = data.ssid();
+        info.strength = data.strength();
+        info.secure = data.mode() == services::NetworkInfo::Secure;
+        info.ip = data.ip();
+        info.auth = data.auth();
+        res.push_back(static_cast<NetworkInfo>(info));
+    }
+    grpc::Status status = reader->Finish();
+    return res;
+}
+
+std::string NetworkManagerImpl::connect(const std::string ssid, const std::string password)
+{
+    services::NetworkConnect c;
+    c.set_ssid(ssid);
+    c.set_password(password);
+    services::ConnectionStatus u;
+
+    if (client()
+            ->call(&services::NetworkManager::Stub::Connect, c, &u)
+            .ok()) {
+        return u.uuid();
+    }
+
+    return "";
 }

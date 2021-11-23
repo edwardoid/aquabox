@@ -37,6 +37,9 @@ public:
 
         static const std::string WORKING_DIRECTORY;
         static const std::string WEB_ROOT;
+        static const std::string DATA_ROOT;
+        static const std::string DEVICES_DATA_SUBROOT;
+        static const std::string RULES_DATA_SUBROOT;
 
         static const std::string HTTP_PORT;
         static const std::string STREAM_PORT;
@@ -93,6 +96,9 @@ public:
         static const std::string SERIAL;
         static const std::string FRAMEBUFFER;
         static const std::string TELEGRAM_BOT_API;
+        static const std::string DATA_ROOT;
+        static const std::string DEVICES_DATA_SUBROOT;
+        static const std::string RULES_DATA_SUBROOT;
 
         static const int REST_PORT;
         static const int WS_PORT;

@@ -5,41 +5,33 @@ UPDATE_ARCHIVE=$1
 AB_DIR=/aquabox
 AB_BACKUP_DIR=/aquabox.bak
 
+SERVICES=(ab_settings_provider ab_events_bus ab_devices_manager ab_rules_manager ab_network_manager aquabox-client ab_ui)
+
 echo "Stopping the service"
-systemctl stop aquabox
+for s in ${SERVICES[@]};do
+    systemctl stop $s.service
+done
 
 TMP_DIR=$(mktemp -d -t aquabox-XXXXXXXXXX)
 echo "Temporary dir: $TMP_DIR Update: $UPDATE_ARCHIVE. Extracting update archive"
 tar xvf $UPDATE_ARCHIVE -C $TMP_DIR
 
-function install_service {
-    if test -f "$TMP_DIR/bin/$1.service"; then
-        systemctl stop $1
-        echo "Updating service"
-        cp $TMP_DIR/bin/$1.service /etc/systemd/system/$1.service
-        systemctl daemon-reload
-    fi
-}
+for s in ${SERVICES[@]};do
+    echo "Stopping $s"
+    systemctl stop $s.service
+done
 
-install_service aquabox-client
-install_service ab_rules_manager
-install_service ab_devices_manager
-install_service ab_network_manager
-install_service ab_events_bus
-install_service ab_settings_provider
+for s in ${SERVICES[@]};do
+    echo "Copying service file: $s"
+    cp $TMP_DIR/bin/$s.service /etc/systemd/system/$s.service
+done
 
-systemctl start ab_settings_provider
-systemctl start ab_events_bus
-systemctl start ab_network_manager
-systemctl start ab_devices_manager
-systemctl start ab_rules_manager
-systemctl start aquabox-client
+systemctl daemon-reload
 
-if test -f "$TMP_DIR/bin/aquabox-client.service"; then
-    echo "Updating service"
-    cp $TMP_DIR/bin/aquabox-client.service /etc/systemd/system/aquabox.service
-    systemctl daemon-reload
-fi
+for s in ${SERVICES[@]};do
+    echo "Enabling $s"
+    systemctl enable $s.service
+done
 
 echo "Removing old backup"
 rm -rf $AB_BACKUP_DIR
@@ -55,13 +47,10 @@ cd $AB_DIR
 echo "Restoring config file from $AB_BACKUP_DIR/bin/config.json to $AB_DIR/bin/config.json"
 cp $AB_BACKUP_DIR/bin/config.json $AB_DIR/bin/config.json
 
-echo "Restarting service"
-systemctl restart aquabox-client
-
-echo "Checking service"
-systemctl status aquabox-client
-
-journalctl -f -u aquabox-client
-
 echo "Version: "
 cat $AB_DIR/version.txt
+
+for s in ${SERVICES[@]};do
+    echo "Starting $s"
+    systemctl start $s.service
+done

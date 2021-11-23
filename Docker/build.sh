@@ -112,6 +112,8 @@ function pack_client {
                     bin/ab_rules_manager.service \
                     bin/ab_settings_provider \
                     bin/ab_settings_provider.service \
+                    bin/ab_ui \
+                    bin/ab_ui.service \
                     bin/assets \
                     bin/config.json \
                     bin/devices \

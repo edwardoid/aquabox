@@ -35,22 +35,26 @@ void Screen::show()
     fb->flush();
 }
 
-boost::filesystem::path Screen::resource(std::string name)
+const boost::filesystem::path& Screen::resource(const std::string& name)
 {
-    return boost::filesystem::current_path() / "assets/" / name;
+    static std::unordered_map<std::string, boost::filesystem::path> paths;
+    if (paths.count(name) == 0) {
+        paths[name] = boost::filesystem::current_path() / "assets/" / name;
+    }
+    return paths[name];
 }
 
-boost::filesystem::path Screen::asset(std::string name)
+const boost::filesystem::path& Screen::asset(const std::string& name)
 {
     return resource(name + std::string(".png"));
 }
 
-boost::filesystem::path Screen::font(std::string name)
+const boost::filesystem::path& Screen::font(const std::string& name)
 {
     return resource(name + std::string(".ttf"));
 }
 
-std::shared_ptr<LIBFB_NS::PNGImage> Screen::pixmap(std::string name)
+std::shared_ptr<LIBFB_NS::PNGImage> Screen::pixmap(const std::string& name)
 {
     auto px = Singleton<LIBFB_NS::PNGProvider>::i()->get(asset(name).c_str());
     if (px == nullptr) {

@@ -20,6 +20,7 @@
 
 #include <stdint.h>
 #include <string>
+#include <vector>
 
 namespace aquabox {
 
@@ -39,6 +40,8 @@ struct NetworkInfo
 {
     std::string uuid;
     std::string ssid;
+    std::string ip;
+    std::string auth;
     int strength;
     bool secure;
 };
@@ -47,5 +50,9 @@ class INetworkManager {
 public:
     virtual NetworkState currentState() = 0;
     virtual NetworkInfo currentNetwork() = 0;
+    virtual bool startScan() = 0;
+    virtual bool hasInternetConnection() = 0;
+    virtual std::vector<NetworkInfo> availableNetworks() = 0;
+    virtual std::string connect(const std::string ssid, const std::string password) = 0;
 };
 }

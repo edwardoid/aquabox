@@ -5,6 +5,7 @@
 #include <common/thread_pool.h>
 #include <common/singleton.h>
 #include <services/application.h>
+#include <services/settings.h>
 #include "events/device_events.h"
 #include "layer/network_layer.h"
 #include "hermes/hermes_mesh_gateway.h"
@@ -62,7 +63,9 @@ bool DevicesServiceServer::init()
     Singleton<aquabox::HermesMeshGateway>::available = !Application::app()->optionsIsSet("no-spi") &&
                                                        Singleton<ISettings>::i()->get(Settings::Keys::MESH_ENABLED, Settings::Defaults::MESH_ENABLED);
 
-    boost::filesystem::path root = Singleton<ISettings>::i()->path("devices", "./devices");
+    boost::filesystem::path root = Singleton<ISettings>::i()->path(Settings::Keys::DATA_ROOT, Settings::Defaults::DATA_ROOT) /
+                                   Singleton<ISettings>::i()->path(Settings::Keys::DEVICES_DATA_SUBROOT, Settings::Defaults::DEVICES_DATA_SUBROOT);
+
     if (!boost::filesystem::exists(root)) {
         if (!boost::filesystem::create_directory(root)) {
             LOG_ERROR << "Can't create devices directory" << root;

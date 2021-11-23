@@ -22,10 +22,10 @@
 #include "aquabox.h"
 #include "cloud.h"
 #include <types/update_events.h>
-#include "networking/network_manager.h"
 #include <micro_clients/settings.h>
 #include <micro_clients/devices_manager.h>
 #include <micro_clients/rules_manager.h>
+#include <micro_clients/network_manager.h>
 #include <boost/asio/ip/host_name.hpp>
 
 using namespace aquabox;
@@ -106,18 +106,14 @@ bool CommandExecutor::exec(const Command& cmd)
 bool CommandExecutor::GetStatus()
 {
     nlohmann::json host(
-        { { "rest", Settings::integer(Settings::Keys::HTTP_PORT, Settings::Defaults::REST_PORT) },
-            { "stream", Settings::integer(Settings::Keys::STREAM_PORT, Settings::Defaults::WS_PORT) },
-            { "serial",
-                Settings::string(Settings::Keys::SERIAL, Settings::Defaults::SERIAL) } });
+        { { "rest", Singleton<ISettings>::i()->get(Settings::Keys::HTTP_PORT, Settings::Defaults::REST_PORT) },
+            { "stream", Singleton<ISettings>::i()->get(Settings::Keys::STREAM_PORT, Settings::Defaults::WS_PORT) },
+            { "serial", SERIAL_NUMBER } });
 
-    auto nm = Singleton<NetworkManager>::i();
-
-    if (nm != nullptr) {
-        host["network"] = nlohmann::json({ { "ssid", nm->currentConnection.value.ssid },
-            { "ip", nm->currentConnection.value.ip },
-            { "internet", nm->connectedToInternet() } });
-    }
+    auto network = Singleton<INetworkManager>::i()->currentNetwork();
+    host["network"] = nlohmann::json({ { "ssid", network.ssid },
+        { "ip", network.ip },
+        { "internet", Singleton<INetworkManager>::i()->hasInternetConnection() } });
 
     host["host"] = boost::asio::ip::host_name();
 
@@ -370,12 +366,7 @@ bool CommandExecutor::SetValue()
 
 bool CommandExecutor::ScanWiFiNetworks()
 {
-    auto nm = Singleton<NetworkManager>::i();
-
-    bool res = false;
-    if (nm != nullptr) {
-        res = nm->requestScan();
-    }
+    bool res = Singleton<INetworkManager>::i()->startScan();
 
     m_cmd.response(nlohmann::json({ { "requestResult", res } }), Result::Ok);
     return true;
@@ -385,30 +376,13 @@ bool CommandExecutor::ListNetworks()
 {
     std::vector<nlohmann::json> nets;
 
-    auto nm = Singleton<NetworkManager>::i();
-
-    if (nm != nullptr) {
-        auto currentConnection = nm->currentConnection.value;
-        for (auto& net : nm->networks()) {
-            nets.emplace_back(nlohmann::json(
-                { { "ssid", net.ssid },
-                    { "ip",
-                        (net.ssid == currentConnection.ssid ? currentConnection.ip : "") },
-                    { "auth",
-                        (net.auth == nm::Security::WEP
-                                ? "wep"
-                                : (net.auth == nm::Security::WPA
-                                        ? "wpa"
-                                        : (net.auth == nm::Security::WPA2
-                                                ? "wpa2"
-                                                : (net.auth == nm::Security::None
-                                                        ? "none"
-                                                        : (net.auth == nm::Security::Enterprise
-                                                                ? "enterprise"
-                                                                : "unknown"))))) },
-                    { "encrypted", net.encrypted },
-                    { "signal", net.signal } }));
-        }
+    for (auto& net : Singleton<INetworkManager>::i()->availableNetworks()) {
+        nets.emplace_back(nlohmann::json(
+            { { "ssid", net.ssid },
+                { "ip", net.ip },
+                { "auth", net.auth },
+                { "encrypted", net.secure },
+                { "signal", net.strength } }));
     }
 
     m_cmd.response(nlohmann::json({ { "networks", nets }, { "count", nets.size() } }),
@@ -434,22 +408,11 @@ bool CommandExecutor::ConnectToWiFi()
         return true;
     }
 
-    auto nm = Singleton<NetworkManager>::i();
+    std::string uuid = Singleton<INetworkManager>::i()->connect(ssidStr, passwordStr);
 
-    if (nm != nullptr) {
-        for (const WifiNetwork& net : nm->networks()) {
-            if (net.ssid == ssidStr) {
-                auto uuid = nm->connect(ssidStr, passwordStr);
-                m_cmd.response({ { "uuid", uuid } }, Result::Ok);
-                Singleton<AquaBox>::get()->doLater(
-                    "activating_connection",
-                    [uuid, nm]() { nm->activateConnection(uuid); });
-
-                return true;
-            }
-        }
-    }
-
-    m_cmd.response(Result::NotFound);
+    if(uuid.empty())
+        m_cmd.response(Result::NotFound);
+    else
+        m_cmd.response({ { "uuid", uuid } }, Result::Ok);
     return true;
 }

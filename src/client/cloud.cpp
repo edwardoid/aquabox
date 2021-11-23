@@ -21,13 +21,13 @@
 #include "commands_stream.h"
 #include <types/cloud_event.h>
 #include "events_stream.h"
-#include "networking/network_manager.h"
 #include <types/serial.h>
 #include <types/event.h>
 #include <common/log.h>
 #include <common/singleton.h>
 #include <nlohmann/json.hpp>
 #include <micro_clients/settings.h>
+#include <micro_clients/network_manager.h>
 
 #define AUTH_URL "/hw/api/v1/register"
 
@@ -171,9 +171,9 @@ void Cloud::heartheat()
             if (isConnected()) {
                 break;
             }
-            auto nm = Singleton<NetworkManager>::i();
+            auto nm = Singleton<INetworkManager>::i();
 
-            if (nm != nullptr && !nm->connectedToInternet()) {
+            if (Singleton<INetworkManager>::i()->hasInternetConnection()) {
                 break;
             }
 

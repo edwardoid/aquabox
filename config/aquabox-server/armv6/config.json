@@ -11,6 +11,7 @@
         "threads": 8,
         "workingDirectory": "/aquabox/bin"
     },
+    "meshEnabled": false,
     "cloud": {
         "cloudPort": 5557,
         "cloudWSPort": 5556,

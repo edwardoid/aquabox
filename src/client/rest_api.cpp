@@ -21,14 +21,15 @@
 #include "command_executor.h"
 #include <common/enumerations.h>
 #include <types/update_events.h>
+#include <types/serial.h>
 #include <common/log.h>
-#include "networking/network_manager.h"
 #include "qr.h"
 #include <common/http_helpers.h>
 #include <nlohmann/json.hpp>
 #include <random>
 #include <common/singleton.h>
 #include <micro_clients/settings.h>
+#include <micro_clients/network_manager.h>
 #include <stdio.h>
 
 using namespace aquabox::v1;
@@ -95,16 +96,15 @@ void execCommand(Command& cmd, Web::Response response, Web::Headers headers)
 nlohmann::json getStatusInfo(bool detailed)
 {
     nlohmann::json host(
-        { { "rest", Settings::integer(Settings::Keys::HTTP_PORT, Settings::Defaults::REST_PORT) },
-            { "stream", Settings::integer(Settings::Keys::STREAM_PORT, Settings::Defaults::WS_PORT) },
-            { "serial",
-                Settings::string(Settings::Keys::SERIAL, Settings::Defaults::SERIAL) } });
+        { { "rest", Singleton<ISettings>::i()->get(Settings::Keys::HTTP_PORT, Settings::Defaults::REST_PORT) },
+            { "stream", Singleton<ISettings>::i()->get(Settings::Keys::STREAM_PORT, Settings::Defaults::WS_PORT) },
+            { "serial", SERIAL_NUMBER } });
 
-    auto nm = Singleton<NetworkManager>::i();
-    if (detailed && nm) {
-        host["network"] = nlohmann::json({ { "ssid", nm->currentConnection.value.ssid },
-            { "ip", nm->currentConnection.value.ip },
-            { "internet", nm->connectedToInternet() } });
+    if (detailed) {
+        auto net = Singleton<INetworkManager>::i()->currentNetwork();
+        host["network"] = nlohmann::json({ { "ssid", net.ssid },
+            { "ip", net.ip },
+            { "internet", Singleton<INetworkManager>::i()->hasInternetConnection() } });
     }
 
     host["host"] = boost::asio::ip::host_name();

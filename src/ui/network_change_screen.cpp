@@ -23,6 +23,7 @@
 #include <common/singleton.h>
 #include <micro_clients/events.h>
 #include <micro_clients/settings.h>
+#include <micro_clients/network_manager.h>
 
 using namespace aquabox;
 

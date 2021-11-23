@@ -14,7 +14,7 @@ file(COPY ${AQUABOX_ROOT_DIR}/config/aquabox/$ENV{BUILD_PLATFORM}/assets DESTINA
 file(COPY ${AQUABOX_ROOT_DIR}/config/aquabox/$ENV{BUILD_PLATFORM}/devices DESTINATION ${CMAKE_BINARY_DIR}/bin)
 file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/bin/rules)
 
-file(GLOB AQUABOX_SOURCES "*.cpp" "*/*.cpp" "*/hermes/*.cpp")
+file(GLOB AQUABOX_SOURCES "*.cpp")
 
 add_executable(${PROJECT_NAME} ${AQUABOX_SOURCES})
 target_include_directories(${PROJECT_NAME} PUBLIC ${CMAKE_CURRENT_LIST_DIR}/.. ${NM_DBUS_INCLUDE_DIR})
@@ -26,14 +26,13 @@ target_compile_definitions(${PROJECT_NAME} PUBLIC AB_GIT_HASH=\"${GIT_COMMIT_HAS
 
 find_package(libqrencode REQUIRED)
 
-target_link_libraries(${PROJECT_NAME} NMDBus stats)
+target_link_libraries(${PROJECT_NAME} stats)
 target_link_libraries(${PROJECT_NAME} aquabox-common)
 target_link_libraries(${PROJECT_NAME} CONAN_PKG::tgbot)
 target_link_libraries(${PROJECT_NAME} libqrencode::libqrencode)
 target_link_libraries(${PROJECT_NAME} CONAN_PKG::json-schema-validator)
 target_link_libraries(${PROJECT_NAME} CONAN_PKG::boost)
 target_link_libraries(${PROJECT_NAME} OpenSSL::OpenSSL)
-target_link_libraries(${PROJECT_NAME} PNG::PNG)
 target_link_libraries(${PROJECT_NAME} Threads::Threads)
 target_link_libraries(${PROJECT_NAME} CONAN_PKG::simppl)
 target_link_libraries(${PROJECT_NAME} CONAN_PKG::libserial)
@@ -41,3 +40,10 @@ target_link_libraries(${PROJECT_NAME} dl)
 target_link_libraries(${PROJECT_NAME} rt)
 target_link_libraries(${PROJECT_NAME} rf24meshgw)
 target_link_libraries(${PROJECT_NAME} types)
+
+set_target_properties(${PROJECT_NAME}
+    PROPERTIES
+    ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib"
+    LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib"
+    RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin"
+)

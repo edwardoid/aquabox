@@ -25,12 +25,12 @@
 #include "global_timer.h"
 #include "lock_file.h"
 #include <common/log.h>
-#include "networking/network_manager.h"
 #include "options.h"
 #include "rest_api.h"
 #include <common/singleton.h>
 #include <micro_clients/settings.h>
 #include <micro_clients/events.h>
+#include <micro_clients/network_manager.h>
 #include "web_server.h"
 #include <chrono>
 #include <exception>
@@ -59,7 +59,6 @@ AquaBox::~AquaBox()
 
 int AquaBox::start()
 {
-    Singleton<NetworkManager>::available = !optionsIsSet("ignore-networking");
     Singleton<Cloud>::available = !optionsIsSet("standalone");
 
     plog::init(plog::severityFromString(
@@ -67,19 +66,6 @@ int AquaBox::start()
                        plog::severityToString(plog::Severity::info))
                        .c_str()),
         &m_consoleAppender);
-
-    if (Singleton<NetworkManager>::available) {
-        NetworkManager* nm = Singleton<NetworkManager>::i();
-        nm->setInterface(Settings::string(Settings::Keys::CLIENT_INTERFACE,
-            Settings::Defaults::CLIENT_INTERFACE));
-        nm->currentConnection.connect([this](Connection c) {
-            postUpdate(std::make_shared<NetworkChangedEvent>(c));
-        });
-        LOG_DEBUG << "Signal id: "
-                  << nm->deviceState.connect([this](NetworkDeviceState state) {
-                         postUpdate(std::make_shared<NetworkDeviceStateEvent>(state));
-                     });
-    }
 
     LOG_INFO << "Starting " << Settings::Defaults::APPLICATION << " ver. "
              << std::hex << Settings::Defaults::VERSION_MAJOR << "."
@@ -173,10 +159,8 @@ std::string AquaBox::configurationData() const
     configurationDataString += SERIAL_NUMBER;
     configurationDataString += ";";
 
-    if (Singleton<NetworkManager>::i() != nullptr)
-        configurationDataString += Singleton<NetworkManager>::i()->currentConnection.value.ip;
-    else
-        configurationDataString += "aquabox";
+
+    configurationDataString += Singleton<INetworkManager>::i()->currentNetwork().ip;
     configurationDataString += ";";
 
     configurationDataString += std::to_string((int)Singleton<AquaBox>::get()->systemTemperature());

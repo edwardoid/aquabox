@@ -8,6 +8,8 @@ UPDATE=aquabox-$1.tar.gz
 UPDATE_DIR=$INSTALL_DIR/update
 UPDATE_DIR_TMP=$UPDATE_DIR/tmp
 
+SERVICES=(ab_settings_provider ab_events_bus ab_devices_manager ab_rules_manager ab_network_manager aquabox-client)
+
 mkdir -p $BACKUP_DIR
 mkdir -p $UPDATE_DIR
 mkdir -p $UPDATE_DIR_TMP
@@ -18,17 +20,34 @@ mv $INSTALL_DIR/bin $BACKUP_DIR
 mkdir -p $INSTALL_DIR/bin
 
 echo "Extracting update"
-cd $UPDATE_DIR 
-tar -xf $UPDATE.tar -C $UPDATE_DIR_TMP
+cd $UPDATE_DIR
+tar -xf $UPDATE.tar -C $
 
 if test -f "$UPDATE_DIR_TMP/pre_update.sh"
 then
-    source $UPDATE_DIR_TMP/pre_update.sh 
+    source $UPDATE_DIR_TMP/pre_update.sh
 else
     echo "No pre updates"
 fi
 
-systemctl stop $SERVICE
+for s in ${SERVICES[@]};do
+    systemctl stop $s.service
+done
+
+for s in ${SERVICES[@]};do
+    cp $UPDATE_DIR_TMP/bin/$s.service /etc/systemd/system/$s.service
+done
+
+systemctl daemon-deload
+
+for s in ${SERVICES[@]};do
+    systemctl enable $s.service
+done
+
+
+for s in ${SERVICES[@]};do
+    systemctl start $s.service
+done
 
 cat $UPDATE_DIR_TMP/files.txt
 
@@ -46,11 +65,8 @@ done
 if test -f "$UPDATE_DIR_TMP/post_update.sh"
 then
     echo "Doing post update"
-    source $UPDATE_DIR_TMP/post_update.sh 
+    source $UPDATE_DIR_TMP/post_update.sh
 else
     echo "No post updates provided"
 fi
-
-systemctl daemon-deload
-systemctl start $SERVICE
 

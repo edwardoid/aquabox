@@ -13,7 +13,7 @@ namespace services {
     class MicroService {
     public:
         MicroService(std::uint32_t port)
-            : MicroService(std::string("localhost:") + std::to_string(port))
+            : MicroService(std::string("127.0.0.1:") + std::to_string(port))
         {
         }
         MicroService(std::string address)

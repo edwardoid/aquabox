@@ -56,7 +56,7 @@ void StatusBarScreen::draw()
 
     elements.push_back(wifiIndex);
 
-    int cloudIndex = Singleton<ICloud>::i()->connected() ? 7 : 6;
+    int cloudIndex = 7; // Singleton<ICloud>::i()->connected() ? 7 : 6;
     elements.push_back(cloudIndex);
 
     int assistantIndex = /*Singleton<AquaBox>::get()->assistantIsConnected()*/ false ? 8 : 9;

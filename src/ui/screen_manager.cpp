@@ -21,6 +21,7 @@
 #include <chrono>
 #include <micro_clients/settings.h>
 #include <thread>
+#include <common/log.h>
 
 using namespace aquabox;
 
@@ -35,8 +36,8 @@ void ScreenManager::show()
 
     if (m_networkChangeScreen.hasUpdate()) {
         m_networkChangeScreen.show();
-    } else if (m_cloudScreen.hasUpdate()) {
-        m_cloudScreen.show();
+    } else if (false /* m_cloudScreen.hasUpdate() */) {
+        //m_cloudScreen.show();
     } else {
         static std::vector<Screen*> allScreens(
             { &m_main, &m_scan, &m_stats, &m_stats });
@@ -62,18 +63,13 @@ void ScreenManager::init()
         return;
     }
 
-    if (!fb->open(Settings::string(Settings::Keys::FRAMEBUFFER,
-            Settings::Defaults::FRAMEBUFFER))) {
+    auto dev = Singleton<ISettings>::i()->path(Settings::Keys::FRAMEBUFFER, Settings::Defaults::FRAMEBUFFER);
+
+    if (boost::filesystem::status(dev).type() != boost::filesystem::file_type::character_file) {
+        LOG_INFO << "Framebuffer device " << dev << " does not exist or is not a framebuffer!";
+        exit(EXIT_FAILURE);
+    }
+    if (!fb->open(dev.c_str())) {
         Singleton<LIBFB_NS::FrameBuffer>::destroy();
     }
-
-    std::thread gui([this] {
-        while (true) {
-            show();
-            std::this_thread::sleep_for(std::chrono::milliseconds(100));
-        }
-    });
-
-    pthread_setname_np(gui.native_handle(), "GUI");
-    gui.detach();
 }

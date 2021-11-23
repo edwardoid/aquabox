@@ -27,10 +27,10 @@ namespace aquabox {
 class Screen {
 public:
     Screen() = default;
-    static boost::filesystem::path resource(std::string name);
-    static boost::filesystem::path asset(std::string name);
-    static boost::filesystem::path font(std::string name);
-    static std::shared_ptr<LIBFB_NS::PNGImage> pixmap(std::string name);
+    static const boost::filesystem::path& resource(const std::string& name);
+    static const boost::filesystem::path& asset(const std::string& name);
+    static const boost::filesystem::path& font(const std::string& name);
+    static std::shared_ptr<LIBFB_NS::PNGImage> pixmap(const std::string& name);
     void show();
 
 protected:

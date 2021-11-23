@@ -7,11 +7,11 @@ Wants=ab_rules_manager.service ab_devices_manager.service ab_devices_manager.ser
 
 [Service]
 Type=simple
-Environment="APP_ARGS=--debug --nodraw"
 Environment="LD_LIBRARY_PATH=${AQUABOX_RUN_PATH_LIB}"
 WorkingDirectory=${AQUABOX_RUN_PATH_BIN}
-ExecStart=${AQUABOX_RUN_PATH_BIN}/${PROJECT_NAME} $APP_ARGS
+ExecStart=${AQUABOX_RUN_PATH_BIN}/${PROJECT_NAME}
 Restart=always
 RestartSec=5s
 
 [Install]
+WantedBy=multi-user.target

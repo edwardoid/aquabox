@@ -22,5 +22,6 @@
 int main(int argc, char** argv)
 {
     aquabox::RPCApplication<aquabox::services::NetworkManagerServer> app("network-manager");
+    app.addOption("ignore-networking, in", "Disables actual working with NetworkManager");
     return app.exec(argc, argv);
 }

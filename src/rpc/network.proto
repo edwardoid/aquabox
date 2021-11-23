@@ -7,13 +7,15 @@ message NetworkInfo {
     string UUID = 1;
     string SSID = 2;
     int32 strength = 3;
+    string ip = 4;
 
     enum Mode {
         Unsecure = 0;
         Secure = 1;
     }
 
-    Mode mode = 4;
+    Mode mode = 5;
+    string auth = 6;
 }
 
 message NetworkConnect {
@@ -35,14 +37,18 @@ message ConnectionStatus {
     };
 
     Status status = 2;
+
+    string UUID = 3;
 }
 
 service NetworkManager {
     rpc GetCurrentNetwork(google.protobuf.Empty) returns (NetworkInfo) {};
     rpc GetCurrentStatus(google.protobuf.Empty) returns (ConnectionStatus) {};
     rpc IsConnectedToInternet(google.protobuf.Empty) returns (google.protobuf.BoolValue) {};
-    rpc Connect(NetworkConnect) returns (stream ConnectionStatus) {};
+    rpc Connect(NetworkConnect) returns (ConnectionStatus) {};
     rpc StartHotspot(google.protobuf.Empty) returns (google.protobuf.Empty) {};
     rpc StopHotspot(google.protobuf.Empty) returns (google.protobuf.Empty) {};
     rpc CurrentNetworkChanged(google.protobuf.Empty) returns (stream NetworkInfo) {};
+    rpc StartScan(google.protobuf.Empty) returns (google.protobuf.BoolValue) {};
+    rpc GetAvailableNetworks(google.protobuf.Empty) returns (stream NetworkInfo);
 }

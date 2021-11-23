@@ -35,6 +35,7 @@ NetworkManager::NetworkManager()
     , currentState(NetworkingState::Unknown)
     , deviceState(NetworkDeviceState::NM_DEVICE_STATE_UNKNOWN)
 {
+    setInterface(Singleton<ISettings>::i()->get(Settings::Keys::CLIENT_INTERFACE, Settings::Defaults::CLIENT_INTERFACE));
     m_nm.ActiveConnectionsChanged.connect(std::bind(
         &NetworkManager::onActiveConnectionChanged, this, std::placeholders::_1));
 
@@ -147,6 +148,7 @@ NetworkChangeReason NetworkManager::changeReason() const
 
 void NetworkManager::setInterface(std::string interface)
 {
+    LOG_INFO << "Monitoring " << interface;
     m_interface = interface;
     if (m_interface.empty()) {
         return;

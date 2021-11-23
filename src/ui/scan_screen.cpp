@@ -23,7 +23,9 @@
 #include <qrcode.h>
 #include <common/log.h>
 #include <common/singleton.h>
-#include <micro_clients/aquabox.h>
+#include <types/serial.h>
+#include <micro_clients/settings.h>
+#include <micro_clients/network_manager.h>
 #include <sprite.h>
 using namespace aquabox;
 
@@ -32,6 +34,31 @@ using namespace aquabox;
 #define QR_X 2
 #define QR_Y 2
 #define QR_SIZE 124
+
+
+std::string configurationData()
+{
+    std::string configurationDataString;
+    configurationDataString += std::to_string(Singleton<ISettings>::i()->get(
+        Settings::Keys::HTTP_PORT, Settings::Defaults::REST_PORT));
+    configurationDataString += ";";
+
+    configurationDataString += std::to_string(Singleton<ISettings>::i()->get(
+        Settings::Keys::STREAM_PORT, Settings::Defaults::WS_PORT));
+    configurationDataString += ";";
+
+    configurationDataString += SERIAL_NUMBER;
+    configurationDataString += ";";
+
+    if (Singleton<INetworkManager>::i() != nullptr)
+        configurationDataString += Singleton<INetworkManager>::i()->currentNetwork().ip;
+    else
+        configurationDataString += "aquabox";
+    configurationDataString += ";";
+
+    configurationDataString += std::to_string(16);
+    return configurationDataString;
+}
 
 void ScanScreen::draw()
 {
@@ -47,7 +74,7 @@ void ScanScreen::draw()
     int canvasHeight = fb->height() - (StatusBarScreen::height() + 2 * margins);
 
     LIBFB_NS::QRCode code;
-    code.setText(Singleton<IAquaboxApi>::i()->configurationData());
+    code.setText(configurationData());
     code.setColors(0x000000FF, 0xFFFFFFFF);
     code.resizeTo(std::min(canvasWidth, canvasHeight));
 

@@ -24,7 +24,8 @@ RulesServiceServer::RulesServiceServer() {
 RulesServiceServer::~RulesServiceServer() { }
 
 bool RulesServiceServer::init() {
-    boost::filesystem::path root = Singleton<ISettings>::i()->path("rules", "./rules");
+    boost::filesystem::path root = Singleton<ISettings>::i()->path(Settings::Keys::DATA_ROOT, Settings::Defaults::DATA_ROOT) /
+                                   Singleton<ISettings>::i()->path(Settings::Keys::RULES_DATA_SUBROOT, Settings::Defaults::RULES_DATA_SUBROOT);
     if (!boost::filesystem::exists(root)) {
         if (!boost::filesystem::create_directory(root)) {
             LOG_ERROR << "Can't create devices directory" << root;

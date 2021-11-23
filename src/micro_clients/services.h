@@ -22,6 +22,7 @@
 #include <services/devices_manager.h>
 #include <services/rules_manager.h>
 #include <services/settings.h>
+#include <services/network_manager.h>
 
 namespace aquabox {
 template <>

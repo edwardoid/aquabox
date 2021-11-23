@@ -18,7 +18,6 @@
 
 #include "aquabox.h"
 #include "cloud.h"
-#include "networking/network_manager.h"
 #include "options.h"
 #include <micro_clients/settings.h>
 #include <common/performance_metrics.h>
@@ -54,7 +53,6 @@ int main(int argc, char** argv)
 
     aquabox::PerformanceMetrics::uptime();
 
-    aquabox::Singleton<aquabox::AquaBox>::get()->addOption("ignore-networking", "Disables interaction with NetworkManager");
     aquabox::Singleton<aquabox::AquaBox>::get()->addOption("standalone", "Disables Cloud support");
     aquabox::Singleton<aquabox::AquaBox>::get()->addOption("help", "Show this help");
     return aquabox::Singleton<aquabox::AquaBox>::get()->exec(argc, argv);

@@ -5,5 +5,20 @@ configure_file(${AQUABOX_ROOT_DIR}/config/aquabox/$ENV{BUILD_PLATFORM}/${PROJECT
 add_executable(${PROJECT_NAME} ${SOURCES} ${AQUABOX_MICROSERVICES_HEADERS})
 
 find_package(libqrencode REQUIRED)
+find_package(PNG REQUIRED)
 
-target_link_libraries (${PROJECT_NAME} aquabox-common micro-clients types types rpc fb libqrencode::libqrencode CONAN_PKG::freetype)
+set_target_properties(${PROJECT_NAME}
+    PROPERTIES
+    ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib"
+    LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib"
+    RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin"
+)
+
+target_link_libraries (${PROJECT_NAME} aquabox-common
+                                        micro-clients
+                                        types
+                                        rpc
+                                        fb
+                                        libqrencode::libqrencode
+                                        CONAN_PKG::freetype
+                                        PNG::PNG)
