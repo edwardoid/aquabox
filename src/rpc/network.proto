@@ -49,6 +49,6 @@ service NetworkManager {
     rpc StartHotspot(google.protobuf.Empty) returns (google.protobuf.Empty) {};
     rpc StopHotspot(google.protobuf.Empty) returns (google.protobuf.Empty) {};
     rpc CurrentNetworkChanged(google.protobuf.Empty) returns (stream NetworkInfo) {};
-    rpc StartScan(google.protobuf.Empty) returns (google.protobuf.BoolValue) {};
+    rpc StartScan(google.protobuf.BoolValue) returns (google.protobuf.BoolValue) {};
     rpc GetAvailableNetworks(google.protobuf.Empty) returns (stream NetworkInfo);
 }

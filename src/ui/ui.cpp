@@ -19,6 +19,8 @@
 
 #include "ui.h"
 #include "screen_manager.h"
+#include <micro_clients/settings.h>
+#include <common/log.h>
 #include <thread>
 #include <chrono>
 
@@ -32,10 +34,22 @@ int UI::start()
 {
     try
     {
+        int fps = Singleton<ISettings>::i()->get(Settings::Keys::FPS, Settings::Defaults::FPS);
+        if (fps < 1) { fps = 1; };
+        std::chrono::milliseconds fpsTimeout(1000 / fps);
+        LOG_INFO << "Desired fps is " << fps << " changed to ~" << (1000 / fpsTimeout.count()) << " updating screen each " << fpsTimeout.count() << "ms.";
         while(1)
         {
-            std::this_thread::sleep_for(std::chrono::milliseconds(500));
+            std::chrono::high_resolution_clock::time_point before = std::chrono::high_resolution_clock::now();
             Singleton<ScreenManager>::i()->show();
+            std::chrono::high_resolution_clock::time_point after = std::chrono::high_resolution_clock::now();
+            std::chrono::high_resolution_clock::duration delta = after - before;
+            if (delta > fpsTimeout) {
+                std::chrono::milliseconds renderTime = std::chrono::duration_cast<std::chrono::milliseconds>(delta);
+                LOG_INFO << "Dropped " << (delta / fpsTimeout) << " frames. Rendering took " << renderTime.count() << "ms." << " throttling " << renderTime.count() / fpsTimeout.count() << " frames.";
+                before = after - std::chrono::milliseconds(delta.count() % fpsTimeout.count());
+            }
+            std::this_thread::sleep_until(before + fpsTimeout);
         }
     }
     catch(...) {

@@ -3,16 +3,16 @@ project(aquabox-client)
 MESSAGE(STATUS "AquaBox will be installed to ${CMAKE_INSTALL_PREFIX}")
 
 find_package(nlohmann_json_schema_validator REQUIRED)
-file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/rules)
-file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/devices)
-file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/assets)
+file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/../data/rules)
+file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/../data/rules)
+file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/../data/rules)
 
 configure_file(${AQUABOX_ROOT_DIR}/config/aquabox/$ENV{BUILD_PLATFORM}/config.dev.json.in ${CMAKE_BINARY_DIR}/bin/config.json)
 configure_file(${AQUABOX_ROOT_DIR}/config/aquabox/$ENV{BUILD_PLATFORM}/aquabox.service ${CMAKE_BINARY_DIR}/bin/aquabox-client.service)
 configure_file(${AQUABOX_ROOT_DIR}/config/aquabox/$ENV{BUILD_PLATFORM}/manifest.json ${CMAKE_BINARY_DIR}/manifest-client.json)
-file(COPY ${AQUABOX_ROOT_DIR}/config/aquabox/$ENV{BUILD_PLATFORM}/assets DESTINATION ${CMAKE_BINARY_DIR}/bin)
-file(COPY ${AQUABOX_ROOT_DIR}/config/aquabox/$ENV{BUILD_PLATFORM}/devices DESTINATION ${CMAKE_BINARY_DIR}/bin)
-file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/bin/rules)
+file(COPY ${AQUABOX_ROOT_DIR}/config/aquabox/$ENV{BUILD_PLATFORM}/assets DESTINATION ${CMAKE_BINARY_DIR}/data)
+file(COPY ${AQUABOX_ROOT_DIR}/config/aquabox/$ENV{BUILD_PLATFORM}/devices DESTINATION ${CMAKE_BINARY_DIR}/data)
+file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/data/rules)
 
 file(GLOB AQUABOX_SOURCES "*.cpp")
 

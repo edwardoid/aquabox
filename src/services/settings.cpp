@@ -73,6 +73,7 @@ const std::string Settings::Keys::RF24_RADIO_PIN = "rf24Pin";
 const std::string Settings::Keys::DATA_ROOT = "root";
 const std::string Settings::Keys::DEVICES_DATA_SUBROOT = "devices";
 const std::string Settings::Keys::RULES_DATA_SUBROOT = "rules";
+const std::string Settings::Keys::FPS = "fps";
 
 const std::string Settings::Defaults::GIT_HASH = AB_GIT_HASH;
 const std::string Settings::Defaults::APPLICATION = "aquabox";
@@ -110,6 +111,7 @@ const int Settings::Defaults::RF24_RADIO_PIN = 25;
 const std::string Settings::Defaults::DATA_ROOT = "/root/aquabox/data";
 const std::string Settings::Defaults::DEVICES_DATA_SUBROOT = "devices";
 const std::string Settings::Defaults::RULES_DATA_SUBROOT = "rules";
+const int Settings::Defaults::FPS = 10;
 
 bool Settings::dataToWrite = false;
 bool Settings::ready = false;

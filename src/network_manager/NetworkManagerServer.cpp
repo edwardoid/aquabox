@@ -1,6 +1,7 @@
 #include "NetworkManagerServer.h"
 
 #include "network_manager.h"
+#include "network_manager_events.h"
 #include <services/application.h>
 #include <micro_clients/settings.h>
 #include <micro_clients/events.h>
@@ -21,7 +22,6 @@ std::string security_to_string(nm::Security sec)
     return "unknown";
 }
 
-
 NetworkManagerServer::NetworkManagerServer()
 {
     if (Application::app()->optionsIsSet("ignore-networking") || Application::app()->optionsIsSet("in"))
@@ -34,10 +34,9 @@ NetworkManagerServer::NetworkManagerServer()
         nm->currentConnection.connect([this](Connection c) {
             Singleton<IEvents>::i()->notify(std::make_shared<NetworkChangedEvent>(c));
         });
-        LOG_DEBUG << "Signal id: "
-                  << nm->deviceState.connect([this](NetworkDeviceState state) {
-                        Singleton<IEvents>::i()->notify(std::make_shared<NetworkDeviceStateEvent>(state));
-                     });
+        nm->deviceState.connect([this](NetworkDeviceState state) {
+            Singleton<IEvents>::i()->notify(std::make_shared<NetworkDeviceStateEvent>(state));
+        });
     }
 }
 
@@ -47,7 +46,6 @@ NetworkManagerServer::~NetworkManagerServer() { }
     ::grpc::ServerContext* context, const ::google::protobuf::Empty* request,
     ::aquabox::services::NetworkInfo* response)
 {
-    LOG_INFO << "IP: " << Singleton<aquabox::NetworkManager>::i()->currentConnection->ip;
     response->set_ssid(Singleton<aquabox::NetworkManager>::i()->currentConnection->ssid);
     response->set_ip(Singleton<aquabox::NetworkManager>::i()->currentConnection->ip);
     response->set_strength(Singleton<aquabox::NetworkManager>::i()->currentConnection->signal);
@@ -61,11 +59,18 @@ NetworkManagerServer::~NetworkManagerServer() { }
     ::grpc::ServerContext* context, const ::google::protobuf::Empty* request,
     ::google::protobuf::BoolValue* response)
 {
-    LOG_INFO << __func__;
     aquabox::NetworkManager* nm = Singleton<aquabox::NetworkManager>::i();
     response->set_value(nm != nullptr && nm->connectedToInternet());
-    return ::grpc::Status(grpc::StatusCode::ALREADY_EXISTS,
-        "Connectivity checked!", "Check details");
+    return ::grpc::Status::OK;
+}
+
+::grpc::Status NetworkManagerServer::StartScan(
+    ::grpc::ServerContext* context, const ::google::protobuf::BoolValue* request,
+    ::google::protobuf::BoolValue* response)
+{
+    aquabox::NetworkManager* nm = Singleton<aquabox::NetworkManager>::i();
+    response->set_value(nm != nullptr && nm->requestScan(request->value()));
+    return ::grpc::Status::OK;
 }
 
 ::grpc::Status NetworkManagerServer::Connect(
@@ -73,7 +78,11 @@ NetworkManagerServer::~NetworkManagerServer() { }
     const ::aquabox::services::NetworkConnect* request,
     ::aquabox::services::ConnectionStatus* response)
 {
-    LOG_INFO << __func__;
+    std::string ssid = request->ssid();
+    std::string password = request->password();
+    std::string uuid = Singleton<aquabox::NetworkManager>::i()->connect(ssid, password);
+    response->set_ssid(ssid);
+    response->set_uuid(uuid);
     return ::grpc::Status::OK;
 }
 
@@ -97,5 +106,22 @@ NetworkManagerServer::StopHotspot(::grpc::ServerContext* context,
     ::grpc::ServerContext* context, const ::google::protobuf::Empty* request,
     ::grpc::ServerWriter<::aquabox::services::NetworkInfo>* writer)
 {
+    return ::grpc::Status::OK;
+}
+
+::grpc::Status NetworkManagerServer::GetAvailableNetworks(
+    ::grpc::ServerContext* context, const ::google::protobuf::Empty* request,
+    ::grpc::ServerWriter<::aquabox::services::NetworkInfo>* writer)
+{
+    LOG_DEBUG << "Reqested all available networks!";
+    for(auto& network: Singleton<aquabox::NetworkManager>::i()->networks()) {
+        NetworkInfo info;
+        info.set_ssid(network.ssid);
+        info.set_ip(network.ip);
+        info.set_strength(network.signal);
+        info.set_auth(security_to_string(network.auth));
+        info.set_mode(network.encrypted ? ::aquabox::services::NetworkInfo::Secure : ::aquabox::services::NetworkInfo::Unsecure );
+        writer->Write(info);;
+    }
     return ::grpc::Status::OK;
 }

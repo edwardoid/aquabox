@@ -20,40 +20,11 @@
 
 #include <nmdbus/Device.h>
 #include <nmdbus/AccessPoint.h>
-#include <types/event.h>
-
-struct WifiNetwork {
-    std::string ssid;
-    std::string password;
-    std::string ip;
-    nm::Security auth = nm::Security::Unknown;
-    bool encrypted = 0;
-    int signal = 0;
-
-    const bool operator==(const WifiNetwork& wifi)
-    {
-        return ssid == wifi.ssid && auth == wifi.auth && encrypted == wifi.encrypted && signal == wifi.signal;
-    }
-
-    const bool operator<(const WifiNetwork& wifi)
-    {
-        if (signal < wifi.signal) {
-            return true;
-        }
-        return ssid < wifi.ssid;
-    }
-};
-
-struct Connection : public WifiNetwork {
-    std::string uuid;
-};
+#include <types/network_event.h>
+#include "network_manager.h"
 
 namespace aquabox {
     using NetworkDeviceState = nm::NMDeviceState;
-class NetworkEvent : public Event {
-public:
-    NetworkEvent();
-};
 
 class NetworkDeviceStateEvent : public NetworkEvent {
 public:

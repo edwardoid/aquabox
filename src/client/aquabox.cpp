@@ -20,7 +20,7 @@
 #include <types/types.h>
 #include <types/rule.h>
 #include "cloud.h"
-#include <types/network_events.h>
+#include <types/network_event.h>
 #include <types/update_events.h>
 #include "global_timer.h"
 #include "lock_file.h"

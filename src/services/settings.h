@@ -69,6 +69,7 @@ public:
         static const std::string MESH_ENABLED;
         static const std::string RF24_BUS;
         static const std::string RF24_RADIO_PIN;
+        static const std::string FPS;
     };
 
     struct Defaults {
@@ -109,6 +110,7 @@ public:
         static const bool MESH_ENABLED;
         static const int RF24_BUS;
         static const int RF24_RADIO_PIN;
+        static const int FPS;
     };
 
     static void set(std::string key, bool value);

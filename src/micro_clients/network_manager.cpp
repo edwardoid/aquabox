@@ -31,7 +31,7 @@ public:
     virtual NetworkState currentState() override;
     virtual NetworkInfo currentNetwork() override;
     virtual bool hasInternetConnection() override;
-    virtual bool startScan() override;
+    virtual bool startScan(bool force = true) override;
     virtual std::vector<NetworkInfo> availableNetworks() override;
     virtual std::string connect(const std::string ssid, const std::string password) override;
 };
@@ -89,13 +89,15 @@ NetworkInfo NetworkManagerImpl::currentNetwork()
     return info;
 }
 
-bool NetworkManagerImpl::startScan()
+bool NetworkManagerImpl::startScan(bool force)
 {
-    google::protobuf::Empty e;
-    google::protobuf::BoolValue b;
+    google::protobuf::BoolValue rq;
+    google::protobuf::BoolValue rp;
 
-    if (client()->call(&services::NetworkManager::Stub::StartScan, e, &b).ok()) {
-        return b.value();
+    rq.set_value(force);
+
+    if (client()->call(&services::NetworkManager::Stub::StartScan, rq, &rp).ok()) {
+        return rp.value();
     }
 
     return false;

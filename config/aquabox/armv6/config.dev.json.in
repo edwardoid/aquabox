@@ -1,16 +1,16 @@
 {
-    "aquabox": {
-        "cloudPort": 5555,
-        "cloudUrl": "edwardoid.redirectme.net",
-        "cloudWSPort": 5556,
-        "framebuffer": "/dev/fb1",
-        "httpPort": 1213,
-        "interface": "wlan0",
-        "log": "DEBUG",
-        "serial": "testDev",
-        "streamPort": 1214,
-        "threads": 1,
-        "workingDirectory": "/aquabox/bin",
-        "debug": true
-    }
+    "cloudPort": 5555,
+    "cloudUrl": "edwardoid.redirectme.net",
+    "cloudWSPort": 5556,
+    "framebuffer": "/dev/fb1",
+    "httpPort": 1213,
+    "interface": "wlan0",
+    "log": "DEBUG",
+    "serial": "testDev",
+    "streamPort": 1214,
+    "threads": 1,
+    "workingDirectory": "/aquabox/bin",
+    "debug": true,
+    "meshEnabled": false,
+    "root": "${CMAKE_BINARY_DIR}/..",
 }

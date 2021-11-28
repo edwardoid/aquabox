@@ -16,5 +16,8 @@
         }
     ],
     "workingDirectory": "/aquabox/bin",
-    "debug": true
+    "debug": true,
+    "interface": "wlan1",
+    "meshEnabled": false,
+    "root": "${CMAKE_BINARY_DIR}/..",
 }

@@ -15,5 +15,8 @@
             "user": "admin"
         }
     ],
+
+    "meshEnabled": false,
+    "root": "${CMAKE_BINARY_DIR}/..",
     "workingDirectory": "${CMAKE_BINARY_DIR}"
 }

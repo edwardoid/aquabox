@@ -19,6 +19,7 @@
 #include "screen.h"
 #include <common/log.h>
 #include <common/singleton.h>
+#include <micro_clients/services.h>
 
 using namespace aquabox;
 
@@ -39,7 +40,7 @@ const boost::filesystem::path& Screen::resource(const std::string& name)
 {
     static std::unordered_map<std::string, boost::filesystem::path> paths;
     if (paths.count(name) == 0) {
-        paths[name] = boost::filesystem::current_path() / "assets/" / name;
+        paths[name] = Singleton<ISettings>::i()->path(Settings::Keys::DATA_ROOT, Settings::Defaults::DATA_ROOT)  / "assets/" / name;
     }
     return paths[name];
 }

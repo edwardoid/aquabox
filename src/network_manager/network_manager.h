@@ -24,11 +24,37 @@
 #include <nmdbus/AccessPoint.h>
 #include <nmdbus/Device.h>
 #include <nmdbus/NetworkManager.h>
-#include <types/network_events.h>
+#include <nmdbus/Connection.h>
 #include <s2s_property.h>
 #include <common/singleton.h>
 #include <string>
 #include <vector>
+
+struct WifiNetwork {
+    std::string ssid;
+    std::string password;
+    std::string ip;
+    nm::Security auth = nm::Security::Unknown;
+    bool encrypted = 0;
+    int signal = 0;
+
+    const bool operator==(const WifiNetwork& wifi)
+    {
+        return ssid == wifi.ssid && auth == wifi.auth && encrypted == wifi.encrypted && signal == wifi.signal;
+    }
+
+    const bool operator<(const WifiNetwork& wifi)
+    {
+        if (signal < wifi.signal) {
+            return true;
+        }
+        return ssid < wifi.ssid;
+    }
+};
+
+struct Connection : public WifiNetwork {
+    std::string uuid;
+};
 
 namespace nm {
 class ActiveConnection;
