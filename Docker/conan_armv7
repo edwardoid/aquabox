@@ -9,6 +9,7 @@ arch=armv7hf
 os_build=Linux
 arch_build=x86_64
 [options]
+libpng:neon=False
 [build_requires]
 [env]
 AR=arm-linux-gnueabihf-ar

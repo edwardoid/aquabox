@@ -100,6 +100,7 @@ function pack_client {
     tar cvfz $CLIENT_PKG_NAME.tar.gz \
                     version.txt \
                     lib \
+                    data \
                     bin/aquabox-client \
                     bin/aquabox-client.service \
                     bin/ab_devices_manager \
@@ -114,10 +115,10 @@ function pack_client {
                     bin/ab_settings_provider.service \
                     bin/ab_ui \
                     bin/ab_ui.service \
-                    bin/assets \
+                    data/assets \
                     bin/config.json \
-                    bin/devices \
-                    bin/rules |& tee -a build.log && \
+                    data/devices \
+                    data/rules |& tee -a build.log && \
     cp $CLIENT_PKG_NAME.tar.gz aquabox-client-latest.tar.gz |& tee -a build.log && \
     return $?
 }
