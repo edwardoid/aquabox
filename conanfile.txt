@@ -6,7 +6,7 @@ json-schema-validator/2.1.0
 libqrencode/4.1.1
 libpng/1.6.37
 mongo-cxx-driver/3.6.2
-tgbot/latest
+tgbot/1.2.1
 mqtt_cpp/10.0.0
 libserial/latest
 simppl/0.3.0
@@ -34,7 +34,7 @@ mongo-c-driver:with_zstd=False
 mongo-cxx-driver:shared=True
 libpng:shared=True
 tgbot:shared=True
-tgbot:use_curl=True
+#tgbot:use_curl=True
 #json-schema-validator:shared=True
 libqrencode:shared=True
 grpc:codegen=False
