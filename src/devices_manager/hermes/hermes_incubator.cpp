@@ -91,7 +91,7 @@ void HermesIncubator::routine()
                         obj.state = ObjectInfoState::Ready;
                     }
                     int32_t updatedTimeout = obj.lastRequest.timeout().count();
-                    if (obj.object->getProperty<int32_t>("_timeout", updatedTimeout) && obj.lastRequest.timeout().count() != updatedTimeout) {
+                    if (obj.state != ObjectInfoState::Dead && obj.object->getProperty<int32_t>("_timeout", updatedTimeout) && obj.lastRequest.timeout().count() != updatedTimeout) {
                         if (updatedTimeout < 1000) {
                             updatedTimeout = 1000;
                         }

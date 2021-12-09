@@ -1,7 +1,10 @@
 {
 	"folders": [
 		{
-			"path": "."
+			"path": "/sources"
+		},
+		{
+			"path": "/build"
 		}
 	],
 	"settings": {
@@ -90,5 +93,31 @@
 			"source_location": "cpp",
 			"*.inc": "cpp"
 		}
+	},
+	"launch": {
+		"version": "0.2.0",
+		"configurations": [
+			
+
+			{
+				"name": "(gdb) Launch",
+				"type": "cppdbg",
+				"request": "launch",
+				"program": "/build/bin/ab_devices_manager",
+				"args": [],
+				"stopAtEntry": false,
+				"cwd": "/build/bin",
+				"environment": [],
+				"externalConsole": false,
+				"MIMode": "gdb",
+				"setupCommands": [
+					{
+						"description": "Enable pretty-printing for gdb",
+						"text": "-enable-pretty-printing",
+						"ignoreFailures": true
+					}
+				]
+			}
+		]
 	}
 }

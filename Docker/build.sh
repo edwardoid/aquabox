@@ -26,7 +26,7 @@ function prepare_build {
 
     if [ "$BUILD_PLATFORM" = "armv6" ]; then
         export CONAN_EXTRA_ARGS="-pr:h $BUILD_PLATFORM -pr:b default"
-        export CMAKE_EXTRA_ARGS="-DCMAKE_BUILD_TYPE=Release -DCMAKE_TOOLCHAIN_FILE=/sources/toolchain_armv6.cmake"
+        export CMAKE_EXTRA_ARGS="-DCMAKE_BUILD_TYPE=RelWithDebInfo -DCMAKE_TOOLCHAIN_FILE=/sources/toolchain_armv6.cmake"
     fi
 
     if [ "$BUILD_PLATFORM" = "armv7" ]; then

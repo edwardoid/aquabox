@@ -22,6 +22,11 @@ if [ -v DOCKER_EXTRA_ARGS ]; then
     export DOCKER_EXTRA_ARGS_INT="$DOCKER_EXTRA_ARGS $DOCKER_EXTRA_ARGS_INT"
 fi
 
+if [ -n "$PERMANENT_CONAN" ]; then
+  mkdir -p $DIR/../conan_data_$1
+  export DOCKER_EXTRA_ARGS_INT="-v $DIR/../conan_data_$1:/root/.conan/data  $DOCKER_EXTRA_ARGS_INT"
+fi
+
 echo "Running conan with args: $DOCKER_EXTRA_ARGS_INT"
 
 docker run --privileged \
