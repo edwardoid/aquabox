@@ -88,10 +88,9 @@ bool Cloud::requestStreams()
     if (streamsAreOk && !m_streams.empty()) {
         return streamsAreOk;
     }
-    const auto cloudBaseUrl = Settings::string(Settings::Keys::CLOUD_URL,
-        Settings::Defaults::CLOUD_URL);
-    const std::string cloudHttpUrl = cloudBaseUrl + ":" + std::to_string(Settings::integer(Settings::Keys::CLOUD_PORT, Settings::Defaults::CLOUD_PORT));
-    const std::string cloudWSUrl = cloudBaseUrl + ":" + std::to_string(Settings::integer(Settings::Keys::CLOUD_WS_PORT, Settings::Defaults::CLOUD_WS_PORT));
+    const auto cloudBaseUrl = Singleton<ISettings>::i()->get(Settings::Keys::CLOUD_URL, Settings::Defaults::CLOUD_URL);
+    const std::string cloudHttpUrl = cloudBaseUrl + ":" + std::to_string(Singleton<ISettings>::i()->get(Settings::Keys::CLOUD_PORT, Settings::Defaults::CLOUD_PORT));
+    const std::string cloudWSUrl = cloudBaseUrl + ":" + std::to_string(Singleton<ISettings>::i()->get(Settings::Keys::CLOUD_WS_PORT, Settings::Defaults::CLOUD_WS_PORT));
     LOG_INFO << "Checking if device is registered on " << cloudHttpUrl;
     HttpClient client(cloudHttpUrl);
 

@@ -73,9 +73,9 @@ void HermesMeshIO::newMessage(const RF24NetworkHeader& header,
 void HermesMeshIO::clear() { m_messages.clear(); }
 
 HermesMeshGateway::HermesMeshGateway()
-    : m_radio(Settings::integer(Settings::Keys::RF24_RADIO_PIN,
+    : m_radio(Singleton<ISettings>::i()->get(Settings::Keys::RF24_RADIO_PIN,
                   Settings::Defaults::RF24_RADIO_PIN),
-        Settings::integer(Settings::Keys::RF24_BUS,
+        Singleton<ISettings>::i()->get(Settings::Keys::RF24_BUS,
             Settings::Defaults::RF24_BUS))
     , m_network(m_radio)
     , m_mesh(m_radio, m_network)
@@ -170,7 +170,7 @@ void HermesMeshGateway::run()
             std::lock_guard<HermesMeshGateway> lock(*this);
             loop();
         }
-        std::this_thread::sleep_for(std::chrono::milliseconds(2));
+        std::this_thread::sleep_for(std::chrono::milliseconds(100));
     }
 }
 

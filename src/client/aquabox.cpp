@@ -45,8 +45,7 @@ using namespace aquabox;
 
 AquaBox::AquaBox()
     : Application("client")
-    , m_pool(Settings::integer(Settings::Keys::THREADS,
-        std::thread::hardware_concurrency()))
+    , m_pool(std::thread::hardware_concurrency())
     , m_server(new WebServer)
 {
     // PerformanceMetrics::update();
@@ -61,34 +60,11 @@ int AquaBox::start()
 {
     Singleton<Cloud>::available = !optionsIsSet("standalone");
 
-    plog::init(plog::severityFromString(
-                   Settings::string(Settings::Keys::LOG_LEVEL,
-                       plog::severityToString(plog::Severity::info))
-                       .c_str()),
-        &m_consoleAppender);
-
-    LOG_INFO << "Starting " << Settings::Defaults::APPLICATION << " ver. "
-             << std::hex << Settings::Defaults::VERSION_MAJOR << "."
-             << Settings::Defaults::VERSION_MINOR;
+    const std::string severity = Singleton<ISettings>::i()->get(Settings::Keys::LOG_LEVEL,
+        std::string(plog::severityToString(plog::Severity::info)));
+    plog::init(plog::severityFromString(severity.c_str()), &m_consoleAppender);
 
     srand(time(NULL));
-    std::string procPath = "/proc/";
-    procPath += std::to_string(static_cast<int>(getpid()));
-    procPath += "/exe";
-
-    char exePath[1024];
-    memset(exePath, '\0', 1024);
-
-    int bytes = std::min<size_t>(readlink(procPath.c_str(), exePath, 1024), 1024 - 1);
-    if (bytes >= 0) {
-        exePath[bytes] = '\0';
-    }
-
-    std::string cwd = exePath;
-
-    auto pos = cwd.find_last_of('/');
-    if (pos > 0)
-        cwd.erase(pos);
 
     Singleton<IEvents>::i()->subscribe("rules_manager", [this](const std::shared_ptr<Event> e) {
         LOG_ERROR << e->serialize().dump();
@@ -148,11 +124,11 @@ double AquaBox::systemTemperature() const
 std::string AquaBox::configurationData() const
 {
     std::string configurationDataString;
-    configurationDataString += std::to_string(Settings::integer(
+    configurationDataString += std::to_string(Singleton<ISettings>::i()->get(
         Settings::Keys::HTTP_PORT, Settings::Defaults::REST_PORT));
     configurationDataString += ";";
 
-    configurationDataString += std::to_string(Settings::integer(
+    configurationDataString += std::to_string(Singleton<ISettings>::i()->get(
         Settings::Keys::STREAM_PORT, Settings::Defaults::WS_PORT));
     configurationDataString += ";";
 

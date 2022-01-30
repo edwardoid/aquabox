@@ -43,6 +43,9 @@ namespace aquabox
                 server_address += std::to_string(Singleton<ISettings>::i()->port(Implementation::service_full_name(), true));
             }
 
+            const std::string severity = Singleton<ISettings>::i()->get(Settings::Keys::LOG_LEVEL, std::string(plog::severityToString(plog::Severity::info)));
+            plog::get()->setMaxSeverity(plog::severityFromString(severity.c_str()));
+
             grpc::ServerBuilder builder;
             builder.AddListeningPort(server_address, grpc::InsecureServerCredentials());
             builder.RegisterService(m_impl.get());

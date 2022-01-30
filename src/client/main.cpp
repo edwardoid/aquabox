@@ -47,8 +47,6 @@ int main(int argc, char** argv)
 
     chdir(cwd.c_str());
 
-    aquabox::Settings::setDomain("aquabox");
-
     bool handleSignals = true;
 
     aquabox::PerformanceMetrics::uptime();

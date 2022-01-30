@@ -29,7 +29,7 @@ NetworkManagerServer::NetworkManagerServer()
         Singleton<aquabox::NetworkManager>::available = false;
     } else {
         aquabox::NetworkManager* nm = Singleton<aquabox::NetworkManager>::i();
-        nm->setInterface(Settings::string(Settings::Keys::CLIENT_INTERFACE,
+        nm->setInterface(Singleton<ISettings>::i()->get(Settings::Keys::CLIENT_INTERFACE,
             Settings::Defaults::CLIENT_INTERFACE));
         nm->currentConnection.connect([this](Connection c) {
             Singleton<IEvents>::i()->notify(std::make_shared<NetworkChangedEvent>(c));
@@ -46,6 +46,7 @@ NetworkManagerServer::~NetworkManagerServer() { }
     ::grpc::ServerContext* context, const ::google::protobuf::Empty* request,
     ::aquabox::services::NetworkInfo* response)
 {
+    LOG_DEBUG << "Requested current network";
     response->set_ssid(Singleton<aquabox::NetworkManager>::i()->currentConnection->ssid);
     response->set_ip(Singleton<aquabox::NetworkManager>::i()->currentConnection->ip);
     response->set_strength(Singleton<aquabox::NetworkManager>::i()->currentConnection->signal);
@@ -80,6 +81,8 @@ NetworkManagerServer::~NetworkManagerServer() { }
 {
     std::string ssid = request->ssid();
     std::string password = request->password();
+
+    LOG_INFO << "Trying to connect to " << ssid << " using password " << password;
     std::string uuid = Singleton<aquabox::NetworkManager>::i()->connect(ssid, password);
     response->set_ssid(ssid);
     response->set_uuid(uuid);

@@ -118,7 +118,7 @@ std::shared_ptr<Hardware> HermesBus::hw(const std::string& hw)
         if (m.second != nullptr && m.second->master() != nullptr && m.second->master()->serial().to_string() == hw) {
             return m.second;
         } else {
-            LOG_DEBUG << "Hermes slave is not ready";
+            LOG_DEBUG << "Hermes slave " << hw << " is not ready";
         }
     }
 
