@@ -49,10 +49,9 @@ void NetworkManager::reconnect()
 {
     while (1) {
         std::this_thread::sleep_for(std::chrono::minutes(1));
-        if (Settings::has(Settings::Keys::NETWORK) && currentState == NetworkingState::Disconnected && m_changeReason != NetworkChangeReason::Reconnect) {
+        if (currentState == NetworkingState::Disconnected && m_changeReason != NetworkChangeReason::Reconnect && Singleton<ISettings>::i()->has(Settings::Keys::NETWORK)) {
             m_changeReason = NetworkChangeReason::Reconnect;
-            auto uuid = Settings::string(Settings::Keys::NETWORK,
-                currentConnection.value.uuid);
+            auto uuid = Singleton<ISettings>::i()->get(Settings::Keys::NETWORK, currentConnection.value.uuid);
             if (uuid.empty()) {
                 continue;
             }
@@ -118,7 +117,7 @@ void NetworkManager::updateCurrentState(bool notify)
             }
 
             if (!newValue.uuid.empty()) {
-                Settings::set(Settings::Keys::NETWORK, newValue.uuid); // Update
+                Singleton<ISettings>::i()->set(Settings::Keys::NETWORK, newValue.uuid); // Update
                 m_changeReason = NetworkChangeReason::NothingSpecial;
             }
 

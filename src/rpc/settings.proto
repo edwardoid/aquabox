@@ -20,6 +20,8 @@ message SettingsSetStringRequest {
 }
 
 service SettingsProvider {
+    rpc Has(google.protobuf.StringValue) returns (google.protobuf.BoolValue);
+
     rpc GetInt(google.protobuf.StringValue) returns (google.protobuf.Int32Value);
     rpc SetInt(SettingsSetIntRequest) returns (google.protobuf.Empty);
 

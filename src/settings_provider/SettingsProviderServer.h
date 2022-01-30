@@ -30,6 +30,7 @@ namespace services {
     public:
         SettingsProviderServer(std::uint32_t startFrom);
         virtual ~SettingsProviderServer();
+        virtual ::grpc::Status Has(::grpc::ServerContext* context, const ::google::protobuf::StringValue* request, ::google::protobuf::BoolValue* response) override;
         virtual ::grpc::Status AllocatePort(::grpc::ServerContext* context, const ::google::protobuf::StringValue* request, ::google::protobuf::UInt32Value* response) override;
         virtual ::grpc::Status GetPort(::grpc::ServerContext* context, const ::google::protobuf::StringValue* request, ::google::protobuf::UInt32Value* response) override;
         virtual ::grpc::Status GetString(::grpc::ServerContext* context, const ::google::protobuf::StringValue* request, ::google::protobuf::StringValue* response) override;

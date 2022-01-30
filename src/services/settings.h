@@ -142,6 +142,7 @@ private:
 };
 class ISettings {
 public:
+    virtual bool has(const std::string& key) = 0;
     virtual std::int32_t get(const std::string& key, std::int32_t defaultValue) = 0;
     virtual void set(const std::string& key, std::int32_t value) = 0;
     virtual std::string get(const std::string& key, const std::string& defaultValue) = 0;

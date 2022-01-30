@@ -52,6 +52,7 @@ class SettingsImpl : public ISettings {
 public:
     SettingsImpl();
     virtual ~SettingsImpl() { }
+    virtual bool has(const std::string& key) override;
     virtual std::int32_t get(const std::string& key,
         std::int32_t defaultValue) override;
     virtual void set(const std::string& key, std::int32_t value) override;
@@ -79,6 +80,18 @@ private:
 SettingsImpl::SettingsImpl()
     : m_client(500500)
 {
+}
+
+bool SettingsImpl::has(const std::string& key)
+{
+    google::protobuf::StringValue _key;
+    _key.set_value(key);
+    google::protobuf::BoolValue val;
+    if (m_client.call(&services::SettingsProvider::Stub::Has, _key, &val)
+            .ok()) {
+        return val.value();
+    }
+    return false;
 }
 
 std::int32_t SettingsImpl::get(const std::string& key,

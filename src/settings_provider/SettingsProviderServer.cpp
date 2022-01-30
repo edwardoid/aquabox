@@ -56,6 +56,15 @@ void SettingsProviderServer::save()
 
 SettingsProviderServer::~SettingsProviderServer() { }
 
+::grpc::Status SettingsProviderServer::Has(::grpc::ServerContext* context,
+    const ::google::protobuf::StringValue* request,
+    ::google::protobuf::BoolValue* response)
+{
+    std::unique_lock<std::recursive_mutex> lock(m_mx);
+    response->set_value(m_data[request->value()]);
+    return ::grpc::Status::OK;
+}
+
 ::grpc::Status SettingsProviderServer::AllocatePort(
     ::grpc::ServerContext* context,
     const ::google::protobuf::StringValue* request,
