@@ -238,6 +238,13 @@ void DevicesServiceServer::processSensorUpdates()
             continue;
         }
 
+        if (!dev->available()) {
+            for (auto& p : dev->properties()) {
+                values.erase(id + p);
+            }
+            continue;
+        }
+
         auto sensor = std::dynamic_pointer_cast<AbstractSensor>(dev);
         if (sensor != nullptr) {
             for (auto& p : sensor->properties()) {
@@ -296,7 +303,7 @@ void DevicesServiceServer::processSensorUpdates()
 
 ::grpc::Status DevicesServiceServer::PropertyValue(::grpc::ServerContext* context, const ::aquabox::services::GetPropertyValueRequest* request, ::google::protobuf::DoubleValue* response)
 {
-    LOG_DEBUG << "Fetching property " << request->property()  << "for " << request->deviceid();
+    LOG_DEBUG << "Fetching property '" << request->property()  << "' for " << request->deviceid();
     ::grpc::Status ret;
     bool found = Singleton<DevicesMap>::i()->on<::grpc::Status>(request->deviceid(), [request, response](const auto& id, auto& dev) {
         for(const std::string& p : dev->properties()) {
