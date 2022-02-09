@@ -67,7 +67,17 @@
         "cuchar": "cpp",
         "memory_resource": "cpp",
         "optional": "cpp",
-        "string_view": "cpp"
+        "string_view": "cpp",
+        "hash_map": "cpp",
+        "hash_set": "cpp",
+        "algorithm": "cpp",
+        "iterator": "cpp",
+        "map": "cpp",
+        "random": "cpp",
+        "regex": "cpp",
+        "set": "cpp",
+        "string": "cpp",
+        "bit": "cpp"
     },
     "cmake.configureOnOpen": true,
     "git.ignoreLimitWarning": true

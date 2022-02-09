@@ -35,4 +35,4 @@ build/*
 .vscode/*
 /bin/
 target/*
-conan_data_x86_64
+conan_data_*

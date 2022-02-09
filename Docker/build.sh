@@ -1,6 +1,6 @@
 #/bin/bash
 
-USABLE_CPU_COUNT=$(($CPU_COUNT - 2))
+USABLE_CPU_COUNT=$(($CPU_COUNT - 1))
 J_ARG=$(( $USABLE_CPU_COUNT < 0 ? 1 : $USABLE_CPU_COUNT ))
 export CONAN_CPU_COUNT=$J_ARG
 
@@ -80,7 +80,7 @@ function create_version {
     echo "Commit $GIT_HASH" >> version.txt && \
     echo "Platform: $BUILD_PLATFORM" >> version.txt && \
     echo "Machine: $(uname -a)" >> version.txt && \
-    echo "Bild started at $(date)" >> version.txt && \
+    echo "Build started at $(date)" >> version.txt && \
     conan --version >> version.txt && \
     return $?
 }
