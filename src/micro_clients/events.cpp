@@ -31,11 +31,12 @@ using namespace aquabox;
 
 
 namespace {
-std::shared_ptr<services::MicroService<services::EventsBus>> client()
+services::MicroService<services::EventsBus>& client()
 {
-    return std::make_shared<services::MicroService<services::EventsBus>>(
+    static services::MicroService<services::EventsBus> c(
         Singleton<ISettings>::i()->port(
             services::EventsBus::service_full_name()));
+    return c;
 }
 
 std::string identifier()
@@ -52,7 +53,7 @@ std::uint32_t port()
 
 std::string address()
 {
-    std::string server_address("0.0.0.0:");
+    static const std::string server_address("0.0.0.0:");
     return server_address + std::to_string(Singleton<ISettings>::i()->port(identifier(), true));
 }
 
@@ -116,7 +117,7 @@ void EventsBaseImpl::subscribe(const std::string& sender, std::function<void (co
 
     google::protobuf::Empty e;
 
-    if (client()->call(&services::EventsBus::Stub::Subscribe, id, &e).ok()) {
+    if (client().call(&services::EventsBus::Stub::Subscribe, id, &e).ok()) {
         m_service.add(sender, handler);
     } else {
         LOG_ERROR << "Can't subscribe for events";
@@ -130,7 +131,7 @@ void EventsBaseImpl::notify(const std::shared_ptr<const Event> event)
     e.set_event(event->serialize().dump());
 
     google::protobuf::Empty v;
-    if (!client()->call(&services::EventsBus::Stub::Notify, e, &v).ok()) {
+    if (!client().call(&services::EventsBus::Stub::Notify, e, &v).ok()) {
         LOG_ERROR << "Can't publish update " << event->serialize().dump();
     }
 }

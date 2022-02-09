@@ -44,11 +44,12 @@ IRulesManager* Singleton<IRulesManager>::create()
 }
 
 namespace {
-std::shared_ptr<services::MicroService<services::RulesService>> client()
+services::MicroService<services::RulesService>& client()
 {
-    return std::make_shared<services::MicroService<services::RulesService>>(
+    static services::MicroService<services::RulesService> c(
         Singleton<ISettings>::i()->port(
             services::RulesService::service_full_name()));
+    return c;
 }
 } // namespace
 
@@ -60,7 +61,7 @@ Rule RulesManagerImpl::get(const std::string& id)
     _id.set_value(id);
     services::RuleData data;
 
-    if (client()->call(&services::RulesService::Stub::Get, _id, &data).ok()) {
+    if (client().call(&services::RulesService::Stub::Get, _id, &data).ok()) {
         return services::Converter<services::RuleData, Rule>::convert(data);
     }
 
@@ -71,7 +72,7 @@ bool RulesManagerImpl::add(const Rule& rule)
 {
     google::protobuf::BoolValue res;
     services::RuleData data = services::Converter<Rule, services::RuleData>::convert(rule);
-    const grpc::Status ret = client()->call(&services::RulesService::Stub::Add, data, &res);
+    const grpc::Status ret = client().call(&services::RulesService::Stub::Add, data, &res);
     if (ret.ok()) {
         return true;
     }
@@ -85,7 +86,7 @@ bool RulesManagerImpl::update(const Rule& rule)
 {
     google::protobuf::BoolValue res;
     services::RuleData data = services::Converter<Rule, services::RuleData>::convert(rule);
-    const grpc::Status ret = client()->call(&services::RulesService::Stub::Update, data, &res);
+    const grpc::Status ret = client().call(&services::RulesService::Stub::Update, data, &res);
     if (ret.ok()) {
         return true;
     }
@@ -100,7 +101,7 @@ bool RulesManagerImpl::remove(const std::string& id)
     google::protobuf::StringValue _id;
     google::protobuf::BoolValue res;
     _id.set_value(id);
-    if (client()->call(&services::RulesService::Stub::Remove, _id, &res).ok()) {
+    if (client().call(&services::RulesService::Stub::Remove, _id, &res).ok()) {
         return true;
     }
     return false;
@@ -113,7 +114,7 @@ std::vector<Rule> RulesManagerImpl::all()
     std::vector<Rule> res;
     google::protobuf::Empty e;
     std::unique_ptr<grpc::ClientReader<services::RuleData>> reader(
-        (*c)->GetAll(&cxt, e));
+        c->GetAll(&cxt, e));
     services::RuleData data;
     while (reader->Read(&data)) {
         res.push_back(services::Converter<services::RuleData, Rule>::convert(data));

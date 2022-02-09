@@ -48,11 +48,12 @@ IDevicesManager* Singleton<IDevicesManager>::create()
 }
 
 namespace {
-std::shared_ptr<services::MicroService<services::DevicesService>> client()
+services::MicroService<services::DevicesService>& client()
 {
-    return std::make_shared<services::MicroService<services::DevicesService>>(
+    static services::MicroService<services::DevicesService> c(
         Singleton<ISettings>::i()->port(
             services::DevicesService::service_full_name()));
+    return c;
 }
 } // namespace
 
@@ -66,7 +67,7 @@ DeviceRef DevicesManagerImpl::get(const std::string& id)
     _id.set_value(id);
     services::DeviceData data;
 
-    if (client()->call(&services::DevicesService::Stub::Get, _id, &data).ok()) {
+    if (client().call(&services::DevicesService::Stub::Get, _id, &data).ok()) {
         return static_cast<DeviceRef>(data);
     }
 
@@ -79,7 +80,7 @@ bool DevicesManagerImpl::has(const std::string& id)
     _id.set_value(id);
     services::DeviceData data;
 
-    if (client()->call(&services::DevicesService::Stub::Get, _id, &data).ok()) {
+    if (client().call(&services::DevicesService::Stub::Get, _id, &data).ok()) {
         return !data.address().empty();
     }
 
@@ -91,7 +92,7 @@ bool DevicesManagerImpl::update(const DeviceRef& device)
     google::protobuf::BoolValue res;
     services::DeviceData data = static_cast<DeviceRef>(device);
     if (client()
-            ->call(&services::DevicesService::Stub::Update, data, &res)
+            .call(&services::DevicesService::Stub::Update, data, &res)
             .ok()) {
         return true;
     }
@@ -106,7 +107,7 @@ std::vector<DeviceRef> DevicesManagerImpl::all()
     std::vector<DeviceRef> res;
     google::protobuf::Empty e;
     std::unique_ptr<grpc::ClientReader<services::DeviceData>> reader(
-        (*c)->GetAll(&cxt, e));
+        c->GetAll(&cxt, e));
     services::DeviceData data;
     while (reader->Read(&data)) {
         res.push_back(static_cast<DeviceRef>(data));
@@ -128,7 +129,7 @@ bool DevicesManagerImpl::set(const std::string& id, const std::string& property,
     req.set_property(property);
     req.set_value(value.get<double>());
     if (client()
-            ->call(&services::DevicesService::Stub::Set, req, &res)
+            .call(&services::DevicesService::Stub::Set, req, &res)
             .ok()) {
         return true;
     }
@@ -144,7 +145,7 @@ std::vector<std::string> DevicesManagerImpl::properties(const std::string& id)
     google::protobuf::StringValue req;
     req.set_value(id);
     std::unique_ptr<grpc::ClientReader<google::protobuf::StringValue>> reader(
-        (*c)->FetchProperties(&cxt, req));
+        c->FetchProperties(&cxt, req));
     google::protobuf::StringValue data;
     while (reader->Read(&data)) {
         res.push_back(data.value());
@@ -160,7 +161,7 @@ nlohmann::json DevicesManagerImpl::value(const std::string& id, const std::strin
     req.set_deviceid(id);
     req.set_property(property);
     if (client()
-            ->call(&services::DevicesService::Stub::PropertyValue, req, &res)
+            .call(&services::DevicesService::Stub::PropertyValue, req, &res)
             .ok()) {
         return nlohmann::json(res.value());
     }

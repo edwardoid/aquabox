@@ -37,11 +37,12 @@ public:
 };
 
 namespace {
-std::shared_ptr<services::MicroService<services::NetworkManager>> client()
+services::MicroService<services::NetworkManager>& client()
 {
-    return std::make_shared<services::MicroService<services::NetworkManager>>(
+    static services::MicroService<services::NetworkManager> c(
         Singleton<ISettings>::i()->port(
             services::NetworkManager::service_full_name()));
+    return c;
 }
 } // namespace
 
@@ -59,7 +60,7 @@ NetworkState NetworkManagerImpl::currentState()
     google::protobuf::Empty e;
     services::ConnectionStatus data;
 
-    if (client()->call(&services::NetworkManager::Stub::GetCurrentStatus, e, &data).ok()) {
+    if (client().call(&services::NetworkManager::Stub::GetCurrentStatus, e, &data).ok()) {
         return static_cast<NetworkState>(data.status());
     }
 
@@ -74,7 +75,7 @@ NetworkInfo NetworkManagerImpl::currentNetwork()
     services::NetworkInfo data;
 
     LOG_DEBUG << "services::NetworkManager::Stub::GetCurrentNetwork";
-    if (client()->call(&services::NetworkManager::Stub::GetCurrentNetwork, e, &data).ok()) {
+    if (client().call(&services::NetworkManager::Stub::GetCurrentNetwork, e, &data).ok()) {
         info.uuid = data.uuid();
         info.ssid = data.ssid();
         info.strength = data.strength();
@@ -96,7 +97,7 @@ bool NetworkManagerImpl::startScan(bool force)
 
     rq.set_value(force);
 
-    if (client()->call(&services::NetworkManager::Stub::StartScan, rq, &rp).ok()) {
+    if (client().call(&services::NetworkManager::Stub::StartScan, rq, &rp).ok()) {
         return rp.value();
     }
 
@@ -108,7 +109,7 @@ bool NetworkManagerImpl::hasInternetConnection()
     google::protobuf::Empty e;
     google::protobuf::BoolValue b;
 
-    if (client()->call(&services::NetworkManager::Stub::IsConnectedToInternet, e, &b).ok()) {
+    if (client().call(&services::NetworkManager::Stub::IsConnectedToInternet, e, &b).ok()) {
         return b.value();
     }
 
@@ -122,7 +123,7 @@ std::vector<NetworkInfo> NetworkManagerImpl::availableNetworks()
     std::vector<NetworkInfo> res;
     google::protobuf::Empty e;
     std::unique_ptr<grpc::ClientReader<services::NetworkInfo>> reader(
-        (*c)->GetAvailableNetworks(&cxt, e));
+        c->GetAvailableNetworks(&cxt, e));
     services::NetworkInfo data;
     while (reader->Read(&data)) {
         NetworkInfo info;
@@ -146,7 +147,7 @@ std::string NetworkManagerImpl::connect(const std::string ssid, const std::strin
     services::ConnectionStatus u;
 
     if (client()
-            ->call(&services::NetworkManager::Stub::Connect, c, &u)
+            .call(&services::NetworkManager::Stub::Connect, c, &u)
             .ok()) {
         return u.uuid();
     }
