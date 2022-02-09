@@ -37,6 +37,7 @@ struct HermesSerial : std::array<proto::byte_t, SERIAL_LEN> {
 class HermesMaster : public proto::Master, public std::recursive_mutex {
 public:
     HermesMaster(std::shared_ptr<proto::MessageIO> io);
+    virtual ~HermesMaster();
     inline void enableCaching() { m_caching = true; }
     inline void disableCaching() { m_caching = false; }
     bool isConnected() const;

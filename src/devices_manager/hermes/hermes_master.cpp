@@ -56,6 +56,11 @@ HermesMaster::HermesMaster(std::shared_ptr<proto::MessageIO> io)
 {
 }
 
+HermesMaster::~HermesMaster()
+{
+    if (m_io) m_io->close();
+}
+
 HermesSerial HermesMaster::serial() const { return HermesSerial(m_serial); }
 
 void HermesMaster::setSerial(const HermesSerial& newSerial)
