@@ -54,6 +54,7 @@ bool RulesServiceServer::init() {
                     Singleton<RulesMap>::i()->insert(rule->id(), rule);
                 } else {
                     LOG_ERROR << "Can't find device " << rule->device() << " for rule " << rule->id();
+                    Singleton<RulesMap>::i()->removeRule(rule->id());
                 }
             }
         }
