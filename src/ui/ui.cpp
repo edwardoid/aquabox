@@ -34,8 +34,12 @@ int UI::start()
 {
     try
     {
+        const std::string severity = Singleton<ISettings>::i()->get(Settings::Keys::LOG_LEVEL,
+        std::string(plog::severityToString(plog::Severity::info)));
+        plog::init(plog::severityFromString(severity.c_str()), &m_consoleAppender);
+
         int fps = Singleton<ISettings>::i()->get(Settings::Keys::FPS, Settings::Defaults::FPS);
-        if (fps < 1) { fps = 1; };
+        fps = std::min(std::max(fps, 1), 60);
         std::chrono::milliseconds fpsTimeout(1000 / fps);
         LOG_INFO << "Desired fps is " << fps << " changed to ~" << (1000 / fpsTimeout.count()) << " updating screen each " << fpsTimeout.count() << "ms.";
         while(1)
@@ -52,7 +56,13 @@ int UI::start()
             std::this_thread::sleep_until(before + fpsTimeout);
         }
     }
+    catch(const std::exception& e)
+    {
+        LOG_ERROR << e.what();
+        return EXIT_FAILURE;
+    }
     catch(...) {
+        LOG_ERROR << "Unknown exception in UI";
         return EXIT_FAILURE;
     }
 

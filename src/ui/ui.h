@@ -19,6 +19,7 @@
 #pragma once
 
 #include <services/application.h>
+#include <common/log.h>
 
 namespace aquabox
 {
@@ -27,5 +28,7 @@ class UI: public Application
 public:
     UI();
     virtual int start() override;
+private:
+    plog::ColorConsoleAppender<plog::TxtFormatter> m_consoleAppender;
 };
 }
