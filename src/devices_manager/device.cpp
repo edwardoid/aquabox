@@ -20,133 +20,181 @@
 #include "../common/enumerations.h"
 #include "../common/log.h"
 #include "../types/rule.h"
-#include <rpc/converters.h>
-#include <types.grpc.pb.h>
 #include <fstream>
 #include <nlohmann/json.hpp>
+#include <rpc/converters.h>
 #include <time.h>
+#include <types.grpc.pb.h>
 
-namespace aquabox {
-void to_json(nlohmann::json& j, const Device& d)
+namespace aquabox
 {
-    try {
-        j = nlohmann::json {
-            { "id", d.id() },
-            { "name", d.name() },
-            { "index", d.index() },
-            { "address", d.address() },
-            { "rules_enabled", d.rulesEnabled() },
-            { "type", Serializable<DeviceType>::convert(d.type()) },
-            { "class", Serializable<DeviceClass>::convert(d.deviceClass()) },
-            { "meta", d.metadata() },
-            { "accepted", d.accepted() },
-            { "available", d.available() }
-        };
-    } catch (const nlohmann::detail::exception& e) {
-        LOG_ERROR << "Can't serialize Device: " << e.what();
-    }
-}
-
-void from_json(const nlohmann::json& j, Device& d)
-{
-    try {
-        d.setId(j.at("id"));
-        d.setName(j.at("name"));
-        d.setIndex(j.at("index"));
-        d.setAddress(j.at("address"));
-        d.setRulesEnabled(j.at("rules_enabled"));
-        d.setType(Serializable<DeviceType>::convert((std::string)j.at("type")));
-        d.setDeviceClass(
-            Serializable<DeviceClass>::convert((std::string)j.at("class")));
-        d.setMetadata(j.at("meta"));
-        d.accept(j.at("accepted"));
-    } catch (std::exception& e) {
-        LOG_ERROR << "Parsing failed: " << e.what();
-    } catch (...) {
-        LOG_ERROR << "Parsing failed";
-    }
-}
-
-//  --------------
-template <>
-Device services::Converter<services::DeviceData, Device>::convert(
-    const services::DeviceData& data)
-{
-    Device device;
-    device.setId(data.id());
-    device.setName(data.name());
-    device.setAddress(data.address());
-    device.setRulesEnabled(data.rulesenabled());
-    device.setAvailable(data.available());
-    device.accept(data.accepted());
-    device.setType(Serializable<DeviceType>::convert(data.type()));
-    device.setDeviceClass(Serializable<DeviceClass>::convert(data.clazz()));
-    Metadata meta;
-    for(const auto& m : data.meta())
+    void to_json(nlohmann::json& j, const Device& d)
     {
-        meta[m.first] = m.second;
+        try {
+            j = nlohmann::json{{"id", d.id()},
+                               {"name", d.name()},
+                               {"index", d.index()},
+                               {"address", d.address()},
+                               {"rules_enabled", d.rulesEnabled()},
+                               {"type", Serializable<DeviceType>::convert(d.type())},
+                               {"class", Serializable<DeviceClass>::convert(d.deviceClass())},
+                               {"meta", d.metadata()},
+                               {"accepted", d.accepted()},
+                               {"available", d.available()}};
+        }
+        catch (const nlohmann::detail::exception& e) {
+            LOG_ERROR << "Can't serialize Device: " << e.what();
+        }
     }
-    device.setMetadata(meta);
-    return device;
-}
 
-template <>
-services::DeviceData
-services::Converter<Device, ::aquabox::services::DeviceData>::convert(const Device& data)
-{
-    services::DeviceData device;
-    device.set_id(data.id());
-    device.set_name(data.name());
-    device.set_address(data.address());
-    device.set_rulesenabled(data.rulesEnabled());
-    device.set_available(data.available());
-    device.set_accepted(data.accepted());
-    device.set_type(Serializable<DeviceType>::convert(data.type()));
-    device.set_clazz(Serializable<DeviceClass>::convert(data.deviceClass()));
-    for(auto& m : data.metadata())
+    void from_json(const nlohmann::json& j, Device& d)
     {
-        device.mutable_meta()->insert({ m.first, (std::string)m.second });
+        try {
+            d.setId(j.at("id"));
+            d.setName(j.at("name"));
+            d.setIndex(j.at("index"));
+            d.setAddress(j.at("address"));
+            d.setRulesEnabled(j.at("rules_enabled"));
+            d.setType(Serializable<DeviceType>::convert((std::string) j.at("type")));
+            d.setDeviceClass(Serializable<DeviceClass>::convert((std::string) j.at("class")));
+            d.setMetadata(j.at("meta"));
+            d.accept(j.at("accepted"));
+        }
+        catch (std::exception& e) {
+            LOG_ERROR << "Parsing failed: " << e.what();
+        }
+        catch (...) {
+            LOG_ERROR << "Parsing failed";
+        }
     }
-    return device;
-}
+
+    //  --------------
+    template<>
+    Device services::Converter<services::DeviceData, Device>::convert(const services::DeviceData& data)
+    {
+        Device device;
+        device.setId(data.id());
+        device.setName(data.name());
+        device.setAddress(data.address());
+        device.setRulesEnabled(data.rulesenabled());
+        device.setAvailable(data.available());
+        device.accept(data.accepted());
+        device.setType(Serializable<DeviceType>::convert(data.type()));
+        device.setDeviceClass(Serializable<DeviceClass>::convert(data.clazz()));
+        Metadata meta;
+        for (const auto& m : data.meta()) {
+            meta[m.first] = m.second;
+        }
+        device.setMetadata(meta);
+        return device;
+    }
+
+    template<>
+    services::DeviceData services::Converter<Device, ::aquabox::services::DeviceData>::convert(const Device& data)
+    {
+        services::DeviceData device;
+        device.set_id(data.id());
+        device.set_name(data.name());
+        device.set_address(data.address());
+        device.set_rulesenabled(data.rulesEnabled());
+        device.set_available(data.available());
+        device.set_accepted(data.accepted());
+        device.set_type(Serializable<DeviceType>::convert(data.type()));
+        device.set_clazz(Serializable<DeviceClass>::convert(data.deviceClass()));
+        for (auto& m : data.metadata()) {
+            device.mutable_meta()->insert({m.first, (std::string) m.second});
+        }
+        return device;
+    }
 
 } // namespace aquabox
 
 using namespace aquabox;
 
-const std::string& Device::id() const { return m_id; }
+const std::string& Device::id() const
+{
+    return m_id;
+}
 
-void Device::setId(const std::string& id) { m_id = id; }
+void Device::setId(const std::string& id)
+{
+    m_id = id;
+}
 
-const std::string& Device::name() const { return m_name; }
+const std::string& Device::name() const
+{
+    return m_name;
+}
 
-void Device::setName(const std::string name) { m_name = name; }
+void Device::setName(const std::string name)
+{
+    m_name = name;
+}
 
-const int32_t& Device::index() const { return m_index; }
+const int32_t& Device::index() const
+{
+    return m_index;
+}
 
-void Device::setIndex(const int32_t& index) { m_index = index; }
+void Device::setIndex(const int32_t& index)
+{
+    m_index = index;
+}
 
-const std::string& Device::address() const { return m_address; }
+const std::string& Device::address() const
+{
+    return m_address;
+}
 
-void Device::setAddress(const std::string address) { m_address = address; }
+void Device::setAddress(const std::string address)
+{
+    m_address = address;
+}
 
-bool Device::rulesEnabled() const { return m_rulesEnabled; }
+bool Device::rulesEnabled() const
+{
+    return m_rulesEnabled;
+}
 
-void Device::setRulesEnabled(bool enabled) { m_rulesEnabled = enabled; }
+void Device::setRulesEnabled(bool enabled)
+{
+    m_rulesEnabled = enabled;
+}
 
-bool Device::accepted() const { return m_accepted; }
+bool Device::accepted() const
+{
+    return m_accepted;
+}
 
-void Device::accept(bool a) { m_accepted = a; }
+void Device::accept(bool a)
+{
+    m_accepted = a;
+}
 
-bool Device::available() const { return m_available; }
+bool Device::available() const
+{
+    return m_available;
+}
 
-bool Device::setAvailable(bool available) { return m_available = available; }
+bool Device::setAvailable(bool available)
+{
+    return m_available = available;
+}
 
-DeviceType Device::type() const { return m_type; }
+DeviceType Device::type() const
+{
+    return m_type;
+}
 
-void Device::setType(const DeviceType& type) { m_type = type; }
+void Device::setType(const DeviceType& type)
+{
+    m_type = type;
+}
 
-DeviceClass Device::deviceClass() const { return m_deviceClass; }
+DeviceClass Device::deviceClass() const
+{
+    return m_deviceClass;
+}
 
 void Device::setDeviceClass(DeviceClass deviceClass)
 {
@@ -154,9 +202,15 @@ void Device::setDeviceClass(DeviceClass deviceClass)
     enableSupport(deviceClass);
 }
 
-const Metadata& Device::metadata() const { return m_metadata; }
+const Metadata& Device::metadata() const
+{
+    return m_metadata;
+}
 
-void Device::setMetadata(const Metadata& metadata) { m_metadata = metadata; }
+void Device::setMetadata(const Metadata& metadata)
+{
+    m_metadata = metadata;
+}
 
 std::vector<std::shared_ptr<Rule>> Device::rules() const
 {
@@ -207,8 +261,17 @@ bool Device::saveToFile(const boost::filesystem::path& file)
     return true;
 }
 
-AbstractRelay::AbstractRelay() { enableSupport(DeviceClass::Relay); }
+AbstractRelay::AbstractRelay()
+{
+    enableSupport(DeviceClass::Relay);
+}
 
-AbstractSensor::AbstractSensor() { enableSupport(DeviceClass::Sensor); }
+AbstractSensor::AbstractSensor()
+{
+    enableSupport(DeviceClass::Sensor);
+}
 
-AbstractStep::AbstractStep() { enableSupport(DeviceClass::Step); }
+AbstractStep::AbstractStep()
+{
+    enableSupport(DeviceClass::Step);
+}

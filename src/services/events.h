@@ -22,11 +22,12 @@
 #include <string>
 #include <types/event.h>
 
-namespace aquabox {
-
-class IEvents {
-public:
-    virtual void subscribe(const std::string& sender, std::function<void (const std::shared_ptr<Event>)>&& handler) = 0;
-    virtual void notify(const std::shared_ptr<const Event> event) = 0;
-};
-}
+namespace aquabox
+{
+    class IEvents
+    {
+    public:
+        virtual void subscribe(const std::string& sender, std::function<void(const std::shared_ptr<Event>)>&& handler) = 0;
+        virtual void notify(const std::shared_ptr<const Event> event) = 0;
+    };
+} // namespace aquabox

@@ -19,23 +19,25 @@
 #pragma once
 
 #include "screen.h"
-#include <queue>
+#include <common/timeout.h>
 #include <sprite.h>
 #include <text.h>
-#include <common/timeout.h>
+#include <queue>
 
-namespace aquabox {
-class CloudScreen : public Screen {
-public:
-    CloudScreen();
-    virtual void draw() override;
-    bool hasUpdate();
+namespace aquabox
+{
+    class CloudScreen : public Screen
+    {
+    public:
+        CloudScreen();
+        virtual void draw() override;
+        bool hasUpdate();
 
-private:
-    LIBFB_NS::Sprite m_stateImage;
-    Timeout m_timeout;
-    bool m_lastState = false;
-    LIBFB_NS::Text m_text;
-    std::string m_icon;
-};
-}
+    private:
+        LIBFB_NS::Sprite m_stateImage;
+        Timeout m_timeout;
+        bool m_lastState = false;
+        LIBFB_NS::Text m_text;
+        std::string m_icon;
+    };
+} // namespace aquabox

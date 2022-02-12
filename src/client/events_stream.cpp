@@ -23,10 +23,9 @@ using namespace aquabox;
 
 EventsStream::EventsStream(const std::string& url)
     : CloudStream(url)
-{
-}
+{}
 
-EventsStream::~EventsStream() { }
+EventsStream::~EventsStream() {}
 
 nlohmann::json EventsStream::messageReceived(const nlohmann::json& message)
 {

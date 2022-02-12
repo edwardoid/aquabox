@@ -20,13 +20,15 @@
 
 #include "cloud_stream.h"
 
-namespace aquabox {
-class CommandsStream : public CloudStream {
-public:
-    CommandsStream(const std::string& url);
-    virtual ~CommandsStream() { }
+namespace aquabox
+{
+    class CommandsStream : public CloudStream
+    {
+    public:
+        CommandsStream(const std::string& url);
+        virtual ~CommandsStream() {}
 
-protected:
-    virtual nlohmann::json messageReceived(const nlohmann::json& message) override;
-};
-}
+    protected:
+        virtual nlohmann::json messageReceived(const nlohmann::json& message) override;
+    };
+} // namespace aquabox

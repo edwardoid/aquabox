@@ -23,14 +23,16 @@
 #include <server_http.hpp>
 #include <server_ws.hpp>
 
-namespace aquabox {
-namespace Web {
-    using HttpServer = SimpleWeb::Server<SimpleWeb::HTTP>;
-    using WSServer = SimpleWeb::SocketServer<SimpleWeb::WS>;
-    using Request = std::shared_ptr<HttpServer::Request>;
-    using Response = std::shared_ptr<HttpServer::Response>;
-    using Headers = SimpleWeb::CaseInsensitiveMultimap;
-    using WSConnection = WSServer::Connection;
-    using Message = WSServer::InMessage;
-}
-}
+namespace aquabox
+{
+    namespace Web
+    {
+        using HttpServer = SimpleWeb::Server<SimpleWeb::HTTP>;
+        using WSServer = SimpleWeb::SocketServer<SimpleWeb::WS>;
+        using Request = std::shared_ptr<HttpServer::Request>;
+        using Response = std::shared_ptr<HttpServer::Response>;
+        using Headers = SimpleWeb::CaseInsensitiveMultimap;
+        using WSConnection = WSServer::Connection;
+        using Message = WSServer::InMessage;
+    } // namespace Web
+} // namespace aquabox

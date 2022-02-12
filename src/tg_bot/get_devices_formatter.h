@@ -23,10 +23,10 @@
 
 namespace aquabox
 {
-    class GetDevicesFormatter: public MessageFormatter
+    class GetDevicesFormatter : public MessageFormatter
     {
     public:
         GetDevicesFormatter(const Command& cmd, const TgBot::Api& api, std::int64_t chatId);
-        virtual void operator() (const Command& cmd, bool ok) const override;
+        virtual void operator()(const Command& cmd, bool ok) const override;
     };
-}
+} // namespace aquabox

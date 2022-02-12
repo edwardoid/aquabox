@@ -20,7 +20,7 @@
 
 using namespace aquabox;
 
-template <>
+template<>
 ICloud* Singleton<ICloud>::create()
 {
     return nullptr;

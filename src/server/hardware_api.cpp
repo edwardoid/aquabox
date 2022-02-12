@@ -20,8 +20,8 @@
 #include "box.h"
 #include "boxes_manager.h"
 #include "database.h"
-#include <common/log.h>
 #include "telegram_bot.h"
+#include <common/log.h>
 #include <micro_clients/settings.h>
 #include <singleton.h>
 
@@ -39,13 +39,11 @@ bool HardwareApi::start()
     self.setupRoutes();
 
     static std::thread managerThread([]() {
-        HardwareApi::self.m_ws.config.port = Settings::integer(
-            Settings::Keys::CLOUD_WS_PORT, Settings::Defaults::CLOUD_WS_PORT);
+        HardwareApi::self.m_ws.config.port = Settings::integer(Settings::Keys::CLOUD_WS_PORT, Settings::Defaults::CLOUD_WS_PORT);
         LOG_INFO << "Starting Websocket server on " << self.m_ws.config.port;
         self.m_ws.start();
     });
-    self.m_http.config.port = Settings::integer(Settings::Keys::CLOUD_PORT,
-        Settings::Defaults::CLOUD_PORT);
+    self.m_http.config.port = Settings::integer(Settings::Keys::CLOUD_PORT, Settings::Defaults::CLOUD_PORT);
     LOG_INFO << "Starting HTTP server on " << self.m_http.config.port;
     self.m_http.start();
     return true;
@@ -58,56 +56,47 @@ void HardwareApi::setupRoutes()
     m_login = base.sub().word("login");
     m_firmware = base.sub().word("firmware");
 
-    m_http.resource[m_register.url()]["POST"] = [this](Web::Response response,
-                                                    Web::Request request) {
+    m_http.resource[m_register.url()]["POST"] = [this](Web::Response response, Web::Request request) {
         try {
             auto registerData = nlohmann::json::parse(request->content.string());
             if (!registerData.contains("id")) {
-                response->write(
-                    SimpleWeb::StatusCode::client_error_bad_request,
-                    nlohmann::json({ { "error", "Box id is missed" } }).dump(4));
+                response->write(SimpleWeb::StatusCode::client_error_bad_request, nlohmann::json({{"error", "Box id is missed"}}).dump(4));
                 return;
             }
             auto id = registerData["id"].get<std::string>();
             if (Database::i().wasProduced(id)) {
-                response->write(
-                    SimpleWeb::StatusCode::success_accepted,
-                    nlohmann::json({ { "streams", { "events", "commands" } }, { "id", id } })
-                        .dump(4),
-                    { { "Content-Type", "application/json" } });
-            } else {
+                response->write(SimpleWeb::StatusCode::success_accepted,
+                                nlohmann::json({{"streams", {"events", "commands"}}, {"id", id}}).dump(4),
+                                {{"Content-Type", "application/json"}});
+            }
+            else {
                 response->write(SimpleWeb::StatusCode::client_error_method_not_allowed);
             }
-        } catch (nlohmann::json::exception& err) {
+        }
+        catch (nlohmann::json::exception& err) {
             LOG_ERROR << "Box registrarion failed: " << err.what();
-            response->write(SimpleWeb::StatusCode::client_error_bad_request,
-                nlohmann::json({ { "error", err.what() } }).dump(4));
-        } catch (std::exception& err) {
+            response->write(SimpleWeb::StatusCode::client_error_bad_request, nlohmann::json({{"error", err.what()}}).dump(4));
+        }
+        catch (std::exception& err) {
             LOG_ERROR << "Box registrarion failed: " << err.what();
-            response->write(SimpleWeb::StatusCode::server_error_internal_server_error,
-                nlohmann::json({ { "error", err.what() } }).dump(4));
-        } catch (...) {
+            response->write(SimpleWeb::StatusCode::server_error_internal_server_error, nlohmann::json({{"error", err.what()}}).dump(4));
+        }
+        catch (...) {
             LOG_ERROR << "Box registrarion failed with unknown issue";
-            response->write(
-                SimpleWeb::StatusCode::server_error_internal_server_error);
+            response->write(SimpleWeb::StatusCode::server_error_internal_server_error);
         }
     };
 
-    m_http.resource[m_register.url()]["POST"] = [this](Web::Response response,
-                                                    Web::Request request) {
+    m_http.resource[m_register.url()]["POST"] = [this](Web::Response response, Web::Request request) {
         try {
             auto registerData = nlohmann::json::parse(request->content.string());
             if (!registerData.contains("id")) {
-                response->write(
-                    SimpleWeb::StatusCode::client_error_bad_request,
-                    nlohmann::json({ { "error", "Box id is missed" } }).dump(4));
+                response->write(SimpleWeb::StatusCode::client_error_bad_request, nlohmann::json({{"error", "Box id is missed"}}).dump(4));
                 return;
             }
 
             if (!registerData.contains("version")) {
-                response->write(
-                    SimpleWeb::StatusCode::client_error_bad_request,
-                    nlohmann::json({ { "error", "Version is missed" } }).dump(4));
+                response->write(SimpleWeb::StatusCode::client_error_bad_request, nlohmann::json({{"error", "Version is missed"}}).dump(4));
                 return;
             }
 
@@ -118,142 +107,117 @@ void HardwareApi::setupRoutes()
             }
 
             auto version = registerData["version"].get<std::string>();
-            response->write(
-                SimpleWeb::StatusCode::success_accepted,
-                nlohmann::json(
-                    { { "streams", { "events", "commands" } },
-                        { "id", id },
-                        { "versions", Database::i().firmwareVersions(version) } })
-                    .dump(4),
-                { { "Content-Type", "application/json" } });
-        } catch (nlohmann::json::exception& err) {
+            response->write(SimpleWeb::StatusCode::success_accepted,
+                            nlohmann::json(
+                                {{"streams", {"events", "commands"}}, {"id", id}, {"versions", Database::i().firmwareVersions(version)}})
+                                .dump(4),
+                            {{"Content-Type", "application/json"}});
+        }
+        catch (nlohmann::json::exception& err) {
             LOG_ERROR << "Box firmware version update check failed: " << err.what();
-            response->write(SimpleWeb::StatusCode::client_error_bad_request,
-                nlohmann::json({ { "error", err.what() } }).dump(4));
-        } catch (std::exception& err) {
+            response->write(SimpleWeb::StatusCode::client_error_bad_request, nlohmann::json({{"error", err.what()}}).dump(4));
+        }
+        catch (std::exception& err) {
             LOG_ERROR << "Box firmware version update check failed: " << err.what();
-            response->write(SimpleWeb::StatusCode::server_error_internal_server_error,
-                nlohmann::json({ { "error", err.what() } }).dump(4));
-        } catch (...) {
+            response->write(SimpleWeb::StatusCode::server_error_internal_server_error, nlohmann::json({{"error", err.what()}}).dump(4));
+        }
+        catch (...) {
             LOG_ERROR << "Box registrarion failed with unknown issue";
-            response->write(
-                SimpleWeb::StatusCode::server_error_internal_server_error);
+            response->write(SimpleWeb::StatusCode::server_error_internal_server_error);
         }
     };
 
-    m_http.resource[m_login.url()]["POST"] = [this](Web::Response response,
-                                                 Web::Request request) {
+    m_http.resource[m_login.url()]["POST"] = [this](Web::Response response, Web::Request request) {
 
     };
 
     m_events = base.sub().word("stream").string(":id").word("events");
     m_commands = base.sub().word("stream").string(":id").word("commands");
 
-    m_ws.endpoint[m_events.url()].on_open =
-        [this](std::shared_ptr<Web::WSConnection> connection) {
+    m_ws.endpoint[m_events.url()].on_open = [this](std::shared_ptr<Web::WSConnection> connection) {
+        const auto id = m_events.extract(connection->path)[":id"];
+        if (acceptConnectionFromHW(id, connection)) {
+            BoxesManager::get(id)->events = connection;
+        }
+    };
+
+    m_ws.endpoint[m_events.url()].on_close = [this](std::shared_ptr<Web::WSConnection> connection, int status, const std::string& reason) {
+        if (status == STREAM_CONNECTION_REJECTED) {
+            return;
+        }
+        LOG_INFO << "Connection from " << connection->remote_endpoint().address().to_string() << " to " << connection->path << " closed.";
+        const auto id = m_events.extract(connection->path)[":id"];
+        BoxesManager::get(id)->events.reset();
+        BoxesManager::eraseIfNeed(id);
+    };
+
+    m_ws.endpoint[m_events.url()].on_error = [this](std::shared_ptr<Web::WSConnection> connection, SimpleWeb::error_code) {
+        LOG_INFO << "Connection from " << connection->remote_endpoint().address().to_string() << " to " << connection->path
+                 << " closed due error.";
+        const auto id = m_events.extract(connection->path)[":id"];
+        BoxesManager::get(id)->events.reset();
+        BoxesManager::eraseIfNeed(id);
+    };
+
+    m_ws.endpoint[m_events.url()].on_message = [this](std::shared_ptr<Web::WSConnection> connection,
+                                                      std::shared_ptr<Web::Message> in_message) {
+        LOG_DEBUG << "On " << connection->path << " got event.";
+        try {
+            nlohmann::json data = nlohmann::json::parse(in_message->string());
             const auto id = m_events.extract(connection->path)[":id"];
-            if (acceptConnectionFromHW(id, connection)) {
-                BoxesManager::get(id)->events = connection;
-            }
-        };
+            BoxesManager::get(id)->UpdateReceived(data);
+        }
+        catch (...) {
+            LOG_ERROR << "Can't parse event data";
+        }
+    };
 
-    m_ws.endpoint[m_events.url()].on_close =
-        [this](std::shared_ptr<Web::WSConnection> connection, int status,
-            const std::string& reason) {
-            if (status == STREAM_CONNECTION_REJECTED) {
-                return;
-            }
-            LOG_INFO << "Connection from "
-                     << connection->remote_endpoint().address().to_string()
-                     << " to " << connection->path << " closed.";
-            const auto id = m_events.extract(connection->path)[":id"];
-            BoxesManager::get(id)->events.reset();
-            BoxesManager::eraseIfNeed(id);
-        };
+    m_ws.endpoint[m_commands.url()].on_open = [this](std::shared_ptr<Web::WSConnection> connection) {
+        const auto id = m_commands.extract(connection->path)[":id"];
+        if (acceptConnectionFromHW(id, connection)) {
+            BoxesManager::get(id)->commands = connection;
+        }
+    };
 
-    m_ws.endpoint[m_events.url()].on_error =
-        [this](std::shared_ptr<Web::WSConnection> connection,
-            SimpleWeb::error_code) {
-            LOG_INFO << "Connection from "
-                     << connection->remote_endpoint().address().to_string()
-                     << " to " << connection->path << " closed due error.";
-            const auto id = m_events.extract(connection->path)[":id"];
-            BoxesManager::get(id)->events.reset();
-            BoxesManager::eraseIfNeed(id);
-        };
+    m_ws.endpoint[m_commands.url()].on_close = [this](std::shared_ptr<Web::WSConnection> connection, int status, const std::string& reason) {
+        if (status == STREAM_CONNECTION_REJECTED) {
+            return;
+        }
+        LOG_INFO << "Connection from " << connection->remote_endpoint().address().to_string() << " to " << connection->path << " closed.";
+        const auto id = m_commands.extract(connection->path)[":id"];
+        BoxesManager::get(id)->commands.reset();
+        BoxesManager::eraseIfNeed(id);
+    };
 
-    m_ws.endpoint[m_events.url()].on_message =
-        [this](std::shared_ptr<Web::WSConnection> connection,
-            std::shared_ptr<Web::Message> in_message) {
-            LOG_DEBUG << "On " << connection->path << " got event.";
-            try {
-                nlohmann::json data = nlohmann::json::parse(in_message->string());
-                const auto id = m_events.extract(connection->path)[":id"];
-                BoxesManager::get(id)->UpdateReceived(data);
-            } catch (...) {
-                LOG_ERROR << "Can't parse event data";
-            }
-        };
+    m_ws.endpoint[m_commands.url()].on_error = [this](std::shared_ptr<Web::WSConnection> connection, SimpleWeb::error_code) {
+        LOG_INFO << "Connection from " << connection->remote_endpoint().address().to_string() << " to " << connection->path
+                 << " closed due error.";
+        const auto id = m_commands.extract(connection->path)[":id"];
+        BoxesManager::get(id)->commands.reset();
+        BoxesManager::eraseIfNeed(id);
+    };
 
-    m_ws.endpoint[m_commands.url()].on_open =
-        [this](std::shared_ptr<Web::WSConnection> connection) {
-            const auto id = m_commands.extract(connection->path)[":id"];
-            if (acceptConnectionFromHW(id, connection)) {
-                BoxesManager::get(id)->commands = connection;
-            }
-        };
+    m_ws.endpoint[m_commands.url()].on_message = [this](std::shared_ptr<Web::WSConnection> connection,
+                                                        std::shared_ptr<Web::Message> in_message) {
+        std::string data = in_message->string();
+        LOG_DEBUG << "On " << connection->path << " got some data: " << data;
 
-    m_ws.endpoint[m_commands.url()].on_close =
-        [this](std::shared_ptr<Web::WSConnection> connection, int status,
-            const std::string& reason) {
-            if (status == STREAM_CONNECTION_REJECTED) {
-                return;
-            }
-            LOG_INFO << "Connection from "
-                     << connection->remote_endpoint().address().to_string()
-                     << " to " << connection->path << " closed.";
-            const auto id = m_commands.extract(connection->path)[":id"];
-            BoxesManager::get(id)->commands.reset();
-            BoxesManager::eraseIfNeed(id);
-        };
+        auto id = m_commands.extract(connection->path)[":id"];
 
-    m_ws.endpoint[m_commands.url()].on_error =
-        [this](std::shared_ptr<Web::WSConnection> connection,
-            SimpleWeb::error_code) {
-            LOG_INFO << "Connection from "
-                     << connection->remote_endpoint().address().to_string()
-                     << " to " << connection->path << " closed due error.";
-            const auto id = m_commands.extract(connection->path)[":id"];
-            BoxesManager::get(id)->commands.reset();
-            BoxesManager::eraseIfNeed(id);
-        };
+        auto box = BoxesManager::get(id);
 
-    m_ws.endpoint[m_commands.url()].on_message =
-        [this](std::shared_ptr<Web::WSConnection> connection,
-            std::shared_ptr<Web::Message> in_message) {
-            std::string data = in_message->string();
-            LOG_DEBUG << "On " << connection->path << " got some data: " << data;
-
-            auto id = m_commands.extract(connection->path)[":id"];
-
-            auto box = BoxesManager::get(id);
-
-            if (box) {
-                box->ready(data);
-            }
-        };
+        if (box) {
+            box->ready(data);
+        }
+    };
 }
 
-bool HardwareApi::acceptConnectionFromHW(
-    std::string id, std::shared_ptr<Web::WSConnection> connection)
+bool HardwareApi::acceptConnectionFromHW(std::string id, std::shared_ptr<Web::WSConnection> connection)
 {
-    LOG_INFO << "Got connection from "
-             << connection->remote_endpoint().address().to_string() << " for "
-             << id << " to " << connection->path;
+    LOG_INFO << "Got connection from " << connection->remote_endpoint().address().to_string() << " for " << id << " to "
+             << connection->path;
     if (!Database::i().wasProduced(id)) {
-        LOG_WARNING << "Rejecting connection from "
-                    << connection->remote_endpoint().address().to_string()
-                    << " to stream for " << id;
+        LOG_WARNING << "Rejecting connection from " << connection->remote_endpoint().address().to_string() << " to stream for " << id;
         connection->send_close(STREAM_CONNECTION_REJECTED);
         return false;
     }

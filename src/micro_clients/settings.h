@@ -21,7 +21,8 @@
 #include <common/singleton.h>
 #include <services/settings.h>
 
-namespace aquabox {
-template <>
-ISettings* Singleton<ISettings>::create();
+namespace aquabox
+{
+    template<>
+    ISettings* Singleton<ISettings>::create();
 }

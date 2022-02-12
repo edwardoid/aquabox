@@ -21,11 +21,13 @@
 
 #include <nlohmann/json.hpp>
 
-namespace aquabox {
-class JsonEntity {
-public:
-    static bool isValidCommand(const nlohmann::json& obj);
-};
-}
+namespace aquabox
+{
+    class JsonEntity
+    {
+    public:
+        static bool isValidCommand(const nlohmann::json& obj);
+    };
+} // namespace aquabox
 
 #endif // JSON_SCHEMES_H

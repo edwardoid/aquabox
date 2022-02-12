@@ -20,12 +20,15 @@
 
 #include <string>
 
-namespace aquabox {
-namespace services {
-    struct Identifier {
-        static const std::string SETTINGS;
-        static const std::string RULES_MANAGER;
-        static const std::string DEVICES_MANAGER;
-    };
-}
-}
+namespace aquabox
+{
+    namespace services
+    {
+        struct Identifier
+        {
+            static const std::string SETTINGS;
+            static const std::string RULES_MANAGER;
+            static const std::string DEVICES_MANAGER;
+        };
+    } // namespace services
+} // namespace aquabox

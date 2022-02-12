@@ -17,12 +17,12 @@
  */
 
 #include "cloud_screen.h"
-#include <micro_clients/settings.h>
-#include <micro_clients/cloud.h>
-#include <framebuffer.h>
-#include <libfb_globals.h>
 #include <common/log.h>
 #include <common/singleton.h>
+#include <framebuffer.h>
+#include <libfb_globals.h>
+#include <micro_clients/cloud.h>
+#include <micro_clients/settings.h>
 using namespace aquabox;
 
 CloudScreen::CloudScreen()
@@ -45,7 +45,8 @@ void CloudScreen::draw()
     if (m_lastState) {
         m_text.setColor(0x5aa61aff);
         m_text.setText("Online");
-    } else {
+    }
+    else {
         m_text.setColor(0xdd1f0bff);
         m_text.setText("Offline");
     }
@@ -56,8 +57,7 @@ void CloudScreen::draw()
 
     m_stateImage.mapTo((fb->width() - m_stateImage.width()) / 2, y);
 
-    m_text.mapTo((fb->width() - m_text.width()) / 2,
-        y + m_stateImage.height() + 4);
+    m_text.mapTo((fb->width() - m_text.width()) / 2, y + m_stateImage.height() + 4);
 
     fb->draw(&m_text);
     fb->draw(&m_stateImage);

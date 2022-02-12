@@ -21,7 +21,8 @@
 #include <common/singleton.h>
 #include <services/network_manager.h>
 
-namespace aquabox {
-template <>
-INetworkManager* Singleton<INetworkManager>::create();
+namespace aquabox
+{
+    template<>
+    INetworkManager* Singleton<INetworkManager>::create();
 }

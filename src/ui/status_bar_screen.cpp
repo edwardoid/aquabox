@@ -17,10 +17,10 @@
  */
 
 #include "status_bar_screen.h"
-#include <micro_clients/network_manager.h>
-#include <micro_clients/cloud.h>
-#include <rotate.h>
 #include <common/singleton.h>
+#include <micro_clients/cloud.h>
+#include <micro_clients/network_manager.h>
+#include <rotate.h>
 #include <sprite.h>
 
 #define ASSISTANT_X 132
@@ -37,7 +37,10 @@
 
 using namespace aquabox;
 
-std::size_t StatusBarScreen::height() const { return 24; }
+std::size_t StatusBarScreen::height() const
+{
+    return 24;
+}
 
 void StatusBarScreen::draw()
 {
@@ -68,7 +71,7 @@ void StatusBarScreen::draw()
     fb->fillRect(0, 0, fb->width(), 24, 0x81bf2a);
     fb->drawLine(0, height(), fb->width(), 24, 0xebeb8c);
 
-    static const uint32_t live[] = { 0xff0000, 0x00ff00, 0x0000ff };
+    static const uint32_t live[] = {0xff0000, 0x00ff00, 0x0000ff};
 
     fb->fillRect(0, 0, 5, 5, live[time(NULL) % 3]);
 

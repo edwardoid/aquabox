@@ -1,18 +1,17 @@
 #include "DevicesServiceServer.h"
-#include <micro_clients/micro_service.h>
-#include <micro_clients/events.h>
-#include <rpc/converters.h>
-#include <common/thread_pool.h>
+#include "devices_map.h"
+#include "events/device_events.h"
+#include "hermes/hermes_mesh_gateway.h"
+#include "layer/network_layer.h"
+#include "relay.h"
+#include "sensor.h"
+#include "step.h"
 #include <common/singleton.h>
+#include <micro_clients/events.h>
+#include <micro_clients/micro_service.h>
+#include <rpc/converters.h>
 #include <services/application.h>
 #include <services/settings.h>
-#include "events/device_events.h"
-#include "layer/network_layer.h"
-#include "hermes/hermes_mesh_gateway.h"
-#include "devices_map.h"
-#include "relay.h"
-#include "step.h"
-#include "sensor.h"
 
 #include <grpcpp/channel.h>
 #include <grpcpp/client_context.h>
@@ -41,9 +40,9 @@ DeviceClass getClass(const boost::filesystem::path& p)
             auto clazz = Serializable<DeviceClass>::convert(val.get<std::string>(), &ok);
             return ok ? clazz : DeviceClass::Unknown;
         }
-    } catch (std::exception e) {
-        LOG_ERROR << "Can't determine device type in " << p
-                  << " error: " << e.what();
+    }
+    catch (std::exception e) {
+        LOG_ERROR << "Can't determine device type in " << p << " error: " << e.what();
     }
 
     return DeviceClass::Unknown;
@@ -51,20 +50,22 @@ DeviceClass getClass(const boost::filesystem::path& p)
 
 DevicesServiceServer::DevicesServiceServer()
 {
-    if(!init()) {
+    if (!init()) {
         LOG_ERROR << "Can't init Devices Manager";
     }
 }
 
-DevicesServiceServer::~DevicesServiceServer() { }
+DevicesServiceServer::~DevicesServiceServer() {}
 
 bool DevicesServiceServer::init()
 {
-    Singleton<aquabox::HermesMeshGateway>::available = !Application::app()->optionsIsSet("no-spi") &&
-                                                       Singleton<ISettings>::i()->get(Settings::Keys::MESH_ENABLED, Settings::Defaults::MESH_ENABLED);
+    Singleton<aquabox::HermesMeshGateway>::available = !Application::app()->optionsIsSet("no-spi")
+                                                       && Singleton<ISettings>::i()->get(Settings::Keys::MESH_ENABLED,
+                                                                                         Settings::Defaults::MESH_ENABLED);
 
-    boost::filesystem::path root = Singleton<ISettings>::i()->path(Settings::Keys::DATA_ROOT, Settings::Defaults::DATA_ROOT) /
-                                   Singleton<ISettings>::i()->path(Settings::Keys::DEVICES_DATA_SUBROOT, Settings::Defaults::DEVICES_DATA_SUBROOT);
+    boost::filesystem::path root = Singleton<ISettings>::i()->path(Settings::Keys::DATA_ROOT, Settings::Defaults::DATA_ROOT)
+                                   / Singleton<ISettings>::i()->path(Settings::Keys::DEVICES_DATA_SUBROOT,
+                                                                     Settings::Defaults::DEVICES_DATA_SUBROOT);
 
     if (!boost::filesystem::exists(root)) {
         if (!boost::filesystem::create_directory(root)) {
@@ -78,10 +79,8 @@ bool DevicesServiceServer::init()
         return false;
     }
 
-    for(auto const& file: boost::filesystem::directory_iterator(root))
-    {
-        if (boost::filesystem::is_regular_file(file))
-        {
+    for (auto const& file : boost::filesystem::directory_iterator(root)) {
+        if (boost::filesystem::is_regular_file(file)) {
             auto p = boost::filesystem::path(file);
 
             if (p.extension() != ".json") {
@@ -111,7 +110,7 @@ bool DevicesServiceServer::init()
             if (dev != nullptr && dev->parseFile(p)) {
                 Singleton<DevicesMap>::i()->addDevice(dev);
 
-                Singleton<ThreadPool>::i()->run([dev]() {
+                m_pool.run([dev]() {
                     bool avail = Hardware::resolve(dev->address()) != nullptr;
                     dev->setAvailable(avail);
                 });
@@ -125,7 +124,6 @@ bool DevicesServiceServer::init()
 
     LOG_INFO << "Loaded " << Singleton<DevicesMap>::i()->size() << " devices";
 
-
     NetworkLayer::prepare();
 
     m_sensorPollingThread = std::thread([this] {
@@ -138,19 +136,19 @@ bool DevicesServiceServer::init()
     return true;
 }
 
-::grpc::Status DevicesServiceServer::GetAll(
-    ::grpc::ServerContext* /*context*/,
-    const ::google::protobuf::Empty* /*request*/,
-    ::grpc::ServerWriter<::aquabox::services::DeviceData>* writer)
+::grpc::Status DevicesServiceServer::GetAll(::grpc::ServerContext* /*context*/,
+                                            const ::google::protobuf::Empty* /*request*/,
+                                            ::grpc::ServerWriter<::aquabox::services::DeviceData>* writer)
 {
     LOG_DEBUG << "Reqested all devices!";
-    Singleton<DevicesMap>::i()->for_each([this, writer](const auto id, const auto dev) {
-        writer->Write(Converter<Device, DeviceData>::convert(*dev));
-    });
+    Singleton<DevicesMap>::i()->for_each(
+        [this, writer](const auto id, const auto dev) { writer->Write(Converter<Device, DeviceData>::convert(*dev)); });
     return ::grpc::Status::OK;
 }
 
-::grpc::Status DevicesServiceServer::Update(::grpc::ServerContext* context, const ::aquabox::services::DeviceData* request, ::google::protobuf::BoolValue* response)
+::grpc::Status DevicesServiceServer::Update(::grpc::ServerContext* context,
+                                            const ::aquabox::services::DeviceData* request,
+                                            ::google::protobuf::BoolValue* response)
 {
     LOG_DEBUG << "Updating device " << request->id();
     bool found = Singleton<DevicesMap>::i()->on(request->id(), [request](const auto& id, auto& dev) {
@@ -161,8 +159,7 @@ bool DevicesServiceServer::init()
         dev->accept(request->accepted());
         dev->setType(Serializable<DeviceType>::convert(request->type()));
         Metadata meta = dev->metadata();
-        for(const auto& m : request->meta())
-        {
+        for (const auto& m : request->meta()) {
             LOG_INFO << m.first << " -> " << m.second;
             meta[m.first] = m.second;
         }
@@ -171,7 +168,7 @@ bool DevicesServiceServer::init()
         path /= id;
         path.replace_extension(".json");
 
-        if(!dev->saveToFile(path)) {
+        if (!dev->saveToFile(path)) {
             return false;
         }
 
@@ -189,7 +186,9 @@ bool DevicesServiceServer::init()
     return grpc::Status(grpc::StatusCode::NOT_FOUND, std::string("Device") + request->id() + "not found");
 }
 
-::grpc::Status DevicesServiceServer::Get(::grpc::ServerContext* context, const ::google::protobuf::StringValue* request, ::aquabox::services::DeviceData* response)
+::grpc::Status DevicesServiceServer::Get(::grpc::ServerContext* context,
+                                         const ::google::protobuf::StringValue* request,
+                                         ::aquabox::services::DeviceData* response)
 {
     LOG_DEBUG << "Requested device " << request->value();
     bool found = Singleton<DevicesMap>::i()->on(request->value(), [response](const auto& id, auto& dev) {
@@ -203,14 +202,16 @@ bool DevicesServiceServer::init()
     return grpc::Status(grpc::StatusCode::NOT_FOUND, std::string("Device") + request->value() + "not found");
 }
 
-::grpc::Status DevicesServiceServer::Set(::grpc::ServerContext* context, const ::aquabox::services::SetValueRequest* request, ::google::protobuf::BoolValue* response)
+::grpc::Status DevicesServiceServer::Set(::grpc::ServerContext* context,
+                                         const ::aquabox::services::SetValueRequest* request,
+                                         ::google::protobuf::BoolValue* response)
 {
     LOG_DEBUG << "Setting device value " << request->deviceid();
     bool found = Singleton<DevicesMap>::i()->on(request->deviceid(), [request](const auto& id, auto& dev) {
-        for(auto& p : dev->properties()) {
+        for (auto& p : dev->properties()) {
             if (p == request->property()) {
                 nlohmann::json v = request->value();
-                if(dev->setValue(p, v)) {
+                if (dev->setValue(p, v)) {
                     Singleton<IEvents>::i()->notify(std::make_shared<ValueChangedEvent>(dev, p, dev->value(p), "user"));
                     return true;
                 }
@@ -256,8 +257,9 @@ void DevicesServiceServer::processSensorUpdates()
                     }
 
                     values[key] = newValue;
-                } else {
-                    values.insert({ key, newValue });
+                }
+                else {
+                    values.insert({key, newValue});
                 }
 
                 Singleton<IEvents>::i()->notify(std::make_shared<ValueChangedEvent>(sensor, p, newValue, "regular_check"));
@@ -274,8 +276,9 @@ void DevicesServiceServer::processSensorUpdates()
                     }
 
                     values[key] = newValue;
-                } else {
-                    values.insert({ key, newValue });
+                }
+                else {
+                    values.insert({key, newValue});
                 }
 
                 Singleton<IEvents>::i()->notify(std::make_shared<ValueChangedEvent>(step, p, newValue, "regular_check"));
@@ -284,11 +287,13 @@ void DevicesServiceServer::processSensorUpdates()
     }
 }
 
-::grpc::Status DevicesServiceServer::FetchProperties(::grpc::ServerContext* context, const ::google::protobuf::StringValue* request, ::grpc::ServerWriter< ::google::protobuf::StringValue>* writer)
+::grpc::Status DevicesServiceServer::FetchProperties(::grpc::ServerContext* context,
+                                                     const ::google::protobuf::StringValue* request,
+                                                     ::grpc::ServerWriter<::google::protobuf::StringValue>* writer)
 {
     LOG_DEBUG << "Fetching properties for " << request->value();
     bool found = Singleton<DevicesMap>::i()->on(request->value(), [writer](const auto& id, auto& dev) {
-        for(const std::string& p : dev->properties()) {
+        for (const std::string& p : dev->properties()) {
             ::google::protobuf::StringValue sv;
             sv.set_value(p);
             writer->Write(sv);
@@ -301,19 +306,24 @@ void DevicesServiceServer::processSensorUpdates()
     return grpc::Status(grpc::StatusCode::NOT_FOUND, std::string("Device") + request->value() + "not found");
 }
 
-::grpc::Status DevicesServiceServer::PropertyValue(::grpc::ServerContext* context, const ::aquabox::services::GetPropertyValueRequest* request, ::google::protobuf::DoubleValue* response)
+::grpc::Status DevicesServiceServer::PropertyValue(::grpc::ServerContext* context,
+                                                   const ::aquabox::services::GetPropertyValueRequest* request,
+                                                   ::google::protobuf::DoubleValue* response)
 {
-    LOG_DEBUG << "Fetching property '" << request->property()  << "' for " << request->deviceid();
+    LOG_DEBUG << "Fetching property '" << request->property() << "' for " << request->deviceid();
     ::grpc::Status ret;
-    bool found = Singleton<DevicesMap>::i()->on<::grpc::Status>(request->deviceid(), [request, response](const auto& id, auto& dev) {
-        for(const std::string& p : dev->properties()) {
-            if (p == request->property()) {
-                response->set_value(dev->value(p));
-                return ::grpc::Status::OK;
+    bool found = Singleton<DevicesMap>::i()->on<::grpc::Status>(
+        request->deviceid(),
+        [request, response](const auto& id, auto& dev) {
+            for (const std::string& p : dev->properties()) {
+                if (p == request->property()) {
+                    response->set_value(dev->value(p));
+                    return ::grpc::Status::OK;
+                }
             }
-        }
-        return grpc::Status(grpc::StatusCode::NOT_FOUND, std::string("Property") + request->property() + "not found");
-    }, ret);
+            return grpc::Status(grpc::StatusCode::NOT_FOUND, std::string("Property") + request->property() + "not found");
+        },
+        ret);
 
     if (found) {
         return ::grpc::Status::OK;

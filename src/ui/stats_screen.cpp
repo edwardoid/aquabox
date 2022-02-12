@@ -65,9 +65,9 @@ void StatsScreen::draw()
 
     m_uptime.setText(ss.str());
 
-    int offsetY = ((int)fb->height() - (int)StatusBarScreen::height() - (int)m_uptime.height()) / 2;
+    int offsetY = ((int) fb->height() - (int) StatusBarScreen::height() - (int) m_uptime.height()) / 2;
     offsetY = std::max<int>(0, offsetY);
-    int offsetX = ((int)fb->width() - (int)m_uptime.width()) / 2;
+    int offsetX = ((int) fb->width() - (int) m_uptime.width()) / 2;
     offsetX = std::max(offsetX, 0);
     m_uptime.mapTo(offsetX, StatusBarScreen::height() + offsetY);
 

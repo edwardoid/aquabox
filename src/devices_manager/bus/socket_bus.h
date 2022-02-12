@@ -23,13 +23,15 @@
 #include <memory>
 #include <thread>
 
-namespace aquabox {
-class SocketBus : public HermesBus {
-public:
-    SocketBus(const std::string& address);
-    virtual ~SocketBus();
+namespace aquabox
+{
+    class SocketBus : public HermesBus
+    {
+    public:
+        SocketBus(const std::string& address);
+        virtual ~SocketBus();
 
-private:
-    virtual void loop() override;
-};
-}
+    private:
+        virtual void loop() override;
+    };
+} // namespace aquabox

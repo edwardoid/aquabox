@@ -17,46 +17,40 @@
  */
 
 #include "telegram_bot.h"
-#include <common/log.h>
-#include <thread>
-#include <micro_clients/settings.h>
 #include "get_devices_formatter.h"
+#include <common/log.h>
+#include <micro_clients/settings.h>
+#include <thread>
 
 using namespace aquabox;
 
-TelegramBot::TelegramBot()
-{
-}
+TelegramBot::TelegramBot() {}
 
 void TelegramBot::start()
 {
-    std::string api_key = Singleton<ISettings>::i()->get(
-        "TG_API_KEY", std::string("1406003356:AAGsrEfW77j7oUbApyev6ulmjWlPuHahrv8"));
+    std::string api_key = Singleton<ISettings>::i()->get("TG_API_KEY", std::string("1406003356:AAGsrEfW77j7oUbApyev6ulmjWlPuHahrv8"));
     m_bot = std::make_shared<TgBot::Bot>(api_key);
-    m_bot->getEvents().onCommand(
-        "devices", [this](TgBot::Message::Ptr message) {
-            auto client = m_server.get("testDev");
-            Command devices;
-            devices.setSeqNum(0);
-            devices.setOperation(Operation::GetDevices);
-            client->runCommand(devices, GetDevicesFormatter(devices, m_bot->getApi(), message->chat->id));
-        });
+    m_bot->getEvents().onCommand("devices", [this](TgBot::Message::Ptr message) {
+        auto client = m_server.get("testDev");
+        Command devices;
+        devices.setSeqNum(0);
+        devices.setOperation(Operation::GetDevices);
+        client->runCommand(devices, GetDevicesFormatter(devices, m_bot->getApi(), message->chat->id));
+    });
 
-    m_bot->getEvents().onCommand(
-        "list_rules", [this](TgBot::Message::Ptr message) {
-            std::string reply = "You have ";
-            reply += std::to_string(0);
-            reply += " rules!";
-            m_bot->getApi().sendMessage(message->chat->id, reply);
-        });
+    m_bot->getEvents().onCommand("list_rules", [this](TgBot::Message::Ptr message) {
+        std::string reply = "You have ";
+        reply += std::to_string(0);
+        reply += " rules!";
+        m_bot->getApi().sendMessage(message->chat->id, reply);
+    });
 
-    m_bot->getEvents().onCommand(
-        "subscribe", [this](TgBot::Message::Ptr message) {
-            m_chats.insert(message->chat->id);
-            m_bot->getApi().sendMessage(message->chat->id, "Subscribed!");
-        });
+    m_bot->getEvents().onCommand("subscribe", [this](TgBot::Message::Ptr message) {
+        m_chats.insert(message->chat->id);
+        m_bot->getApi().sendMessage(message->chat->id, "Subscribed!");
+    });
 
-    while(1) {
+    while (1) {
         try {
             LOG_INFO << m_bot->getApi().getMe()->username;
             m_bot->getApi().deleteWebhook();
@@ -66,7 +60,8 @@ void TelegramBot::start()
                 LOG_DEBUG << "Long poll started";
                 longPoll.start();
             }
-        } catch (std::exception& e) {
+        }
+        catch (std::exception& e) {
             LOG_ERROR << e.what();
         }
         std::this_thread::sleep_for(std::chrono::seconds(1));

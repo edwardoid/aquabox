@@ -21,19 +21,18 @@
 #include <math.h>
 #include <plog/Log.h>
 #include <png.h>
-#include <qrencode.h>
 #include <stdio.h>
 #include <vector>
+#include <qrencode.h>
 
 #define INCHES_PER_METER (100.0 / 2.54)
 
 using namespace qr;
 
-static unsigned char fg_color[4] = { 0, 0, 0, 255 };
-static unsigned char bg_color[4] = { 255, 255, 255, 255 };
+static unsigned char fg_color[4] = {0, 0, 0, 255};
+static unsigned char bg_color[4] = {255, 255, 255, 255};
 
-static void fillRow(std::vector<unsigned char>& row, int num,
-    const unsigned char color[])
+static void fillRow(std::vector<unsigned char>& row, int num, const unsigned char color[])
 {
     unsigned char* p = row.data();
     for (int i = 0; i < num; i++) {
@@ -51,7 +50,8 @@ bool Qr::create(std::string data, std::string pngPath, double zoomFactor)
     if (qrcode == NULL) {
         if (errno == ERANGE) {
             LOG_ERROR << "Failed to encode the input data: Input data too large";
-        } else {
+        }
+        else {
             LOG_ERROR << "Failed to encode the input data";
         }
         return false;
@@ -95,13 +95,17 @@ bool Qr::create(std::string data, std::string pngPath, double zoomFactor)
     }
 
     png_init_io(png_ptr, fp);
-    png_set_IHDR(png_ptr, info_ptr, (unsigned int)realwidth,
-        (unsigned int)realwidth, 8, PNG_COLOR_TYPE_RGB_ALPHA,
-        PNG_INTERLACE_NONE, PNG_COMPRESSION_TYPE_DEFAULT,
-        PNG_FILTER_TYPE_DEFAULT);
+    png_set_IHDR(png_ptr,
+                 info_ptr,
+                 (unsigned int) realwidth,
+                 (unsigned int) realwidth,
+                 8,
+                 PNG_COLOR_TYPE_RGB_ALPHA,
+                 PNG_INTERLACE_NONE,
+                 PNG_COMPRESSION_TYPE_DEFAULT,
+                 PNG_FILTER_TYPE_DEFAULT);
 
-    png_set_pHYs(png_ptr, info_ptr, dpi * INCHES_PER_METER,
-        dpi * INCHES_PER_METER, PNG_RESOLUTION_METER);
+    png_set_pHYs(png_ptr, info_ptr, dpi * INCHES_PER_METER, dpi * INCHES_PER_METER, PNG_RESOLUTION_METER);
     png_write_info(png_ptr, info_ptr);
 
     fillRow(row, realwidth, bg_color);

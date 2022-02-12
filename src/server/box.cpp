@@ -2,10 +2,10 @@
 #include "application_connection.h"
 #include "boxes_manager.h"
 #include "database.h"
-#include <common/log.h>
-#include <types/event.h>
 #include "telegram_bot.h"
+#include <common/log.h>
 #include <singleton.h>
+#include <types/event.h>
 
 using namespace aquabox;
 

@@ -19,13 +19,14 @@
 #pragma once
 
 #include "value_change.h"
-#include <nlohmann/json.hpp>
 #include <boost/filesystem.hpp>
+#include <nlohmann/json.hpp>
 #include <string>
 #include <vector>
 
-namespace aquabox {
-/*
+namespace aquabox
+{
+    /*
         {
             "id" : "someId",
             "device" : "dev01",
@@ -49,56 +50,57 @@ namespace aquabox {
         }
     */
 
-class Rule {
-public:
-    Rule() = default;
-    ~Rule() = default;
+    class Rule
+    {
+    public:
+        Rule() = default;
+        ~Rule() = default;
 
-    bool parseFile(const boost::filesystem::path& file);
-    bool saveToFile(const boost::filesystem::path& file);
+        bool parseFile(const boost::filesystem::path& file);
+        bool saveToFile(const boost::filesystem::path& file);
 
-    const std::string& id() const;
-    void setId(const std::string& id);
+        const std::string& id() const;
+        void setId(const std::string& id);
 
-    const std::string& name() const;
-    void setName(const std::string& name);
+        const std::string& name() const;
+        void setName(const std::string& name);
 
-    uint32_t index() const;
-    void setIndex(const uint32_t index);
+        uint32_t index() const;
+        void setIndex(const uint32_t index);
 
-    const std::string& device() const;
-    void setDevice(const std::string& device);
+        const std::string& device() const;
+        void setDevice(const std::string& device);
 
-    bool enabled() const;
-    void setEnabled(bool enabled);
+        bool enabled() const;
+        void setEnabled(bool enabled);
 
-    uint64_t createdAt() const;
-    void setCreatedAt(uint64_t createdAt);
+        uint64_t createdAt() const;
+        void setCreatedAt(uint64_t createdAt);
 
-    uint64_t lastRun() const;
-    void setLastRun(uint64_t lastRun);
+        uint64_t lastRun() const;
+        void setLastRun(uint64_t lastRun);
 
-    uint64_t deleteAfter() const;
-    void setDeleteAfter(uint64_t deleteAfter);
-    bool expired() const;
-    bool isTemporary() const;
+        uint64_t deleteAfter() const;
+        void setDeleteAfter(uint64_t deleteAfter);
+        bool expired() const;
+        bool isTemporary() const;
 
-    const std::vector<ValueChange>& actions() const;
-    void setActions(const std::vector<ValueChange>& actions);
+        const std::vector<ValueChange>& actions() const;
+        void setActions(const std::vector<ValueChange>& actions);
 
-private:
-    std::string m_id;
-    std::string m_name;
-    uint32_t m_index;
-    std::string m_device;
-    bool m_enabled;
-    bool m_available;
-    uint64_t m_createdAt;
-    uint64_t m_lastRun;
-    uint64_t m_deleteAfter;
-    std::vector<ValueChange> m_actions;
-};
+    private:
+        std::string m_id;
+        std::string m_name;
+        uint32_t m_index;
+        std::string m_device;
+        bool m_enabled;
+        bool m_available;
+        uint64_t m_createdAt;
+        uint64_t m_lastRun;
+        uint64_t m_deleteAfter;
+        std::vector<ValueChange> m_actions;
+    };
 
-void to_json(nlohmann::json& j, const Rule& r);
-void from_json(const nlohmann::json& j, Rule& r);
-}
+    void to_json(nlohmann::json& j, const Rule& r);
+    void from_json(const nlohmann::json& j, Rule& r);
+} // namespace aquabox

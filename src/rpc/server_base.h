@@ -23,25 +23,22 @@
 #include <plog/Init.h>
 #include <plog/Log.h>
 
-namespace aquabox {
-namespace services {
-    template <typename Interface>
-    class ServerBase : public Interface ::Service {
-    public:
-        ServerBase()
+namespace aquabox
+{
+    namespace services
+    {
+        template<typename Interface>
+        class ServerBase : public Interface ::Service
         {
-            plog::init(plog::Severity::debug, &m_consoleAppender);
-        }
+        public:
+            ServerBase() { plog::init(plog::Severity::debug, &m_consoleAppender); }
 
-        static std::string service_full_name() { return Interface::service_full_name(); }
+            static std::string service_full_name() { return Interface::service_full_name(); }
 
-        virtual bool init()
-        {
-            return true;
-        }
+            virtual bool init() { return true; }
 
-    private:
-        plog::ColorConsoleAppender<plog::TxtFormatter> m_consoleAppender;
-    };
-}
-}
+        private:
+            plog::ColorConsoleAppender<plog::TxtFormatter> m_consoleAppender;
+        };
+    } // namespace services
+} // namespace aquabox

@@ -19,31 +19,33 @@
 #pragma once
 
 #include "rest_api.h"
-#include <common/route.h>
 #include "ws_api.h"
+#include <common/route.h>
 #include <server_http.hpp>
 #include <server_ws.hpp>
 #include <thread>
 
 class Event;
 
-namespace aquabox {
-class WebServer {
-public:
-    ~WebServer();
-    bool start();
-    void setupRoutes();
-    bool bindApiCalls();
-    void postUpdate(std::shared_ptr<Event> event);
+namespace aquabox
+{
+    class WebServer
+    {
+    public:
+        ~WebServer();
+        bool start();
+        void setupRoutes();
+        bool bindApiCalls();
+        void postUpdate(std::shared_ptr<Event> event);
 
-private:
-    std::shared_ptr<Web::HttpServer> m_http;
-    Web::WSServer m_ws;
-    std::thread m_rest;
-    std::thread m_stream;
-    v1::REST RESTApi;
-    ws::API WS;
-    Route m_updates;
-    Route m_rpc;
-};
-}
+    private:
+        std::shared_ptr<Web::HttpServer> m_http;
+        Web::WSServer m_ws;
+        std::thread m_rest;
+        std::thread m_stream;
+        v1::REST RESTApi;
+        ws::API WS;
+        Route m_updates;
+        Route m_rpc;
+    };
+} // namespace aquabox

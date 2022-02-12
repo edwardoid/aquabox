@@ -23,8 +23,7 @@ using namespace aquabox;
 
 HermesIncubator::HermesObjectInfo::HermesObjectInfo()
     : lastRequest(std::chrono::seconds(10))
-{
-}
+{}
 
 HermesIncubator::HermesIncubator()
 {
@@ -73,8 +72,7 @@ void HermesIncubator::routine()
         ++iter;
         for (size_t i = 0; i < m_objects.size(); ++i) {
             HermesObjectInfo& obj = m_objects[i];
-            LOG_DEBUG << "Polling " << m_objects.size() << " hermes slaves state "
-                      << (int)obj.state;
+            LOG_DEBUG << "Polling " << m_objects.size() << " hermes slaves state " << (int) obj.state;
             if (obj.state == Incubating) {
                 std::lock_guard<HermesMaster> objLock(*obj.object);
                 if (obj.object->hasIncomingMessage()) {
@@ -84,31 +82,32 @@ void HermesIncubator::routine()
                         deadObjects.push_back(obj);
                         obj.state = ObjectInfoState::Dead;
                         toRemove.push_back(i);
-                    } else {
-                        LOG_INFO << "Hermes slave " << obj.object->serial().to_string()
-                                 << " accepted";
+                    }
+                    else {
+                        LOG_INFO << "Hermes slave " << obj.object->serial().to_string() << " accepted";
                         readyObjects.push_back(obj);
                         obj.state = ObjectInfoState::Ready;
                     }
                     int32_t updatedTimeout = obj.lastRequest.timeout().count();
-                    if (obj.state != ObjectInfoState::Dead && obj.object->getProperty<int32_t>("_timeout", updatedTimeout) && obj.lastRequest.timeout().count() != updatedTimeout) {
+                    if (obj.state != ObjectInfoState::Dead && obj.object->getProperty<int32_t>("_timeout", updatedTimeout)
+                        && obj.lastRequest.timeout().count() != updatedTimeout) {
                         if (updatedTimeout < 1000) {
                             updatedTimeout = 1000;
                         }
-                        LOG_INFO << "Polling timeout updated to " << updatedTimeout
-                                 << " milliseconds";
-                        obj.lastRequest.setTimeout(
-                            std::chrono::milliseconds(updatedTimeout));
+                        LOG_INFO << "Polling timeout updated to " << updatedTimeout << " milliseconds";
+                        obj.lastRequest.setTimeout(std::chrono::milliseconds(updatedTimeout));
                     }
                     obj.lastRequest.reset();
-                } else if (obj.lastRequest.expired()) {
+                }
+                else if (obj.lastRequest.expired()) {
                     LOG_DEBUG << "Waiting for handshake message";
                     deadObjects.push_back(obj);
                     obj.state = ObjectInfoState::Dead;
                     obj.lastRequest.reset();
                     toRemove.push_back(i);
                 }
-            } else if (obj.state == Ready) {
+            }
+            else if (obj.state == Ready) {
                 if (obj.lastRequest.expired()) {
                     LOG_DEBUG << "Checking if slave " << obj.id << " is connected";
                     obj.lastRequest.reset();
@@ -117,7 +116,8 @@ void HermesIncubator::routine()
                         deadObjects.push_back(obj);
                         obj.state = ObjectInfoState::Dead;
                         toRemove.push_back(i);
-                    } else {
+                    }
+                    else {
                         obj.lastRequest.reset();
                     }
                 }

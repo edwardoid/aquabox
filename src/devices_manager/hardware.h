@@ -20,66 +20,73 @@
 
 #include <memory>
 #include <vector>
-namespace aquabox {
-using Bytes = std::vector<uint8_t>;
-using BytesCount = Bytes::size_type;
-using Offset = Bytes::size_type;
+namespace aquabox
+{
+    using Bytes = std::vector<uint8_t>;
+    using BytesCount = Bytes::size_type;
+    using Offset = Bytes::size_type;
 
-enum class State {
-    RegistrationRequest,
-    Online,
-    Oflfine
-};
-
-struct IO {
-    virtual BytesCount send(const Bytes& data, const BytesCount count = 0) = 0;
-    virtual BytesCount read(Bytes& data, const Offset = 0) = 0;
-};
-
-struct OnOff {
-    virtual void setOn() = 0;
-    virtual void setOff() = 0;
-    virtual bool isOn() = 0;
-};
-
-template <typename T>
-struct Value {
-    virtual bool set(T type) = 0;
-    virtual T get() = 0;
-};
-
-struct Toggle {
-    virtual void toggle(uint8_t times = 1) = 0;
-    virtual void started() = 0;
-    virtual void finished() = 0;
-};
-
-class Hardware {
-public:
-    static std::shared_ptr<Hardware> resolve(const std::string& address);
-    virtual bool isReady() = 0;
-    virtual bool open(int flags) = 0;
-    virtual bool close() = 0;
-
-    template <class IFace>
-    IFace* implementation()
+    enum class State
     {
-        return dynamic_cast<IFace*>(this);
-    }
+        RegistrationRequest,
+        Online,
+        Oflfine
+    };
 
-    template <typename IFace>
-    bool implements() const
+    struct IO
     {
-        return implementation<IFace>() != nullptr;
-    }
-};
+        virtual BytesCount send(const Bytes& data, const BytesCount count = 0) = 0;
+        virtual BytesCount read(Bytes& data, const Offset = 0) = 0;
+    };
 
-struct OnOffDevice : public virtual Hardware, public OnOff {
-};
+    struct OnOff
+    {
+        virtual void setOn() = 0;
+        virtual void setOff() = 0;
+        virtual bool isOn() = 0;
+    };
 
-struct IntegerDevice : public virtual Hardware, public Value<int32_t> {
-};
+    template<typename T>
+    struct Value
+    {
+        virtual bool set(T type) = 0;
+        virtual T get() = 0;
+    };
 
-struct FloatValueDevice : public Hardware, public Value<double> {
-};
-}
+    struct Toggle
+    {
+        virtual void toggle(uint8_t times = 1) = 0;
+        virtual void started() = 0;
+        virtual void finished() = 0;
+    };
+
+    class Hardware
+    {
+    public:
+        static std::shared_ptr<Hardware> resolve(const std::string& address);
+        virtual bool isReady() = 0;
+        virtual bool open(int flags) = 0;
+        virtual bool close() = 0;
+
+        template<class IFace>
+        IFace* implementation()
+        {
+            return dynamic_cast<IFace*>(this);
+        }
+
+        template<typename IFace>
+        bool implements() const
+        {
+            return implementation<IFace>() != nullptr;
+        }
+    };
+
+    struct OnOffDevice : public virtual Hardware, public OnOff
+    {};
+
+    struct IntegerDevice : public virtual Hardware, public Value<int32_t>
+    {};
+
+    struct FloatValueDevice : public Hardware, public Value<double>
+    {};
+} // namespace aquabox

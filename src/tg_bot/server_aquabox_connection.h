@@ -18,12 +18,12 @@
 
 #pragma once
 
-#include <common/box_api.h>
 #include "message_formatter.h"
+#include <common/box_api.h>
 
 namespace aquabox
 {
-    class ServerAquaboxConnection: public CommandHandler
+    class ServerAquaboxConnection : public CommandHandler
     {
     public:
         ServerAquaboxConnection(const std::string id);
@@ -31,6 +31,7 @@ namespace aquabox
         //virtual const std::string& id() const override;
         virtual void runCommand(Command cmd, std::function<void(const Command&, bool)>&& onResult) override;
         virtual void runCommand(Command cmd, MessageFormatter&& onResult);
+
     private:
         std::string m_id;
     };

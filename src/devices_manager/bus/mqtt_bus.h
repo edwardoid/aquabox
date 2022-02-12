@@ -20,14 +20,16 @@
 
 #include "bus.h"
 
-namespace aquabox {
-class MQTTBus : public Bus {
-public:
-    MQTTBus(const std::string& address);
-    virtual ~MQTTBus();
-    virtual std::shared_ptr<Hardware> hw(const std::string& hw) override;
+namespace aquabox
+{
+    class MQTTBus : public Bus
+    {
+    public:
+        MQTTBus(const std::string& address);
+        virtual ~MQTTBus();
+        virtual std::shared_ptr<Hardware> hw(const std::string& hw) override;
 
-private:
-    std::unique_ptr<class MQTTBroker> m_broker;
-};
-}
+    private:
+        std::unique_ptr<class MQTTBroker> m_broker;
+    };
+} // namespace aquabox

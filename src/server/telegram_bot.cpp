@@ -26,12 +26,8 @@
 using namespace aquabox;
 
 TelegramBot::TelegramBot(const std::string& token)
-    : m_bot(token.empty()
-            ? Settings::string(Settings::Keys::TELEGRAM_BOT_API,
-                Settings::Defaults::TELEGRAM_BOT_API)
-            : token)
-{
-}
+    : m_bot(token.empty() ? Settings::string(Settings::Keys::TELEGRAM_BOT_API, Settings::Defaults::TELEGRAM_BOT_API) : token)
+{}
 
 void TelegramBot::start()
 {
@@ -43,18 +39,24 @@ void TelegramBot::start()
             while (true) {
                 longPoll.start();
             }
-        } catch (TgBot::TgException& e) {
+        }
+        catch (TgBot::TgException& e) {
             LOG_FATAL << "Can't start Telegram bot: " << e.what();
-        } catch (std::exception& e) {
+        }
+        catch (std::exception& e) {
             LOG_FATAL << "Can't start Telegram bot: " << e.what();
-        } catch (...) {
+        }
+        catch (...) {
             LOG_FATAL << "Starting of Te;egram bot failed. Check logs...";
         }
     });
     pthread_setname_np(m_loop.native_handle(), "TelegramBot");
 }
 
-TelegramBot::~TelegramBot() { m_loop.join(); }
+TelegramBot::~TelegramBot()
+{
+    m_loop.join();
+}
 
 void TelegramBot::statusChanged(const Box& box, bool online)
 {
@@ -75,18 +77,13 @@ void TelegramBot::updateReceived(const Box& box, const nlohmann::json& event)
 
 void TelegramBot::setup()
 {
-    m_bot.getEvents().onCommand("start", [this](TgBot::Message::Ptr message) {
-        m_bot.getApi().sendMessage(message->chat->id, "Hi!");
-    });
-    m_bot.getEvents().onCommand("login", [this](TgBot::Message::Ptr message) {
-        m_bot.getApi().sendMessage(message->chat->id, message->text);
-    });
-    m_bot.getEvents().onCommand("logoff", [this](TgBot::Message::Ptr message) {
-        m_bot.getApi().sendMessage(message->chat->id, message->text);
-    });
+    m_bot.getEvents().onCommand("start", [this](TgBot::Message::Ptr message) { m_bot.getApi().sendMessage(message->chat->id, "Hi!"); });
+    m_bot.getEvents().onCommand("login",
+                                [this](TgBot::Message::Ptr message) { m_bot.getApi().sendMessage(message->chat->id, message->text); });
+    m_bot.getEvents().onCommand("logoff",
+                                [this](TgBot::Message::Ptr message) { m_bot.getApi().sendMessage(message->chat->id, message->text); });
     m_bot.getEvents().onAnyMessage([this](TgBot::Message::Ptr message) {
         LOG_DEBUG << "Got message " << message->text;
-        m_bot.getApi().sendMessage(message->chat->id,
-            "Your message is: " + message->text);
+        m_bot.getApi().sendMessage(message->chat->id, "Your message is: " + message->text);
     });
 }

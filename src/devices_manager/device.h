@@ -18,12 +18,12 @@
 
 #pragma once
 
-#include <types/device_type.h>
-#include <types/value_change.h>
-#include <nlohmann/json.hpp>
 #include <boost/filesystem.hpp>
+#include <nlohmann/json.hpp>
 #include <set>
 #include <string>
+#include <types/device_type.h>
+#include <types/value_change.h>
 
 #define ON_OFF_PROPERTY "on"
 
@@ -31,94 +31,100 @@
 
 #define STEP_PROPERTY "times"
 
-namespace aquabox {
-using Metadata = nlohmann::json::object_t;
+namespace aquabox
+{
+    using Metadata = nlohmann::json::object_t;
 
-class Device {
-public:
-    Device() = default;
-    virtual ~Device() = default;
+    class Device
+    {
+    public:
+        Device() = default;
+        virtual ~Device() = default;
 
-    bool parseFile(const boost::filesystem::path& file);
-    bool saveToFile(const boost::filesystem::path& file);
+        bool parseFile(const boost::filesystem::path& file);
+        bool saveToFile(const boost::filesystem::path& file);
 
-    std::vector<std::shared_ptr<class Rule>> rules() const;
+        std::vector<std::shared_ptr<class Rule>> rules() const;
 
-    const std::string& id() const;
-    void setId(const std::string& id);
+        const std::string& id() const;
+        void setId(const std::string& id);
 
-    const std::string& name() const;
-    void setName(const std::string name);
+        const std::string& name() const;
+        void setName(const std::string name);
 
-    const int32_t& index() const;
-    void setIndex(const int32_t& index);
+        const int32_t& index() const;
+        void setIndex(const int32_t& index);
 
-    const std::string& address() const;
-    void setAddress(const std::string address);
+        const std::string& address() const;
+        void setAddress(const std::string address);
 
-    bool rulesEnabled() const;
-    void setRulesEnabled(bool enabled);
+        bool rulesEnabled() const;
+        void setRulesEnabled(bool enabled);
 
-    bool accepted() const;
-    void accept(bool accept);
+        bool accepted() const;
+        void accept(bool accept);
 
-    bool available() const;
-    bool setAvailable(bool available);
+        bool available() const;
+        bool setAvailable(bool available);
 
-    DeviceType type() const;
-    void setType(const DeviceType& type);
+        DeviceType type() const;
+        void setType(const DeviceType& type);
 
-    DeviceClass deviceClass() const;
-    void setDeviceClass(DeviceClass deviceClass);
+        DeviceClass deviceClass() const;
+        void setDeviceClass(DeviceClass deviceClass);
 
-    const Metadata& metadata() const;
-    void setMetadata(const Metadata& metadata);
+        const Metadata& metadata() const;
+        void setMetadata(const Metadata& metadata);
 
-    virtual std::vector<std::string> properties() const { return {}; }
-    virtual nlohmann::json value(std::string property) const { return nlohmann::json(); };
-    virtual bool setValue(std::string property, const nlohmann::json& value) { return false; };
+        virtual std::vector<std::string> properties() const { return {}; }
+        virtual nlohmann::json value(std::string property) const { return nlohmann::json(); };
+        virtual bool setValue(std::string property, const nlohmann::json& value) { return false; };
 
-    bool supports(DeviceClass _class) const;
+        bool supports(DeviceClass _class) const;
 
-protected:
-    void enableSupport(DeviceClass _class);
+    protected:
+        void enableSupport(DeviceClass _class);
 
-protected:
-    std::string m_id;
-    std::string m_name;
-    int32_t m_index = -1;
-    std::string m_address;
-    bool m_rulesEnabled = true;
-    bool m_accepted = true;
-    bool m_available = true;
-    DeviceType m_type = DeviceType::Generic;
-    DeviceClass m_deviceClass = DeviceClass::Unknown;
-    Metadata m_metadata;
-    std::set<DeviceClass> m_implementation;
-};
+    protected:
+        std::string m_id;
+        std::string m_name;
+        int32_t m_index = -1;
+        std::string m_address;
+        bool m_rulesEnabled = true;
+        bool m_accepted = true;
+        bool m_available = true;
+        DeviceType m_type = DeviceType::Generic;
+        DeviceClass m_deviceClass = DeviceClass::Unknown;
+        Metadata m_metadata;
+        std::set<DeviceClass> m_implementation;
+    };
 
-void to_json(nlohmann::json& j, const Device& d);
-void from_json(const nlohmann::json& j, Device& d);
+    void to_json(nlohmann::json& j, const Device& d);
+    void from_json(const nlohmann::json& j, Device& d);
 
-struct ValueChangableDevice : public Device {
-    virtual void addPendingAction(uint64_t priority, ValueChange action) = 0;
-    virtual bool performPendingAction(ValueChange& action) = 0;
-};
+    struct ValueChangableDevice : public Device
+    {
+        virtual void addPendingAction(uint64_t priority, ValueChange action) = 0;
+        virtual bool performPendingAction(ValueChange& action) = 0;
+    };
 
-struct AbstractRelay : public ValueChangableDevice {
-    AbstractRelay();
-    virtual std::vector<std::string> properties() const override { return { ON_OFF_PROPERTY }; }
-};
+    struct AbstractRelay : public ValueChangableDevice
+    {
+        AbstractRelay();
+        virtual std::vector<std::string> properties() const override { return {ON_OFF_PROPERTY}; }
+    };
 
-struct AbstractSensor : public Device {
-    AbstractSensor();
-    virtual std::vector<std::string> properties() const override { return { SENSOR_PROPERTY }; }
-};
+    struct AbstractSensor : public Device
+    {
+        AbstractSensor();
+        virtual std::vector<std::string> properties() const override { return {SENSOR_PROPERTY}; }
+    };
 
-struct AbstractStep : public ValueChangableDevice {
-    AbstractStep();
-    virtual int steps() const = 0;
-    virtual void makeSteps(int times = 1) = 0;
-    virtual std::vector<std::string> properties() const override { return { STEP_PROPERTY }; }
-};
-}
+    struct AbstractStep : public ValueChangableDevice
+    {
+        AbstractStep();
+        virtual int steps() const = 0;
+        virtual void makeSteps(int times = 1) = 0;
+        virtual std::vector<std::string> properties() const override { return {STEP_PROPERTY}; }
+    };
+} // namespace aquabox

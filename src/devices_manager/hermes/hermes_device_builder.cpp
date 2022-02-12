@@ -28,9 +28,7 @@
 
 using namespace aquabox;
 
-std::shared_ptr<class Device>
-HermesDeviceBuilder::build(std::string address,
-    std::shared_ptr<class HermesMaster> master)
+std::shared_ptr<class Device> HermesDeviceBuilder::build(std::string address, std::shared_ptr<class HermesMaster> master)
 {
     if (!master->serial().isValid()) {
         LOG_ERROR << "Serial for Hermes device to build is invalid";
@@ -39,7 +37,8 @@ HermesDeviceBuilder::build(std::string address,
     std::string tp;
     if (master->getProperty("type", tp)) {
         LOG_DEBUG << "Slave type: " << tp;
-    } else {
+    }
+    else {
         LOG_DEBUG << "Can't get property 'type'";
         return nullptr;
     }
@@ -47,7 +46,8 @@ HermesDeviceBuilder::build(std::string address,
     std::string cs;
     if (master->getProperty("class", cs)) {
         LOG_DEBUG << "Slave class: " << cs;
-    } else {
+    }
+    else {
         LOG_DEBUG << "Can't get property 'class'";
         return nullptr;
     }
@@ -90,8 +90,8 @@ HermesDeviceBuilder::build(std::string address,
     }
 
     std::vector<std::string> additionalProperties;
-    for(int i  = 0; i < master->getPropertiesCount(); ++i) {
-        char name[32] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+    for (int i = 0; i < master->getPropertiesCount(); ++i) {
+        char name[32] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
         memset(name, 9, 32);
         if (master->getPropertyName(i, name))
             additionalProperties.push_back(name);
@@ -115,7 +115,7 @@ HermesDeviceBuilder::build(std::string address,
     dev->setAddress(address);
     dev->setType(type);
     dev->setDeviceClass(clazz);
-    dev->setMetadata({ { "serial", master->serial().to_string() } });
+    dev->setMetadata({{"serial", master->serial().to_string()}});
 
     return dev;
 }

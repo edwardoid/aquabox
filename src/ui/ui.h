@@ -18,17 +18,18 @@
 
 #pragma once
 
-#include <services/application.h>
 #include <common/log.h>
+#include <services/application.h>
 
 namespace aquabox
 {
-class UI: public Application
-{
-public:
-    UI();
-    virtual int start() override;
-private:
-    plog::ColorConsoleAppender<plog::TxtFormatter> m_consoleAppender;
-};
-}
+    class UI : public Application
+    {
+    public:
+        UI();
+        virtual int start() override;
+
+    private:
+        plog::ColorConsoleAppender<plog::TxtFormatter> m_consoleAppender;
+    };
+} // namespace aquabox

@@ -24,8 +24,7 @@ std::chrono::seconds PerformanceMetrics::uptime()
 {
     static auto begin = std::chrono::system_clock::now();
 
-    return std::chrono::duration_cast<std::chrono::seconds>(
-        std::chrono::system_clock::now() - begin);
+    return std::chrono::duration_cast<std::chrono::seconds>(std::chrono::system_clock::now() - begin);
 }
 
 uint32_t PerformanceMetrics::taskStarted(const std::string& task)

@@ -4,14 +4,11 @@
 
 using namespace aquabox;
 
-MQTTBroker::MQTTSlaveSubscription::MQTTSlaveSubscription(MQTT_NS::buffer topic,
-    MQTTSlavePtr con,
-    MQTT_NS::qos qos_value)
+MQTTBroker::MQTTSlaveSubscription::MQTTSlaveSubscription(MQTT_NS::buffer topic, MQTTSlavePtr con, MQTT_NS::qos qos_value)
     : topic(std::move(topic))
     , connection(std::move(con))
     , qos_value(qos_value)
-{
-}
+{}
 
 void MQTTBroker::start(int port)
 {
@@ -19,9 +16,7 @@ void MQTTBroker::start(int port)
         stop();
     }
     LOG_INFO << "Starting MQTT bkock on port " << port;
-    m_server = new ServerImpl(
-        boost::asio::ip::tcp::endpoint(boost::asio::ip::tcp::v4(), port),
-        m_serviceContext);
+    m_server = new ServerImpl(boost::asio::ip::tcp::endpoint(boost::asio::ip::tcp::v4(), port), m_serviceContext);
 
     setupHandlers();
 
@@ -43,12 +38,14 @@ void MQTTBroker::stop()
 
 void MQTTBroker::setupHandlers()
 {
-    m_server->set_error_handler(
-        [this](MQTT_NS::error_code code) { onError(code); });
+    m_server->set_error_handler([this](MQTT_NS::error_code code) { onError(code); });
     m_server->set_accept_handler([this](MQTTSlavePtr slave) { onAccept(slave); });
 }
 
-void MQTTBroker::onError(MQTT_NS::error_code c) { LOG_ERROR << c.message(); }
+void MQTTBroker::onError(MQTT_NS::error_code c)
+{
+    LOG_ERROR << c.message();
+}
 
 void MQTTBroker::onAccept(MQTTSlavePtr slavePtr)
 {
@@ -180,11 +177,9 @@ void MQTTBroker::disconnectSlave(MQTTSlavePtr slave)
     idx.erase(r.first, r.second);
 }
 
-void MQTTBroker::onNewMessage(MQTTSlavePtr sender, const std::string& topic,
-    const std::vector<uint8_t>& data) { }
+void MQTTBroker::onNewMessage(MQTTSlavePtr sender, const std::string& topic, const std::vector<uint8_t>& data) {}
 
-void MQTTBroker::sendMessage(const std::string& topic,
-    const std::vector<uint8_t>& data)
+void MQTTBroker::sendMessage(const std::string& topic, const std::vector<uint8_t>& data)
 {
     auto const& idx = m_subscriptions.get<tag_topic>();
     std::string b64 = aquabox::utils::base64_encode<std::string>(data.data(), data.size());

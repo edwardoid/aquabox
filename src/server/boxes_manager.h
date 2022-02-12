@@ -23,17 +23,19 @@
 #include <mutex>
 #include <unordered_map>
 
-namespace aquabox {
-class BoxesManager {
-public:
-    static std::shared_ptr<class Box> get(const std::string& id, bool createIfNotExists = false);
-    static bool eraseIfNeed(std::string id);
+namespace aquabox
+{
+    class BoxesManager
+    {
+    public:
+        static std::shared_ptr<class Box> get(const std::string& id, bool createIfNotExists = false);
+        static bool eraseIfNeed(std::string id);
 
-private:
-    static BoxesManager self;
+    private:
+        static BoxesManager self;
 
-    ResultsMap<Command> m_results;
-    std::unordered_map<std::string, std::shared_ptr<class Box>> m_connections;
-    std::mutex m_mx;
-};
-}
+        ResultsMap<Command> m_results;
+        std::unordered_map<std::string, std::shared_ptr<class Box>> m_connections;
+        std::mutex m_mx;
+    };
+} // namespace aquabox

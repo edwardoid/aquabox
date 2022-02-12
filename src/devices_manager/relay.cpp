@@ -22,7 +22,7 @@
 
 using namespace aquabox;
 
-Relay::Relay() { }
+Relay::Relay() {}
 
 nlohmann::json Relay::value(std::string property) const
 {
@@ -39,7 +39,8 @@ bool Relay::setValue(std::string property, const nlohmann::json& value)
         if (value.is_number()) {
             if (value == 0) {
                 turnOff();
-            } else if (value == 1) {
+            }
+            else if (value == 1) {
                 turnOn();
             }
             return true;
@@ -116,7 +117,7 @@ void Relay::turnOff()
 
 void Relay::addPendingAction(uint64_t priority, ValueChange action)
 {
-    m_pendingActions.insert({ priority, action });
+    m_pendingActions.insert({priority, action});
 }
 
 bool Relay::performPendingAction(ValueChange& action)
@@ -132,7 +133,8 @@ bool Relay::performPendingAction(ValueChange& action)
     actionToPerform.value = 1;
     if (lb == m_pendingActions.begin()) {
         actionToPerform = m_pendingActions.rbegin()->second;
-    } else {
+    }
+    else {
         if (lb->first != 0) {
             --lb;
         }
@@ -147,7 +149,8 @@ bool Relay::performPendingAction(ValueChange& action)
 
     if (actionToPerform.value == 1) {
         turnOn();
-    } else {
+    }
+    else {
         turnOff();
     }
 

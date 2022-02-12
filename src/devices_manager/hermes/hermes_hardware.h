@@ -22,31 +22,33 @@
 #include "hermes_master.h"
 #include <memory>
 
-namespace aquabox {
-class HermesHardware : public virtual Hardware, public virtual OnOff, public virtual IntegerDevice {
-public:
-    HermesHardware(std::shared_ptr<HermesMaster> impl);
-    std::shared_ptr<HermesMaster> master() const { return m_impl; };
-    void setMaster(std::shared_ptr<HermesMaster> impl) { m_impl = impl; };
+namespace aquabox
+{
+    class HermesHardware : public virtual Hardware, public virtual OnOff, public virtual IntegerDevice
+    {
+    public:
+        HermesHardware(std::shared_ptr<HermesMaster> impl);
+        std::shared_ptr<HermesMaster> master() const { return m_impl; };
+        void setMaster(std::shared_ptr<HermesMaster> impl) { m_impl = impl; };
 
-    // Hardware
-    virtual bool isReady() override;
-    virtual bool open(int flags) override { return true; }
-    virtual bool close() override { return true; }
+        // Hardware
+        virtual bool isReady() override;
+        virtual bool open(int flags) override { return true; }
+        virtual bool close() override { return true; }
 
-    // OnOff
-    virtual void setOn() override;
-    virtual void setOff() override;
-    virtual bool isOn() override;
+        // OnOff
+        virtual void setOn() override;
+        virtual void setOff() override;
+        virtual bool isOn() override;
 
-    // IntegerDevice
-    virtual bool set(int32_t type) override;
-    virtual int32_t get() override;
+        // IntegerDevice
+        virtual bool set(int32_t type) override;
+        virtual int32_t get() override;
 
-    bool call(const std::string& method);
-    bool callInProgress(const std::string& method);
+        bool call(const std::string& method);
+        bool callInProgress(const std::string& method);
 
-private:
-    mutable std::shared_ptr<HermesMaster> m_impl;
-};
-}
+    private:
+        mutable std::shared_ptr<HermesMaster> m_impl;
+    };
+} // namespace aquabox

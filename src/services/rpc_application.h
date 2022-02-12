@@ -18,21 +18,22 @@
 
 #pragma once
 
-#include <grpcpp/server_builder.h>
-#include <services/application.h>
-#include <micro_clients/settings.h>
 #include <common/log.h>
 #include <common/singleton.h>
+#include <grpcpp/server_builder.h>
 #include <memory>
+#include <micro_clients/settings.h>
+#include <services/application.h>
 
 namespace aquabox
 {
     template<typename Implementation>
-    class RPCApplication: public Application
+    class RPCApplication : public Application
     {
     public:
         RPCApplication(const std::string& identifier)
-            : Application(identifier) {}
+            : Application(identifier)
+        {}
         virtual int start() override
         {
             m_impl = std::make_unique<Implementation>();
@@ -43,7 +44,8 @@ namespace aquabox
                 server_address += std::to_string(Singleton<ISettings>::i()->port(Implementation::service_full_name(), true));
             }
 
-            const std::string severity = Singleton<ISettings>::i()->get(Settings::Keys::LOG_LEVEL, std::string(plog::severityToString(plog::Severity::info)));
+            const std::string severity = Singleton<ISettings>::i()->get(Settings::Keys::LOG_LEVEL,
+                                                                        std::string(plog::severityToString(plog::Severity::info)));
             plog::get()->setMaxSeverity(plog::severityFromString(severity.c_str()));
 
             grpc::ServerBuilder builder;
@@ -54,7 +56,8 @@ namespace aquabox
             server->Wait();
             return 0;
         }
+
     protected:
         std::unique_ptr<Implementation> m_impl;
     };
-}
+} // namespace aquabox

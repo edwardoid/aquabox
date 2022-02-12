@@ -18,8 +18,10 @@
 
 #pragma once
 
-namespace aquabox {
-struct Options {
-    static bool AccessPoint;
-};
-}
+namespace aquabox
+{
+    struct Options
+    {
+        static bool AccessPoint;
+    };
+} // namespace aquabox

@@ -18,8 +18,8 @@
 
 #include "global_timer.h"
 #include "cloud.h"
-#include <common/log.h>
 #include "options.h"
+#include <common/log.h>
 #include <common/singleton.h>
 
 using namespace aquabox;
@@ -34,8 +34,10 @@ GlobalTimer::GlobalTimer()
                 cloud->heartheat();
             }
         },
-        std::chrono::duration_cast<std::chrono::milliseconds>(
-            std::chrono::seconds(1)));
+        std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::seconds(1)));
 }
 
-void GlobalTimer::waitToFinish() { wait(); }
+void GlobalTimer::waitToFinish()
+{
+    wait();
+}

@@ -22,14 +22,22 @@ using namespace aquabox;
 
 OneWireDevice::OneWireDevice(const w1::Device& dev)
     : m_dev(dev)
+{}
+
+bool OneWireDevice::isReady()
 {
+    return true;
 }
 
-bool OneWireDevice::isReady() { return true; }
+bool OneWireDevice::open(int)
+{
+    return true;
+}
 
-bool OneWireDevice::open(int) { return true; }
-
-bool OneWireDevice::close() { return true; }
+bool OneWireDevice::close()
+{
+    return true;
+}
 
 bool OneWireDevice::set(double precision)
 {
@@ -38,4 +46,7 @@ bool OneWireDevice::set(double precision)
     return true;
 }
 
-double OneWireDevice::get() { return m_dev.temperature(); }
+double OneWireDevice::get()
+{
+    return m_dev.temperature();
+}

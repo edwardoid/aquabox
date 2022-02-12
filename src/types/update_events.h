@@ -21,36 +21,42 @@
 #include <types/event.h>
 #include <types/types.h>
 
-namespace aquabox {
+namespace aquabox
+{
+    class RuleEnableChangedEvent : public Event
+    {
+    public:
+        RuleEnableChangedEvent(std::shared_ptr<class Rule> rule);
+    };
 
-class RuleEnableChangedEvent : public Event {
-public:
-    RuleEnableChangedEvent(std::shared_ptr<class Rule> rule);
-};
+    class RuleDeletedEvent : public Event
+    {
+    public:
+        RuleDeletedEvent(const class Rule& rule);
+    };
 
-class RuleDeletedEvent : public Event {
-public:
-    RuleDeletedEvent(const class Rule& rule);
-};
+    class RuleCreatedEvent : public Event
+    {
+    public:
+        RuleCreatedEvent(const class Rule& rule);
+    };
 
-class RuleCreatedEvent : public Event {
-public:
-    RuleCreatedEvent(const class Rule& rule);
-};
+    class RuleUpdatedEvent : public Event
+    {
+    public:
+        RuleUpdatedEvent(const class Rule& rule, const nlohmann::json& before);
+    };
 
-class RuleUpdatedEvent : public Event {
-public:
-    RuleUpdatedEvent(const class Rule& rule, const nlohmann::json& before);
-};
+    class TemporaryRuleRemainEvent : public Event
+    {
+    public:
+        TemporaryRuleRemainEvent(const class Rule& rule);
+    };
 
-class TemporaryRuleRemainEvent : public Event {
-public:
-    TemporaryRuleRemainEvent(const class Rule& rule);
-};
+    class DeviceRulesChangedEvent : public Event
+    {
+    public:
+        DeviceRulesChangedEvent(const DeviceRef& device);
+    };
 
-class DeviceRulesChangedEvent : public Event {
-public:
-    DeviceRulesChangedEvent(const DeviceRef& device);
-};
-
-}
+} // namespace aquabox

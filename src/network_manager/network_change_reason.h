@@ -18,11 +18,13 @@
 
 #pragma once
 
-namespace aquabox {
-enum class NetworkChangeReason : int {
-    NothingSpecial = 0,
-    Reconnect,
-    SwitchNework,
-    Unknown
-};
+namespace aquabox
+{
+    enum class NetworkChangeReason : int
+    {
+        NothingSpecial = 0,
+        Reconnect,
+        SwitchNework,
+        Unknown
+    };
 }

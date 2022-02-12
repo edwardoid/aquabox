@@ -27,8 +27,10 @@
 using namespace aquabox::v1;
 using namespace aquabox;
 
-Command createCommand(Operation operation, Web::Request request, bool body,
-    std::unordered_map<std::string, std::string> params = std::unordered_map<std::string, std::string>())
+Command createCommand(Operation operation,
+                      Web::Request request,
+                      bool body,
+                      std::unordered_map<std::string, std::string> params = std::unordered_map<std::string, std::string>())
 {
     static std::atomic_int seqNum;
     Command command;
@@ -42,8 +44,9 @@ Command createCommand(Operation operation, Web::Request request, bool body,
     if (body) {
         try {
             command.setRequest(nlohmann::json::parse(request->content.string()));
-        } catch (...) {
-            LOG_ERROR << "Can't set request data for operation " << (int)operation;
+        }
+        catch (...) {
+            LOG_ERROR << "Can't set request data for operation " << (int) operation;
         }
     }
     return command;
@@ -52,20 +55,18 @@ Command createCommand(Operation operation, Web::Request request, bool body,
 void execCommand(Command& cmd, Web::Response response, Web::Headers headers)
 {
     if (!cmd.hasParameter("boxId")) {
-        response->write(SimpleWeb::StatusCode::client_error_bad_request,
-            "Missed BoxId");
+        response->write(SimpleWeb::StatusCode::client_error_bad_request, "Missed BoxId");
         return;
     }
 
     auto box = BoxesManager::get(cmd.getParameter("boxId"), true);
     if (box == nullptr) {
-        response->write(SimpleWeb::StatusCode::client_error_not_found,
-            "Specified box is not available");
+        response->write(SimpleWeb::StatusCode::client_error_not_found, "Specified box is not available");
         return;
     }
 
     if (box->empty()) {
-        response->write(nlohmann::json({ { "online", false } }).dump());
+        response->write(nlohmann::json({{"online", false}}).dump());
         return;
     }
 
@@ -100,13 +101,13 @@ void execCommand(Command& cmd, Web::Response response, Web::Headers headers)
 
     if (cmd.response().is_null()) {
         response->write(code, headers);
-    } else {
+    }
+    else {
         response->write(code, cmd.response().dump(4), headers);
     }
 }
 
-bool REST::IsAuthorized(const Route& route, Request& request,
-    Response& response, Web::Headers& headers)
+bool REST::IsAuthorized(const Route& route, Request& request, Response& response, Web::Headers& headers)
 {
     auto params = route.extract(request->path);
     auto appId = params.find(":appId");
@@ -117,124 +118,100 @@ bool REST::IsAuthorized(const Route& route, Request& request,
     return false;
 }
 
-void REST::Status(const Route& route, Web::Request& request,
-    Web::Response& response, Web::Headers& headers)
+void REST::Status(const Route& route, Web::Request& request, Web::Response& response, Web::Headers& headers)
 {
     auto cmd = createCommand(Operation::GetStatus, request, false);
     execCommand(cmd, response, headers);
 }
 
-void REST::Devices(const Route& route, Web::Request& request,
-    Web::Response& response, Web::Headers& headers)
+void REST::Devices(const Route& route, Web::Request& request, Web::Response& response, Web::Headers& headers)
 {
     auto cmd = createCommand(Operation::GetDevices, request, false);
     execCommand(cmd, response, headers);
 }
 
-void REST::GetDevice(const Route& route, Web::Request& request,
-    Web::Response& response, Web::Headers& headers)
+void REST::GetDevice(const Route& route, Web::Request& request, Web::Response& response, Web::Headers& headers)
 {
-    auto cmd = createCommand(Operation::GetDevice, request, false,
-        route.extract(request->path));
+    auto cmd = createCommand(Operation::GetDevice, request, false, route.extract(request->path));
     execCommand(cmd, response, headers);
 }
 
-void REST::UpdateDevice(const Route& route, Web::Request& request,
-    Web::Response& response, Web::Headers& headers)
+void REST::UpdateDevice(const Route& route, Web::Request& request, Web::Response& response, Web::Headers& headers)
 {
-    auto cmd = createCommand(Operation::UpdateDevice, request, true,
-        route.extract(request->path));
+    auto cmd = createCommand(Operation::UpdateDevice, request, true, route.extract(request->path));
     execCommand(cmd, response, headers);
 }
 
-void REST::Rules(const Route& route, Web::Request& request,
-    Web::Response& response, Web::Headers& headers)
+void REST::Rules(const Route& route, Web::Request& request, Web::Response& response, Web::Headers& headers)
 {
     auto cmd = createCommand(Operation::GetRules, request, false);
     execCommand(cmd, response, headers);
 }
 
-void REST::GetRule(const Route& route, Web::Request& request,
-    Web::Response& response, Web::Headers& headers)
+void REST::GetRule(const Route& route, Web::Request& request, Web::Response& response, Web::Headers& headers)
 {
-    auto cmd = createCommand(Operation::GetRules, request, false,
-        route.extract(request->path));
+    auto cmd = createCommand(Operation::GetRules, request, false, route.extract(request->path));
     execCommand(cmd, response, headers);
 }
 
-void REST::CreateRule(const Route& route, Web::Request& request,
-    Web::Response& response, Web::Headers& headers)
+void REST::CreateRule(const Route& route, Web::Request& request, Web::Response& response, Web::Headers& headers)
 {
-    auto cmd = createCommand(request->method == "PUT" ? Operation::CreateRule
-                                                      : Operation::UpdateRule,
-        request, true, route.extract(request->path));
+    auto cmd = createCommand(request->method == "PUT" ? Operation::CreateRule : Operation::UpdateRule,
+                             request,
+                             true,
+                             route.extract(request->path));
     execCommand(cmd, response, headers);
 }
 
-void REST::DeleteRule(const Route& route, Web::Request& request,
-    Web::Response& response, Web::Headers& headers)
+void REST::DeleteRule(const Route& route, Web::Request& request, Web::Response& response, Web::Headers& headers)
 {
-    auto cmd = createCommand(Operation::DeleteRule, request, false,
-        route.extract(request->path));
+    auto cmd = createCommand(Operation::DeleteRule, request, false, route.extract(request->path));
     execCommand(cmd, response, headers);
 }
 
-void REST::DeviceRules(const Route& route, Web::Request& request,
-    Web::Response& response, Web::Headers& headers)
+void REST::DeviceRules(const Route& route, Web::Request& request, Web::Response& response, Web::Headers& headers)
 {
-    auto cmd = createCommand(Operation::DeviceRules, request, false,
-        route.extract(request->path));
+    auto cmd = createCommand(Operation::DeviceRules, request, false, route.extract(request->path));
     execCommand(cmd, response, headers);
 }
 
-void REST::SupportedRepeatTimeouts(const Route& route, Web::Request& request,
-    Web::Response& response,
-    Web::Headers& headers)
+void REST::SupportedRepeatTimeouts(const Route& route, Web::Request& request, Web::Response& response, Web::Headers& headers)
 {
     auto cmd = createCommand(Operation::SupportedRepeatTimeouts, request, false);
     execCommand(cmd, response, headers);
 }
 
-void REST::SetValue(const Route& route, Web::Request& request,
-    Web::Response& response, Web::Headers& headers)
+void REST::SetValue(const Route& route, Web::Request& request, Web::Response& response, Web::Headers& headers)
 {
-    auto cmd = createCommand(Operation::Set, request, true,
-        route.extract(request->path));
+    auto cmd = createCommand(Operation::Set, request, true, route.extract(request->path));
     execCommand(cmd, response, headers);
 }
 
-void REST::Call(const Route& route, Web::Request& request,
-    Web::Response& response, Web::Headers& headers)
+void REST::Call(const Route& route, Web::Request& request, Web::Response& response, Web::Headers& headers)
 {
-    auto cmd = createCommand(Operation::Call, request, true,
-        route.extract(request->path));
+    auto cmd = createCommand(Operation::Call, request, true, route.extract(request->path));
     execCommand(cmd, response, headers);
 }
 
-void REST::GetHistory(const Route& route, Web::Request& request,
-    Web::Response& response, Web::Headers& headers)
+void REST::GetHistory(const Route& route, Web::Request& request, Web::Response& response, Web::Headers& headers)
 {
-    auto cmd = createCommand(Operation::Call, request, true,
-        route.extract(request->path));
+    auto cmd = createCommand(Operation::Call, request, true, route.extract(request->path));
     execCommand(cmd, response, headers);
 }
 
-void REST::ScanWiFiNetworks(const Route& route, Web::Request& request,
-    Web::Response& response, Web::Headers& headers)
+void REST::ScanWiFiNetworks(const Route& route, Web::Request& request, Web::Response& response, Web::Headers& headers)
 {
     auto cmd = createCommand(Operation::ScanWiFiNetworks, request, false);
     execCommand(cmd, response, headers);
 }
 
-void REST::ListNetworks(const Route& route, Web::Request& request,
-    Web::Response& response, Web::Headers& headers)
+void REST::ListNetworks(const Route& route, Web::Request& request, Web::Response& response, Web::Headers& headers)
 {
     auto cmd = createCommand(Operation::WiFiNetworks, request, false);
     execCommand(cmd, response, headers);
 }
 
-void REST::ConnectToWiFi(const Route& route, Web::Request& request,
-    Web::Response& response, Web::Headers& headers)
+void REST::ConnectToWiFi(const Route& route, Web::Request& request, Web::Response& response, Web::Headers& headers)
 {
     Command cmd = createCommand(Operation::ConnectToWiFi, request, true);
     execCommand(cmd, response, headers);

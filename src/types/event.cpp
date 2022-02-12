@@ -20,7 +20,10 @@
 
 using namespace aquabox;
 
-Event::Event() { m_properties = nlohmann::json({}); }
+Event::Event()
+{
+    m_properties = nlohmann::json({});
+}
 
 void Event::setSender(std::string sender, std::string _class)
 {
@@ -44,8 +47,5 @@ void Event::setPropertiesUpdate(const nlohmann::json& update)
 
 nlohmann::json Event::serialize() const
 {
-    return nlohmann::json({ { "sender", m_sender },
-        { "class", m_class },
-        { "data", m_data },
-        { "props", m_properties } });
+    return nlohmann::json({{"sender", m_sender}, {"class", m_class}, {"data", m_data}, {"props", m_properties}});
 }

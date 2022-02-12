@@ -18,59 +18,61 @@
 
 #pragma once
 
+#include <boost/asio/thread_pool.hpp>
 #include <common/lockablemap.h>
 #include <common/log.h>
 #include <common/performance_metrics.h>
-#include <types/serial.h>
-#include <boost/asio/thread_pool.hpp>
-#include <memory>
 #include <common/singleton.h>
+#include <memory>
 #include <services/application.h>
+#include <types/serial.h>
 
 #define LOG_FILE_SIZE_IN_MB 10
 #define BYTES_IN_MB 1000000
 #define MAX_LOG_FILES 50
 
-namespace aquabox {
-class Device;
-class Rule;
-class User;
-class Event;
-class WebServer;
-class Timer;
-class RulesTimer;
-class ThreadPool;
-class GlobalTimer;
+namespace aquabox
+{
+    class Device;
+    class Rule;
+    class User;
+    class Event;
+    class WebServer;
+    class Timer;
+    class RulesTimer;
+    class ThreadPool;
+    class GlobalTimer;
 
-using UsersMap = LockableHashMap<std::string, std::shared_ptr<User>>;
+    using UsersMap = LockableHashMap<std::string, std::shared_ptr<User>>;
 
-class AquaBox: public Application {
-protected:
-    AquaBox(const AquaBox&) = delete;
-    AquaBox(AquaBox&&) = delete;
-    AquaBox& operator=(const AquaBox&) = delete;
-    AquaBox();
-    friend class Singleton<AquaBox>;
+    class AquaBox : public Application
+    {
+    protected:
+        AquaBox(const AquaBox&) = delete;
+        AquaBox(AquaBox&&) = delete;
+        AquaBox& operator=(const AquaBox&) = delete;
+        AquaBox();
+        friend class Singleton<AquaBox>;
 
-public:
-    int start();
-    ~AquaBox();
-    UsersMap& users() const;
-    void doLater(const std::string& name, std::function<void(void)>&& task);
-    void postUpdate(std::shared_ptr<Event> event);
-    bool assistantIsConnected() const { return false; }
-    double systemTemperature() const;
-    std::string configurationData() const;
+    public:
+        int start();
+        ~AquaBox();
+        UsersMap& users() const;
+        void doLater(const std::string& name, std::function<void(void)>&& task);
+        void postUpdate(std::shared_ptr<Event> event);
+        bool assistantIsConnected() const { return false; }
+        double systemTemperature() const;
+        std::string configurationData() const;
 
-private:
-    void onCurrentNetworkChanged(const class CurrentNetworkState& state);
+    private:
+        void onCurrentNetworkChanged(const class CurrentNetworkState& state);
 
-private:
-    PerformanceMetrics m_perfomance;
-    boost::asio::thread_pool m_pool;
-    plog::ColorConsoleAppender<plog::TxtFormatter> m_consoleAppender;
-    mutable UsersMap m_users;
-    WebServer* m_server;
-    std::unique_ptr<GlobalTimer> m_globalTimer;
-};
-}
+    private:
+        PerformanceMetrics m_perfomance;
+        boost::asio::thread_pool m_pool;
+        plog::ColorConsoleAppender<plog::TxtFormatter> m_consoleAppender;
+        mutable UsersMap m_users;
+        WebServer* m_server;
+        std::unique_ptr<GlobalTimer> m_globalTimer;
+    };
+} // namespace aquabox

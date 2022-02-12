@@ -19,38 +19,40 @@
 #pragma once
 
 #include "cloud_stream.h"
-#include <common/lockablemap.h>
 #include <atomic>
 #include <client_http.hpp>
+#include <common/lockablemap.h>
+#include <common/timeout.h>
 #include <memory>
 #include <s2s_property.h>
-#include <common/timeout.h>
 #include <unordered_map>
 
 using WsClient = SimpleWeb::SocketClient<SimpleWeb::WS>;
 using HttpClient = SimpleWeb::Client<SimpleWeb::HTTP>;
 
-namespace aquabox {
-class Cloud {
-public:
-    Cloud();
-    void connect();
-    void disconnect();
+namespace aquabox
+{
+    class Cloud
+    {
+    public:
+        Cloud();
+        void connect();
+        void disconnect();
 
-    SignalSlot::Property<bool> isRegistered;
-    bool checkIfRegistered();
-    void doRegister();
-    void heartheat();
-    void postUpdate(std::shared_ptr<class Event> event);
-    std::shared_ptr<CloudStream> stream(std::string name);
+        SignalSlot::Property<bool> isRegistered;
+        bool checkIfRegistered();
+        void doRegister();
+        void heartheat();
+        void postUpdate(std::shared_ptr<class Event> event);
+        std::shared_ptr<CloudStream> stream(std::string name);
 
-private:
-    bool requestStreams();
-    bool isConnected();
+    private:
+        bool requestStreams();
+        bool isConnected();
 
-private:
-    std::atomic_bool m_working;
-    LockableHashMap<std::string, std::shared_ptr<CloudStream>> m_streams;
-    Timeout m_updateTimeout;
-};
-}
+    private:
+        std::atomic_bool m_working;
+        LockableHashMap<std::string, std::shared_ptr<CloudStream>> m_streams;
+        Timeout m_updateTimeout;
+    };
+} // namespace aquabox

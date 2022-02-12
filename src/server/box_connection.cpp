@@ -5,14 +5,15 @@
 
 using namespace aquabox;
 
-BoxConnection::BoxConnection(const std::string& id,
-    ResultsMap<Command>& resutsMap)
+BoxConnection::BoxConnection(const std::string& id, ResultsMap<Command>& resutsMap)
     : results(resutsMap)
     , m_id(id)
-{
-}
+{}
 
-const std::string& BoxConnection::id() const { return m_id; }
+const std::string& BoxConnection::id() const
+{
+    return m_id;
+}
 
 void BoxConnection::ready(const std::string& body)
 {
@@ -21,9 +22,10 @@ void BoxConnection::ready(const std::string& body)
     try {
         nlohmann::json data = nlohmann::json::parse(body);
         cmd.fromJSON(data);
-    } catch (nlohmann::json::parse_error ex) {
-
-    } catch (...) {
+    }
+    catch (nlohmann::json::parse_error ex) {
+    }
+    catch (...) {
     }
     results.ready(cmd.seqNum(), cmd);
 }
@@ -36,8 +38,7 @@ void BoxConnection::runCommand(Command& cmd)
     }
     nlohmann::json response = cmd.responseJson();
 
-    LOG_DEBUG << "Executing command\n"
-              << response.dump();
+    LOG_DEBUG << "Executing command\n" << response.dump();
 
     commands->send(response.dump());
 

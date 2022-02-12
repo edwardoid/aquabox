@@ -21,10 +21,11 @@
 #include <stdint.h>
 #include <string>
 
-namespace aquabox {
-
-class ICloud {
-public:
-    virtual bool connected() = 0;
-};
-}
+namespace aquabox
+{
+    class ICloud
+    {
+    public:
+        virtual bool connected() = 0;
+    };
+} // namespace aquabox

@@ -17,13 +17,13 @@
  */
 
 #include "network_change_screen.h"
-#include <framebuffer.h>
-#include <libfb_globals.h>
 #include <common/log.h>
 #include <common/singleton.h>
+#include <framebuffer.h>
+#include <libfb_globals.h>
 #include <micro_clients/events.h>
-#include <micro_clients/settings.h>
 #include <micro_clients/network_manager.h>
+#include <micro_clients/settings.h>
 
 using namespace aquabox;
 
@@ -96,7 +96,8 @@ void NetworkChangeScreen::updateState(NetworkState state)
         if (m_lastState != NetworkState::Disconnected || m_text.text().empty()) {
             text = "Disconnected";
             m_stageIcon = 0;
-        } else {
+        }
+        else {
             m_stageIcon = 1;
         }
         m_lastState = state;

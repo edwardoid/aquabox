@@ -18,19 +18,20 @@
 
 #include "devices_manager.h"
 
+#include "micro_service.h"
+#include "services.h"
 #include <devices.grpc.pb.h>
 #include <rpc/converters.h>
 #include <services/service_identifier.h>
 #include <services/settings.h>
-#include "micro_service.h"
-#include "services.h"
 
 using namespace aquabox;
 
-class DevicesManagerImpl : public IDevicesManager {
+class DevicesManagerImpl : public IDevicesManager
+{
 public:
     DevicesManagerImpl();
-    virtual ~DevicesManagerImpl() { }
+    virtual ~DevicesManagerImpl() {}
     virtual DeviceRef get(const std::string& id) override;
     virtual bool has(const std::string& id) override;
     virtual bool update(const DeviceRef& revice) override;
@@ -41,25 +42,23 @@ public:
     virtual nlohmann::json value(const std::string& id, const std::string& property) override;
 };
 
-template <>
+template<>
 IDevicesManager* Singleton<IDevicesManager>::create()
 {
     return new DevicesManagerImpl();
 }
 
-namespace {
-services::MicroService<services::DevicesService>& client()
+namespace
 {
-    static services::MicroService<services::DevicesService> c(
-        Singleton<ISettings>::i()->port(
-            services::DevicesService::service_full_name()));
-    return c;
-}
+    services::MicroService<services::DevicesService>& client()
+    {
+        static services::MicroService<services::DevicesService> c(
+            Singleton<ISettings>::i()->port(services::DevicesService::service_full_name()));
+        return c;
+    }
 } // namespace
 
-
-
-DevicesManagerImpl::DevicesManagerImpl() { }
+DevicesManagerImpl::DevicesManagerImpl() {}
 
 DeviceRef DevicesManagerImpl::get(const std::string& id)
 {
@@ -91,9 +90,7 @@ bool DevicesManagerImpl::update(const DeviceRef& device)
 {
     google::protobuf::BoolValue res;
     services::DeviceData data = static_cast<DeviceRef>(device);
-    if (client()
-            .call(&services::DevicesService::Stub::Update, data, &res)
-            .ok()) {
+    if (client().call(&services::DevicesService::Stub::Update, data, &res).ok()) {
         return true;
     }
 
@@ -106,8 +103,7 @@ std::vector<DeviceRef> DevicesManagerImpl::all()
     auto c = client();
     std::vector<DeviceRef> res;
     google::protobuf::Empty e;
-    std::unique_ptr<grpc::ClientReader<services::DeviceData>> reader(
-        c->GetAll(&cxt, e));
+    std::unique_ptr<grpc::ClientReader<services::DeviceData>> reader(c->GetAll(&cxt, e));
     services::DeviceData data;
     while (reader->Read(&data)) {
         res.push_back(static_cast<DeviceRef>(data));
@@ -128,9 +124,7 @@ bool DevicesManagerImpl::set(const std::string& id, const std::string& property,
     req.set_deviceid(id);
     req.set_property(property);
     req.set_value(value.get<double>());
-    if (client()
-            .call(&services::DevicesService::Stub::Set, req, &res)
-            .ok()) {
+    if (client().call(&services::DevicesService::Stub::Set, req, &res).ok()) {
         return true;
     }
 
@@ -144,8 +138,7 @@ std::vector<std::string> DevicesManagerImpl::properties(const std::string& id)
     std::vector<std::string> res;
     google::protobuf::StringValue req;
     req.set_value(id);
-    std::unique_ptr<grpc::ClientReader<google::protobuf::StringValue>> reader(
-        c->FetchProperties(&cxt, req));
+    std::unique_ptr<grpc::ClientReader<google::protobuf::StringValue>> reader(c->FetchProperties(&cxt, req));
     google::protobuf::StringValue data;
     while (reader->Read(&data)) {
         res.push_back(data.value());
@@ -160,9 +153,7 @@ nlohmann::json DevicesManagerImpl::value(const std::string& id, const std::strin
     ::aquabox::services::GetPropertyValueRequest req;
     req.set_deviceid(id);
     req.set_property(property);
-    if (client()
-            .call(&services::DevicesService::Stub::PropertyValue, req, &res)
-            .ok()) {
+    if (client().call(&services::DevicesService::Stub::PropertyValue, req, &res).ok()) {
         return nlohmann::json(res.value());
     }
 

@@ -20,31 +20,36 @@
 
 #include <types/box_event.h>
 
-namespace aquabox {
-class DeviceAddedEvent : public BoxEvent {
-public:
-    DeviceAddedEvent(std::shared_ptr<class Device> device);
-};
+namespace aquabox
+{
+    class DeviceAddedEvent : public BoxEvent
+    {
+    public:
+        DeviceAddedEvent(std::shared_ptr<class Device> device);
+    };
 
-class DeviceDeletedEvent : public BoxEvent {
-public:
-    DeviceDeletedEvent(std::shared_ptr<class Device> device);
-};
+    class DeviceDeletedEvent : public BoxEvent
+    {
+    public:
+        DeviceDeletedEvent(std::shared_ptr<class Device> device);
+    };
 
+    class DeviceUpdatedEvent : public Event
+    {
+    public:
+        DeviceUpdatedEvent(std::shared_ptr<class Device> device, const nlohmann::json& before);
+    };
 
-class DeviceUpdatedEvent : public Event {
-public:
-    DeviceUpdatedEvent(std::shared_ptr<class Device> device, const nlohmann::json& before);
-};
+    class DevicePropertyUpdateEvent : public Event
+    {
+    public:
+        DevicePropertyUpdateEvent(std::shared_ptr<class Device> device, const nlohmann::json& updates);
+    };
 
-class DevicePropertyUpdateEvent : public Event {
-public:
-    DevicePropertyUpdateEvent(std::shared_ptr<class Device> device, const nlohmann::json& updates);
-};
+    class ValueChangedEvent : public Event
+    {
+    public:
+        ValueChangedEvent(std::shared_ptr<class Device> device, std::string property, const nlohmann::json& value, std::string reason);
+    };
 
-class ValueChangedEvent : public Event {
-public:
-    ValueChangedEvent(std::shared_ptr<class Device> device, std::string property, const nlohmann::json& value, std::string reason);
-};
-
-}
+} // namespace aquabox

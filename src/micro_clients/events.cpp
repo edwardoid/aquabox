@@ -17,62 +17,63 @@
  */
 
 #include "events.h"
-#include <memory>
-#include <sstream>
-#include <unordered_map>
-#include <events.grpc.pb.h>
-#include <grpcpp/server_builder.h>
-#include <thread>
-#include <services/application.h>
 #include "micro_service.h"
 #include "settings.h"
+#include <events.grpc.pb.h>
+#include <grpcpp/server_builder.h>
+#include <memory>
+#include <services/application.h>
+#include <sstream>
+#include <thread>
+#include <unordered_map>
 
 using namespace aquabox;
 
-
-namespace {
-services::MicroService<services::EventsBus>& client()
+namespace
 {
-    static services::MicroService<services::EventsBus> c(
-        Singleton<ISettings>::i()->port(
-            services::EventsBus::service_full_name()));
-    return c;
-}
+    services::MicroService<services::EventsBus>& client()
+    {
+        static services::MicroService<services::EventsBus> c(Singleton<ISettings>::i()->port(services::EventsBus::service_full_name()));
+        return c;
+    }
 
-std::string identifier()
-{
-    std::stringstream ss;
-    ss << Application::app()->identifier() << "@" << services::EventsBus::service_full_name();
-    return ss.str();
-}
+    std::string identifier()
+    {
+        std::stringstream ss;
+        ss << Application::app()->identifier() << "@" << services::EventsBus::service_full_name();
+        return ss.str();
+    }
 
-std::uint32_t port()
-{
-    return Singleton<ISettings>::i()->port(identifier());
-}
+    std::uint32_t port() { return Singleton<ISettings>::i()->port(identifier()); }
 
-std::string address()
-{
-    static const std::string server_address("0.0.0.0:");
-    return server_address + std::to_string(Singleton<ISettings>::i()->port(identifier(), true));
-}
+    std::string address()
+    {
+        static const std::string server_address("0.0.0.0:");
+        return server_address + std::to_string(Singleton<ISettings>::i()->port(identifier(), true));
+    }
 
 } // namespace
 
-class EventsBaseImpl: public IEvents
+class EventsBaseImpl : public IEvents
 {
 public:
     EventsBaseImpl();
-    virtual void subscribe(const std::string& sender, std::function<void (const std::shared_ptr<Event>)>&& handler) override;
+    virtual void subscribe(const std::string& sender, std::function<void(const std::shared_ptr<Event>)>&& handler) override;
     virtual void notify(const std::shared_ptr<const Event> event) override;
+
 private:
-    class ConsumerService final : public services::EventConsumer::Service {
+    class ConsumerService final : public services::EventConsumer::Service
+    {
     public:
-        ConsumerService()
-        { }
-        virtual ~ConsumerService() { }
-        void add(std::string service, std::function<void (const std::shared_ptr<Event>)> callback) { m_callbacks.insert({service, callback}); }
-        virtual ::grpc::Status On(::grpc::ServerContext* context, const services::EventData* request, ::google::protobuf::Empty* response) override
+        ConsumerService() {}
+        virtual ~ConsumerService() {}
+        void add(std::string service, std::function<void(const std::shared_ptr<Event>)> callback)
+        {
+            m_callbacks.insert({service, callback});
+        }
+        virtual ::grpc::Status On(::grpc::ServerContext* context,
+                                  const services::EventData* request,
+                                  ::google::protobuf::Empty* response) override
         {
             auto handlers = m_callbacks.equal_range(request->sender());
             std::shared_ptr<Event> e = std::make_shared<Event>();
@@ -89,12 +90,13 @@ private:
         }
 
     private:
-        std::unordered_multimap<std::string, std::function<void (const std::shared_ptr<Event>)>> m_callbacks;
+        std::unordered_multimap<std::string, std::function<void(const std::shared_ptr<Event>)>> m_callbacks;
     };
+
 private:
     std::thread m_consumer;
     ConsumerService m_service;
-    std::unordered_map<std::string, std::function<void (const std::shared_ptr<Event>)>> m_handlers;
+    std::unordered_map<std::string, std::function<void(const std::shared_ptr<Event>)>> m_handlers;
 };
 
 EventsBaseImpl::EventsBaseImpl()
@@ -108,7 +110,7 @@ EventsBaseImpl::EventsBaseImpl()
     });
 }
 
-void EventsBaseImpl::subscribe(const std::string& sender, std::function<void (const std::shared_ptr<Event>)>&& handler)
+void EventsBaseImpl::subscribe(const std::string& sender, std::function<void(const std::shared_ptr<Event>)>&& handler)
 {
     services::ConsumerIdentifier id;
     id.set_interface(Application::app()->identifier());
@@ -119,7 +121,8 @@ void EventsBaseImpl::subscribe(const std::string& sender, std::function<void (co
 
     if (client().call(&services::EventsBus::Stub::Subscribe, id, &e).ok()) {
         m_service.add(sender, handler);
-    } else {
+    }
+    else {
         LOG_ERROR << "Can't subscribe for events";
     }
 }
@@ -135,7 +138,6 @@ void EventsBaseImpl::notify(const std::shared_ptr<const Event> event)
         LOG_ERROR << "Can't publish update " << event->serialize().dump();
     }
 }
-
 
 template<>
 IEvents* Singleton<IEvents>::create()

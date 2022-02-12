@@ -19,9 +19,9 @@
 #include "aquabox.h"
 #include "cloud.h"
 #include "options.h"
-#include <micro_clients/settings.h>
 #include <common/performance_metrics.h>
 #include <common/singleton.h>
+#include <micro_clients/settings.h>
 // #include <common/stacktrace.h>
 #include <iostream>
 

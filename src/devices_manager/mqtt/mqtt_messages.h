@@ -19,35 +19,42 @@
 #ifndef MQTT_MESSAGES_H
 #define MQTT_MESSAGES_H
 
-namespace aquabox {
-enum class Command : uint16_t {
-    AuthRequest = 0
-};
+namespace aquabox
+{
+    enum class Command : uint16_t
+    {
+        AuthRequest = 0
+    };
 
-enum class Capability : uint8_t {
-    Relay = 1 << 0,
-    Sensor = 1 << 1
-};
+    enum class Capability : uint8_t
+    {
+        Relay = 1 << 0,
+        Sensor = 1 << 1
+    };
 
-struct HarwareAddress {
-    uint8_t a0;
-    uint8_t a1;
-    uint8_t a2;
-    utin8_t a3;
-};
+    struct HarwareAddress
+    {
+        uint8_t a0;
+        uint8_t a1;
+        uint8_t a2;
+        utin8_t a3;
+    };
 
-template <typename DataT>
-struct Message {
-    Command command;
-    DataT data;
-};
+    template<typename DataT>
+    struct Message
+    {
+        Command command;
+        DataT data;
+    };
 
-struct AuthRequest {
-    HarwareAddress adress;
-    Capability capabilities;
-}
+    struct AuthRequest
+    {
+        HarwareAddress adress;
+        Capability capabilities;
+    }
 
-struct AuthResponse {
-    uint8_t response;
-};
-}
+    struct AuthResponse
+    {
+        uint8_t response;
+    };
+} // namespace aquabox

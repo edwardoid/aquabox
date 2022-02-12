@@ -19,19 +19,21 @@
 #include "hardware.h"
 #include "ow_device.h"
 
-namespace aquabox {
-class OneWireDevice : public FloatValueDevice {
-public:
-    OneWireDevice(const w1::Device& dev);
+namespace aquabox
+{
+    class OneWireDevice : public FloatValueDevice
+    {
+    public:
+        OneWireDevice(const w1::Device& dev);
 
-public:
-    virtual bool isReady() override;
-    virtual bool open(int flags) override;
-    virtual bool close() override;
-    virtual bool set(double precision) override;
-    virtual double get() override;
+    public:
+        virtual bool isReady() override;
+        virtual bool open(int flags) override;
+        virtual bool close() override;
+        virtual bool set(double precision) override;
+        virtual double get() override;
 
-private:
-    w1::Device m_dev;
-};
-}
+    private:
+        w1::Device m_dev;
+    };
+} // namespace aquabox

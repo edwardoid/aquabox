@@ -22,7 +22,7 @@
 
 using namespace aquabox;
 
-Step::Step() { }
+Step::Step() {}
 
 nlohmann::json Step::value(std::string property) const
 {
@@ -84,7 +84,7 @@ void Step::makeSteps(int32_t steps)
 
 void Step::addPendingAction(uint64_t priority, ValueChange action)
 {
-    m_pendingActions.insert({ priority, action });
+    m_pendingActions.insert({priority, action});
 }
 
 bool Step::performPendingAction(ValueChange& action)
@@ -100,7 +100,8 @@ bool Step::performPendingAction(ValueChange& action)
     actionToPerform.value = 1;
     if (lb == m_pendingActions.begin()) {
         actionToPerform = m_pendingActions.rbegin()->second;
-    } else {
+    }
+    else {
         if (lb->first != 0) {
             --lb;
         }

@@ -21,11 +21,13 @@
 #include "screen.h"
 #include <string>
 
-namespace aquabox {
-class StatusBarScreen : public Screen {
-public:
-    std::size_t height() const;
-    StatusBarScreen() = default;
-    virtual void draw() override;
-};
-}
+namespace aquabox
+{
+    class StatusBarScreen : public Screen
+    {
+    public:
+        std::size_t height() const;
+        StatusBarScreen() = default;
+        virtual void draw() override;
+    };
+} // namespace aquabox

@@ -28,8 +28,7 @@ bool WebServer::start()
     m_rest = std::thread([this, base]() {
         m_http = std::make_shared<Web::HttpServer>();
         m_http->config.port = Singleton<ISettings>::i()->get(Settings::Keys::HTTP_PORT, Settings::Defaults::REST_PORT);
-        LOG_INFO << "Starting web server on " << m_http->config.address << ":"
-                 << m_http->config.port;
+        LOG_INFO << "Starting web server on " << m_http->config.address << ":" << m_http->config.port;
         RESTApi.init(m_http, base);
 
         m_http->start();
@@ -37,8 +36,7 @@ bool WebServer::start()
 
     m_stream = std::thread([this, base]() {
         m_ws.config.port = Singleton<ISettings>::i()->get(Settings::Keys::STREAM_PORT, Settings::Defaults::WS_PORT);
-        LOG_INFO << "Starting websocket server" << m_ws.config.address << ":"
-                 << m_ws.config.port;
+        LOG_INFO << "Starting websocket server" << m_ws.config.address << ":" << m_ws.config.port;
         m_updates = base.sub().string(":boxId").string(":appId").word("updates");
         m_rpc = base.sub().word("rpc");
 

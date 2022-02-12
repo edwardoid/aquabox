@@ -1,8 +1,8 @@
 #include "hermes_mesh_gateway.h"
 #include <common/log.h>
+#include <common/timeout.h>
 #include <micro_clients/settings.h>
 #include <thread>
-#include <common/timeout.h>
 
 #include <iostream>
 
@@ -10,18 +10,19 @@ using namespace aquabox;
 
 HermesMeshIO::HermesMeshIO(HermesMeshGateway* gateway)
     : m_gateway(gateway)
-{
-}
+{}
 
-bool HermesMeshIO::good() const { return m_gateway->isAlive(m_lastId); }
+bool HermesMeshIO::good() const
+{
+    return m_gateway->isAlive(m_lastId);
+}
 
 proto::buffer_length_t HermesMeshIO::available() const
 {
     return sizeof(proto::Message) * m_messages.size();
 }
 
-proto::buffer_length_t HermesMeshIO::read(proto::buffer_length_t sz,
-    proto::byte_t* buffer)
+proto::buffer_length_t HermesMeshIO::read(proto::buffer_length_t sz, proto::byte_t* buffer)
 {
     static const size_t portion = sizeof(proto::Message);
     sz /= portion;
@@ -35,8 +36,7 @@ proto::buffer_length_t HermesMeshIO::read(proto::buffer_length_t sz,
     return portion * sz;
 }
 
-proto::buffer_length_t HermesMeshIO::write(const proto::byte_t* buffer,
-    proto::buffer_length_t sz)
+proto::buffer_length_t HermesMeshIO::write(const proto::byte_t* buffer, proto::buffer_length_t sz)
 {
     if (m_gateway->write(m_lastId, buffer, sz)) {
         return sz;
@@ -63,24 +63,23 @@ proto::buffer_length_t HermesMeshIO::wait(proto::buffer_length_t length) const
     return available();
 }
 
-void HermesMeshIO::newMessage(const RF24NetworkHeader& header,
-    const proto::Message& msg)
+void HermesMeshIO::newMessage(const RF24NetworkHeader& header, const proto::Message& msg)
 {
     m_lastId = header.from_node;
     m_messages.push_back(msg);
 }
 
-void HermesMeshIO::clear() { m_messages.clear(); }
+void HermesMeshIO::clear()
+{
+    m_messages.clear();
+}
 
 HermesMeshGateway::HermesMeshGateway()
-    : m_radio(Singleton<ISettings>::i()->get(Settings::Keys::RF24_RADIO_PIN,
-                  Settings::Defaults::RF24_RADIO_PIN),
-        Singleton<ISettings>::i()->get(Settings::Keys::RF24_BUS,
-            Settings::Defaults::RF24_BUS))
+    : m_radio(Singleton<ISettings>::i()->get(Settings::Keys::RF24_RADIO_PIN, Settings::Defaults::RF24_RADIO_PIN),
+              Singleton<ISettings>::i()->get(Settings::Keys::RF24_BUS, Settings::Defaults::RF24_BUS))
     , m_network(m_radio)
     , m_mesh(m_radio, m_network)
-{
-}
+{}
 
 bool HermesMeshGateway::isAlive(uint16_t from)
 {
@@ -94,8 +93,7 @@ void HermesMeshGateway::remove(const HermesSerial& serial)
     m_clients.erase(serial);
 }
 
-bool HermesMeshGateway::write(uint16_t from, const proto::byte_t* buffer,
-    proto::buffer_length_t sz)
+bool HermesMeshGateway::write(uint16_t from, const proto::byte_t* buffer, proto::buffer_length_t sz)
 {
     std::lock_guard<HermesMeshGateway> lock(*Singleton<HermesMeshGateway>::i());
     auto now = std::chrono::system_clock::now();
@@ -104,7 +102,8 @@ bool HermesMeshGateway::write(uint16_t from, const proto::byte_t* buffer,
         m_mesh.DHCP();
         if (std::chrono::system_clock::now() - now < std::chrono::seconds(3)) {
             std::this_thread::sleep_for(std::chrono::milliseconds(10));
-        } else {
+        }
+        else {
             return false;
         }
     }
@@ -123,12 +122,14 @@ void HermesMeshGateway::loop(bool processAll)
         if (hdr.type == 'M') // Hermes message
         {
             handle(hdr);
-        } else if (hdr.type == 'D') {
+        }
+        else if (hdr.type == 'D') {
             char msg[100];
             memset(msg, '\0', 100);
             m_network.read(hdr, &msg, 100);
             LOG_DEBUG << "Got from node " << hdr.from_node << ": " << msg;
-        } else if (hdr.type == 'P') {
+        }
+        else if (hdr.type == 'P') {
             proto::Message p;
             m_network.read(hdr, &p, sizeof(proto::Message));
             p.payloadLength++;
@@ -141,7 +142,8 @@ void HermesMeshGateway::loop(bool processAll)
                     break;
                 }
             }
-        } else {
+        }
+        else {
             LOG_DEBUG << "Got a message!! Type: " << hdr.type;
         }
 
@@ -161,7 +163,8 @@ void HermesMeshGateway::run()
     m_mesh.setNodeID(0);
     if (!m_mesh.begin()) {
         LOG_ERROR << "Can't start mesh network!";
-    } else {
+    }
+    else {
         LOG_INFO << "Mesh network started";
     }
 
@@ -186,17 +189,16 @@ void HermesMeshGateway::handle(RF24NetworkHeader& header)
     }
     HermesSerial serial(msg.serial);
 
-    static const char* types_str[] = { "Error", "InternalError", "Command",
-        "Handshake" };
+    static const char* types_str[] = {"Error", "InternalError", "Command", "Handshake"};
 
-    LOG_DEBUG << "Got messafe from " << serial.to_string() << " type "
-              << types_str[(int)msg.type];
+    LOG_DEBUG << "Got messafe from " << serial.to_string() << " type " << types_str[(int) msg.type];
     bool isHandshake = msg.type == proto::MessageType::Handshake;
     bool isReconnect = isHandshake && m_clients.find(serial) != m_clients.end();
     if (m_clients.find(serial) == m_clients.end()) { // isHandshake || isReconnect) {
         if (isReconnect) {
             LOG_INFO << "Device " << serial.to_string() << " reconnected";
-        } else {
+        }
+        else {
             LOG_INFO << "Got new device " << serial.to_string();
         }
         m_clients[serial] = std::make_shared<HermesMeshIO>(this);
@@ -204,12 +206,19 @@ void HermesMeshGateway::handle(RF24NetworkHeader& header)
     if (isReconnect) {
         m_clients[serial]->clear();
         reconnected(serial);
-    } else if (isHandshake) {
+    }
+    else if (isHandshake) {
         newConnection(m_clients[serial], serial);
     }
     m_clients[serial]->newMessage(header, msg);
 }
 
-void HermesMeshGateway::lock() const { m_mx.lock(); }
+void HermesMeshGateway::lock() const
+{
+    m_mx.lock();
+}
 
-void HermesMeshGateway::unlock() const { m_mx.unlock(); }
+void HermesMeshGateway::unlock() const
+{
+    m_mx.unlock();
+}

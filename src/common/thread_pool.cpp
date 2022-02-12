@@ -17,17 +17,16 @@
  */
 
 #include "thread_pool.h"
-#include <thread>
 #include <boost/asio/post.hpp>
+#include <thread>
 
 using namespace aquabox;
 
 ThreadPool::ThreadPool()
     : m_pool(std::thread::hardware_concurrency())
+{}
+
+void ThreadPool::run(std::function<void(void)>&& cb)
 {
-
-}
-
-void ThreadPool::run(std::function<void(void)>&& cb) {
     boost::asio::post(m_pool, cb);
 }

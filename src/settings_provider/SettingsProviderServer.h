@@ -17,35 +17,54 @@
  */
 
 #pragma once
-#include <rpc/server_base.h>
 #include <mutex>
+#include <nlohmann/json.hpp>
+#include <rpc/server_base.h>
 #include <settings.grpc.pb.h>
 #include <string>
 #include <unordered_map>
-#include <nlohmann/json.hpp>
 
-namespace aquabox {
-namespace services {
-    class SettingsProviderServer final : public ServerBase<SettingsProvider> {
-    public:
-        SettingsProviderServer(std::uint32_t startFrom);
-        virtual ~SettingsProviderServer();
-        virtual ::grpc::Status Has(::grpc::ServerContext* context, const ::google::protobuf::StringValue* request, ::google::protobuf::BoolValue* response) override;
-        virtual ::grpc::Status AllocatePort(::grpc::ServerContext* context, const ::google::protobuf::StringValue* request, ::google::protobuf::UInt32Value* response) override;
-        virtual ::grpc::Status GetPort(::grpc::ServerContext* context, const ::google::protobuf::StringValue* request, ::google::protobuf::UInt32Value* response) override;
-        virtual ::grpc::Status GetString(::grpc::ServerContext* context, const ::google::protobuf::StringValue* request, ::google::protobuf::StringValue* response) override;
-        virtual ::grpc::Status SetString(::grpc::ServerContext* context, const ::aquabox::services::SettingsSetStringRequest* request, ::google::protobuf::Empty* response) override;
+namespace aquabox
+{
+    namespace services
+    {
+        class SettingsProviderServer final : public ServerBase<SettingsProvider>
+        {
+        public:
+            SettingsProviderServer(std::uint32_t startFrom);
+            virtual ~SettingsProviderServer();
+            virtual ::grpc::Status Has(::grpc::ServerContext* context,
+                                       const ::google::protobuf::StringValue* request,
+                                       ::google::protobuf::BoolValue* response) override;
+            virtual ::grpc::Status AllocatePort(::grpc::ServerContext* context,
+                                                const ::google::protobuf::StringValue* request,
+                                                ::google::protobuf::UInt32Value* response) override;
+            virtual ::grpc::Status GetPort(::grpc::ServerContext* context,
+                                           const ::google::protobuf::StringValue* request,
+                                           ::google::protobuf::UInt32Value* response) override;
+            virtual ::grpc::Status GetString(::grpc::ServerContext* context,
+                                             const ::google::protobuf::StringValue* request,
+                                             ::google::protobuf::StringValue* response) override;
+            virtual ::grpc::Status SetString(::grpc::ServerContext* context,
+                                             const ::aquabox::services::SettingsSetStringRequest* request,
+                                             ::google::protobuf::Empty* response) override;
 
-        virtual ::grpc::Status GetBool(::grpc::ServerContext* context, const ::google::protobuf::StringValue* request, ::google::protobuf::BoolValue* response) override;
-        virtual ::grpc::Status SetBool(::grpc::ServerContext* context, const ::aquabox::services::SettingsSetBoolRequest* request, ::google::protobuf::Empty* response) override;
-    private:
-        void load();
-        void save();
-    private:
-        std::recursive_mutex m_mx;
-        std::unordered_map<std::string, std::uint32_t> m_ports;
-        nlohmann::json m_data;
-        std::uint32_t m_lastPort = 50050;
-    };
-}
-}
+            virtual ::grpc::Status GetBool(::grpc::ServerContext* context,
+                                           const ::google::protobuf::StringValue* request,
+                                           ::google::protobuf::BoolValue* response) override;
+            virtual ::grpc::Status SetBool(::grpc::ServerContext* context,
+                                           const ::aquabox::services::SettingsSetBoolRequest* request,
+                                           ::google::protobuf::Empty* response) override;
+
+        private:
+            void load();
+            void save();
+
+        private:
+            std::recursive_mutex m_mx;
+            std::unordered_map<std::string, std::uint32_t> m_ports;
+            nlohmann::json m_data;
+            std::uint32_t m_lastPort = 50050;
+        };
+    } // namespace services
+} // namespace aquabox

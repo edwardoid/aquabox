@@ -21,9 +21,9 @@
 
 using namespace aquabox;
 
-void ValidationErrorHandler::error(
-    const nlohmann::json_pointer<nlohmann::basic_json<>>& pointer,
-    const nlohmann::json& instance, const std::string& message)
+void ValidationErrorHandler::error(const nlohmann::json_pointer<nlohmann::basic_json<>>& pointer,
+                                   const nlohmann::json& instance,
+                                   const std::string& message)
 {
     std::stringstream ss;
     nlohmann::json_schema::basic_error_handler::error(pointer, instance, message);
@@ -31,4 +31,7 @@ void ValidationErrorHandler::error(
     m_error = ss.str();
 }
 
-const std::string& ValidationErrorHandler::error() const { return m_error; }
+const std::string& ValidationErrorHandler::error() const
+{
+    return m_error;
+}

@@ -23,27 +23,33 @@
 namespace aquabox
 {
     template<class Base>
-    class HermesDevice: public Base
+    class HermesDevice : public Base
     {
     public:
         HermesDevice() = default;
-        void setupProperties(std::vector<std::string> props) {
+        void setupProperties(std::vector<std::string> props)
+        {
             std::set<std::string> all;
-            for (auto p : Base::properties()) all.insert(p);
+            for (auto p : Base::properties())
+                all.insert(p);
 
             for (auto& p : props) {
-                if (p.empty()) continue;
-                if (p[0] == '_') continue;
-                if (p == "type" ) continue;
-                if (p == "class" ) continue;
+                if (p.empty())
+                    continue;
+                if (p[0] == '_')
+                    continue;
+                if (p == "type")
+                    continue;
+                if (p == "class")
+                    continue;
                 all.insert(p);
             }
-            for (auto& p : all)
-            {
+            for (auto& p : all) {
                 m_props.push_back(p);
             }
         }
-        virtual std::vector<std::string> properties() const override {
+        virtual std::vector<std::string> properties() const override
+        {
             if (m_props.empty())
                 return Base::properties();
             return m_props;
@@ -53,7 +59,7 @@ namespace aquabox
             if (property.size() > 0 && property[0] == '+') {
                 std::shared_ptr<HermesHardware> hw = std::dynamic_pointer_cast<HermesHardware>(Hardware::resolve(Base::address()));
                 if (hw != nullptr) {
-                    return hw->callInProgress(property) ? 1 :  0;
+                    return hw->callInProgress(property) ? 1 : 0;
                 }
                 return 0;
             }
@@ -74,7 +80,8 @@ namespace aquabox
             }
             return Base::setValue(property, value);
         }
+
     private:
         std::vector<std::string> m_props;
     };
-}
+} // namespace aquabox

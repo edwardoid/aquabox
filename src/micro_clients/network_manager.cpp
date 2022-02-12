@@ -18,16 +18,17 @@
 
 #include "network_manager.h"
 #include "micro_service.h"
-#include <services/service_identifier.h>
 #include "settings.h"
 #include <network.grpc.pb.h>
+#include <services/service_identifier.h>
 
 using namespace aquabox;
 
-class NetworkManagerImpl : public INetworkManager {
+class NetworkManagerImpl : public INetworkManager
+{
 public:
     NetworkManagerImpl();
-    virtual ~NetworkManagerImpl() { }
+    virtual ~NetworkManagerImpl() {}
     virtual NetworkState currentState() override;
     virtual NetworkInfo currentNetwork() override;
     virtual bool hasInternetConnection() override;
@@ -36,24 +37,23 @@ public:
     virtual std::string connect(const std::string ssid, const std::string password) override;
 };
 
-namespace {
-services::MicroService<services::NetworkManager>& client()
+namespace
 {
-    static services::MicroService<services::NetworkManager> c(
-        Singleton<ISettings>::i()->port(
-            services::NetworkManager::service_full_name()));
-    return c;
-}
+    services::MicroService<services::NetworkManager>& client()
+    {
+        static services::MicroService<services::NetworkManager> c(
+            Singleton<ISettings>::i()->port(services::NetworkManager::service_full_name()));
+        return c;
+    }
 } // namespace
 
-template <>
+template<>
 INetworkManager* Singleton<INetworkManager>::create()
 {
     return new NetworkManagerImpl();
 }
 
-NetworkManagerImpl::NetworkManagerImpl()
-{}
+NetworkManagerImpl::NetworkManagerImpl() {}
 
 NetworkState NetworkManagerImpl::currentState()
 {
@@ -83,7 +83,8 @@ NetworkInfo NetworkManagerImpl::currentNetwork()
         info.ip = data.ip();
         info.auth = data.auth();
         LOG_INFO << "IP: " << data.ip();
-    } else {
+    }
+    else {
         LOG_ERROR << "services::NetworkManager::Stub::GetCurrentNetwork FAILED!";
     }
 
@@ -122,8 +123,7 @@ std::vector<NetworkInfo> NetworkManagerImpl::availableNetworks()
     auto c = client();
     std::vector<NetworkInfo> res;
     google::protobuf::Empty e;
-    std::unique_ptr<grpc::ClientReader<services::NetworkInfo>> reader(
-        c->GetAvailableNetworks(&cxt, e));
+    std::unique_ptr<grpc::ClientReader<services::NetworkInfo>> reader(c->GetAvailableNetworks(&cxt, e));
     services::NetworkInfo data;
     while (reader->Read(&data)) {
         NetworkInfo info;
@@ -146,9 +146,7 @@ std::string NetworkManagerImpl::connect(const std::string ssid, const std::strin
     c.set_password(password);
     services::ConnectionStatus u;
 
-    if (client()
-            .call(&services::NetworkManager::Stub::Connect, c, &u)
-            .ok()) {
+    if (client().call(&services::NetworkManager::Stub::Connect, c, &u).ok()) {
         return u.uuid();
     }
 

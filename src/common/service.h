@@ -21,98 +21,89 @@
 #include <map>
 #include <vector>
 
-namespace aquabox {
-
-class Services {
-protected:
-    friend class AbstractService;
-    static uint32_t implements(int Id, class AbstractService* impl)
+namespace aquabox
+{
+    class Services
     {
-        static uint32_t m_id = 0;
-        m_services[Id][++m_id] = impl;
-        return m_id;
+    protected:
+        friend class AbstractService;
+        static uint32_t implements(int Id, class AbstractService* impl)
+        {
+            static uint32_t m_id = 0;
+            m_services[Id][++m_id] = impl;
+            return m_id;
+        }
+
+        static void unregister(int Id, uint32_t instance)
+        {
+            m_services[Id].erase(instance);
+            if (m_services[Id].empty()) {
+                m_services.erase(Id);
+            }
+        }
+
+    public:
+        template<typename Interface>
+        static std::vector<Interface*> implementations();
+
+        template<typename Interface, typename Function, typename... Args>
+        static void invoke(Function, Args... args);
+
+    private:
+        static std::map<uint32_t, std::map<uint32_t, class AbstractService*>> m_services;
+    };
+
+    class AbstractService
+    {
+    protected:
+        virtual ~AbstractService() {}
+        uint32_t registerImplmentation(int Id) { return Services::implements(Id, this); }
+
+        void unregisterImplementation(int Id, uint32_t instance) { Services::unregister(Id, instance); }
+    };
+
+    template<class Interface>
+    class Service : public AbstractService
+    {
+    protected:
+        Service() { m_implementationId = AbstractService::registerImplmentation(Id); }
+
+        ~Service() { AbstractService::unregisterImplementation(Id, m_implementationId); }
+
+        virtual bool initialize() { return true; }
+        virtual bool initialized() const { return true; }
+
+    protected:
+        static const uint32_t Id;
+        friend class Services;
+
+    private:
+        int32_t m_implementationId;
+    };
+
+    template<typename Interface>
+    std::vector<Interface*> Services::implementations()
+    {
+        std::vector<Interface*> impls;
+        for (auto i : m_services[Service<Interface>::Id]) {
+            Interface* impl = dynamic_cast<Interface*>(i.second);
+            if (impl) {
+                impls.push_back(impl);
+            }
+        }
+
+        return impls;
     }
 
-    static void unregister(int Id, uint32_t instance)
+    template<typename Interface, typename Function, typename... Args>
+    void Services::invoke(Function fn, Args... args)
     {
-        m_services[Id].erase(instance);
-        if (m_services[Id].empty()) {
-            m_services.erase(Id);
+        for (auto i : implementations<Interface>()) {
+            (i->*fn)(args...);
         }
     }
 
-public:
-    template <typename Interface>
-    static std::vector<Interface*> implementations();
-
-    template <typename Interface, typename Function, typename... Args>
-    static void invoke(Function, Args... args);
-
-private:
-    static std::map<uint32_t, std::map<uint32_t, class AbstractService*>> m_services;
-};
-
-class AbstractService {
-protected:
-    virtual ~AbstractService() { }
-    uint32_t registerImplmentation(int Id)
-    {
-        return Services::implements(Id, this);
-    }
-
-    void unregisterImplementation(int Id, uint32_t instance)
-    {
-        Services::unregister(Id, instance);
-    }
-};
-
-template <class Interface>
-class Service : public AbstractService {
-protected:
-    Service()
-    {
-        m_implementationId = AbstractService::registerImplmentation(Id);
-    }
-
-    ~Service()
-    {
-        AbstractService::unregisterImplementation(Id, m_implementationId);
-    }
-
-    virtual bool initialize() { return true; }
-    virtual bool initialized() const { return true; }
-
-protected:
-    static const uint32_t Id;
-    friend class Services;
-
-private:
-    int32_t m_implementationId;
-};
-
-template <typename Interface>
-std::vector<Interface*> Services::implementations()
-{
-    std::vector<Interface*> impls;
-    for (auto i : m_services[Service<Interface>::Id]) {
-        Interface* impl = dynamic_cast<Interface*>(i.second);
-        if (impl) {
-            impls.push_back(impl);
-        }
-    }
-
-    return impls;
-}
-
-template <typename Interface, typename Function, typename... Args>
-void Services::invoke(Function fn, Args... args)
-{
-    for (auto i : implementations<Interface>()) {
-        (i->*fn)(args...);
-    }
-}
-
-/*
+    /*
     struct Ev {};
 
 
@@ -167,7 +158,7 @@ void Services::invoke(Function fn, Args... args)
     {
 
     };*/
-}
+} // namespace aquabox
 
 /*
 int main()

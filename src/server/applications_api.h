@@ -21,23 +21,25 @@
 #include "iot_definitions.h"
 #include "rest_api.h"
 
-namespace aquabox {
-class ApplicationsApi {
-public:
-    static void start();
+namespace aquabox
+{
+    class ApplicationsApi
+    {
+    public:
+        static void start();
 
-private:
-    void startWebServer();
-    void startStreamServer();
-    void removeConnection(std::string boxId, std::shared_ptr<WSServer::Connection> connection);
+    private:
+        void startWebServer();
+        void startStreamServer();
+        void removeConnection(std::string boxId, std::shared_ptr<WSServer::Connection> connection);
 
-private:
-    static ApplicationsApi m_instance;
+    private:
+        static ApplicationsApi m_instance;
 
-private:
-    Route m_base;
-    std::shared_ptr<HttpServer> m_http;
-    std::shared_ptr<WSServer> m_ws;
-    v1::REST RESTApi;
-};
-}
+    private:
+        Route m_base;
+        std::shared_ptr<HttpServer> m_http;
+        std::shared_ptr<WSServer> m_ws;
+        v1::REST RESTApi;
+    };
+} // namespace aquabox

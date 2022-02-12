@@ -36,20 +36,23 @@ NetworkManager::NetworkManager()
     , deviceState(NetworkDeviceState::NM_DEVICE_STATE_UNKNOWN)
 {
     setInterface(Singleton<ISettings>::i()->get(Settings::Keys::CLIENT_INTERFACE, Settings::Defaults::CLIENT_INTERFACE));
-    m_nm.ActiveConnectionsChanged.connect(std::bind(
-        &NetworkManager::onActiveConnectionChanged, this, std::placeholders::_1));
+    m_nm.ActiveConnectionsChanged.connect(std::bind(&NetworkManager::onActiveConnectionChanged, this, std::placeholders::_1));
 
     m_nm.StateChanged.connect(currentState);
     pthread_setname_np(m_reconnectThread.native_handle(), "ReconnectMonitor");
 }
 
-NetworkManager::~NetworkManager() { m_reconnectThread.join(); }
+NetworkManager::~NetworkManager()
+{
+    m_reconnectThread.join();
+}
 
 void NetworkManager::reconnect()
 {
     while (1) {
         std::this_thread::sleep_for(std::chrono::minutes(1));
-        if (currentState == NetworkingState::Disconnected && m_changeReason != NetworkChangeReason::Reconnect && Singleton<ISettings>::i()->has(Settings::Keys::NETWORK)) {
+        if (currentState == NetworkingState::Disconnected && m_changeReason != NetworkChangeReason::Reconnect
+            && Singleton<ISettings>::i()->has(Settings::Keys::NETWORK)) {
             m_changeReason = NetworkChangeReason::Reconnect;
             auto uuid = Singleton<ISettings>::i()->get(Settings::Keys::NETWORK, currentConnection.value.uuid);
             if (uuid.empty()) {
@@ -59,9 +62,11 @@ void NetworkManager::reconnect()
             try {
                 LOG_INFO << "Reconnecting...";
                 activateConnection(uuid);
-            } catch (std::exception& ex) {
+            }
+            catch (std::exception& ex) {
                 LOG_ERROR << "Reconnect failed: " << ex.what();
-            } catch (...) {
+            }
+            catch (...) {
                 LOG_ERROR << "Reconnect failed...";
             }
         }
@@ -112,7 +117,8 @@ void NetworkManager::updateCurrentState(bool notify)
                 newValue.ssid = ap->ssid();
                 newValue.signal = ap->strength();
                 newValue.encrypted = ap->encrypted();
-            } else {
+            }
+            else {
                 LOG_DEBUG << "No Access point info available";
             }
 
@@ -128,7 +134,8 @@ void NetworkManager::updateCurrentState(bool notify)
             }
 
             newValue.ip = ipv4->ip();
-        } catch (std::exception& ex) {
+        }
+        catch (std::exception& ex) {
             LOG_ERROR << ex.what();
             break;
         }
@@ -154,29 +161,27 @@ void NetworkManager::setInterface(std::string interface)
     }
     m_dev = m_nm.getDevice(m_interface);
     if (m_dev != nullptr) {
-        m_dev->StateChanged.connect(std::bind(&NetworkManager::onDeviceStateChanged,
-            this, std::placeholders::_1,
-            std::placeholders::_2));
+        m_dev->StateChanged.connect(std::bind(&NetworkManager::onDeviceStateChanged, this, std::placeholders::_1, std::placeholders::_2));
     }
     updateCurrentState(true);
 }
 
-void NetworkManager::onDeviceStateChanged(nm::NMDeviceState newState,
-    nm::NMDeviceState oldState)
+void NetworkManager::onDeviceStateChanged(nm::NMDeviceState newState, nm::NMDeviceState oldState)
 {
     updateCurrentState(newState == nm::NMDeviceState::NM_DEVICE_STATE_ACTIVATED);
     deviceState.set(newState);
     LOG_ERROR << "State changed from " << oldState << " to " << newState;
     if (newState == nm::NM_DEVICE_STATE_FAILED && oldState == nm::NM_DEVICE_STATE_NEED_AUTH) {
         AuthentificationFailed.emit();
-    } else if (newState == nm::NM_DEVICE_STATE_FAILED) {
+    }
+    else if (newState == nm::NM_DEVICE_STATE_FAILED) {
         ConnectingFailed.emit();
-    } else if (newState == nm::NM_DEVICE_STATE_ACTIVATED) {
+    }
+    else if (newState == nm::NM_DEVICE_STATE_ACTIVATED) {
     }
 }
 
-void NetworkManager::onActiveConnectionChanged(
-    const std::vector<std::shared_ptr<nm::ActiveConnection>>&)
+void NetworkManager::onActiveConnectionChanged(const std::vector<std::shared_ptr<nm::ActiveConnection>>&)
 {
     if (m_dev == nullptr) {
         LOG_ERROR << "Can't find device " << m_interface;
@@ -228,8 +233,7 @@ std::vector<WifiNetwork> NetworkManager::networks()
     return networks;
 }
 
-std::string NetworkManager::connect(const std::string& ssid,
-    const std::string& password)
+std::string NetworkManager::connect(const std::string& ssid, const std::string& password)
 {
     m_changeReason = NetworkChangeReason::SwitchNework;
     return m_nm.connect(m_interface, ssid, password);

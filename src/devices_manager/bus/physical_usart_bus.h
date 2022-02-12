@@ -20,11 +20,13 @@
 
 #include "bus.h"
 
-namespace aquabox {
-class PhysicalUSARTBus : public Bus {
-public:
-    PhysicalUSARTBus(const std::string& address);
-    virtual ~PhysicalUSARTBus();
-    std::shared_ptr<Hardware> hw(const std::string& hw) override;
-};
-}
+namespace aquabox
+{
+    class PhysicalUSARTBus : public Bus
+    {
+    public:
+        PhysicalUSARTBus(const std::string& address);
+        virtual ~PhysicalUSARTBus();
+        std::shared_ptr<Hardware> hw(const std::string& hw) override;
+    };
+} // namespace aquabox

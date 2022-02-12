@@ -18,139 +18,145 @@
 
 #pragma once
 
-#include <stdint.h>
-#include <string>
 #include <boost/filesystem.hpp>
 #include <nlohmann/json.hpp>
+#include <stdint.h>
+#include <string>
+#include <mutex>
 
-namespace aquabox {
-    class Settings {
-    Settings() = default;
-
-    static void read();
-    static void write();
-    static nlohmann::json::json_pointer pointer(const std::string& key);
-
-public:
-    struct Keys {
-        static const std::string LOG_LEVEL;
-
-        static const std::string WORKING_DIRECTORY;
-        static const std::string WEB_ROOT;
-        static const std::string DATA_ROOT;
-        static const std::string DEVICES_DATA_SUBROOT;
-        static const std::string RULES_DATA_SUBROOT;
-
-        static const std::string HTTP_PORT;
-        static const std::string STREAM_PORT;
-        static const std::string NETWORK;
-        static const std::string AP_SSID;
-        static const std::string AP_PASSWORD;
-
-        static const std::string USERS;
-
-        static const std::string THREADS;
-        static const std::string CLOUD_URL;
-        static const std::string CLOUD_PORT;
-        static const std::string CLOUD_WS_PORT;
-        static const std::string DATABASE_URI;
-        static const std::string DATABASE_NAME;
-        static const std::string HW_COLLECTION_NAME;
-        static const std::string APP_COLLECTION_NAME;
-        static const std::string CLIENT_INTERFACE;
-        static const std::string AP_INTERFACE;
-        static const std::string SERIAL;
-        static const std::string FRAMEBUFFER;
-        static const std::string MQTT_PORT;
-        static const std::string SCT_BUS_PORT;
-        static const std::string DEBUG;
-        static const std::string MAX_MEM;
-        static const std::string TELEGRAM_BOT_API;
-        static const std::string MESH_ENABLED;
-        static const std::string RF24_BUS;
-        static const std::string RF24_RADIO_PIN;
-        static const std::string FPS;
-    };
-
-    struct Defaults {
-        static const std::string APPLICATION;
-        static const std::string DESCRIPTION;
-        static const std::string VERSION;
-        static const std::string GIT_HASH;
-        static const uint16_t VERSION_MAJOR;
-        static const uint16_t VERSION_MINOR;
-        static const std::string LOCK_FILE;
-        static const std::string AUTHOR;
-        static const std::string EMAIL;
-        static const std::string ConfigurationFile;
-        static const std::string AP_SSID;
-        static const std::string AP_PASSWORD;
-        static const std::string CLOUD_URL;
-        static const uint16_t CLOUD_PORT;
-        static const uint16_t CLOUD_WS_PORT;
-        static const std::string DATABASE_URI;
-        static const std::string DATABASE_NAME;
-        static const std::string HW_COLLECTION_NAME;
-        static const std::string APP_COLLECTION_NAME;
-        static const std::string CLIENT_INTERFACE;
-        static const std::string AP_INTERFACE;
-        static const std::string SERIAL;
-        static const std::string FRAMEBUFFER;
-        static const std::string TELEGRAM_BOT_API;
-        static const std::string DATA_ROOT;
-        static const std::string DEVICES_DATA_SUBROOT;
-        static const std::string RULES_DATA_SUBROOT;
-
-        static const int REST_PORT;
-        static const int WS_PORT;
-        static const int MQTT_PORT;
-        static const int SCT_BUS_PORT;
-        static const bool DEBUG;
-        static const int MAX_MEM;
-        static const bool MESH_ENABLED;
-        static const int RF24_BUS;
-        static const int RF24_RADIO_PIN;
-        static const int FPS;
-    };
-
-    static void set(std::string key, bool value);
-    static void set(std::string key, int value);
-    static void set(std::string key, double value);
-    static void set(std::string key, std::string value);
-    static void set(std::string key, nlohmann::json value);
-
-    static bool boolean(std::string key, bool def);
-    static int integer(std::string key, int def);
-    static double floating(std::string key, double value);
-    static std::string string(std::string key, std::string def);
-    static bool has(std::string key);
-
-    static std::vector<nlohmann::json> array(std::string key);
-
-    static void setDomain(std::string domainName)
+namespace aquabox
+{
+    class Settings
     {
-        domain = domainName;
-        read();
-    }
+        Settings() = default;
 
-private:
-    static bool dataToWrite;
-    static bool ready;
-    static std::recursive_mutex mx;
-    static nlohmann::json json;
-    static std::string domain;
-};
-class ISettings {
-public:
-    virtual bool has(const std::string& key) = 0;
-    virtual std::int32_t get(const std::string& key, std::int32_t defaultValue) = 0;
-    virtual void set(const std::string& key, std::int32_t value) = 0;
-    virtual std::string get(const std::string& key, const std::string& defaultValue) = 0;
-    virtual void set(const std::string&, const std::string& value) = 0;
-    virtual bool get(const std::string& key, bool defaultValue) = 0;
-    virtual void set(const std::string&, bool value) = 0;
-    virtual std::uint32_t port(const std::string& service, bool request = false) = 0;
-    virtual boost::filesystem::path path(const std::string& key, const boost::filesystem::path& defaultVal) = 0;
-};
+        static void read();
+        static void write();
+        static nlohmann::json::json_pointer pointer(const std::string& key);
 
-}
+    public:
+        struct Keys
+        {
+            static const std::string LOG_LEVEL;
+
+            static const std::string WORKING_DIRECTORY;
+            static const std::string WEB_ROOT;
+            static const std::string DATA_ROOT;
+            static const std::string DEVICES_DATA_SUBROOT;
+            static const std::string RULES_DATA_SUBROOT;
+
+            static const std::string HTTP_PORT;
+            static const std::string STREAM_PORT;
+            static const std::string NETWORK;
+            static const std::string AP_SSID;
+            static const std::string AP_PASSWORD;
+
+            static const std::string USERS;
+
+            static const std::string THREADS;
+            static const std::string CLOUD_URL;
+            static const std::string CLOUD_PORT;
+            static const std::string CLOUD_WS_PORT;
+            static const std::string DATABASE_URI;
+            static const std::string DATABASE_NAME;
+            static const std::string HW_COLLECTION_NAME;
+            static const std::string APP_COLLECTION_NAME;
+            static const std::string CLIENT_INTERFACE;
+            static const std::string AP_INTERFACE;
+            static const std::string SERIAL;
+            static const std::string FRAMEBUFFER;
+            static const std::string MQTT_PORT;
+            static const std::string SCT_BUS_PORT;
+            static const std::string DEBUG;
+            static const std::string MAX_MEM;
+            static const std::string TELEGRAM_BOT_API;
+            static const std::string MESH_ENABLED;
+            static const std::string RF24_BUS;
+            static const std::string RF24_RADIO_PIN;
+            static const std::string FPS;
+        };
+
+        struct Defaults
+        {
+            static const std::string APPLICATION;
+            static const std::string DESCRIPTION;
+            static const std::string VERSION;
+            static const std::string GIT_HASH;
+            static const uint16_t VERSION_MAJOR;
+            static const uint16_t VERSION_MINOR;
+            static const std::string LOCK_FILE;
+            static const std::string AUTHOR;
+            static const std::string EMAIL;
+            static const std::string ConfigurationFile;
+            static const std::string AP_SSID;
+            static const std::string AP_PASSWORD;
+            static const std::string CLOUD_URL;
+            static const uint16_t CLOUD_PORT;
+            static const uint16_t CLOUD_WS_PORT;
+            static const std::string DATABASE_URI;
+            static const std::string DATABASE_NAME;
+            static const std::string HW_COLLECTION_NAME;
+            static const std::string APP_COLLECTION_NAME;
+            static const std::string CLIENT_INTERFACE;
+            static const std::string AP_INTERFACE;
+            static const std::string SERIAL;
+            static const std::string FRAMEBUFFER;
+            static const std::string TELEGRAM_BOT_API;
+            static const std::string DATA_ROOT;
+            static const std::string DEVICES_DATA_SUBROOT;
+            static const std::string RULES_DATA_SUBROOT;
+
+            static const int REST_PORT;
+            static const int WS_PORT;
+            static const int MQTT_PORT;
+            static const int SCT_BUS_PORT;
+            static const bool DEBUG;
+            static const int MAX_MEM;
+            static const bool MESH_ENABLED;
+            static const int RF24_BUS;
+            static const int RF24_RADIO_PIN;
+            static const int FPS;
+        };
+
+        static void set(std::string key, bool value);
+        static void set(std::string key, int value);
+        static void set(std::string key, double value);
+        static void set(std::string key, std::string value);
+        static void set(std::string key, nlohmann::json value);
+
+        static bool boolean(std::string key, bool def);
+        static int integer(std::string key, int def);
+        static double floating(std::string key, double value);
+        static std::string string(std::string key, std::string def);
+        static bool has(std::string key);
+
+        static std::vector<nlohmann::json> array(std::string key);
+
+        static void setDomain(std::string domainName)
+        {
+            domain = domainName;
+            read();
+        }
+
+    private:
+        static bool dataToWrite;
+        static bool ready;
+        static std::recursive_mutex mx;
+        static nlohmann::json json;
+        static std::string domain;
+    };
+    class ISettings
+    {
+    public:
+        virtual bool has(const std::string& key) = 0;
+        virtual std::int32_t get(const std::string& key, std::int32_t defaultValue) = 0;
+        virtual void set(const std::string& key, std::int32_t value) = 0;
+        virtual std::string get(const std::string& key, const std::string& defaultValue) = 0;
+        virtual void set(const std::string&, const std::string& value) = 0;
+        virtual bool get(const std::string& key, bool defaultValue) = 0;
+        virtual void set(const std::string&, bool value) = 0;
+        virtual std::uint32_t port(const std::string& service, bool request = false) = 0;
+        virtual boost::filesystem::path path(const std::string& key, const boost::filesystem::path& defaultVal) = 0;
+    };
+
+} // namespace aquabox

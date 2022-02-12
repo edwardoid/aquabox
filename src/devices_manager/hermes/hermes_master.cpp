@@ -21,7 +21,10 @@
 
 using namespace aquabox;
 
-HermesSerial::HermesSerial() { memset(data(), 0, SERIAL_LEN); }
+HermesSerial::HermesSerial()
+{
+    memset(data(), 0, SERIAL_LEN);
+}
 
 HermesSerial::HermesSerial(const proto::byte_t serial[])
 {
@@ -32,10 +35,10 @@ std::string HermesSerial::to_string() const
 {
     std::stringstream ss;
     for (int i = 0; i < SERIAL_LEN - 1; ++i) {
-        ss << std::hex << (int)data()[i] << '-';
+        ss << std::hex << (int) data()[i] << '-';
     }
 
-    ss << std::hex << (int)data()[SERIAL_LEN - 1];
+    ss << std::hex << (int) data()[SERIAL_LEN - 1];
     return ss.str();
 }
 
@@ -53,15 +56,18 @@ bool HermesSerial::isValid() const
 HermesMaster::HermesMaster(std::shared_ptr<proto::MessageIO> io)
     : proto::Master(io.get())
     , m_io(io)
-{
-}
+{}
 
 HermesMaster::~HermesMaster()
 {
-    if (m_io) m_io->close();
+    if (m_io)
+        m_io->close();
 }
 
-HermesSerial HermesMaster::serial() const { return HermesSerial(m_serial); }
+HermesSerial HermesMaster::serial() const
+{
+    return HermesSerial(m_serial);
+}
 
 void HermesMaster::setSerial(const HermesSerial& newSerial)
 {
@@ -82,11 +88,9 @@ bool HermesMaster::isConnected() const
     return false;
 }
 
-bool HermesMaster::getPropertyData(const char* property,
-    proto::GetValueData& value)
+bool HermesMaster::getPropertyData(const char* property, proto::GetValueData& value)
 {
-    LOG_DEBUG << "Requested property " << property
-              << " Caching enabled: " << m_caching;
+    LOG_DEBUG << "Requested property " << property << " Caching enabled: " << m_caching;
     if (m_caching) {
         auto pos = m_properties.find(property);
 
@@ -101,12 +105,13 @@ bool HermesMaster::getPropertyData(const char* property,
                 if (timeoutData.type == aquabox::proto::ValueType::UnsignedInteger) {
                     updateTimeout = std::chrono::milliseconds(timeoutData.value.U);
                 }
-                LOG_DEBUG << "Update time out for " << property << " updated to "
-                          << updateTimeout.count() << "ms";
-            } else {
+                LOG_DEBUG << "Update time out for " << property << " updated to " << updateTimeout.count() << "ms";
+            }
+            else {
                 LOG_ERROR << "Timeout request failed!";
             }
-        } else {
+        }
+        else {
             updateTimeout = m_properties[property].updateTimeout;
         }
 
@@ -127,8 +132,7 @@ bool HermesMaster::getPropertyData(const char* property,
     return proto::Master::getPropertyData(property, value);
 }
 
-bool HermesMaster::setPropertyData(const char* property,
-    const proto::SetValueData& value)
+bool HermesMaster::setPropertyData(const char* property, const proto::SetValueData& value)
 {
     if (!proto::Master::setPropertyData(property, value)) {
         m_properties.erase(property);
@@ -150,9 +154,8 @@ bool HermesMaster::acceptConnectionFrom(const proto::byte_t* serial) const
     return true;
 }
 
-template <>
-bool proto::Master::getProperty<std::string>(const char* property,
-    std::string& value)
+template<>
+bool proto::Master::getProperty<std::string>(const char* property, std::string& value)
 {
     char raw[32];
     memset(raw, '\0', 32);
@@ -164,9 +167,8 @@ bool proto::Master::getProperty<std::string>(const char* property,
     return false;
 }
 
-template <>
-bool proto::Master::setProperty<std::string>(const char* property,
-    const std::string& value)
+template<>
+bool proto::Master::setProperty<std::string>(const char* property, const std::string& value)
 {
     char* raw = const_cast<char*>(value.c_str());
     return setProperty<const char*>(property, value.c_str());

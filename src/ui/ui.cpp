@@ -16,13 +16,12 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-
 #include "ui.h"
 #include "screen_manager.h"
-#include <micro_clients/settings.h>
-#include <common/log.h>
-#include <thread>
 #include <chrono>
+#include <common/log.h>
+#include <micro_clients/settings.h>
+#include <thread>
 
 using namespace aquabox;
 
@@ -32,36 +31,35 @@ UI::UI()
 
 int UI::start()
 {
-    try
-    {
+    try {
         const std::string severity = Singleton<ISettings>::i()->get(Settings::Keys::LOG_LEVEL,
-        std::string(plog::severityToString(plog::Severity::info)));
+                                                                    std::string(plog::severityToString(plog::Severity::info)));
         plog::init(plog::severityFromString(severity.c_str()), &m_consoleAppender);
 
         int fps = Singleton<ISettings>::i()->get(Settings::Keys::FPS, Settings::Defaults::FPS);
         fps = std::min(std::max(fps, 1), 60);
         std::chrono::milliseconds fpsTimeout(1000 / fps);
-        LOG_INFO << "Desired fps is " << fps << " changed to ~" << (1000 / fpsTimeout.count()) << " updating screen each " << fpsTimeout.count() << "ms.";
-        while(1)
-        {
+        LOG_INFO << "Desired fps is " << fps << " changed to ~" << (1000 / fpsTimeout.count()) << " updating screen each "
+                 << fpsTimeout.count() << "ms.";
+        while (1) {
             std::chrono::high_resolution_clock::time_point before = std::chrono::high_resolution_clock::now();
             Singleton<ScreenManager>::i()->show();
             std::chrono::high_resolution_clock::time_point after = std::chrono::high_resolution_clock::now();
             std::chrono::high_resolution_clock::duration delta = after - before;
             if (delta > fpsTimeout) {
                 std::chrono::milliseconds renderTime = std::chrono::duration_cast<std::chrono::milliseconds>(delta);
-                LOG_INFO << "Dropped " << (delta / fpsTimeout) << " frames. Rendering took " << renderTime.count() << "ms." << " throttling " << renderTime.count() / fpsTimeout.count() << " frames.";
+                LOG_INFO << "Dropped " << (delta / fpsTimeout) << " frames. Rendering took " << renderTime.count() << "ms."
+                         << " throttling " << renderTime.count() / fpsTimeout.count() << " frames.";
                 before = after - std::chrono::milliseconds(delta.count() % fpsTimeout.count());
             }
             std::this_thread::sleep_until(before + fpsTimeout);
         }
     }
-    catch(const std::exception& e)
-    {
+    catch (const std::exception& e) {
         LOG_ERROR << e.what();
         return EXIT_FAILURE;
     }
-    catch(...) {
+    catch (...) {
         LOG_ERROR << "Unknown exception in UI";
         return EXIT_FAILURE;
     }

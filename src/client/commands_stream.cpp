@@ -17,16 +17,15 @@
  */
 
 #include "commands_stream.h"
-#include <common/command.h>
 #include "command_executor.h"
+#include <common/command.h>
 #include <common/log.h>
 
 using namespace aquabox;
 
 CommandsStream::CommandsStream(const std::string& url)
     : CloudStream(url)
-{
-}
+{}
 
 nlohmann::json CommandsStream::messageReceived(const nlohmann::json& message)
 {
@@ -39,11 +38,14 @@ nlohmann::json CommandsStream::messageReceived(const nlohmann::json& message)
         }
 
         return cmd.responseJson();
-    } catch (nlohmann::json::parse_error err) {
-        return nlohmann::json({ "error", err.what() }).dump(4);
-    } catch (std::exception err) {
-        return nlohmann::json({ "error", err.what() }).dump(4);
-    } catch (...) {
-        return nlohmann::json({ "error", "Something went wrong" }).dump(4);
+    }
+    catch (nlohmann::json::parse_error err) {
+        return nlohmann::json({"error", err.what()}).dump(4);
+    }
+    catch (std::exception err) {
+        return nlohmann::json({"error", err.what()}).dump(4);
+    }
+    catch (...) {
+        return nlohmann::json({"error", "Something went wrong"}).dump(4);
     }
 }

@@ -22,18 +22,19 @@
 #include <s2s.h>
 #include <string>
 
-namespace aquabox {
-class Bus {
-public:
-    inline Bus(const std::string& address)
-        : m_address(address)
+namespace aquabox
+{
+    class Bus
     {
-    }
-    virtual ~Bus() { }
-    virtual std::shared_ptr<Hardware> hw(const std::string& hw) = 0;
-    SignalSlot::Signal<std::shared_ptr<Hardware>, State> HardwareStateChanged;
+    public:
+        inline Bus(const std::string& address)
+            : m_address(address)
+        {}
+        virtual ~Bus() {}
+        virtual std::shared_ptr<Hardware> hw(const std::string& hw) = 0;
+        SignalSlot::Signal<std::shared_ptr<Hardware>, State> HardwareStateChanged;
 
-protected:
-    const std::string m_address;
-};
-}
+    protected:
+        const std::string m_address;
+    };
+} // namespace aquabox

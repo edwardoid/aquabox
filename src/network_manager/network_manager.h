@@ -20,17 +20,18 @@
 
 #include "network_change_reason.h"
 #include "network_manager_device_state.h"
+#include <common/singleton.h>
 #include <mutex>
 #include <nmdbus/AccessPoint.h>
+#include <nmdbus/Connection.h>
 #include <nmdbus/Device.h>
 #include <nmdbus/NetworkManager.h>
-#include <nmdbus/Connection.h>
 #include <s2s_property.h>
-#include <common/singleton.h>
 #include <string>
 #include <vector>
 
-struct WifiNetwork {
+struct WifiNetwork
+{
     std::string ssid;
     std::string password;
     std::string ip;
@@ -52,48 +53,52 @@ struct WifiNetwork {
     }
 };
 
-struct Connection : public WifiNetwork {
+struct Connection : public WifiNetwork
+{
     std::string uuid;
 };
 
-namespace nm {
-class ActiveConnection;
+namespace nm
+{
+    class ActiveConnection;
 }
-namespace aquabox {
-using NetworkingState = nm::NetworkingState;
+namespace aquabox
+{
+    using NetworkingState = nm::NetworkingState;
 
-class NetworkManager {
-protected:
-    NetworkManager();
-    ~NetworkManager();
-    friend Singleton<NetworkManager>;
+    class NetworkManager
+    {
+    protected:
+        NetworkManager();
+        ~NetworkManager();
+        friend Singleton<NetworkManager>;
 
-public:
-    bool connectedToInternet();
-    void setInterface(std::string interface);
-    bool requestScan(bool force = true);
-    SignalSlot::Property<Connection> currentConnection;
-    SignalSlot::Property<NetworkingState> currentState;
-    SignalSlot::Property<NetworkDeviceState> deviceState;
-    std::vector<WifiNetwork> networks();
-    std::string connect(const std::string& ssid, const std::string& password);
-    bool activateConnection(std::string uuid);
-    SignalSlot::Signal<size_t> NetworksChanged;
-    SignalSlot::Signal<> AuthentificationFailed;
-    SignalSlot::Signal<> ConnectingFailed;
-    void updateCurrentState(bool notify = true);
-    NetworkChangeReason changeReason() const;
+    public:
+        bool connectedToInternet();
+        void setInterface(std::string interface);
+        bool requestScan(bool force = true);
+        SignalSlot::Property<Connection> currentConnection;
+        SignalSlot::Property<NetworkingState> currentState;
+        SignalSlot::Property<NetworkDeviceState> deviceState;
+        std::vector<WifiNetwork> networks();
+        std::string connect(const std::string& ssid, const std::string& password);
+        bool activateConnection(std::string uuid);
+        SignalSlot::Signal<size_t> NetworksChanged;
+        SignalSlot::Signal<> AuthentificationFailed;
+        SignalSlot::Signal<> ConnectingFailed;
+        void updateCurrentState(bool notify = true);
+        NetworkChangeReason changeReason() const;
 
-private:
-    void reconnect();
-    void onActiveConnectionChanged(const std::vector<std::shared_ptr<nm::ActiveConnection>>&);
-    void onDeviceStateChanged(nm::NMDeviceState newState, nm::NMDeviceState oldState);
+    private:
+        void reconnect();
+        void onActiveConnectionChanged(const std::vector<std::shared_ptr<nm::ActiveConnection>>&);
+        void onDeviceStateChanged(nm::NMDeviceState newState, nm::NMDeviceState oldState);
 
-private:
-    NetworkChangeReason m_changeReason;
-    std::shared_ptr<nm::Device> m_dev;
-    std::string m_interface;
-    std::thread m_reconnectThread;
-    nm::NetworkManager m_nm;
-};
-}
+    private:
+        NetworkChangeReason m_changeReason;
+        std::shared_ptr<nm::Device> m_dev;
+        std::string m_interface;
+        std::thread m_reconnectThread;
+        nm::NetworkManager m_nm;
+    };
+} // namespace aquabox

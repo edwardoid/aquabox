@@ -19,16 +19,16 @@
 #pragma once
 
 #include <common/lockablemap.h>
-#include <types/rule.h>
 #include <memory>
+#include <types/rule.h>
 
 namespace aquabox
 {
-    class RulesMap: public LockableHashMap<std::string, std::shared_ptr<Rule>>
+    class RulesMap : public LockableHashMap<std::string, std::shared_ptr<Rule>>
     {
     public:
         bool addRule(std::shared_ptr<Rule> rule, bool replace);
         bool saveRule(const std::string& id);
         bool removeRule(const std::string& id);
     };
-}
+} // namespace aquabox

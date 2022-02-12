@@ -18,31 +18,34 @@
 
 #pragma once
 
-#include "bus.h"
 #include "../hermes/hermes_master.h"
+#include "bus.h"
 #include <map>
 #include <memory>
 #include <thread>
 
-namespace aquabox {
-namespace proto {
-    class MessageIO;
-}
+namespace aquabox
+{
+    namespace proto
+    {
+        class MessageIO;
+    }
 
-class HermesBus : public Bus {
-public:
-    HermesBus(const std::string& address);
-    virtual ~HermesBus();
-    void start();
-    std::shared_ptr<Hardware> hw(const std::string& hw) override;
+    class HermesBus : public Bus
+    {
+    public:
+        HermesBus(const std::string& address);
+        virtual ~HermesBus();
+        void start();
+        std::shared_ptr<Hardware> hw(const std::string& hw) override;
 
-protected:
-    virtual void loop() = 0;
-    virtual void newConnection(std::shared_ptr<proto::MessageIO> io, const HermesSerial& serial);
-    virtual void reconnected(const HermesSerial& serial);
+    protected:
+        virtual void loop() = 0;
+        virtual void newConnection(std::shared_ptr<proto::MessageIO> io, const HermesSerial& serial);
+        virtual void reconnected(const HermesSerial& serial);
 
-private:
-    std::thread m_thread;
-    std::map<int, std::shared_ptr<class HermesHardware>> m_master;
-};
-}
+    private:
+        std::thread m_thread;
+        std::map<int, std::shared_ptr<class HermesHardware>> m_master;
+    };
+} // namespace aquabox

@@ -18,9 +18,9 @@
 
 #pragma once
 
-#include <unordered_map>
-#include <memory>
 #include "server_aquabox_connection.h"
+#include <memory>
+#include <unordered_map>
 
 namespace aquabox
 {
@@ -29,6 +29,7 @@ namespace aquabox
     public:
         ServerConnection() = default;
         std::shared_ptr<CommandHandler> get(const std::string& id);
+
     private:
         std::unordered_map<std::string, std::shared_ptr<ServerAquaboxConnection>> m_openConnections;
     };

@@ -20,6 +20,7 @@
 
 #include <nmdbus/Device.h>
 
-namespace aquabox {
-using NetworkDeviceState = nm::NMDeviceState;
+namespace aquabox
+{
+    using NetworkDeviceState = nm::NMDeviceState;
 }

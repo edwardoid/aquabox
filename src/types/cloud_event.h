@@ -20,9 +20,11 @@
 
 #include <types/box_event.h>
 
-namespace aquabox {
-class CloudEvent : public BoxEvent {
-public:
-    CloudEvent(bool online);
-};
-}
+namespace aquabox
+{
+    class CloudEvent : public BoxEvent
+    {
+    public:
+        CloudEvent(bool online);
+    };
+} // namespace aquabox

@@ -17,19 +17,20 @@
  */
 
 #include "rules_manager.h"
-#include <rpc/converters.h>
-#include <services/service_identifier.h>
-#include <services/settings.h>
-#include <rules.grpc.pb.h>
 #include "micro_service.h"
 #include "services.h"
+#include <rpc/converters.h>
+#include <rules.grpc.pb.h>
+#include <services/service_identifier.h>
+#include <services/settings.h>
 
 using namespace aquabox;
 
-class RulesManagerImpl : public IRulesManager {
+class RulesManagerImpl : public IRulesManager
+{
 public:
     RulesManagerImpl();
-    virtual ~RulesManagerImpl() { }
+    virtual ~RulesManagerImpl() {}
     virtual Rule get(const std::string& id) override;
     virtual bool add(const Rule& rule) override;
     virtual bool update(const Rule& rule) override;
@@ -37,23 +38,23 @@ public:
     virtual std::vector<Rule> all() override;
 };
 
-template <>
+template<>
 IRulesManager* Singleton<IRulesManager>::create()
 {
     return new RulesManagerImpl();
 }
 
-namespace {
-services::MicroService<services::RulesService>& client()
+namespace
 {
-    static services::MicroService<services::RulesService> c(
-        Singleton<ISettings>::i()->port(
-            services::RulesService::service_full_name()));
-    return c;
-}
+    services::MicroService<services::RulesService>& client()
+    {
+        static services::MicroService<services::RulesService> c(
+            Singleton<ISettings>::i()->port(services::RulesService::service_full_name()));
+        return c;
+    }
 } // namespace
 
-RulesManagerImpl::RulesManagerImpl() { }
+RulesManagerImpl::RulesManagerImpl() {}
 
 Rule RulesManagerImpl::get(const std::string& id)
 {
@@ -113,8 +114,7 @@ std::vector<Rule> RulesManagerImpl::all()
     auto c = client();
     std::vector<Rule> res;
     google::protobuf::Empty e;
-    std::unique_ptr<grpc::ClientReader<services::RuleData>> reader(
-        c->GetAll(&cxt, e));
+    std::unique_ptr<grpc::ClientReader<services::RuleData>> reader(c->GetAll(&cxt, e));
     services::RuleData data;
     while (reader->Read(&data)) {
         res.push_back(services::Converter<services::RuleData, Rule>::convert(data));

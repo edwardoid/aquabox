@@ -18,22 +18,24 @@
 
 #pragma once
 
+#include <boost/filesystem.hpp>
 #include <framebuffer.h>
 #include <pngimage.h>
 #include <pngprovider.h>
-#include <boost/filesystem.hpp>
 
-namespace aquabox {
-class Screen {
-public:
-    Screen() = default;
-    static const boost::filesystem::path& resource(const std::string& name);
-    static const boost::filesystem::path& asset(const std::string& name);
-    static const boost::filesystem::path& font(const std::string& name);
-    static std::shared_ptr<LIBFB_NS::PNGImage> pixmap(const std::string& name);
-    void show();
+namespace aquabox
+{
+    class Screen
+    {
+    public:
+        Screen() = default;
+        static const boost::filesystem::path& resource(const std::string& name);
+        static const boost::filesystem::path& asset(const std::string& name);
+        static const boost::filesystem::path& font(const std::string& name);
+        static std::shared_ptr<LIBFB_NS::PNGImage> pixmap(const std::string& name);
+        void show();
 
-protected:
-    virtual void draw() = 0;
-};
-}
+    protected:
+        virtual void draw() = 0;
+    };
+} // namespace aquabox

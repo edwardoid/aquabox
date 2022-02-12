@@ -7,16 +7,14 @@ bool ApplicationStreams::hasConnectionToBox(const std::string& box)
     return m_connections.count(box) > 0;
 }
 
-std::shared_ptr<ApplicationStreams::Connection>
-ApplicationStreams::getConnectionToBox(const std::string& box)
+std::shared_ptr<ApplicationStreams::Connection> ApplicationStreams::getConnectionToBox(const std::string& box)
 {
     return m_connections[box];
 }
 
-void ApplicationStreams::addConnectionTo(
-    const std::string& box, std::shared_ptr<Connection> connection)
+void ApplicationStreams::addConnectionTo(const std::string& box, std::shared_ptr<Connection> connection)
 {
-    m_connections.insert({ box, connection });
+    m_connections.insert({box, connection});
 }
 
 bool ApplicationStreams::removeConnectionTo(const std::string& box)

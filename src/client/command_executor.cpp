@@ -17,16 +17,16 @@
  */
 
 #include "command_executor.h"
-#include <types/rule.h>
-#include <types/types.h>
 #include "aquabox.h"
 #include "cloud.h"
-#include <types/update_events.h>
-#include <micro_clients/settings.h>
-#include <micro_clients/devices_manager.h>
-#include <micro_clients/rules_manager.h>
-#include <micro_clients/network_manager.h>
 #include <boost/asio/ip/host_name.hpp>
+#include <micro_clients/devices_manager.h>
+#include <micro_clients/network_manager.h>
+#include <micro_clients/rules_manager.h>
+#include <micro_clients/settings.h>
+#include <types/rule.h>
+#include <types/types.h>
+#include <types/update_events.h>
 
 using namespace aquabox;
 
@@ -96,7 +96,7 @@ bool CommandExecutor::exec(const Command& cmd)
         break;
     }
     default: {
-        LOG_ERROR << "Unsupported operation " << (int)(cmd.operation());
+        LOG_ERROR << "Unsupported operation " << (int) (cmd.operation());
     }
     }
     const_cast<Command&>(cmd) = m_cmd;
@@ -105,43 +105,38 @@ bool CommandExecutor::exec(const Command& cmd)
 
 bool CommandExecutor::GetStatus()
 {
-    nlohmann::json host(
-        { { "rest", Singleton<ISettings>::i()->get(Settings::Keys::HTTP_PORT, Settings::Defaults::REST_PORT) },
-            { "stream", Singleton<ISettings>::i()->get(Settings::Keys::STREAM_PORT, Settings::Defaults::WS_PORT) },
-            { "serial", SERIAL_NUMBER } });
+    nlohmann::json host({{"rest", Singleton<ISettings>::i()->get(Settings::Keys::HTTP_PORT, Settings::Defaults::REST_PORT)},
+                         {"stream", Singleton<ISettings>::i()->get(Settings::Keys::STREAM_PORT, Settings::Defaults::WS_PORT)},
+                         {"serial", SERIAL_NUMBER}});
 
     auto network = Singleton<INetworkManager>::i()->currentNetwork();
-    host["network"] = nlohmann::json({ { "ssid", network.ssid },
-        { "ip", network.ip },
-        { "internet", Singleton<INetworkManager>::i()->hasInternetConnection() } });
+    host["network"] = nlohmann::json(
+        {{"ssid", network.ssid}, {"ip", network.ip}, {"internet", Singleton<INetworkManager>::i()->hasInternetConnection()}});
 
     host["host"] = boost::asio::ip::host_name();
 
     host["config"] = Singleton<AquaBox>::get()->configurationData();
 
     auto cloud = Singleton<Cloud>::i();
-    bool isRegistered = cloud == nullptr ? false : (bool)cloud->isRegistered;
+    bool isRegistered = cloud == nullptr ? false : (bool) cloud->isRegistered;
 
-    m_cmd.response(nlohmann::json({ { "aquabox", host },
-                       { "status", "online" },
-                       { "registered", isRegistered } }),
-        Result::Ok);
+    m_cmd.response(nlohmann::json({{"aquabox", host}, {"status", "online"}, {"registered", isRegistered}}), Result::Ok);
     return true;
 }
 
 bool CommandExecutor::GetDevices()
 {
     std::vector<nlohmann::json> all;
-    for(auto& dev : Singleton<IDevicesManager>::i()->all()) {
+    for (auto& dev : Singleton<IDevicesManager>::i()->all()) {
         nlohmann::json json = dev;
 
-        for(auto& p : Singleton<IDevicesManager>::i()->properties(dev.id())) {
+        for (auto& p : Singleton<IDevicesManager>::i()->properties(dev.id())) {
             json[p] = Singleton<IDevicesManager>::i()->value(dev.id(), p);
         }
         all.push_back(json);
     };
 
-    m_cmd.response(nlohmann::json({ { "devices", all } }), Result::Ok);
+    m_cmd.response(nlohmann::json({{"devices", all}}), Result::Ok);
     return true;
 }
 
@@ -163,7 +158,7 @@ bool CommandExecutor::GetDevice()
     }
 
     nlohmann::json data = dev;
-    for(auto& p : Singleton<IDevicesManager>::i()->properties(id)) {
+    for (auto& p : Singleton<IDevicesManager>::i()->properties(id)) {
         data[p] = Singleton<IDevicesManager>::i()->value(id, p);
     }
 
@@ -184,7 +179,8 @@ bool CommandExecutor::UpdateDevice()
     DeviceRef d;
     try {
         d = m_cmd.request();
-    } catch (nlohmann::detail::parse_error& e) {
+    }
+    catch (nlohmann::detail::parse_error& e) {
         nlohmann::json data;
         data["request"] = m_cmd.request();
         data["error"] = e.what();
@@ -195,7 +191,7 @@ bool CommandExecutor::UpdateDevice()
 
     auto src = Singleton<IDevicesManager>::i()->get(id);
 
-    if(src.id().empty()) {
+    if (src.id().empty()) {
         LOG_ERROR << "No device " << id << " not found";
         m_cmd.response(Result::NotFound);
         return true;
@@ -203,13 +199,14 @@ bool CommandExecutor::UpdateDevice()
 
     nlohmann::json before = src;
 
-    for(auto& p : Singleton<IDevicesManager>::i()->properties(id)) {
+    for (auto& p : Singleton<IDevicesManager>::i()->properties(id)) {
         before[p] = Singleton<IDevicesManager>::i()->value(id, p);
     }
 
-    if(Singleton<IDevicesManager>::i()->update(d)) {
+    if (Singleton<IDevicesManager>::i()->update(d)) {
         m_cmd.response(Result::Ok);
-    } else {
+    }
+    else {
         m_cmd.response(Result::ServerError);
     }
 
@@ -219,8 +216,7 @@ bool CommandExecutor::UpdateDevice()
 bool CommandExecutor::GetRules()
 {
     std::vector<nlohmann::json> all;
-    for(const Rule& rule : Singleton<IRulesManager>::i()->all())
-    {
+    for (const Rule& rule : Singleton<IRulesManager>::i()->all()) {
         nlohmann::json data = rule;
         all.push_back(data);
     };
@@ -241,7 +237,8 @@ bool CommandExecutor::GetRule()
 
     if (rule.id() != id) {
         m_cmd.response(Result::NotFound);
-    } else {
+    }
+    else {
         nlohmann::json data = rule;
         m_cmd.response(data, Result::Ok);
     }
@@ -259,7 +256,8 @@ bool CommandExecutor::CreateOrUpdateRule(bool update)
     Rule r;
     try {
         r = m_cmd.request();
-    } catch (nlohmann::detail::parse_error& e) {
+    }
+    catch (nlohmann::detail::parse_error& e) {
         LOG_ERROR << "Rule can not be parsed because: " << e.what();
         m_cmd.response(e.what(), Result::BadCommand);
         return true;
@@ -287,7 +285,8 @@ bool CommandExecutor::DeleteRule()
     if (Singleton<IRulesManager>::i()->remove(id)) {
         LOG_DEBUG << "Rule " << id << " removed";
         m_cmd.response(Result::Ok);
-    } else {
+    }
+    else {
         LOG_ERROR << "Rule " << id << " removal failed";
         m_cmd.response(Result::ServerError);
     }
@@ -313,7 +312,7 @@ bool CommandExecutor::DeviceRules()
         }
     });
 
-    nlohmann::json res({ { "rules", all }, { "device", dev } });
+    nlohmann::json res({{"rules", all}, {"device", dev}});
     m_cmd.response(res, Result::Ok);
     return true;
 }
@@ -321,7 +320,7 @@ bool CommandExecutor::DeviceRules()
 bool CommandExecutor::SupportedRepeatTimeouts()
 {
     nlohmann::json res;
-    res["units"] = std::vector<std::string>({ "hour" });
+    res["units"] = std::vector<std::string>({"hour"});
     m_cmd.response(res, Result::Ok);
     return true;
 }
@@ -350,10 +349,11 @@ bool CommandExecutor::SetValue()
     for (auto v : changes) {
         std::string property = v["property"].get<std::string>();
 
-        if(Singleton<IDevicesManager>::i()->set(id, property, v["value"])) {
+        if (Singleton<IDevicesManager>::i()->set(id, property, v["value"])) {
             data[property] = Singleton<IDevicesManager>::i()->value(id, property);
             LOG_INFO << "Updated value for " << property << " to be " << data[property].dump();
-        } else {
+        }
+        else {
             LOG_ERROR << "Can't set " << property << " to be " << v["value"].dump();
         }
     }
@@ -368,7 +368,7 @@ bool CommandExecutor::ScanWiFiNetworks()
 {
     bool res = Singleton<INetworkManager>::i()->startScan();
 
-    m_cmd.response(nlohmann::json({ { "requestResult", res } }), Result::Ok);
+    m_cmd.response(nlohmann::json({{"requestResult", res}}), Result::Ok);
     return true;
 }
 
@@ -377,16 +377,11 @@ bool CommandExecutor::ListNetworks()
     std::vector<nlohmann::json> nets;
 
     for (auto& net : Singleton<INetworkManager>::i()->availableNetworks()) {
-        nets.emplace_back(nlohmann::json(
-            { { "ssid", net.ssid },
-                { "ip", net.ip },
-                { "auth", net.auth },
-                { "encrypted", net.secure },
-                { "signal", net.strength } }));
+        nets.emplace_back(
+            nlohmann::json({{"ssid", net.ssid}, {"ip", net.ip}, {"auth", net.auth}, {"encrypted", net.secure}, {"signal", net.strength}}));
     }
 
-    m_cmd.response(nlohmann::json({ { "networks", nets }, { "count", nets.size() } }),
-        Result::Ok);
+    m_cmd.response(nlohmann::json({{"networks", nets}, {"count", nets.size()}}), Result::Ok);
     return true;
 }
 
@@ -410,9 +405,9 @@ bool CommandExecutor::ConnectToWiFi()
 
     std::string uuid = Singleton<INetworkManager>::i()->connect(ssidStr, passwordStr);
 
-    if(uuid.empty())
+    if (uuid.empty())
         m_cmd.response(Result::NotFound);
     else
-        m_cmd.response({ { "uuid", uuid } }, Result::Ok);
+        m_cmd.response({{"uuid", uuid}}, Result::Ok);
     return true;
 }

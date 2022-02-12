@@ -21,9 +21,11 @@
 #include <memory>
 #include <string>
 
-namespace aquabox {
-class HermesDeviceBuilder {
-public:
-    static std::shared_ptr<class Device> build(std::string busPath, std::shared_ptr<class HermesMaster> master);
-};
-}
+namespace aquabox
+{
+    class HermesDeviceBuilder
+    {
+    public:
+        static std::shared_ptr<class Device> build(std::string busPath, std::shared_ptr<class HermesMaster> master);
+    };
+} // namespace aquabox

@@ -22,15 +22,17 @@
 #include <memory>
 #include <string>
 
-namespace aquabox {
-class Layer {
-public:
-    Layer(const std::string& address);
-    virtual ~Layer();
-    static std::shared_ptr<Layer> get(const std::string& layer);
-    virtual std::shared_ptr<Bus> bus(const std::string& bus) = 0;
+namespace aquabox
+{
+    class Layer
+    {
+    public:
+        Layer(const std::string& address);
+        virtual ~Layer();
+        static std::shared_ptr<Layer> get(const std::string& layer);
+        virtual std::shared_ptr<Bus> bus(const std::string& bus) = 0;
 
-protected:
-    const std::string m_address;
-};
-}
+    protected:
+        const std::string m_address;
+    };
+} // namespace aquabox

@@ -16,8 +16,8 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <common/log.h>
 #include "telegram_bot.h"
+#include <common/log.h>
 #include <iostream>
 
 #include <services/events.h>

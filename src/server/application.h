@@ -20,10 +20,12 @@
 
 #include "command.h"
 
-namespace aquabox {
-class Application {
-public:
-    bool isAuthorized(std::string box);
-    Command& runCommand(std::string box, Command& cmd);
-};
-}
+namespace aquabox
+{
+    class Application
+    {
+    public:
+        bool isAuthorized(std::string box);
+        Command& runCommand(std::string box, Command& cmd);
+    };
+} // namespace aquabox

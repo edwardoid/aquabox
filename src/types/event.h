@@ -20,8 +20,9 @@
 
 #include <nlohmann/json.hpp>
 
-namespace aquabox {
-/*
+namespace aquabox
+{
+    /*
         {
             "sender": "id",
             "class" : "device"
@@ -30,18 +31,19 @@ namespace aquabox {
             }
         }
     */
-class Event {
-public:
-    Event();
-    void setSender(std::string sender, std::string _class);
-    void setData(const nlohmann::json& data);
-    void setPropertiesUpdate(const nlohmann::json& update);
-    nlohmann::json serialize() const;
+    class Event
+    {
+    public:
+        Event();
+        void setSender(std::string sender, std::string _class);
+        void setData(const nlohmann::json& data);
+        void setPropertiesUpdate(const nlohmann::json& update);
+        nlohmann::json serialize() const;
 
-private:
-    std::string m_sender;
-    std::string m_class;
-    nlohmann::json m_data;
-    nlohmann::json m_properties;
-};
-}
+    private:
+        std::string m_sender;
+        std::string m_class;
+        nlohmann::json m_data;
+        nlohmann::json m_properties;
+    };
+} // namespace aquabox

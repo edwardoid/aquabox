@@ -23,57 +23,53 @@
 
 using namespace aquabox;
 
-template <>
-Serializable<Operation>::Enum2StrMap Serializable<Operation>::val2Str(
-    { { Operation::GetStatus, "get_status" },
-        { Operation::GetDevices, "get_all_devices" },
-        { Operation::GetDevice, "get_device" },
-        { Operation::UpdateDevice, "update_device" },
-        { Operation::GetRules, "get_rules" },
-        { Operation::GetRule, "get_rule" },
-        { Operation::CreateRule, "create_rule" },
-        { Operation::UpdateRule, "update_rule" },
-        { Operation::DeleteRule, "delete_rule" },
-        { Operation::DeviceRules, "get_device_rules" },
-        { Operation::ScanWiFiNetworks, "scan" },
-        { Operation::ConnectToWiFi, "connect" },
-        { Operation::WiFiNetworks, "networks" },
-        { Operation::SupportedRepeatTimeouts, "repeat_units" },
-        { Operation::Set, "set" } });
+template<>
+Serializable<Operation>::Enum2StrMap Serializable<Operation>::val2Str({{Operation::GetStatus, "get_status"},
+                                                                       {Operation::GetDevices, "get_all_devices"},
+                                                                       {Operation::GetDevice, "get_device"},
+                                                                       {Operation::UpdateDevice, "update_device"},
+                                                                       {Operation::GetRules, "get_rules"},
+                                                                       {Operation::GetRule, "get_rule"},
+                                                                       {Operation::CreateRule, "create_rule"},
+                                                                       {Operation::UpdateRule, "update_rule"},
+                                                                       {Operation::DeleteRule, "delete_rule"},
+                                                                       {Operation::DeviceRules, "get_device_rules"},
+                                                                       {Operation::ScanWiFiNetworks, "scan"},
+                                                                       {Operation::ConnectToWiFi, "connect"},
+                                                                       {Operation::WiFiNetworks, "networks"},
+                                                                       {Operation::SupportedRepeatTimeouts, "repeat_units"},
+                                                                       {Operation::Set, "set"}});
 
-template <>
-Serializable<Operation>::Str2EnumMap Serializable<Operation>::str2Val(
-    { { "get_status", Operation::GetStatus },
-        { "get_all_devices", Operation::GetDevices },
-        { "get_device", Operation::GetDevice },
-        { "update_device", Operation::UpdateDevice },
-        { "get_rules", Operation::GetRules },
-        { "get_rule", Operation::GetRule },
-        { "create_rule", Operation::CreateRule },
-        { "update_rule", Operation::UpdateRule },
-        { "delete_rule", Operation::DeleteRule },
-        { "get_device_rules", Operation::DeviceRules },
-        { "scan", Operation::ScanWiFiNetworks },
-        { "networks", Operation::WiFiNetworks },
-        { "connect", Operation::ConnectToWiFi },
-        { "repeat_units", Operation::SupportedRepeatTimeouts },
-        { "set", Operation::Set } });
+template<>
+Serializable<Operation>::Str2EnumMap Serializable<Operation>::str2Val({{"get_status", Operation::GetStatus},
+                                                                       {"get_all_devices", Operation::GetDevices},
+                                                                       {"get_device", Operation::GetDevice},
+                                                                       {"update_device", Operation::UpdateDevice},
+                                                                       {"get_rules", Operation::GetRules},
+                                                                       {"get_rule", Operation::GetRule},
+                                                                       {"create_rule", Operation::CreateRule},
+                                                                       {"update_rule", Operation::UpdateRule},
+                                                                       {"delete_rule", Operation::DeleteRule},
+                                                                       {"get_device_rules", Operation::DeviceRules},
+                                                                       {"scan", Operation::ScanWiFiNetworks},
+                                                                       {"networks", Operation::WiFiNetworks},
+                                                                       {"connect", Operation::ConnectToWiFi},
+                                                                       {"repeat_units", Operation::SupportedRepeatTimeouts},
+                                                                       {"set", Operation::Set}});
 
-template <>
-Serializable<Result>::Enum2StrMap
-    Serializable<Result>::val2Str({ { Result::BadCommand, "bad_command" },
-        { Result::AccessDenied, "access_denied" },
-        { Result::NotFound, "not_found" },
-        { Result::ServerError, "server_error" },
-        { Result::Ok, "ok" } });
+template<>
+Serializable<Result>::Enum2StrMap Serializable<Result>::val2Str({{Result::BadCommand, "bad_command"},
+                                                                 {Result::AccessDenied, "access_denied"},
+                                                                 {Result::NotFound, "not_found"},
+                                                                 {Result::ServerError, "server_error"},
+                                                                 {Result::Ok, "ok"}});
 
-template <>
-Serializable<Result>::Str2EnumMap
-    Serializable<Result>::str2Val({ { "bad_command", Result::BadCommand },
-        { "access_denied", Result::AccessDenied },
-        { "not_found", Result::NotFound },
-        { "server_error", Result::ServerError },
-        { "ok", Result::Ok } });
+template<>
+Serializable<Result>::Str2EnumMap Serializable<Result>::str2Val({{"bad_command", Result::BadCommand},
+                                                                 {"access_denied", Result::AccessDenied},
+                                                                 {"not_found", Result::NotFound},
+                                                                 {"server_error", Result::ServerError},
+                                                                 {"ok", Result::Ok}});
 
 Command::Command(const Command& src)
     : m_seqNum(src.m_seqNum)
@@ -82,8 +78,7 @@ Command::Command(const Command& src)
     , m_response(src.m_response)
     , m_result(src.m_result)
     , m_operation(src.m_operation)
-{
-}
+{}
 
 const Command& Command::operator=(const Command& src)
 {
@@ -104,31 +99,41 @@ bool Command::validate(const nlohmann::json& obj)
     return handler.error().empty();
 }
 
-void Command::setSeqNum(int num) { m_seqNum = num; }
+void Command::setSeqNum(int num)
+{
+    m_seqNum = num;
+}
 
-int Command::seqNum() const { return m_seqNum; }
+int Command::seqNum() const
+{
+    return m_seqNum;
+}
 
-void Command::setRequest(const nlohmann::json& request) { m_request = request; }
+void Command::setRequest(const nlohmann::json& request)
+{
+    m_request = request;
+}
 
-const nlohmann::json& Command::request() const { return m_request; }
+const nlohmann::json& Command::request() const
+{
+    return m_request;
+}
 
-void Command::setParameters(
-    const std::unordered_map<std::string, std::string>& params)
+void Command::setParameters(const std::unordered_map<std::string, std::string>& params)
 {
     for (auto p : params) {
-        m_params.insert({ p.first, p.second });
+        m_params.insert({p.first, p.second});
     }
 }
 
-const std::unordered_map<std::string, std::string>&
-Command::parameters() const
+const std::unordered_map<std::string, std::string>& Command::parameters() const
 {
     return m_params;
 }
 
 void Command::setParameter(std::string name, std::string value)
 {
-    m_params.insert({ name, value });
+    m_params.insert({name, value});
 }
 
 bool Command::hasParameter(std::string name) const
@@ -146,9 +151,15 @@ std::string Command::getParameter(std::string name) const
     return p->second;
 }
 
-void Command::setOperation(Operation op) { m_operation = op; }
+void Command::setOperation(Operation op)
+{
+    m_operation = op;
+}
 
-Operation Command::operation() const { return m_operation; }
+Operation Command::operation() const
+{
+    return m_operation;
+}
 
 void Command::response(const nlohmann::json& response, Result result)
 {
@@ -162,9 +173,15 @@ void Command::response(Result result)
     response(NoData, result);
 }
 
-const nlohmann::json& Command::response() const { return m_response; }
+const nlohmann::json& Command::response() const
+{
+    return m_response;
+}
 
-Result Command::result() const { return m_result; }
+Result Command::result() const
+{
+    return m_result;
+}
 
 nlohmann::json Command::responseJson() const
 {

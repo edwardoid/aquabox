@@ -18,10 +18,10 @@
 
 #pragma once
 
+#include <common/singleton.h>
 #include <services/events.h>
 #include <types/box_event.h>
 #include <types/update_events.h>
-#include <common/singleton.h>
 
 namespace aquabox
 {

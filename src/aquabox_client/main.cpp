@@ -16,11 +16,11 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "AquaboxClientServer.h"
 #include <common/singleton.h>
+#include <grpcpp/server_builder.h>
 #include <micro_clients/settings.h>
 #include <services/rpc_application.h>
-#include "AquaboxClientServer.h"
-#include <grpcpp/server_builder.h>
 
 int main(int argc, const char** argv)
 {

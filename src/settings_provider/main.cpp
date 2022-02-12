@@ -20,10 +20,12 @@
 #include <grpcpp/server_builder.h>
 #include <services/application.h>
 
-class SettingsApp: public aquabox::Application
+class SettingsApp : public aquabox::Application
 {
 public:
-    SettingsApp(): aquabox::Application("settings") {}
+    SettingsApp()
+        : aquabox::Application("settings")
+    {}
     virtual int start() override
     {
         aquabox::services::SettingsProviderServer service(500500);

@@ -24,15 +24,19 @@ using namespace aquabox;
 Timer::Timer(std::string name)
     : m_state(State::Idle)
     , m_name(name)
+{}
+
+Timer::~Timer()
 {
+    stop();
 }
 
-Timer::~Timer() { stop(); }
+const std::string& Timer::name() const
+{
+    return m_name;
+}
 
-const std::string& Timer::name() const { return m_name; }
-
-bool Timer::start(std::function<void(const ClockTimePoint&)>&& callback,
-    std::chrono::milliseconds timeout)
+bool Timer::start(std::function<void(const ClockTimePoint&)>&& callback, std::chrono::milliseconds timeout)
 {
     if (m_state.load() != State::Idle) {
         LOG_ERROR << "Timer \"" << m_name << "\" is already running";
@@ -58,7 +62,10 @@ void Timer::stop()
     wait();
 }
 
-void Timer::wait() { m_thread.join(); }
+void Timer::wait()
+{
+    m_thread.join();
+}
 
 void Timer::run()
 {
@@ -76,12 +83,12 @@ void Timer::run()
         try {
             ClockTimePoint now = Clock::now();
             m_callback(now);
-        } catch (std::exception e) {
-            LOG_ERROR << "Exception occured in timer \"" << m_name
-                      << "\" details: " << e.what();
-        } catch (...) {
-            LOG_ERROR << "Exception occured in timer \"" << m_name
-                      << "\" details: " << strerror(errno);
+        }
+        catch (std::exception e) {
+            LOG_ERROR << "Exception occured in timer \"" << m_name << "\" details: " << e.what();
+        }
+        catch (...) {
+            LOG_ERROR << "Exception occured in timer \"" << m_name << "\" details: " << strerror(errno);
         }
 
         std::this_thread::sleep_until(next);

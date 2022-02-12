@@ -18,9 +18,9 @@
 
 #include "server_aquabox_connection.h"
 #include <client_http.hpp>
-#include <sstream>
 #include <common/log.h>
 #include <micro_clients/settings.h>
+#include <sstream>
 
 using namespace aquabox;
 
@@ -46,28 +46,28 @@ void ServerAquaboxConnection::runCommand(Command cmd, std::function<void(const C
     SimpleWeb::Client<SimpleWeb::HTTP> client(baseUrl);
 
     // Asynchronous request example
-    client.request("GET", "/api/v1/devices", cmd.responseJson().dump(),
-        { { "boxId", m_id }, { "appId", "aquaboxTgBot" } },
-        [cmd, onResult](std::shared_ptr<SimpleWeb::Client<SimpleWeb::HTTP>::Response> response, const SimpleWeb::error_code &ec) {
-        try {
-            std::stringstream ss;
-            ss << response->content.rdbuf();
-            LOG_DEBUG << "API response" << ss.str();
-            (const_cast<Command&>(cmd)).response(nlohmann::json::parse(ss.str()), Result::Ok);
-            onResult(cmd, true);
-        }
-        catch(...) {
-            (const_cast<Command&>(cmd)).response(Result::ServerError);
-            onResult(cmd, false);
-        }
-    });
+    client.request("GET",
+                   "/api/v1/devices",
+                   cmd.responseJson().dump(),
+                   {{"boxId", m_id}, {"appId", "aquaboxTgBot"}},
+                   [cmd, onResult](std::shared_ptr<SimpleWeb::Client<SimpleWeb::HTTP>::Response> response, const SimpleWeb::error_code& ec) {
+                       try {
+                           std::stringstream ss;
+                           ss << response->content.rdbuf();
+                           LOG_DEBUG << "API response" << ss.str();
+                           (const_cast<Command&>(cmd)).response(nlohmann::json::parse(ss.str()), Result::Ok);
+                           onResult(cmd, true);
+                       }
+                       catch (...) {
+                           (const_cast<Command&>(cmd)).response(Result::ServerError);
+                           onResult(cmd, false);
+                       }
+                   });
 
     client.io_service->run();
 }
 
 void ServerAquaboxConnection::runCommand(Command cmd, MessageFormatter&& onResult)
 {
-    runCommand(cmd, [&onResult](const Command& cmd, bool ok) {
-        onResult(cmd, ok);
-    });
+    runCommand(cmd, [&onResult](const Command& cmd, bool ok) { onResult(cmd, ok); });
 }

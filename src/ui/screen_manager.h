@@ -23,23 +23,25 @@
 #include "scan_screen.h"
 #include "stats_screen.h"
 #include <common/singleton.h>
-namespace aquabox {
-class ScreenManager {
-protected:
-    ScreenManager();
-    friend Singleton<ScreenManager>;
+namespace aquabox
+{
+    class ScreenManager
+    {
+    protected:
+        ScreenManager();
+        friend Singleton<ScreenManager>;
 
-public:
-    void show();
+    public:
+        void show();
 
-private:
-    void init();
+    private:
+        void init();
 
-private:
-    MainScreen m_main;
-    ScanScreen m_scan;
-    StatsScreen m_stats;
-    CloudScreen m_cloudScreen;
-    NetworkChangeScreen m_networkChangeScreen;
-};
-}
+    private:
+        MainScreen m_main;
+        ScanScreen m_scan;
+        StatsScreen m_stats;
+        CloudScreen m_cloudScreen;
+        NetworkChangeScreen m_networkChangeScreen;
+    };
+} // namespace aquabox

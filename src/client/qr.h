@@ -20,9 +20,11 @@
 
 #include <string>
 
-namespace qr {
-class Qr {
-public:
-    static bool create(std::string data, std::string pngPath, double zoomFactor = 1.);
-};
-}
+namespace qr
+{
+    class Qr
+    {
+    public:
+        static bool create(std::string data, std::string pngPath, double zoomFactor = 1.);
+    };
+} // namespace qr

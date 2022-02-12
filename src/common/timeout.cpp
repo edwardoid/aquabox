@@ -31,12 +31,15 @@ void Timeout::setTimeout(std::chrono::milliseconds timeout)
     m_timeout = timeout;
 }
 
-const std::chrono::milliseconds Timeout::timeout() const { return m_timeout; }
+const std::chrono::milliseconds Timeout::timeout() const
+{
+    return m_timeout;
+}
 
 size_t Timeout::expired() const
 {
-    std::chrono::milliseconds delta = std::chrono::duration_cast<std::chrono::milliseconds>(
-        std::chrono::high_resolution_clock::now() - m_lastPoint);
+    std::chrono::milliseconds delta = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now()
+                                                                                            - m_lastPoint);
     return delta.count() / m_timeout.count();
 }
 

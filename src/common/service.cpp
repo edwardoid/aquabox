@@ -19,5 +19,4 @@
 
 using namespace aquabox;
 
-std::map<uint32_t, std::map<uint32_t, class AbstractService*>>
-    Services::m_services;
+std::map<uint32_t, std::map<uint32_t, class AbstractService*>> Services::m_services;

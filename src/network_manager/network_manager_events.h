@@ -18,31 +18,36 @@
 
 #pragma once
 
-#include <nmdbus/Device.h>
-#include <nmdbus/AccessPoint.h>
-#include <types/network_event.h>
 #include "network_manager.h"
+#include <nmdbus/AccessPoint.h>
+#include <nmdbus/Device.h>
+#include <types/network_event.h>
 
-namespace aquabox {
+namespace aquabox
+{
     using NetworkDeviceState = nm::NMDeviceState;
 
-class NetworkDeviceStateEvent : public NetworkEvent {
-public:
-    NetworkDeviceStateEvent(const nm::NMDeviceState& state);
-};
+    class NetworkDeviceStateEvent : public NetworkEvent
+    {
+    public:
+        NetworkDeviceStateEvent(const nm::NMDeviceState& state);
+    };
 
-class NetworkChangedEvent : public NetworkEvent {
-public:
-    NetworkChangedEvent(const Connection& connection);
-};
+    class NetworkChangedEvent : public NetworkEvent
+    {
+    public:
+        NetworkChangedEvent(const Connection& connection);
+    };
 
-class NetworkConnectionFailedEvent : public NetworkEvent {
-public:
-    NetworkConnectionFailedEvent();
-};
+    class NetworkConnectionFailedEvent : public NetworkEvent
+    {
+    public:
+        NetworkConnectionFailedEvent();
+    };
 
-class NetworkAuthentifiationFailedEvent : public NetworkEvent {
-public:
-    NetworkAuthentifiationFailedEvent();
-};
-}
+    class NetworkAuthentifiationFailedEvent : public NetworkEvent
+    {
+    public:
+        NetworkAuthentifiationFailedEvent();
+    };
+} // namespace aquabox

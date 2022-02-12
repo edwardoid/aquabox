@@ -21,13 +21,15 @@
 #include <types/rule.h>
 #include <vector>
 
-namespace aquabox {
-class IRulesManager {
-public:
-    virtual Rule get(const std::string& id) = 0;
-    virtual bool add(const Rule& rule) = 0;
-    virtual bool update(const Rule& rule) = 0;
-    virtual bool remove(const std::string& id) = 0;
-    virtual std::vector<Rule> all() = 0;
-};
-}
+namespace aquabox
+{
+    class IRulesManager
+    {
+    public:
+        virtual Rule get(const std::string& id) = 0;
+        virtual bool add(const Rule& rule) = 0;
+        virtual bool update(const Rule& rule) = 0;
+        virtual bool remove(const std::string& id) = 0;
+        virtual std::vector<Rule> all() = 0;
+    };
+} // namespace aquabox

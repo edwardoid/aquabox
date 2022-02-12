@@ -19,32 +19,41 @@
 #pragma once
 #include "../micro_clients/settings.h"
 #include "../rpc/server_base.h"
+#include <common/thread_pool.h>
 #include <condition_variable>
 #include <events.grpc.pb.h>
 #include <mutex>
-#include <queue>
 #include <string>
 #include <thread>
 #include <unordered_map>
-#include <common/thread_pool.h>
+#include <queue>
 
-namespace aquabox {
-namespace services {
-    class EventsBusServer final : public ServerBase<EventsBus> {
-    public:
-        EventsBusServer();
-        virtual ~EventsBusServer();
-        virtual ::grpc::Status Notify(::grpc::ServerContext* context, const ::aquabox::services::EventData* request, ::google::protobuf::Empty* response) override;
-        virtual ::grpc::Status Subscribe(::grpc::ServerContext* context, const ::aquabox::services::ConsumerIdentifier* request, ::google::protobuf::Empty* response) override;
-        virtual ::grpc::Status Unsubscribe(::grpc::ServerContext* context, const ::aquabox::services::ConsumerIdentifier* request, ::google::protobuf::Empty* response) override;
+namespace aquabox
+{
+    namespace services
+    {
+        class EventsBusServer final : public ServerBase<EventsBus>
+        {
+        public:
+            EventsBusServer();
+            virtual ~EventsBusServer();
+            virtual ::grpc::Status Notify(::grpc::ServerContext* context,
+                                          const ::aquabox::services::EventData* request,
+                                          ::google::protobuf::Empty* response) override;
+            virtual ::grpc::Status Subscribe(::grpc::ServerContext* context,
+                                             const ::aquabox::services::ConsumerIdentifier* request,
+                                             ::google::protobuf::Empty* response) override;
+            virtual ::grpc::Status Unsubscribe(::grpc::ServerContext* context,
+                                               const ::aquabox::services::ConsumerIdentifier* request,
+                                               ::google::protobuf::Empty* response) override;
 
-    private:
-        std::string getId(::grpc::ServerContext*) const;
+        private:
+            std::string getId(::grpc::ServerContext*) const;
 
-    private:
-        aquabox::ThreadPool m_pool;
-        std::mutex m_mx;
-        std::unordered_map<std::string, std::string> m_consumers;
-    };
-}
-}
+        private:
+            aquabox::ThreadPool m_pool;
+            std::mutex m_mx;
+            std::unordered_map<std::string, std::string> m_consumers;
+        };
+    } // namespace services
+} // namespace aquabox

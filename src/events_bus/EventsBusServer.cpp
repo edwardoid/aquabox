@@ -11,11 +11,9 @@
 using namespace aquabox;
 using namespace services;
 
-EventsBusServer::EventsBusServer()
-{
-}
+EventsBusServer::EventsBusServer() {}
 
-EventsBusServer::~EventsBusServer() { }
+EventsBusServer::~EventsBusServer() {}
 
 std::string EventsBusServer::getId(::grpc::ServerContext* context) const
 {
@@ -24,14 +22,12 @@ std::string EventsBusServer::getId(::grpc::ServerContext* context) const
     return std::string(it->second.begin(), it->second.end());
 }
 
-::grpc::Status
-EventsBusServer::Notify(::grpc::ServerContext* context,
-    const ::aquabox::services::EventData* request,
-    ::google::protobuf::Empty* response)
+::grpc::Status EventsBusServer::Notify(::grpc::ServerContext* context,
+                                       const ::aquabox::services::EventData* request,
+                                       ::google::protobuf::Empty* response)
 {
     std::unique_lock<std::mutex> lock(m_mx);
-    for(auto c : m_consumers)
-    {
+    for (auto c : m_consumers) {
         if (c.first == request->sender()) {
             continue;
         }
@@ -53,10 +49,9 @@ EventsBusServer::Notify(::grpc::ServerContext* context,
     return ::grpc::Status::OK;
 }
 
-::grpc::Status EventsBusServer::Subscribe(
-    ::grpc::ServerContext* context,
-    const ::aquabox::services::ConsumerIdentifier* request,
-    ::google::protobuf::Empty* response)
+::grpc::Status EventsBusServer::Subscribe(::grpc::ServerContext* context,
+                                          const ::aquabox::services::ConsumerIdentifier* request,
+                                          ::google::protobuf::Empty* response)
 {
     std::unique_lock<std::mutex> lock(m_mx);
     LOG_INFO << "Client subscribed:" << request->interface();
@@ -64,10 +59,9 @@ EventsBusServer::Notify(::grpc::ServerContext* context,
     return ::grpc::Status::OK;
 }
 
-::grpc::Status EventsBusServer::Unsubscribe(
-    ::grpc::ServerContext* context,
-    const ::aquabox::services::ConsumerIdentifier* request,
-    ::google::protobuf::Empty* response)
+::grpc::Status EventsBusServer::Unsubscribe(::grpc::ServerContext* context,
+                                            const ::aquabox::services::ConsumerIdentifier* request,
+                                            ::google::protobuf::Empty* response)
 {
     std::unique_lock<std::mutex> lock(m_mx);
     //m_newEnevtsAvailableCv.notify_one();

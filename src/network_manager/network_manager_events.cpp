@@ -24,17 +24,16 @@
 
 using namespace aquabox;
 
-NetworkDeviceStateEvent::NetworkDeviceStateEvent(
-    const nm::NMDeviceState& state)
+NetworkDeviceStateEvent::NetworkDeviceStateEvent(const nm::NMDeviceState& state)
 {
     auto nm = Singleton<NetworkManager>::i();
 
     if (nm == nullptr) {
         return;
     }
-    Connection net = (Connection)nm->currentConnection;
-    setData({ { "state", Serializable<nm::NMDeviceState>::convert(state) } });
-    setPropertiesUpdate({ { "ssid", net.ssid }, { "uuid", net.uuid } });
+    Connection net = (Connection) nm->currentConnection;
+    setData({{"state", Serializable<nm::NMDeviceState>::convert(state)}});
+    setPropertiesUpdate({{"ssid", net.ssid}, {"uuid", net.uuid}});
 }
 
 NetworkChangedEvent::NetworkChangedEvent(const Connection& net)
@@ -44,13 +43,8 @@ NetworkChangedEvent::NetworkChangedEvent(const Connection& net)
     if (nm == nullptr) {
         return;
     }
-    setData({ { "network", net.ssid },
-        { "reason",
-            Serializable<NetworkChangeReason>::convert(nm->changeReason()) } });
-    setPropertiesUpdate({ { "ssid", net.ssid },
-        { "uuid", net.uuid },
-        { "ip", net.ip },
-        { "strength", net.signal } });
+    setData({{"network", net.ssid}, {"reason", Serializable<NetworkChangeReason>::convert(nm->changeReason())}});
+    setPropertiesUpdate({{"ssid", net.ssid}, {"uuid", net.uuid}, {"ip", net.ip}, {"strength", net.signal}});
 }
 
 NetworkConnectionFailedEvent::NetworkConnectionFailedEvent()
@@ -61,9 +55,9 @@ NetworkConnectionFailedEvent::NetworkConnectionFailedEvent()
         return;
     }
 
-    Connection net = (Connection)nm->currentConnection;
-    setData({ { "network", net.ssid }, { "reason", "connectoin_failed" } });
-    setPropertiesUpdate({ { "ssid", net.ssid }, { "uuid", net.uuid } });
+    Connection net = (Connection) nm->currentConnection;
+    setData({{"network", net.ssid}, {"reason", "connectoin_failed"}});
+    setPropertiesUpdate({{"ssid", net.ssid}, {"uuid", net.uuid}});
 }
 
 NetworkAuthentifiationFailedEvent::NetworkAuthentifiationFailedEvent()
@@ -74,7 +68,7 @@ NetworkAuthentifiationFailedEvent::NetworkAuthentifiationFailedEvent()
         return;
     }
 
-    Connection net = (Connection)nm->currentConnection;
-    setData({ { "network", net.ssid }, { "reason", "authentification_failed" } });
-    setPropertiesUpdate({ { "ssid", net.ssid }, { "uuid", net.uuid } });
+    Connection net = (Connection) nm->currentConnection;
+    setData({{"network", net.ssid}, {"reason", "authentification_failed"}});
+    setPropertiesUpdate({{"ssid", net.ssid}, {"uuid", net.uuid}});
 }

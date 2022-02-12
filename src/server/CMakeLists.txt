@@ -2,7 +2,6 @@ cmake_minimum_required(VERSION 3.5)
 project(aquabox-server)
 
 include_directories(${PLOG_INCLUDE_DIR})
-include_directories(${THREAD_POOL_INCLUDE_DIR})
 include_directories(${SWS_HTTP_INCLUDE_DIR})
 include_directories(${SWS_WS_INCLUDE_DIR})
 include_directories(${PSTREAMS_INCLUDE_DIR})

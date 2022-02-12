@@ -17,8 +17,8 @@
  */
 
 #include "ws_api.h"
-#include <common/command.h>
 #include "command_executor.h"
+#include <common/command.h>
 #include <common/enumerations.h>
 #include <types/event.h>
 
@@ -30,13 +30,13 @@ void API::onOpen(const std::string& route, Connection connection)
 
     auto connections = m_connections.find(route);
     if (connections == m_connections.end()) {
-        m_connections.insert({ route, std::vector<Connection>({ connection }) });
-    } else {
+        m_connections.insert({route, std::vector<Connection>({connection})});
+    }
+    else {
         connections->second.push_back(connection);
     }
 }
-void API::onClose(const std::string& route, Connection connection,
-    Status status, const std::string& reason)
+void API::onClose(const std::string& route, Connection connection, Status status, const std::string& reason)
 {
     std::lock_guard<std::mutex> guard(m_lock);
 
@@ -45,8 +45,7 @@ void API::onClose(const std::string& route, Connection connection,
         return;
     }
 
-    for (auto i = connections->second.begin(); i != connections->second.end();
-         ++i) {
+    for (auto i = connections->second.begin(); i != connections->second.end(); ++i) {
         if (i->get() == connection.get()) {
             connections->second.erase(i);
             break;
@@ -69,14 +68,18 @@ void API::postEvent(Event event)
     }
 }
 
-DEFINE_WS_API_IMPL(Updates) { connection->send("Updates"); }
+DEFINE_WS_API_IMPL(Updates)
+{
+    connection->send("Updates");
+}
 
 DEFINE_WS_API_IMPL(Commands)
 {
     nlohmann::json request;
     try {
         request = nlohmann::json::parse(response->string());
-    } catch (nlohmann::json::parse_error& e) {
+    }
+    catch (nlohmann::json::parse_error& e) {
         LOG_ERROR << "Can't parse command: " << e.what();
         return;
     }
@@ -127,19 +130,20 @@ DEFINE_WS_API_IMPL(Commands)
 
     CommandExecutor exec;
     if (!exec.exec(command)) {
-        LOG_ERROR << "Can't execute command! " << (int)(command.operation());
-    } else {
-        LOG_DEBUG << "Command " << (int)(command.operation()) << " finished with "
-                  << (int)(command.result());
+        LOG_ERROR << "Can't execute command! " << (int) (command.operation());
+    }
+    else {
+        LOG_DEBUG << "Command " << (int) (command.operation()) << " finished with " << (int) (command.result());
     }
 
     nlohmann::json resp;
     resp["rpid"] = rqid->get<unsigned int>();
-    resp["result"] = (int)command.result();
+    resp["result"] = (int) command.result();
 
     try {
         resp["data"] = command.response();
-    } catch (...) {
+    }
+    catch (...) {
     }
 
     connection->send(resp.dump(4));

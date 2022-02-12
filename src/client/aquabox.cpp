@@ -17,25 +17,25 @@
  */
 
 #include "aquabox.h"
-#include <types/types.h>
-#include <types/rule.h>
 #include "cloud.h"
-#include <types/network_event.h>
-#include <types/update_events.h>
 #include "global_timer.h"
 #include "lock_file.h"
-#include <common/log.h>
 #include "options.h"
 #include "rest_api.h"
-#include <common/singleton.h>
-#include <micro_clients/settings.h>
-#include <micro_clients/events.h>
-#include <micro_clients/network_manager.h>
 #include "web_server.h"
 #include <chrono>
+#include <common/log.h>
+#include <common/singleton.h>
 #include <exception>
+#include <micro_clients/events.h>
+#include <micro_clients/network_manager.h>
+#include <micro_clients/settings.h>
 #include <pstream.h>
 #include <random>
+#include <types/network_event.h>
+#include <types/rule.h>
+#include <types/types.h>
+#include <types/update_events.h>
 
 #define LOG_FILE_SIZE_IN_MB 10
 #define BYTES_IN_MB 1000000
@@ -61,7 +61,7 @@ int AquaBox::start()
     Singleton<Cloud>::available = !optionsIsSet("standalone");
 
     const std::string severity = Singleton<ISettings>::i()->get(Settings::Keys::LOG_LEVEL,
-        std::string(plog::severityToString(plog::Severity::info)));
+                                                                std::string(plog::severityToString(plog::Severity::info)));
     plog::init(plog::severityFromString(severity.c_str()), &m_consoleAppender);
 
     srand(time(NULL));
@@ -85,10 +85,12 @@ int AquaBox::start()
     return EXIT_SUCCESS;
 }
 
-UsersMap& AquaBox::users() const { return m_users; }
+UsersMap& AquaBox::users() const
+{
+    return m_users;
+}
 
-void AquaBox::doLater(const std::string& name,
-    std::function<void(void)>&& task)
+void AquaBox::doLater(const std::string& name, std::function<void(void)>&& task)
 {
     auto id = m_perfomance.taskStarted(name);
     boost::asio::post(m_pool, [this, id, t = std::move(task)] {
@@ -124,21 +126,18 @@ double AquaBox::systemTemperature() const
 std::string AquaBox::configurationData() const
 {
     std::string configurationDataString;
-    configurationDataString += std::to_string(Singleton<ISettings>::i()->get(
-        Settings::Keys::HTTP_PORT, Settings::Defaults::REST_PORT));
+    configurationDataString += std::to_string(Singleton<ISettings>::i()->get(Settings::Keys::HTTP_PORT, Settings::Defaults::REST_PORT));
     configurationDataString += ";";
 
-    configurationDataString += std::to_string(Singleton<ISettings>::i()->get(
-        Settings::Keys::STREAM_PORT, Settings::Defaults::WS_PORT));
+    configurationDataString += std::to_string(Singleton<ISettings>::i()->get(Settings::Keys::STREAM_PORT, Settings::Defaults::WS_PORT));
     configurationDataString += ";";
 
     configurationDataString += SERIAL_NUMBER;
     configurationDataString += ";";
 
-
     configurationDataString += Singleton<INetworkManager>::i()->currentNetwork().ip;
     configurationDataString += ";";
 
-    configurationDataString += std::to_string((int)Singleton<AquaBox>::get()->systemTemperature());
+    configurationDataString += std::to_string((int) Singleton<AquaBox>::get()->systemTemperature());
     return configurationDataString;
 }

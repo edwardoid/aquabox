@@ -19,7 +19,8 @@ void error(const char* msg)
     exit(1);
 }
 
-void calibrate(bool) {
+void calibrate(bool)
+{
     fprintf(stderr, "#                                                 #");
     fprintf(stderr, "#                RUNNING CALLBACK                 #");
     fprintf(stderr, "#                                                 #");
@@ -32,21 +33,18 @@ CachedSlaveProperty<char*> m_type("type", "feeder");
 Method m_calibrate("+calibrate", &calibrate);
 CachedSlaveProperty<bool> m_cache("_cache", true);
 CachedSlaveProperty<int32_t> m_pingTimeout("_timeout", 5000);
-SlaveProperty* allProperties[] = { &m_times, &m_timesTimeout, &m_class,
-    &m_type, &m_calibrate, &m_cache, &m_pingTimeout };
+SlaveProperty* allProperties[] = {&m_times, &m_timesTimeout, &m_class, &m_type, &m_calibrate, &m_cache, &m_pingTimeout};
 
-aquabox::proto::byte_t* FEEDER_SERIAL = (aquabox::proto::byte_t*)("tstrelay");
+aquabox::proto::byte_t* FEEDER_SERIAL = (aquabox::proto::byte_t*) ("tstrelay");
 
-class MockFeeder : public EasySlave<7> {
+class MockFeeder : public EasySlave<7>
+{
 public:
     MockFeeder(int scfd)
-        : EasySlave(allProperties, &m_io, FEEDER_SERIAL,
-            (const byte_t*)"allowme")
+        : EasySlave(allProperties, &m_io, FEEDER_SERIAL, (const byte_t*) "allowme")
         , m_io(scfd)
     {
-        MockFeeder::SlavePropertyPtr props[] = {
-            &m_times, &m_timesTimeout, &m_class, &m_calibrate, &m_type, &m_cache, &m_pingTimeout
-        };
+        MockFeeder::SlavePropertyPtr props[] = {&m_times, &m_timesTimeout, &m_class, &m_calibrate, &m_type, &m_cache, &m_pingTimeout};
     }
 
 private:
@@ -96,16 +94,13 @@ int main()
     }
 
     struct sockaddr_in serveraddr;
-    bzero((char*)&serveraddr, sizeof(serveraddr));
+    bzero((char*) &serveraddr, sizeof(serveraddr));
     serveraddr.sin_family = AF_INET;
-    bcopy((char*)server->h_addr, (char*)&serveraddr.sin_addr.s_addr,
-        server->h_length);
+    bcopy((char*) server->h_addr, (char*) &serveraddr.sin_addr.s_addr, server->h_length);
     serveraddr.sin_port = htons(500503);
 
     /* connect: create a connection with the server */
-    if (connect(sockfd, reinterpret_cast<sockaddr*>(&serveraddr),
-            static_cast<socklen_t>(sizeof(serveraddr)))
-        < 0)
+    if (connect(sockfd, reinterpret_cast<sockaddr*>(&serveraddr), static_cast<socklen_t>(sizeof(serveraddr))) < 0)
         error("ERROR connecting");
     runClient(sockfd);
     return 0;

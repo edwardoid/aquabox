@@ -20,9 +20,11 @@
 
 #include <types/event.h>
 
-namespace aquabox {
-class BoxEvent : public Event {
-public:
-    BoxEvent();
-};
-}
+namespace aquabox
+{
+    class BoxEvent : public Event
+    {
+    public:
+        BoxEvent();
+    };
+} // namespace aquabox

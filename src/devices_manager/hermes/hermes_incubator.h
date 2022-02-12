@@ -20,39 +20,43 @@
 
 #include "hermes_master.h"
 #include <chrono>
+#include <common/timeout.h>
 #include <memory>
 #include <mutex>
 #include <s2s.h>
 #include <thread>
-#include <common/timeout.h>
 #include <vector>
-namespace aquabox {
-class HermesIncubator {
-public:
-    HermesIncubator();
-    int incubate(std::shared_ptr<HermesMaster> obj);
-    SignalSlot::Signal<int, std::shared_ptr<HermesMaster>> ready;
-    SignalSlot::Signal<int, std::shared_ptr<HermesMaster>> dead;
+namespace aquabox
+{
+    class HermesIncubator
+    {
+    public:
+        HermesIncubator();
+        int incubate(std::shared_ptr<HermesMaster> obj);
+        SignalSlot::Signal<int, std::shared_ptr<HermesMaster>> ready;
+        SignalSlot::Signal<int, std::shared_ptr<HermesMaster>> dead;
 
-protected:
-    void routine();
+    protected:
+        void routine();
 
-private:
-    enum ObjectInfoState {
-        Incubating = 0,
-        Ready = 1,
-        Dead = 2
+    private:
+        enum ObjectInfoState
+        {
+            Incubating = 0,
+            Ready = 1,
+            Dead = 2
+        };
+        struct HermesObjectInfo
+        {
+            HermesObjectInfo();
+            int id;
+            std::shared_ptr<HermesMaster> object;
+            ObjectInfoState state;
+            Timeout lastRequest;
+        };
+
+        std::vector<HermesObjectInfo> m_objects;
+        std::thread m_routine;
+        std::mutex m_mx;
     };
-    struct HermesObjectInfo {
-        HermesObjectInfo();
-        int id;
-        std::shared_ptr<HermesMaster> object;
-        ObjectInfoState state;
-        Timeout lastRequest;
-    };
-
-    std::vector<HermesObjectInfo> m_objects;
-    std::thread m_routine;
-    std::mutex m_mx;
-};
-}
+} // namespace aquabox

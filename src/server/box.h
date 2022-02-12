@@ -21,19 +21,21 @@
 #include <s2s.h>
 #include <set>
 
-namespace aquabox {
-class ApplicationConnection;
+namespace aquabox
+{
+    class ApplicationConnection;
 
-class Box : public BoxConnection {
-public:
-    Box(const std::string& id, ResultsMap<Command>& results);
-    SignalSlot::Signal<const nlohmann::json&> UpdateReceived;
-    void addConnection(std::shared_ptr<ApplicationConnection> connection);
-    void removeConnection(std::shared_ptr<ApplicationConnection> connection);
-    std::vector<std::shared_ptr<ApplicationConnection>> connections() const;
-    std::set<int64_t> telegramChats() const;
+    class Box : public BoxConnection
+    {
+    public:
+        Box(const std::string& id, ResultsMap<Command>& results);
+        SignalSlot::Signal<const nlohmann::json&> UpdateReceived;
+        void addConnection(std::shared_ptr<ApplicationConnection> connection);
+        void removeConnection(std::shared_ptr<ApplicationConnection> connection);
+        std::vector<std::shared_ptr<ApplicationConnection>> connections() const;
+        std::set<int64_t> telegramChats() const;
 
-private:
-    std::vector<std::shared_ptr<ApplicationConnection>> m_applications;
-};
-}
+    private:
+        std::vector<std::shared_ptr<ApplicationConnection>> m_applications;
+    };
+} // namespace aquabox

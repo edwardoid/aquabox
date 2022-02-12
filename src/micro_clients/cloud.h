@@ -21,7 +21,8 @@
 #include <common/singleton.h>
 #include <services/cloud.h>
 
-namespace aquabox {
-template <>
-ICloud* Singleton<ICloud>::create();
+namespace aquabox
+{
+    template<>
+    ICloud* Singleton<ICloud>::create();
 }

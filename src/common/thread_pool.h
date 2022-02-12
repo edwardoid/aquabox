@@ -18,15 +18,19 @@
 
 #pragma once
 
-#include <boost/asio/thread_pool.hpp>
+#include <boost/thread/thread.hpp>
+#include <boost/asio.hpp>
 #include <functional>
 
-namespace aquabox {
-    class ThreadPool {
+namespace aquabox
+{
+    class ThreadPool
+    {
     public:
         ThreadPool();
         void run(std::function<void(void)>&& cb);
+
     private:
         boost::asio::thread_pool m_pool;
     };
-}
+} // namespace aquabox

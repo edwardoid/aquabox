@@ -20,20 +20,22 @@
 
 #include "log.h"
 
-namespace aquabox {
-class CloudService {
-public:
-    static CloudService& i();
+namespace aquabox
+{
+    class CloudService
+    {
+    public:
+        static CloudService& i();
 
-    bool start();
+        bool start();
 
-private:
-    CloudService();
+    private:
+        CloudService();
 
-private:
-    static CloudService m_instance;
-    plog::ColorConsoleAppender<plog::TxtFormatter> m_consoleAppender;
-    plog::RollingFileAppender<plog::CsvFormatter> m_logAppender;
-    plog::RollingFileAppender<plog::TxtFormatter> m_fileAppender;
-};
-}
+    private:
+        static CloudService m_instance;
+        plog::ColorConsoleAppender<plog::TxtFormatter> m_consoleAppender;
+        plog::RollingFileAppender<plog::CsvFormatter> m_logAppender;
+        plog::RollingFileAppender<plog::TxtFormatter> m_fileAppender;
+    };
+} // namespace aquabox

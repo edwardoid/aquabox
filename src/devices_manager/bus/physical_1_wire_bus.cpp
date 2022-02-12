@@ -27,26 +27,23 @@ using namespace aquabox;
 
 PhysicalOneWireBus::PhysicalOneWireBus(const std::string& address)
     : Bus(address)
-{
-}
+{}
 
-PhysicalOneWireBus::~PhysicalOneWireBus() { }
+PhysicalOneWireBus::~PhysicalOneWireBus() {}
 
 std::shared_ptr<Hardware> PhysicalOneWireBus::hw(const std::string& hw)
 {
-    static std::unordered_map<std::string, std::shared_ptr<OneWireDevice>>
-        devices;
+    static std::unordered_map<std::string, std::shared_ptr<OneWireDevice>> devices;
     if (devices.empty()) {
         for (auto& d : w1::Bus::devices()) {
-            devices.insert({ d.address(), std::make_shared<OneWireDevice>(d) });
+            devices.insert({d.address(), std::make_shared<OneWireDevice>(d)});
         }
     }
 
     auto pos = devices.find(hw);
     if (pos == devices.end()) {
         static int queriesCount;
-        LOG_ERROR_IF((++queriesCount) % 10 == 0)
-            << "Can't find 1-Wire device with adress: " << hw;
+        LOG_ERROR_IF((++queriesCount) % 10 == 0) << "Can't find 1-Wire device with adress: " << hw;
     }
     return pos == devices.end() ? nullptr : pos->second;
 }

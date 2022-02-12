@@ -20,17 +20,18 @@
 
 #include <common/singleton.h>
 #include <services/devices_manager.h>
+#include <services/network_manager.h>
 #include <services/rules_manager.h>
 #include <services/settings.h>
-#include <services/network_manager.h>
 
-namespace aquabox {
-template <>
-ISettings* Singleton<ISettings>::create();
+namespace aquabox
+{
+    template<>
+    ISettings* Singleton<ISettings>::create();
 
-template <>
-IRulesManager* Singleton<IRulesManager>::create();
+    template<>
+    IRulesManager* Singleton<IRulesManager>::create();
 
-template <>
-IDevicesManager* Singleton<IDevicesManager>::create();
-}
+    template<>
+    IDevicesManager* Singleton<IDevicesManager>::create();
+} // namespace aquabox

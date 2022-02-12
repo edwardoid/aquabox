@@ -17,26 +17,28 @@
  */
 
 #include "rest_api.h"
-#include <types/types.h>
 #include "command_executor.h"
-#include <common/enumerations.h>
-#include <types/update_events.h>
-#include <types/serial.h>
-#include <common/log.h>
 #include "qr.h"
+#include <common/enumerations.h>
 #include <common/http_helpers.h>
+#include <common/log.h>
+#include <common/singleton.h>
+#include <micro_clients/network_manager.h>
+#include <micro_clients/settings.h>
 #include <nlohmann/json.hpp>
 #include <random>
-#include <common/singleton.h>
-#include <micro_clients/settings.h>
-#include <micro_clients/network_manager.h>
 #include <stdio.h>
+#include <types/serial.h>
+#include <types/types.h>
+#include <types/update_events.h>
 
 using namespace aquabox::v1;
 using namespace aquabox;
 
-Command createCommand(Operation operation, Web::Request request, bool body,
-    std::unordered_map<std::string, std::string> params = std::unordered_map<std::string, std::string>())
+Command createCommand(Operation operation,
+                      Web::Request request,
+                      bool body,
+                      std::unordered_map<std::string, std::string> params = std::unordered_map<std::string, std::string>())
 {
     Command command;
     command.setOperation(operation);
@@ -44,8 +46,9 @@ Command createCommand(Operation operation, Web::Request request, bool body,
     if (body) {
         try {
             command.setRequest(nlohmann::json::parse(request->content.string()));
-        } catch (...) {
-            LOG_ERROR << "Can't set request data for operation " << (int)operation;
+        }
+        catch (...) {
+            LOG_ERROR << "Can't set request data for operation " << (int) operation;
         }
     }
     return command;
@@ -55,10 +58,11 @@ void execCommand(Command& cmd, Web::Response response, Web::Headers headers)
 {
     CommandExecutor exec;
     if (!exec.exec(cmd)) {
-        LOG_ERROR << "Can't execute command! " << (int)(cmd.operation());
-    } else {
-        LOG_DEBUG << "Command " << (int)(cmd.operation()) << " finished with "
-                  << (int)(cmd.result()) << " data: " << cmd.response().dump() << "seqNum " << cmd.seqNum();
+        LOG_ERROR << "Can't execute command! " << (int) (cmd.operation());
+    }
+    else {
+        LOG_DEBUG << "Command " << (int) (cmd.operation()) << " finished with " << (int) (cmd.result())
+                  << " data: " << cmd.response().dump() << "seqNum " << cmd.seqNum();
     }
     SimpleWeb::StatusCode code = SimpleWeb::StatusCode::server_error_not_implemented;
     switch (cmd.result()) {
@@ -95,21 +99,19 @@ void execCommand(Command& cmd, Web::Response response, Web::Headers headers)
 
 nlohmann::json getStatusInfo(bool detailed)
 {
-    nlohmann::json host(
-        { { "rest", Singleton<ISettings>::i()->get(Settings::Keys::HTTP_PORT, Settings::Defaults::REST_PORT) },
-            { "stream", Singleton<ISettings>::i()->get(Settings::Keys::STREAM_PORT, Settings::Defaults::WS_PORT) },
-            { "serial", SERIAL_NUMBER } });
+    nlohmann::json host({{"rest", Singleton<ISettings>::i()->get(Settings::Keys::HTTP_PORT, Settings::Defaults::REST_PORT)},
+                         {"stream", Singleton<ISettings>::i()->get(Settings::Keys::STREAM_PORT, Settings::Defaults::WS_PORT)},
+                         {"serial", SERIAL_NUMBER}});
 
     if (detailed) {
         auto net = Singleton<INetworkManager>::i()->currentNetwork();
-        host["network"] = nlohmann::json({ { "ssid", net.ssid },
-            { "ip", net.ip },
-            { "internet", Singleton<INetworkManager>::i()->hasInternetConnection() } });
+        host["network"] = nlohmann::json(
+            {{"ssid", net.ssid}, {"ip", net.ip}, {"internet", Singleton<INetworkManager>::i()->hasInternetConnection()}});
     }
 
     host["host"] = boost::asio::ip::host_name();
 
-    nlohmann::json status({ { "aquabox", host }, { "status", "online" } });
+    nlohmann::json status({{"aquabox", host}, {"status", "online"}});
 
     return status;
 }
@@ -147,8 +149,7 @@ headers); return;
     serveFile(response, p, headers, false);
 }*/
 
-void REST::StatusQR(const Route& route, Web::Request& request,
-    Web::Response& response, Web::Headers& headers)
+void REST::StatusQR(const Route& route, Web::Request& request, Web::Response& response, Web::Headers& headers)
 {
     std::string path = "./whoami_qr_" + std::to_string(std::rand()) + ".png";
     double factor = 0.;
@@ -159,7 +160,8 @@ void REST::StatusQR(const Route& route, Web::Request& request,
         std::string factorString = query.find("factor")->second;
         try {
             factor = std::stod(factorString);
-        } catch (const std::invalid_argument&) {
+        }
+        catch (const std::invalid_argument&) {
             LOG_ERROR << "Bad zoom factor value \"" << factorString << "\"";
             factor = 0;
         }
@@ -176,8 +178,7 @@ void REST::StatusQR(const Route& route, Web::Request& request,
     HttpHelpers::serveFile(response, path, headers, true);
 }
 
-void REST::Status(const Route& route, Web::Request& request,
-    Web::Response& response, Web::Headers& headers)
+void REST::Status(const Route& route, Web::Request& request, Web::Response& response, Web::Headers& headers)
 {
     auto cmd = createCommand(Operation::GetStatus, request, false);
     execCommand(cmd, response, headers);
@@ -213,81 +214,66 @@ void REST::Status(const Route& route, Web::Request& request,
 //     serveFile(response, path, headers, true);
 // }
 
-void REST::Devices(const Route& route, Web::Request& request,
-    Web::Response& response, Web::Headers& headers)
+void REST::Devices(const Route& route, Web::Request& request, Web::Response& response, Web::Headers& headers)
 {
     auto cmd = createCommand(Operation::GetDevices, request, false);
     execCommand(cmd, response, headers);
 }
 
-void REST::GetDevice(const Route& route, Web::Request& request,
-    Web::Response& response, Web::Headers& headers)
+void REST::GetDevice(const Route& route, Web::Request& request, Web::Response& response, Web::Headers& headers)
 {
-    auto cmd = createCommand(Operation::GetDevice, request, false,
-        route.extract(request->path));
+    auto cmd = createCommand(Operation::GetDevice, request, false, route.extract(request->path));
     execCommand(cmd, response, headers);
 }
 
-void REST::UpdateDevice(const Route& route, Web::Request& request,
-    Web::Response& response, Web::Headers& headers)
+void REST::UpdateDevice(const Route& route, Web::Request& request, Web::Response& response, Web::Headers& headers)
 {
-    auto cmd = createCommand(Operation::UpdateDevice, request, true,
-        route.extract(request->path));
+    auto cmd = createCommand(Operation::UpdateDevice, request, true, route.extract(request->path));
     execCommand(cmd, response, headers);
 }
 
-void REST::Rules(const Route& route, Web::Request& request,
-    Web::Response& response, Web::Headers& headers)
+void REST::Rules(const Route& route, Web::Request& request, Web::Response& response, Web::Headers& headers)
 {
     auto cmd = createCommand(Operation::GetRules, request, false);
     execCommand(cmd, response, headers);
 }
 
-void REST::GetRule(const Route& route, Web::Request& request,
-    Web::Response& response, Web::Headers& headers)
+void REST::GetRule(const Route& route, Web::Request& request, Web::Response& response, Web::Headers& headers)
 {
-    auto cmd = createCommand(Operation::GetRules, request, false,
-        route.extract(request->path));
+    auto cmd = createCommand(Operation::GetRules, request, false, route.extract(request->path));
     execCommand(cmd, response, headers);
 }
 
-void REST::CreateRule(const Route& route, Web::Request& request,
-    Web::Response& response, Web::Headers& headers)
+void REST::CreateRule(const Route& route, Web::Request& request, Web::Response& response, Web::Headers& headers)
 {
-    auto cmd = createCommand(request->method == "PUT" ? Operation::CreateRule
-                                                      : Operation::UpdateRule,
-        request, true, route.extract(request->path));
+    auto cmd = createCommand(request->method == "PUT" ? Operation::CreateRule : Operation::UpdateRule,
+                             request,
+                             true,
+                             route.extract(request->path));
     execCommand(cmd, response, headers);
 }
 
-void REST::DeleteRule(const Route& route, Web::Request& request,
-    Web::Response& response, Web::Headers& headers)
+void REST::DeleteRule(const Route& route, Web::Request& request, Web::Response& response, Web::Headers& headers)
 {
-    auto cmd = createCommand(Operation::DeleteRule, request, false,
-        route.extract(request->path));
+    auto cmd = createCommand(Operation::DeleteRule, request, false, route.extract(request->path));
     execCommand(cmd, response, headers);
 }
 
-void REST::DeviceRules(const Route& route, Web::Request& request,
-    Web::Response& response, Headers& headers)
+void REST::DeviceRules(const Route& route, Web::Request& request, Web::Response& response, Headers& headers)
 {
-    auto cmd = createCommand(Operation::DeviceRules, request, false,
-        route.extract(request->path));
+    auto cmd = createCommand(Operation::DeviceRules, request, false, route.extract(request->path));
     execCommand(cmd, response, headers);
 }
 
-void REST::SupportedRepeatTimeouts(const Route& route, Web::Request& request,
-    Web::Response& response, Headers& headers)
+void REST::SupportedRepeatTimeouts(const Route& route, Web::Request& request, Web::Response& response, Headers& headers)
 {
     auto cmd = createCommand(Operation::SupportedRepeatTimeouts, request, false);
     execCommand(cmd, response, headers);
 }
 
-void REST::SetValue(const Route& route, Web::Request& request,
-    Web::Response& response, Headers& headers)
+void REST::SetValue(const Route& route, Web::Request& request, Web::Response& response, Headers& headers)
 {
-    auto cmd = createCommand(Operation::Set, request, true,
-        route.extract(request->path));
+    auto cmd = createCommand(Operation::Set, request, true, route.extract(request->path));
     execCommand(cmd, response, headers);
 }
 
@@ -303,22 +289,19 @@ void REST::GetHistory(const Route& route, Request& request, Response& response, 
     execCommand(cmd, response, headers);
 }
 
-void REST::ScanWiFiNetworks(const Route& route, Web::Request& request,
-    Web::Response& response, Headers& headers)
+void REST::ScanWiFiNetworks(const Route& route, Web::Request& request, Web::Response& response, Headers& headers)
 {
     auto cmd = createCommand(Operation::ScanWiFiNetworks, request, false);
     execCommand(cmd, response, headers);
 }
 
-void REST::ListNetworks(const Route& route, Request& request,
-    Response& response, Headers& headers)
+void REST::ListNetworks(const Route& route, Request& request, Response& response, Headers& headers)
 {
     auto cmd = createCommand(Operation::WiFiNetworks, request, false);
     execCommand(cmd, response, headers);
 }
 
-void REST::ConnectToWiFi(const Route& route, Web::Request& request,
-    Web::Response& response, Headers& headers)
+void REST::ConnectToWiFi(const Route& route, Web::Request& request, Web::Response& response, Headers& headers)
 {
     Command cmd = createCommand(Operation::ConnectToWiFi, request, true);
     execCommand(cmd, response, headers);

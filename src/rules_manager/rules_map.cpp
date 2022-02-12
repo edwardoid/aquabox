@@ -18,10 +18,10 @@
 
 #include "rules_map.h"
 #include "rules_scheduler.h"
-#include <micro_clients/settings.h>
+#include <common/log.h>
 #include <micro_clients/devices_manager.h>
 #include <micro_clients/events.h>
-#include <common/log.h>
+#include <micro_clients/settings.h>
 
 using namespace aquabox;
 
@@ -40,11 +40,11 @@ bool RulesMap::addRule(std::shared_ptr<Rule> rule, bool replace)
             }
         })) {
         if (replaceError) {
-            LOG_ERROR << "Rule " << rule->id()
-                      << " has already beed added, and replace flag was not set";
+            LOG_ERROR << "Rule " << rule->id() << " has already beed added, and replace flag was not set";
             return false;
         };
-    } else {
+    }
+    else {
         insert(rule->id(), rule);
     }
 
@@ -59,7 +59,8 @@ bool RulesMap::addRule(std::shared_ptr<Rule> rule, bool replace)
         Singleton<IEvents>::i()->notify(std::make_shared<DeviceRulesChangedEvent>(dev));
         if (replace) {
             Singleton<IEvents>::i()->notify(std::make_shared<RuleUpdatedEvent>(*rule, beforeUpdate));
-        } else {
+        }
+        else {
             Singleton<IEvents>::i()->notify(std::make_shared<RuleCreatedEvent>(*rule));
         }
         return true;

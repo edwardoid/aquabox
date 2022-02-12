@@ -21,14 +21,16 @@
 #include <common/lockablemap.h>
 #include <memory>
 
-namespace aquabox {
-class DevicesMap : public LockableHashMap<std::string, std::shared_ptr<class Device>> {
-public:
-    DevicesMap();
-    std::set<std::string> ids() const;
-    bool hasDevice(const std::string& address) const;
-    std::string deviceIdByAddress(const std::string& address) const;
-    std::string nextId() const;
-    std::string addDevice(std::shared_ptr<class Device> device, bool pending = false);
-};
-}
+namespace aquabox
+{
+    class DevicesMap : public LockableHashMap<std::string, std::shared_ptr<class Device>>
+    {
+    public:
+        DevicesMap();
+        std::set<std::string> ids() const;
+        bool hasDevice(const std::string& address) const;
+        std::string deviceIdByAddress(const std::string& address) const;
+        std::string nextId() const;
+        std::string addDevice(std::shared_ptr<class Device> device, bool pending = false);
+    };
+} // namespace aquabox

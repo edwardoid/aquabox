@@ -18,15 +18,17 @@
 
 #pragma once
 
-#include <types/types.h>
 #include <types/rule.h>
+#include <types/types.h>
 #include <vector>
 
-namespace aquabox {
-class IAquaboxApi {
-public:
-    virtual std::vector<DeviceRef> devices() = 0;
-    virtual std::vector<RuleRef> rules() = 0;
-    virtual std::string configurationData() = 0;
-};
-}
+namespace aquabox
+{
+    class IAquaboxApi
+    {
+    public:
+        virtual std::vector<DeviceRef> devices() = 0;
+        virtual std::vector<RuleRef> rules() = 0;
+        virtual std::string configurationData() = 0;
+    };
+} // namespace aquabox

@@ -36,7 +36,7 @@ void print_trace(int signum)
     int pid = ::getpid();
     char thread[128];
     ::pthread_getname_np(::pthread_self(), thread, 128);
-/*
+    /*
     std::ofstream info(LAST_DUMP_INFO, std::fstream::out);
     info << "Signal: " << signal << "\n";
     info << "PID: " << pid << "\n";
@@ -66,8 +66,7 @@ StackTrace::StackTrace()
         ifs.close();
         boost::filesystem::remove(LAST_DUMP);
     }
-    for (auto s : { SIGABRT, SIGBUS, SIGILL, SIGSEGV, SIGSYS,
-             SIGXCPU, SIGXFSZ, SIGSTKFLT, SIGFPE }) {
+    for (auto s : {SIGABRT, SIGBUS, SIGILL, SIGSEGV, SIGSYS, SIGXCPU, SIGXFSZ, SIGSTKFLT, SIGFPE}) {
         ::signal(s, print_trace);
     }
 }

@@ -20,11 +20,13 @@
 
 #include "bus.h"
 
-namespace aquabox {
-class PhysicalGPIOBus : public Bus {
-public:
-    PhysicalGPIOBus(const std::string& address);
-    virtual ~PhysicalGPIOBus();
-    std::shared_ptr<Hardware> hw(const std::string& hw) override;
-};
-}
+namespace aquabox
+{
+    class PhysicalGPIOBus : public Bus
+    {
+    public:
+        PhysicalGPIOBus(const std::string& address);
+        virtual ~PhysicalGPIOBus();
+        std::shared_ptr<Hardware> hw(const std::string& hw) override;
+    };
+} // namespace aquabox

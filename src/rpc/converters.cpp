@@ -24,9 +24,8 @@
 
 using namespace aquabox;
 
-template <>
-ValueChange services::Converter<services::RuleAction, ValueChange>::convert(
-    const services::RuleAction& data)
+template<>
+ValueChange services::Converter<services::RuleAction, ValueChange>::convert(const services::RuleAction& data)
 {
     ValueChange res;
     res.property = data.property();
@@ -35,10 +34,8 @@ ValueChange services::Converter<services::RuleAction, ValueChange>::convert(
     return res;
 }
 
-template <>
-services::RuleAction
-services::Converter<ValueChange, services::RuleAction>::convert(
-    const ValueChange& data)
+template<>
+services::RuleAction services::Converter<ValueChange, services::RuleAction>::convert(const ValueChange& data)
 {
     services::RuleAction res;
     res.set_property(data.property);
@@ -47,9 +44,8 @@ services::Converter<ValueChange, services::RuleAction>::convert(
     return res;
 }
 
-template <>
-Rule services::Converter<services::RuleData, Rule>::convert(
-    const services::RuleData& data)
+template<>
+Rule services::Converter<services::RuleData, Rule>::convert(const services::RuleData& data)
 {
     Rule rule;
     rule.setId(data.id());
@@ -69,9 +65,8 @@ Rule services::Converter<services::RuleData, Rule>::convert(
     return rule;
 }
 
-template <>
-services::RuleData
-services::Converter<Rule, services::RuleData>::convert(const Rule& data)
+template<>
+services::RuleData services::Converter<Rule, services::RuleData>::convert(const Rule& data)
 {
     services::RuleData rule;
     rule.set_id(data.id());

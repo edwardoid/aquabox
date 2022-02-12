@@ -21,33 +21,32 @@
 #include <sstream>
 using namespace aquabox;
 
-
 GetDevicesFormatter::GetDevicesFormatter(const Command& cmd, const TgBot::Api& api, std::int64_t chatId)
     : MessageFormatter(cmd, api, chatId)
 {}
 
-void GetDevicesFormatter::operator() (const Command& cmd, bool ok) const
+void GetDevicesFormatter::operator()(const Command& cmd, bool ok) const
 {
     std::stringstream ss;
     try {
         if (cmd.response().is_object()) {
             ss << bold(italic("Available Devices")) << "\n";
-            for(const nlohmann::json& d : cmd.response().at("devices"))
-            {
+            for (const nlohmann::json& d : cmd.response().at("devices")) {
                 if (d.count("name") && d.count("type")) {
                     ss << "    Name: " << d["name"].get<std::string>() << "\n";
                     ss << "    Type: " << d["type"].get<std::string>() << "\n";
-                    ss << "    Available: " << emoji(d["available"].dump())  << "\n";
+                    ss << "    Available: " << emoji(d["available"].dump()) << "\n";
                     ss << "-------------------------------\n";
                 }
             }
-        } else {
+        }
+        else {
             ss << "Box is " << bold("not available") << " yet " << emoji("sad") << ". Try again later";
         }
 
         m_api.sendMessage(m_chatId, ss.str(), false, 0, std::make_shared<TgBot::GenericReply>(), "HTML");
     }
-    catch(std::exception& e) {
+    catch (std::exception& e) {
         m_api.sendMessage(m_chatId, e.what());
     }
 }

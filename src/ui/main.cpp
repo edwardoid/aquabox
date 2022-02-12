@@ -23,6 +23,5 @@ int main(int argc, char** argv)
     aquabox::UI app;
     app.addOption("framebuffer,fb", "Use real framebuffer");
 
-
     return app.exec(argc, argv);
 }

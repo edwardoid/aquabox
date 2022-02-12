@@ -19,28 +19,30 @@
 #pragma once
 
 #include "screen.h"
-#include <sprite.h>
-#include <text.h>
 #include <common/timeout.h>
 #include <micro_clients/network_manager.h>
+#include <sprite.h>
+#include <text.h>
 
-namespace aquabox {
-class NetworkChangeScreen : public Screen {
-public:
-    NetworkChangeScreen();
-    virtual void draw() override;
-    bool hasUpdate() const;
+namespace aquabox
+{
+    class NetworkChangeScreen : public Screen
+    {
+    public:
+        NetworkChangeScreen();
+        virtual void draw() override;
+        bool hasUpdate() const;
 
-private:
-    void updateState(NetworkState state);
+    private:
+        void updateState(NetworkState state);
 
-private:
-    LIBFB_NS::Text m_text;
-    LIBFB_NS::Text m_networkName;
-    bool m_inProgress = false;
-    uint8_t m_stageIcon = 0;
-    LIBFB_NS::Sprite m_stageImage;
-    NetworkState m_lastState;
-    Timeout m_timeout;
-};
-}
+    private:
+        LIBFB_NS::Text m_text;
+        LIBFB_NS::Text m_networkName;
+        bool m_inProgress = false;
+        uint8_t m_stageIcon = 0;
+        LIBFB_NS::Sprite m_stageImage;
+        NetworkState m_lastState;
+        Timeout m_timeout;
+    };
+} // namespace aquabox

@@ -20,30 +20,26 @@
 #include "../hermes/hermes_hardware.h"
 #include "../hermes/hermes_incubator.h"
 #include "../hermes/hermes_mesh_gateway.h"
-#include <functional>
 #include <common/log.h>
+#include <functional>
 
 using namespace aquabox;
 
 MeshBus::MeshBus(const std::string& address)
     : HermesBus(address)
-{                               
+{
     if (Singleton<HermesMeshGateway>::available) {
         Singleton<HermesMeshGateway>::i()->newConnection.connect(
-            std::bind(&MeshBus::newConnection, this, std::placeholders::_1,
-                std::placeholders::_2));
+            std::bind(&MeshBus::newConnection, this, std::placeholders::_1, std::placeholders::_2));
 
-        Singleton<HermesMeshGateway>::i()->reconnected.connect(
-            std::bind(&MeshBus::reconnected, this, std::placeholders::_1));
+        Singleton<HermesMeshGateway>::i()->reconnected.connect(std::bind(&MeshBus::reconnected, this, std::placeholders::_1));
 
         Singleton<HermesIncubator>::i()->dead.connect(
-            [this](int id, std::shared_ptr<HermesMaster> master) {
-                Singleton<HermesMeshGateway>::i()->remove(master->serial());
-            });
+            [this](int id, std::shared_ptr<HermesMaster> master) { Singleton<HermesMeshGateway>::i()->remove(master->serial()); });
     }
 }
 
-MeshBus::~MeshBus() { }
+MeshBus::~MeshBus() {}
 
 void MeshBus::loop()
 {

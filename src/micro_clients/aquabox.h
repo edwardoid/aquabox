@@ -21,7 +21,8 @@
 #include <common/singleton.h>
 #include <services/aquabox_api.h>
 
-namespace aquabox {
-template <>
-IAquaboxApi* Singleton<IAquaboxApi>::create();
+namespace aquabox
+{
+    template<>
+    IAquaboxApi* Singleton<IAquaboxApi>::create();
 }

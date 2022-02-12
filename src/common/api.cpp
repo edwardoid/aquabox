@@ -66,16 +66,11 @@ void API::init(std::shared_ptr<HttpServer> http, Route base)
     m_updates = base.sub().word("updates");
 
     if (m_allowCORS) {
-        m_server->default_resource["OPTIONS"] = std::bind(
-            &API::CORSOptions, this, std::placeholders::_2, std::placeholders::_1);
-        m_server->default_resource["GET"] = std::bind(
-            &API::CORSOptions, this, std::placeholders::_2, std::placeholders::_1);
-        m_server->default_resource["POST"] = std::bind(
-            &API::CORSOptions, this, std::placeholders::_2, std::placeholders::_1);
-        m_server->default_resource["PUT"] = std::bind(
-            &API::CORSOptions, this, std::placeholders::_2, std::placeholders::_1);
-        m_server->default_resource["DELETE"] = std::bind(
-            &API::CORSOptions, this, std::placeholders::_2, std::placeholders::_1);
+        m_server->default_resource["OPTIONS"] = std::bind(&API::CORSOptions, this, std::placeholders::_2, std::placeholders::_1);
+        m_server->default_resource["GET"] = std::bind(&API::CORSOptions, this, std::placeholders::_2, std::placeholders::_1);
+        m_server->default_resource["POST"] = std::bind(&API::CORSOptions, this, std::placeholders::_2, std::placeholders::_1);
+        m_server->default_resource["PUT"] = std::bind(&API::CORSOptions, this, std::placeholders::_2, std::placeholders::_1);
+        m_server->default_resource["DELETE"] = std::bind(&API::CORSOptions, this, std::placeholders::_2, std::placeholders::_1);
     }
 
     setup("GET", m_status, &API::Status);
@@ -97,8 +92,7 @@ void API::init(std::shared_ptr<HttpServer> http, Route base)
     setup("GET", m_history, &API::GetHistory);
 }
 
-void API::defaultHandler(const Route& route, Request& request,
-    Response& response, Headers& headers) { }
+void API::defaultHandler(const Route& route, Request& request, Response& response, Headers& headers) {}
 
 void API::CORSOptions(Web::Request request, Web::Response response)
 {
@@ -111,31 +105,28 @@ void API::addCORSHeaders(Web::Headers& headers)
 {
     headers.emplace("Content-Type", "application/json");
     headers.emplace(Access_Control_Allow_Origin, "*");
-    headers.emplace(
-        Access_Control_Allow_Headers,
-        "Origin, X-Requested-With, Content-Type, Accept, boxId, appId");
-    headers.emplace(Access_Control_Allow_Methods,
-        "POST, GET, PUT, PATCH, DELETE, OPTIONS");
+    headers.emplace(Access_Control_Allow_Headers, "Origin, X-Requested-With, Content-Type, Accept, boxId, appId");
+    headers.emplace(Access_Control_Allow_Methods, "POST, GET, PUT, PATCH, DELETE, OPTIONS");
 }
 
-void API::enableCORS(bool enable) { m_allowCORS = enable; }
-
-void API::setup(std::string method, const Route& route,
-    void (API::*Callback)(const Route&, Request&, Response&,
-        Headers&))
+void API::enableCORS(bool enable)
 {
-    m_server->resource[route.url()][method] = std::bind(&API::dispatcher, this, route, Callback, std::placeholders::_2,
-        std::placeholders::_1);
+    m_allowCORS = enable;
+}
+
+void API::setup(std::string method, const Route& route, void (API::*Callback)(const Route&, Request&, Response&, Headers&))
+{
+    m_server->resource[route.url()][method]
+        = std::bind(&API::dispatcher, this, route, Callback, std::placeholders::_2, std::placeholders::_1);
     if (m_allowCORS) {
-        m_server->resource[route.url()]["OPTIONS"] = std::bind(
-            &API::CORSOptions, this, std::placeholders::_2, std::placeholders::_1);
+        m_server->resource[route.url()]["OPTIONS"] = std::bind(&API::CORSOptions, this, std::placeholders::_2, std::placeholders::_1);
     }
 }
 
 void API::dispatcher(const Route& route,
-    void (API::*Callback)(const Route&, Request&, Response&,
-        Headers&),
-    Request request, Response response)
+                     void (API::*Callback)(const Route&, Request&, Response&, Headers&),
+                     Request request,
+                     Response response)
 {
     Headers headers;
     if (m_allowCORS) {

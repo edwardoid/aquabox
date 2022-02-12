@@ -22,10 +22,16 @@
 #include <boost/filesystem.hpp>
 #include <fstream>
 
-namespace aquabox {
-class HttpHelpers {
-public:
-    static void serveFile(Web::Response response, const boost::filesystem::path& path, Web::Headers& headers, bool removeWhenFinished);
-    static void serveStream(Web::Response response, const boost::filesystem::path& path, std::shared_ptr<std::ifstream> ifs, size_t length, bool removeWhenFinished);
-};
-}
+namespace aquabox
+{
+    class HttpHelpers
+    {
+    public:
+        static void serveFile(Web::Response response, const boost::filesystem::path& path, Web::Headers& headers, bool removeWhenFinished);
+        static void serveStream(Web::Response response,
+                                const boost::filesystem::path& path,
+                                std::shared_ptr<std::ifstream> ifs,
+                                size_t length,
+                                bool removeWhenFinished);
+    };
+} // namespace aquabox

@@ -18,30 +18,50 @@
 
 #pragma once
 #include <mutex>
-#include <rpc/server_base.h>
 #include <network.grpc.pb.h>
+#include <rpc/server_base.h>
 
-namespace nm {
-class NetworkManager;
+namespace nm
+{
+    class NetworkManager;
 }
 
-namespace aquabox {
-namespace services {
-    class NetworkManagerServer final : public ServerBase<NetworkManager> {
-    public:
-        NetworkManagerServer();
-        virtual ~NetworkManagerServer();
-        virtual ::grpc::Status GetCurrentNetwork(::grpc::ServerContext* context, const ::google::protobuf::Empty* request, ::aquabox::services::NetworkInfo* response) override;
-        virtual ::grpc::Status IsConnectedToInternet(::grpc::ServerContext* context, const ::google::protobuf::Empty* request, ::google::protobuf::BoolValue* response) override;
-        virtual ::grpc::Status StartScan(::grpc::ServerContext* context, const ::google::protobuf::BoolValue* request, ::google::protobuf::BoolValue* response) override;
-        virtual ::grpc::Status Connect(::grpc::ServerContext* context, const ::aquabox::services::NetworkConnect* request, ::aquabox::services::ConnectionStatus* response) override;
-        virtual ::grpc::Status StartHotspot(::grpc::ServerContext* context, const ::google::protobuf::Empty* request, ::google::protobuf::Empty* response) override;
-        virtual ::grpc::Status StopHotspot(::grpc::ServerContext* context, const ::google::protobuf::Empty* request, ::google::protobuf::Empty* response) override;
-        virtual ::grpc::Status CurrentNetworkChanged(::grpc::ServerContext* context, const ::google::protobuf::Empty* request, ::grpc::ServerWriter<::aquabox::services::NetworkInfo>* writer) override;
-        virtual ::grpc::Status GetAvailableNetworks(::grpc::ServerContext* context, const ::google::protobuf::Empty* request, ::grpc::ServerWriter<::aquabox::services::NetworkInfo>* writer) override;
+namespace aquabox
+{
+    namespace services
+    {
+        class NetworkManagerServer final : public ServerBase<NetworkManager>
+        {
+        public:
+            NetworkManagerServer();
+            virtual ~NetworkManagerServer();
+            virtual ::grpc::Status GetCurrentNetwork(::grpc::ServerContext* context,
+                                                     const ::google::protobuf::Empty* request,
+                                                     ::aquabox::services::NetworkInfo* response) override;
+            virtual ::grpc::Status IsConnectedToInternet(::grpc::ServerContext* context,
+                                                         const ::google::protobuf::Empty* request,
+                                                         ::google::protobuf::BoolValue* response) override;
+            virtual ::grpc::Status StartScan(::grpc::ServerContext* context,
+                                             const ::google::protobuf::BoolValue* request,
+                                             ::google::protobuf::BoolValue* response) override;
+            virtual ::grpc::Status Connect(::grpc::ServerContext* context,
+                                           const ::aquabox::services::NetworkConnect* request,
+                                           ::aquabox::services::ConnectionStatus* response) override;
+            virtual ::grpc::Status StartHotspot(::grpc::ServerContext* context,
+                                                const ::google::protobuf::Empty* request,
+                                                ::google::protobuf::Empty* response) override;
+            virtual ::grpc::Status StopHotspot(::grpc::ServerContext* context,
+                                               const ::google::protobuf::Empty* request,
+                                               ::google::protobuf::Empty* response) override;
+            virtual ::grpc::Status CurrentNetworkChanged(::grpc::ServerContext* context,
+                                                         const ::google::protobuf::Empty* request,
+                                                         ::grpc::ServerWriter<::aquabox::services::NetworkInfo>* writer) override;
+            virtual ::grpc::Status GetAvailableNetworks(::grpc::ServerContext* context,
+                                                        const ::google::protobuf::Empty* request,
+                                                        ::grpc::ServerWriter<::aquabox::services::NetworkInfo>* writer) override;
 
-    private:
-        std::mutex m_lock;
-    };
-}
-}
+        private:
+            std::mutex m_lock;
+        };
+    } // namespace services
+} // namespace aquabox

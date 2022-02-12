@@ -22,37 +22,37 @@
 #include <string>
 #include <vector>
 
-namespace aquabox {
-
-enum class NetworkState
+namespace aquabox
 {
-    Disconnecting = 0,
-    Connecting = 1,
-    Authentificating = 2,
-    OptainingIP = 3,
-    Connected = 4,
-    Disconnected = 5,
-    Failed = 6
-};
+    enum class NetworkState
+    {
+        Disconnecting = 0,
+        Connecting = 1,
+        Authentificating = 2,
+        OptainingIP = 3,
+        Connected = 4,
+        Disconnected = 5,
+        Failed = 6
+    };
 
+    struct NetworkInfo
+    {
+        std::string uuid;
+        std::string ssid;
+        std::string ip;
+        std::string auth;
+        int strength;
+        bool secure;
+    };
 
-struct NetworkInfo
-{
-    std::string uuid;
-    std::string ssid;
-    std::string ip;
-    std::string auth;
-    int strength;
-    bool secure;
-};
-
-class INetworkManager {
-public:
-    virtual NetworkState currentState() = 0;
-    virtual NetworkInfo currentNetwork() = 0;
-    virtual bool startScan(bool force = true) = 0;
-    virtual bool hasInternetConnection() = 0;
-    virtual std::vector<NetworkInfo> availableNetworks() = 0;
-    virtual std::string connect(const std::string ssid, const std::string password) = 0;
-};
-}
+    class INetworkManager
+    {
+    public:
+        virtual NetworkState currentState() = 0;
+        virtual NetworkInfo currentNetwork() = 0;
+        virtual bool startScan(bool force = true) = 0;
+        virtual bool hasInternetConnection() = 0;
+        virtual std::vector<NetworkInfo> availableNetworks() = 0;
+        virtual std::string connect(const std::string ssid, const std::string password) = 0;
+    };
+} // namespace aquabox

@@ -1,10 +1,10 @@
 #include "SettingsProviderServer.h"
 
+#include <fstream>
 #include <grpcpp/channel.h>
 #include <grpcpp/client_context.h>
 #include <grpcpp/create_channel.h>
 #include <grpcpp/security/credentials.h>
-#include <fstream>
 
 using namespace aquabox;
 using namespace services;
@@ -36,7 +36,8 @@ void SettingsProviderServer::load()
                 m_lastPort = m_data["lastPort"].get<std::uint32_t>();
             }
             LOG_INFO << "Config is ready!";
-        } catch (nlohmann::detail::parse_error& e) {
+        }
+        catch (nlohmann::detail::parse_error& e) {
             //LOG_ERROR << "Can't parse settings " << e.what();
         }
     }
@@ -53,22 +54,20 @@ void SettingsProviderServer::save()
     os << m_data.dump(4);
 }
 
-
-SettingsProviderServer::~SettingsProviderServer() { }
+SettingsProviderServer::~SettingsProviderServer() {}
 
 ::grpc::Status SettingsProviderServer::Has(::grpc::ServerContext* context,
-    const ::google::protobuf::StringValue* request,
-    ::google::protobuf::BoolValue* response)
+                                           const ::google::protobuf::StringValue* request,
+                                           ::google::protobuf::BoolValue* response)
 {
     std::unique_lock<std::recursive_mutex> lock(m_mx);
     response->set_value(m_data[request->value()]);
     return ::grpc::Status::OK;
 }
 
-::grpc::Status SettingsProviderServer::AllocatePort(
-    ::grpc::ServerContext* context,
-    const ::google::protobuf::StringValue* request,
-    ::google::protobuf::UInt32Value* response)
+::grpc::Status SettingsProviderServer::AllocatePort(::grpc::ServerContext* context,
+                                                    const ::google::protobuf::StringValue* request,
+                                                    ::google::protobuf::UInt32Value* response)
 {
     std::unique_lock<std::recursive_mutex> lock(m_mx);
     if (!m_ports.count(request->value())) {
@@ -81,10 +80,9 @@ SettingsProviderServer::~SettingsProviderServer() { }
     return ::grpc::Status::OK;
 }
 
-::grpc::Status
-SettingsProviderServer::GetPort(::grpc::ServerContext* context,
-    const ::google::protobuf::StringValue* request,
-    ::google::protobuf::UInt32Value* response)
+::grpc::Status SettingsProviderServer::GetPort(::grpc::ServerContext* context,
+                                               const ::google::protobuf::StringValue* request,
+                                               ::google::protobuf::UInt32Value* response)
 {
     std::unique_lock<std::recursive_mutex> lock(m_mx);
     response->set_value(m_ports[request->value()]);
@@ -93,20 +91,25 @@ SettingsProviderServer::GetPort(::grpc::ServerContext* context,
     return ::grpc::Status::OK;
 }
 
-::grpc::Status SettingsProviderServer::GetString(::grpc::ServerContext* context, const ::google::protobuf::StringValue* request, ::google::protobuf::StringValue* response)
+::grpc::Status SettingsProviderServer::GetString(::grpc::ServerContext* context,
+                                                 const ::google::protobuf::StringValue* request,
+                                                 ::google::protobuf::StringValue* response)
 {
     std::unique_lock<std::recursive_mutex> lock(m_mx);
     if (m_data.contains(request->value())) {
         response->set_value(m_data[request->value()]);
         LOG_DEBUG << "Value of " << request->value() << " -> " << response->value();
-    } else {
+    }
+    else {
         LOG_WARNING << "Can't find value for " << request->value();
         return grpc::Status(grpc::StatusCode::NOT_FOUND, std::string("Configuration does not have") + request->value());
     }
     return ::grpc::Status::OK;
 }
 
-::grpc::Status SettingsProviderServer::SetString(::grpc::ServerContext* context, const ::aquabox::services::SettingsSetStringRequest* request, ::google::protobuf::Empty* response)
+::grpc::Status SettingsProviderServer::SetString(::grpc::ServerContext* context,
+                                                 const ::aquabox::services::SettingsSetStringRequest* request,
+                                                 ::google::protobuf::Empty* response)
 {
     std::unique_lock<std::recursive_mutex> lock(m_mx);
     LOG_DEBUG << "Updating " << request->key() << " to " << request->value();
@@ -115,20 +118,25 @@ SettingsProviderServer::GetPort(::grpc::ServerContext* context,
     return ::grpc::Status::OK;
 }
 
-::grpc::Status SettingsProviderServer::GetBool(::grpc::ServerContext* context, const ::google::protobuf::StringValue* request, ::google::protobuf::BoolValue* response)
+::grpc::Status SettingsProviderServer::GetBool(::grpc::ServerContext* context,
+                                               const ::google::protobuf::StringValue* request,
+                                               ::google::protobuf::BoolValue* response)
 {
     std::unique_lock<std::recursive_mutex> lock(m_mx);
     if (m_data.contains(request->value())) {
         response->set_value(m_data[request->value()]);
         LOG_DEBUG << "Value of " << request->value() << " -> " << response->value();
-    } else {
+    }
+    else {
         LOG_WARNING << "Can't find value for " << request->value();
         return grpc::Status(grpc::StatusCode::NOT_FOUND, std::string("Configuration does not have") + request->value());
     }
     return ::grpc::Status::OK;
 }
 
-::grpc::Status SettingsProviderServer::SetBool(::grpc::ServerContext* context, const ::aquabox::services::SettingsSetBoolRequest* request, ::google::protobuf::Empty* response)
+::grpc::Status SettingsProviderServer::SetBool(::grpc::ServerContext* context,
+                                               const ::aquabox::services::SettingsSetBoolRequest* request,
+                                               ::google::protobuf::Empty* response)
 {
     std::unique_lock<std::recursive_mutex> lock(m_mx);
     LOG_DEBUG << "Updating " << request->key() << " to " << request->value();

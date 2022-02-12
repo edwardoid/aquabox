@@ -21,18 +21,14 @@
 
 using namespace aquabox;
 
-template <>
-Serializable<NetworkChangeReason>::Enum2StrMap
-    Serializable<NetworkChangeReason>::val2Str(
-        { { NetworkChangeReason::NothingSpecial, "ok" },
-            { NetworkChangeReason::Reconnect, "reconnect" },
-            { NetworkChangeReason::SwitchNework, "switching" },
-            { NetworkChangeReason::Unknown, "unknown" } });
+template<>
+Serializable<NetworkChangeReason>::Enum2StrMap Serializable<NetworkChangeReason>::val2Str({{NetworkChangeReason::NothingSpecial, "ok"},
+                                                                                           {NetworkChangeReason::Reconnect, "reconnect"},
+                                                                                           {NetworkChangeReason::SwitchNework, "switching"},
+                                                                                           {NetworkChangeReason::Unknown, "unknown"}});
 
-template <>
-Serializable<NetworkChangeReason>::Str2EnumMap
-    Serializable<NetworkChangeReason>::str2Val(
-        { { "ok", NetworkChangeReason::NothingSpecial },
-            { "reconnect", NetworkChangeReason::Reconnect },
-            { "switching", NetworkChangeReason::SwitchNework },
-            { "unknown", NetworkChangeReason::Unknown } });
+template<>
+Serializable<NetworkChangeReason>::Str2EnumMap Serializable<NetworkChangeReason>::str2Val({{"ok", NetworkChangeReason::NothingSpecial},
+                                                                                           {"reconnect", NetworkChangeReason::Reconnect},
+                                                                                           {"switching", NetworkChangeReason::SwitchNework},
+                                                                                           {"unknown", NetworkChangeReason::Unknown}});

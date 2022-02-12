@@ -17,43 +17,37 @@
  */
 
 #include "update_events.h"
-#include <types/types.h>
-#include <types/rule.h>
 #include <chrono>
 #include <common/enumerations.h>
+#include <types/rule.h>
+#include <types/types.h>
 
 using namespace aquabox;
-
 
 RuleEnableChangedEvent::RuleEnableChangedEvent(std::shared_ptr<Rule> rule)
 {
     setSender(rule->id(), "rule");
     setData({
-        { "sender_full", rule->name() },
-        { "device", rule->device() },
+        {"sender_full", rule->name()},
+        {"device", rule->device()},
     });
 
-    setPropertiesUpdate({ { "enabled", rule->enabled() } });
+    setPropertiesUpdate({{"enabled", rule->enabled()}});
 }
 
 RuleCreatedEvent::RuleCreatedEvent(const Rule& rule)
 {
     setSender(rule.id(), "rule");
-    setData({ { "sender_full", rule.name() },
-        { "device", rule.device() },
-        { "action", "created" } });
+    setData({{"sender_full", rule.name()}, {"device", rule.device()}, {"action", "created"}});
 
     nlohmann::json json = rule;
-    setPropertiesUpdate({ { "*", json } });
+    setPropertiesUpdate({{"*", json}});
 }
 
-RuleUpdatedEvent::RuleUpdatedEvent(const Rule& rule,
-    const nlohmann::json& before)
+RuleUpdatedEvent::RuleUpdatedEvent(const Rule& rule, const nlohmann::json& before)
 {
     setSender(rule.id(), "rule");
-    setData({ { "sender_full", rule.name() },
-        { "device", rule.device() },
-        { "action", "updated" } });
+    setData({{"sender_full", rule.name()}, {"device", rule.device()}, {"action", "updated"}});
 
     nlohmann::json json = rule;
 
@@ -77,24 +71,22 @@ TemporaryRuleRemainEvent::TemporaryRuleRemainEvent(const Rule& rule)
     auto now = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
     auto deleteAt = rule.createdAt() + rule.deleteAfter();
     auto remain = (now < deleteAt) ? (deleteAt - now) : 0;
-    setData({ { "remain", remain } });
+    setData({{"remain", remain}});
 }
 
 RuleDeletedEvent::RuleDeletedEvent(const Rule& rule)
 {
     setSender(rule.id(), "rule");
-    setData({ { "sender_full", rule.name() },
-        { "device", rule.device() },
-        { "action", "deleted" } });
+    setData({{"sender_full", rule.name()}, {"device", rule.device()}, {"action", "deleted"}});
 }
 
 DeviceRulesChangedEvent::DeviceRulesChangedEvent(const DeviceRef& device)
 {
     setSender(device.id(), "device");
     setData({
-        { "sender_full", device.name() },
+        {"sender_full", device.name()},
     });
-/*
+    /*
     std::vector<nlohmann::json> rules;
     for (auto r : device->rules()) {
         nlohmann::json ruleJson = *r;

@@ -20,32 +20,35 @@
 
 #include <common/enumerations.h>
 
-namespace aquabox {
-enum class DeviceClass : int {
-    Unknown = 0,
-    Relay,
-    AnalogRelay,
-    Sensor,
-    Step
-};
+namespace aquabox
+{
+    enum class DeviceClass : int
+    {
+        Unknown = 0,
+        Relay,
+        AnalogRelay,
+        Sensor,
+        Step
+    };
 
-enum class DeviceType : int {
-    Generic = 0,
-    Light,
-    AirPump,
-    WaterPump,
-    InternalFilter,
-    ExternalFilter,
-    AirliftFilter,
-    SUMP,
-    Heater,
-    Cooler,
-    Feeder,
-    Dosator,
-    CO2,
-    UV,
-    PHController,
-    PHMeter,
-    Thermometer
-};
-}
+    enum class DeviceType : int
+    {
+        Generic = 0,
+        Light,
+        AirPump,
+        WaterPump,
+        InternalFilter,
+        ExternalFilter,
+        AirliftFilter,
+        SUMP,
+        Heater,
+        Cooler,
+        Feeder,
+        Dosator,
+        CO2,
+        UV,
+        PHController,
+        PHMeter,
+        Thermometer
+    };
+} // namespace aquabox

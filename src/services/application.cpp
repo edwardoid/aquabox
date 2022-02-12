@@ -18,8 +18,8 @@
 
 #include "application.h"
 #include "stacktrace.h"
-#include <stdlib.h>
 #include <iostream>
+#include <stdlib.h>
 
 using namespace aquabox;
 
@@ -45,18 +45,18 @@ int Application::exec(int argc, char** argv)
 {
     StackTrace trace;
     try {
-        boost::program_options::store(boost::program_options::command_line_parser(argc, argv).options(m_optionsDescription).run(), m_options);
+        boost::program_options::store(boost::program_options::command_line_parser(argc, argv).options(m_optionsDescription).run(),
+                                      m_options);
         if (optionsIsSet("help") || optionsIsSet("h")) {
             std::cout << m_identifier << " available options: \n" << m_optionsDescription << std::endl;
             return EXIT_SUCCESS;
         }
         return start();
     }
-    catch(std::exception& e) {
+    catch (std::exception& e) {
         std::cerr << e.what();
     }
-    catch(...) {
-
+    catch (...) {
     }
     return EXIT_FAILURE;
 }

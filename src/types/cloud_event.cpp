@@ -25,7 +25,7 @@ CloudEvent::CloudEvent(bool online)
 {
     setSender(SERIAL_NUMBER, "cloud");
 
-    setData({ { "cloud", online } });
+    setData({{"cloud", online}});
 
-    setPropertiesUpdate({ { "connected", online } });
+    setPropertiesUpdate({{"connected", online}});
 }

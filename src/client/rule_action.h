@@ -20,15 +20,17 @@
 
 #include "enumerations.h"
 
-namespace aquabox {
-class Action {
-public:
-    Action() = default;
+namespace aquabox
+{
+    class Action
+    {
+    public:
+        Action() = default;
 
-    ActionType action() const;
-    void setAction(ActionType action);
+        ActionType action() const;
+        void setAction(ActionType action);
 
-private:
-    ActionType m_action;
-};
-}
+    private:
+        ActionType m_action;
+    };
+} // namespace aquabox

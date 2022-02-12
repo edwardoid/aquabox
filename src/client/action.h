@@ -22,15 +22,17 @@
 #include "property.h"
 #include "time.h"
 
-namespace aquabox {
-class Action : public ClassProperty {
-public:
-    Action(std::string name = "");
-    Action(const Action& src);
-    Action(Action&& src);
-    const Action& operator=(const Action& src);
+namespace aquabox
+{
+    class Action : public ClassProperty
+    {
+    public:
+        Action(std::string name = "");
+        Action(const Action& src);
+        Action(Action&& src);
+        const Action& operator=(const Action& src);
 
-    property(At, Time);
-    property(Type, EnumProperty<ActionType>);
-};
-}
+        property(At, Time);
+        property(Type, EnumProperty<ActionType>);
+    };
+} // namespace aquabox

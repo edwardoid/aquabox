@@ -27,38 +27,42 @@
 #include <pthread.h>
 #include <unordered_map>
 
-namespace aquabox {
-struct HermesSerial : std::array<proto::byte_t, SERIAL_LEN> {
-    HermesSerial();
-    HermesSerial(const proto::byte_t serial[SERIAL_LEN]);
-    std::string to_string() const;
-    bool isValid() const;
-};
-class HermesMaster : public proto::Master, public std::recursive_mutex {
-public:
-    HermesMaster(std::shared_ptr<proto::MessageIO> io);
-    virtual ~HermesMaster();
-    inline void enableCaching() { m_caching = true; }
-    inline void disableCaching() { m_caching = false; }
-    bool isConnected() const;
-    HermesSerial serial() const;
-    void setSerial(const HermesSerial& newSerial);
-    inline std::shared_ptr<proto::MessageIO> io() { return m_io; }
-
-protected:
-    virtual bool setPropertyData(const char* property, const proto::SetValueData& value) override;
-    virtual bool getPropertyData(const char* property, proto::GetValueData& value) override;
-    virtual bool acceptConnectionFrom(const proto::byte_t* serial) const;
-
-private:
-    struct CachedProperty {
-        std::chrono::system_clock::time_point lastAccess;
-        std::chrono::milliseconds updateTimeout;
-        proto::ValueData value;
+namespace aquabox
+{
+    struct HermesSerial : std::array<proto::byte_t, SERIAL_LEN>
+    {
+        HermesSerial();
+        HermesSerial(const proto::byte_t serial[SERIAL_LEN]);
+        std::string to_string() const;
+        bool isValid() const;
     };
-    std::shared_ptr<proto::MessageIO> m_io;
-    bool m_caching = false;
-    std::unordered_map<std::string, CachedProperty> m_properties;
-    std::recursive_mutex m_mx;
-};
-}
+    class HermesMaster : public proto::Master, public std::recursive_mutex
+    {
+    public:
+        HermesMaster(std::shared_ptr<proto::MessageIO> io);
+        virtual ~HermesMaster();
+        inline void enableCaching() { m_caching = true; }
+        inline void disableCaching() { m_caching = false; }
+        bool isConnected() const;
+        HermesSerial serial() const;
+        void setSerial(const HermesSerial& newSerial);
+        inline std::shared_ptr<proto::MessageIO> io() { return m_io; }
+
+    protected:
+        virtual bool setPropertyData(const char* property, const proto::SetValueData& value) override;
+        virtual bool getPropertyData(const char* property, proto::GetValueData& value) override;
+        virtual bool acceptConnectionFrom(const proto::byte_t* serial) const;
+
+    private:
+        struct CachedProperty
+        {
+            std::chrono::system_clock::time_point lastAccess;
+            std::chrono::milliseconds updateTimeout;
+            proto::ValueData value;
+        };
+        std::shared_ptr<proto::MessageIO> m_io;
+        bool m_caching = false;
+        std::unordered_map<std::string, CachedProperty> m_properties;
+        std::recursive_mutex m_mx;
+    };
+} // namespace aquabox

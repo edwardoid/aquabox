@@ -131,7 +131,8 @@ void Settings::read()
     if (!content.empty()) {
         try {
             json = json.parse(content);
-        } catch (nlohmann::detail::parse_error& e) {
+        }
+        catch (nlohmann::detail::parse_error& e) {
             //LOG_ERROR << "Can't parse settings " << e.what();
         }
     }

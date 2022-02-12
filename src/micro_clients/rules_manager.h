@@ -19,10 +19,11 @@
 #pragma once
 
 #include <common/singleton.h>
-#include <services/rules_manager.h>
 #include <devices.grpc.pb.h>
+#include <services/rules_manager.h>
 
-namespace aquabox {
+namespace aquabox
+{
     template<>
     IRulesManager* Singleton<IRulesManager>::create();
 }

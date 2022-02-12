@@ -18,17 +18,17 @@
 
 #include "devices_map.h"
 #include "device.h"
+#include <common/log.h>
 #include <devices_manager/relay.h>
 #include <devices_manager/sensor.h>
 #include <devices_manager/step.h>
 #include <micro_clients/settings.h>
-#include <common/log.h>
 
 #include <fstream>
 
 using namespace aquabox;
 
-DevicesMap::DevicesMap() { }
+DevicesMap::DevicesMap() {}
 
 std::string DevicesMap::nextId() const
 {
@@ -43,9 +43,7 @@ std::string DevicesMap::nextId() const
 
 bool DevicesMap::hasDevice(const std::string& address) const
 {
-    return this->has([&address](const std::shared_ptr<Device>& dev) {
-        return dev->address() == address;
-    });
+    return this->has([&address](const std::shared_ptr<Device>& dev) { return dev->address() == address; });
 }
 
 std::string DevicesMap::deviceIdByAddress(const std::string& address) const
@@ -62,18 +60,20 @@ std::string DevicesMap::deviceIdByAddress(const std::string& address) const
     return found ? id : "";
 }
 
-std::set<std::string> DevicesMap::ids() const { return keys(); }
+std::set<std::string> DevicesMap::ids() const
+{
+    return keys();
+}
 
 std::string DevicesMap::addDevice(std::shared_ptr<Device> dev, bool pending)
 {
     std::string id = dev->id();
     int index = 0;
-    this->for_each(
-        [&index](const std::string&, const std::shared_ptr<Device> dev) {
-            if (dev->index() >= index) {
-                index = dev->index() + 1;
-            }
-        });
+    this->for_each([&index](const std::string&, const std::shared_ptr<Device> dev) {
+        if (dev->index() >= index) {
+            index = dev->index() + 1;
+        }
+    });
     dev->setIndex(index);
     LOG_INFO << "Adding device " << id;
     insert(id, dev);

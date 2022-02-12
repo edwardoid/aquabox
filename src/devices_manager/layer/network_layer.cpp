@@ -24,23 +24,22 @@
 
 using namespace aquabox;
 
-struct AvailableBuses {
+struct AvailableBuses
+{
     static std::unordered_map<std::string, std::shared_ptr<Bus>> buses()
     {
-        static std::unordered_map<std::string, std::shared_ptr<Bus>> buses(
-            { { "MQTT", std::make_shared<MQTTBus>("NET:MQTT") },
-                { "SCT", std::make_shared<SocketBus>("NET:SCT") },
-                { "NRF", std::make_shared<MeshBus>("NET:NRF") } });
+        static std::unordered_map<std::string, std::shared_ptr<Bus>> buses({{"MQTT", std::make_shared<MQTTBus>("NET:MQTT")},
+                                                                            {"SCT", std::make_shared<SocketBus>("NET:SCT")},
+                                                                            {"NRF", std::make_shared<MeshBus>("NET:NRF")}});
         return buses;
     }
 };
 
 NetworkLayer::NetworkLayer(const std::string& address)
     : Layer(address)
-{
-}
+{}
 
-NetworkLayer::~NetworkLayer() { }
+NetworkLayer::~NetworkLayer() {}
 
 void NetworkLayer::prepare()
 {
@@ -55,7 +54,5 @@ void NetworkLayer::prepare()
 
 std::shared_ptr<Bus> NetworkLayer::bus(const std::string& bus)
 {
-    return AvailableBuses::buses().find(bus) == AvailableBuses::buses().end()
-        ? nullptr
-        : AvailableBuses::buses()[bus];
+    return AvailableBuses::buses().find(bus) == AvailableBuses::buses().end() ? nullptr : AvailableBuses::buses()[bus];
 }

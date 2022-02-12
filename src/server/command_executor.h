@@ -20,12 +20,14 @@
 
 #include <common/command.h>
 
-namespace aquabox {
-class CommandExecutor {
-public:
-    bool exec(const Command& cmd);
+namespace aquabox
+{
+    class CommandExecutor
+    {
+    public:
+        bool exec(const Command& cmd);
 
-private:
-    Command m_cmd;
-};
-}
+    private:
+        Command m_cmd;
+    };
+} // namespace aquabox

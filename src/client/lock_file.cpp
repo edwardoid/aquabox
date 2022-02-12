@@ -31,23 +31,20 @@ using namespace aquabox;
 #define _RW _R | _W
 #define _RWX RW | _X
 
-#define _A(mode) (mode) // All
+#define _A(mode) (mode)        // All
 #define _G(mode) ((mode) << 3) // Group
 #define _O(mode) ((mode) << 6) // Owner
 
 #define LOCK_FILE_MODE (S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH)
 
-Lockfile::Lockfile()
-{
-}
+Lockfile::Lockfile() {}
 
 bool Lockfile::create()
 {
     if (m_fd > 0)
         remove();
 
-    m_fd = open(Settings::Defaults::LOCK_FILE.c_str(),
-        O_CREAT | O_WRONLY | O_EXCL, LOCK_FILE_MODE);
+    m_fd = open(Settings::Defaults::LOCK_FILE.c_str(), O_CREAT | O_WRONLY | O_EXCL, LOCK_FILE_MODE);
     return m_fd > 0;
 }
 
@@ -58,10 +55,12 @@ void Lockfile::remove()
     }
 
     int ret = ::remove(Settings::Defaults::LOCK_FILE.c_str());
-    LOG_FATAL_IF(ret != 0) << "Can't delete lock file "
-                           << Settings::Defaults::LOCK_FILE;
+    LOG_FATAL_IF(ret != 0) << "Can't delete lock file " << Settings::Defaults::LOCK_FILE;
 
     m_fd = -1;
 }
 
-Lockfile::~Lockfile() { remove(); }
+Lockfile::~Lockfile()
+{
+    remove();
+}

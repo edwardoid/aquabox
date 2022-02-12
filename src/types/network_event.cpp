@@ -21,4 +21,7 @@
 #include "serial.h"
 using namespace aquabox;
 
-NetworkEvent::NetworkEvent() { setSender(SERIAL_NUMBER, "network"); }
+NetworkEvent::NetworkEvent()
+{
+    setSender(SERIAL_NUMBER, "network");
+}

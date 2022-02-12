@@ -16,29 +16,26 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "device_events.h"
 #include "../device.h"
+#include "device_events.h"
 #include <types/serial.h>
 
 using namespace aquabox;
 
-
 DeviceAddedEvent::DeviceAddedEvent(std::shared_ptr<Device> device)
 {
-    setData({ { "action", "device_added" }, { "device", device->id() } });
+    setData({{"action", "device_added"}, {"device", device->id()}});
 }
 
 DeviceDeletedEvent::DeviceDeletedEvent(std::shared_ptr<Device> device)
 {
-    setData({ { "action", "device_deleted" }, { "device", device->id() } });
+    setData({{"action", "device_deleted"}, {"device", device->id()}});
 }
 
-
-DeviceUpdatedEvent::DeviceUpdatedEvent(std::shared_ptr<Device> device,
-    const nlohmann::json& before)
+DeviceUpdatedEvent::DeviceUpdatedEvent(std::shared_ptr<Device> device, const nlohmann::json& before)
 {
     setSender(device->id(), "device");
-    setData({ { "sender_full", device->name() }, { "action", "updated" } });
+    setData({{"sender_full", device->name()}, {"action", "updated"}});
 
     nlohmann::json json = *device;
 
@@ -55,26 +52,21 @@ DeviceUpdatedEvent::DeviceUpdatedEvent(std::shared_ptr<Device> device,
     setPropertiesUpdate(res);
 }
 
-DevicePropertyUpdateEvent::DevicePropertyUpdateEvent(
-    std::shared_ptr<Device> device, const nlohmann::json& update)
+DevicePropertyUpdateEvent::DevicePropertyUpdateEvent(std::shared_ptr<Device> device, const nlohmann::json& update)
 {
     setSender(device->id(), "device");
-    setData({ { "sender_full", device->name() }, { "action", "updated" } });
+    setData({{"sender_full", device->name()}, {"action", "updated"}});
 
     setPropertiesUpdate(update);
 }
 
-
-ValueChangedEvent::ValueChangedEvent(std::shared_ptr<Device> device,
-    std::string property,
-    const nlohmann::json& value,
-    std::string reason)
+ValueChangedEvent::ValueChangedEvent(std::shared_ptr<Device> device, std::string property, const nlohmann::json& value, std::string reason)
 {
     setSender(device->id(), "device");
     setData({
-        { "reason", reason },
-        { "sender_full", device->name() },
+        {"reason", reason},
+        {"sender_full", device->name()},
     });
 
-    setPropertiesUpdate({ { property, value } });
+    setPropertiesUpdate({{property, value}});
 }

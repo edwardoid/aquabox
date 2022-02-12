@@ -24,17 +24,20 @@
 using namespace aquabox;
 using namespace aquabox::services;
 
-
 template<typename T, class ClockT = std::chrono::system_clock>
-class CachedSettings: protected std::unordered_map<std::string, T>
+class CachedSettings : protected std::unordered_map<std::string, T>
 {
 public:
     CachedSettings(std::chrono::milliseconds timeout = std::chrono::seconds(60))
         : m_timeout(timeout)
-        , m_lastTouch(ClockT::now() - timeout) {}
-    bool get(const std::string& key, T& value) {
-        if ((ClockT::now() - m_lastTouch) > m_timeout) return false;
-        if (std::unordered_map<std::string, T>::count(key) == 0) return false;
+        , m_lastTouch(ClockT::now() - timeout)
+    {}
+    bool get(const std::string& key, T& value)
+    {
+        if ((ClockT::now() - m_lastTouch) > m_timeout)
+            return false;
+        if (std::unordered_map<std::string, T>::count(key) == 0)
+            return false;
         value = (*this)[key];
         return true;
     }
@@ -43,30 +46,28 @@ public:
         m_lastTouch = ClockT::now();
         (*this)[key] = value;
     }
+
 private:
     std::chrono::milliseconds m_timeout;
     typename ClockT::time_point m_lastTouch;
 };
 
-class SettingsImpl : public ISettings {
+class SettingsImpl : public ISettings
+{
 public:
     SettingsImpl();
-    virtual ~SettingsImpl() { }
+    virtual ~SettingsImpl() {}
     virtual bool has(const std::string& key) override;
-    virtual std::int32_t get(const std::string& key,
-        std::int32_t defaultValue) override;
+    virtual std::int32_t get(const std::string& key, std::int32_t defaultValue) override;
     virtual void set(const std::string& key, std::int32_t value) override;
 
-    virtual std::string get(const std::string& key,
-        const std::string& defaultValue) override;
+    virtual std::string get(const std::string& key, const std::string& defaultValue) override;
     virtual void set(const std::string&, const std::string& value) override;
 
-    virtual bool get(const std::string& key,
-        bool defaultValue) override;
+    virtual bool get(const std::string& key, bool defaultValue) override;
     virtual void set(const std::string&, bool value) override;
 
-    virtual std::uint32_t port(const std::string& service,
-        bool request = false) override;
+    virtual std::uint32_t port(const std::string& service, bool request = false) override;
     virtual boost::filesystem::path path(const std::string& key, const boost::filesystem::path& defaultVal) override;
 
 private:
@@ -79,33 +80,30 @@ private:
 
 SettingsImpl::SettingsImpl()
     : m_client(500500)
-{
-}
+{}
 
 bool SettingsImpl::has(const std::string& key)
 {
     google::protobuf::StringValue _key;
     _key.set_value(key);
     google::protobuf::BoolValue val;
-    if (m_client.call(&services::SettingsProvider::Stub::Has, _key, &val)
-            .ok()) {
+    if (m_client.call(&services::SettingsProvider::Stub::Has, _key, &val).ok()) {
         return val.value();
     }
     return false;
 }
 
-std::int32_t SettingsImpl::get(const std::string& key,
-    std::int32_t defaultValue)
+std::int32_t SettingsImpl::get(const std::string& key, std::int32_t defaultValue)
 {
-    if(!m_ints.get(key, defaultValue)) {
+    if (!m_ints.get(key, defaultValue)) {
         google::protobuf::StringValue _key;
         _key.set_value(key);
         google::protobuf::Int32Value val;
-        if (m_client.call(&services::SettingsProvider::Stub::GetInt, _key, &val)
-                .ok()) {
+        if (m_client.call(&services::SettingsProvider::Stub::GetInt, _key, &val).ok()) {
             m_ints.set(key, val.value());
             return val.value();
-        } else {
+        }
+        else {
             set(key, defaultValue);
         }
     }
@@ -123,18 +121,17 @@ void SettingsImpl::set(const std::string& key, std::int32_t value)
     }
 }
 
-bool SettingsImpl::get(const std::string& key,
-    bool defaultValue)
+bool SettingsImpl::get(const std::string& key, bool defaultValue)
 {
     if (!m_bools.get(key, defaultValue)) {
         google::protobuf::StringValue _key;
         _key.set_value(key);
         google::protobuf::BoolValue val;
-        if (m_client.call(&services::SettingsProvider::Stub::GetBool, _key, &val)
-                .ok()) {
+        if (m_client.call(&services::SettingsProvider::Stub::GetBool, _key, &val).ok()) {
             m_uints.set(key, val.value());
             return val.value();
-        } else {
+        }
+        else {
             set(key, defaultValue);
         }
     }
@@ -152,19 +149,18 @@ void SettingsImpl::set(const std::string& key, bool value)
     }
 }
 
-std::string SettingsImpl::get(const std::string& key,
-    const std::string& defaultValue)
+std::string SettingsImpl::get(const std::string& key, const std::string& defaultValue)
 {
     std::string val = defaultValue;
     if (!m_strings.get(key, val)) {
         google::protobuf::StringValue _key;
         _key.set_value(key);
         google::protobuf::StringValue val;
-        if (m_client.call(&services::SettingsProvider::Stub::GetString, _key, &val)
-                .ok()) {
+        if (m_client.call(&services::SettingsProvider::Stub::GetString, _key, &val).ok()) {
             m_strings.set(key, val.value());
             return val.value();
-        } else {
+        }
+        else {
             set(key, defaultValue);
         }
     }
@@ -177,8 +173,7 @@ void SettingsImpl::set(const std::string& key, const std::string& value)
     google::protobuf::Empty e;
     req.set_key(key);
     req.set_value(value);
-    if (m_client.call(&services::SettingsProvider::Stub::SetString, req, &e)
-             .ok()) {
+    if (m_client.call(&services::SettingsProvider::Stub::SetString, req, &e).ok()) {
         m_strings.set(key, value);
     }
 }
@@ -186,18 +181,16 @@ void SettingsImpl::set(const std::string& key, const std::string& value)
 std::uint32_t SettingsImpl::port(const std::string& service, bool request)
 {
     std::uint32_t port = 0;
-    if (!m_uints.get(service, port))
-    {
+    if (!m_uints.get(service, port)) {
         google::protobuf::StringValue serviceName;
         serviceName.set_value(service);
         google::protobuf::UInt32Value servicePort;
         grpc::Status res;
         if (request) {
-            res = m_client.call(&services::SettingsProvider::Stub::AllocatePort,
-                serviceName, &servicePort);
-        } else {
-            res = m_client.call(&services::SettingsProvider::Stub::GetPort, serviceName,
-                &servicePort);
+            res = m_client.call(&services::SettingsProvider::Stub::AllocatePort, serviceName, &servicePort);
+        }
+        else {
+            res = m_client.call(&services::SettingsProvider::Stub::GetPort, serviceName, &servicePort);
         }
 
         if (!res.ok()) {
@@ -206,8 +199,7 @@ std::uint32_t SettingsImpl::port(const std::string& service, bool request)
         }
 
         if (servicePort.value() == 0 && !request) {
-            res = m_client.call(&services::SettingsProvider::Stub::AllocatePort,
-                serviceName, &servicePort);
+            res = m_client.call(&services::SettingsProvider::Stub::AllocatePort, serviceName, &servicePort);
         }
 
         if (!res.ok()) {
@@ -227,7 +219,7 @@ boost::filesystem::path SettingsImpl::path(const std::string& key, const boost::
     return boost::filesystem::path(result);
 }
 
-template <>
+template<>
 ISettings* Singleton<ISettings>::create()
 {
     return new SettingsImpl();

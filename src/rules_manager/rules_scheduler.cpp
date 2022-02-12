@@ -17,25 +17,23 @@
  */
 
 #include "rules_scheduler.h"
-#include <types/types.h>
-#include <types/rule.h>
-#include <types/update_events.h>
-#include <micro_clients/events.h>
-#include <micro_clients/devices_manager.h>
+#include "rules_map.h"
 #include <common/log.h>
 #include <common/singleton.h>
-#include "rules_map.h"
+#include <micro_clients/devices_manager.h>
+#include <micro_clients/events.h>
+#include <types/rule.h>
+#include <types/types.h>
+#include <types/update_events.h>
 
 using namespace aquabox;
 
-RuleScheduler::RuleScheduler(){}
-
+RuleScheduler::RuleScheduler() {}
 
 void RuleScheduler::recover()
 {
     LOG_INFO << "RuleSchedulering devices states";
-    Singleton<RulesMap>::i()->for_each(
-        [this](std::string id, std::shared_ptr<Rule> rule) { add(*rule); });
+    Singleton<RulesMap>::i()->for_each([this](std::string id, std::shared_ptr<Rule> rule) { add(*rule); });
     LOG_INFO << "Starting Rules service";
     start();
 }
@@ -46,12 +44,12 @@ void RuleScheduler::add(const Rule& rule)
         return;
     }
     for (auto& vc : rule.actions()) {
-        std::pair<std::string, ValueChange> data({ rule.id(), vc });
-        int id = Scheduler<std::pair<std::string, ValueChange>>::add(
-            vc.cron, data, rule.lastRun());
+        std::pair<std::string, ValueChange> data({rule.id(), vc});
+        int id = Scheduler<std::pair<std::string, ValueChange>>::add(vc.cron, data, rule.lastRun());
         if (id < 0) {
             LOG_ERROR << "Can't add action for rule " << rule.id();
-        } else {
+        }
+        else {
             LOG_DEBUG << "Added action of rule " << rule.id() << " as task " << id;
         }
     }
@@ -59,18 +57,20 @@ void RuleScheduler::add(const Rule& rule)
     if (rule.isTemporary()) {
         ValueChange remainValue;
         remainValue.property = "remain";
-        std::pair<std::string, ValueChange> data({ rule.id(), remainValue });
-        Scheduler<std::pair<std::string, ValueChange>>::add("* * * * * *", data,
-            rule.lastRun());
+        std::pair<std::string, ValueChange> data({rule.id(), remainValue});
+        Scheduler<std::pair<std::string, ValueChange>>::add("* * * * * *", data, rule.lastRun());
     }
 }
 
-void RuleScheduler::begin() { m_changes.clear(); }
+void RuleScheduler::begin()
+{
+    m_changes.clear();
+}
 
 void RuleScheduler::finish()
 {
     for (auto& change : m_changes) {
-        if(!Singleton<IDevicesManager>::i()->set(change.first, change.second.property, change.second.value)) {
+        if (!Singleton<IDevicesManager>::i()->set(change.first, change.second.property, change.second.value)) {
             LOG_ERROR << "Can't apply change on " << change.first;
         }
     }
@@ -80,8 +80,7 @@ void RuleScheduler::finish()
     }
 }
 
-bool RuleScheduler::ready(const int& id,
-    std::pair<std::string, ValueChange>& data)
+bool RuleScheduler::ready(const int& id, std::pair<std::string, ValueChange>& data)
 {
     LOG_DEBUG << "Action " << id << " is ready";
     auto r = Singleton<RulesMap>::i()->get(data.first, nullptr);
@@ -92,17 +91,16 @@ bool RuleScheduler::ready(const int& id,
 
     if (r->isTemporary() && data.second.property == "remain") {
         Singleton<IEvents>::i()->notify(std::make_shared<TemporaryRuleRemainEvent>(*r));
-    } else if (r->enabled()) {
-        r->setLastRun(
-            std::chrono::system_clock::to_time_t(std::chrono::system_clock::now()));
+    }
+    else if (r->enabled()) {
+        r->setLastRun(std::chrono::system_clock::to_time_t(std::chrono::system_clock::now()));
         Singleton<RulesMap>::i()->saveRule(data.first);
 
         m_changes[r->device()] = data.second;
     }
 
     if (r->expired()) {
-        LOG_VERBOSE << "Rule " << data.first
-                    << " has expired. Scheduling for delete";
+        LOG_VERBOSE << "Rule " << data.first << " has expired. Scheduling for delete";
         m_rulesToDelete.insert(data.first);
         return false;
     }
@@ -114,7 +112,5 @@ void RuleScheduler::remove(const Rule& rule)
 {
     std::string ruleId = rule.id();
     LOG_DEBUG << "Removing actions for rule " << ruleId;
-    removeIf([ruleId](const int& id, std::pair<std::string, ValueChange>& vc) {
-        return vc.first == ruleId;
-    });
+    removeIf([ruleId](const int& id, std::pair<std::string, ValueChange>& vc) { return vc.first == ruleId; });
 }

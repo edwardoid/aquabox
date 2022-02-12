@@ -18,11 +18,14 @@
 
 #pragma once
 
-namespace aquabox {
-namespace services {
-    template <class F, class T>
-    struct Converter {
-        static T convert(const F&);
-    };
-}
-}
+namespace aquabox
+{
+    namespace services
+    {
+        template<class F, class T>
+        struct Converter
+        {
+            static T convert(const F&);
+        };
+    } // namespace services
+} // namespace aquabox

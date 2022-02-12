@@ -21,7 +21,8 @@
 #include <common/singleton.h>
 #include <services/devices_manager.h>
 
-namespace aquabox {
+namespace aquabox
+{
     template<>
     IDevicesManager* Singleton<IDevicesManager>::create();
 }

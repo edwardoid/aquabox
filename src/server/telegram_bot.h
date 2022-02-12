@@ -23,21 +23,23 @@
 #include <tgbot/tgbot.h>
 #include <thread>
 
-namespace aquabox {
-class Box;
-class TelegramBot {
-public:
-    TelegramBot(const std::string& token = "1406003356:AAEE_dI8UiBKAhbkBEvUvSewWbGaG5Zwubg");
-    ~TelegramBot();
-    void start();
-    void statusChanged(const Box& box, bool online);
-    void updateReceived(const Box& box, const nlohmann::json& event);
+namespace aquabox
+{
+    class Box;
+    class TelegramBot
+    {
+    public:
+        TelegramBot(const std::string& token = "1406003356:AAEE_dI8UiBKAhbkBEvUvSewWbGaG5Zwubg");
+        ~TelegramBot();
+        void start();
+        void statusChanged(const Box& box, bool online);
+        void updateReceived(const Box& box, const nlohmann::json& event);
 
-private:
-    void setup();
+    private:
+        void setup();
 
-private:
-    TgBot::Bot m_bot;
-    std::thread m_loop;
-};
-}
+    private:
+        TgBot::Bot m_bot;
+        std::thread m_loop;
+    };
+} // namespace aquabox

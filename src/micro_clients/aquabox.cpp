@@ -20,7 +20,7 @@
 
 using namespace aquabox;
 
-template <>
+template<>
 IAquaboxApi* Singleton<IAquaboxApi>::create()
 {
     return nullptr;

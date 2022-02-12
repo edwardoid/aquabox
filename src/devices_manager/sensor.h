@@ -20,13 +20,15 @@
 
 #include "device.h"
 
-namespace aquabox {
-class Sensor : public AbstractSensor {
-public:
-    Sensor() = default;
-    Sensor(const Sensor& src) = default;
-    Sensor(Sensor&& src) = default;
+namespace aquabox
+{
+    class Sensor : public AbstractSensor
+    {
+    public:
+        Sensor() = default;
+        Sensor(const Sensor& src) = default;
+        Sensor(Sensor&& src) = default;
 
-    virtual nlohmann::json value(std::string) const override;
-};
-}
+        virtual nlohmann::json value(std::string) const override;
+    };
+} // namespace aquabox

@@ -18,18 +18,21 @@
 
 #pragma once
 
+#include "server_connection.h"
 #include <services/aquabox_api.h>
 #include <tgbot/tgbot.h>
-#include "server_connection.h"
 
-namespace aquabox {
-class TelegramBot {
-public:
-    TelegramBot();
-    void start();
-private:
-    std::shared_ptr<TgBot::Bot> m_bot;
-    std::set<std::int64_t> m_chats;
-    ServerConnection m_server;
-};
-}
+namespace aquabox
+{
+    class TelegramBot
+    {
+    public:
+        TelegramBot();
+        void start();
+
+    private:
+        std::shared_ptr<TgBot::Bot> m_bot;
+        std::set<std::int64_t> m_chats;
+        ServerConnection m_server;
+    };
+} // namespace aquabox

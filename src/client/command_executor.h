@@ -20,28 +20,30 @@
 
 #include <common/command.h>
 
-namespace aquabox {
-class CommandExecutor {
-public:
-    bool exec(const Command& cmd);
+namespace aquabox
+{
+    class CommandExecutor
+    {
+    public:
+        bool exec(const Command& cmd);
 
-private:
-    bool GetStatus();
-    bool GetDevices();
-    bool GetDevice();
-    bool UpdateDevice();
-    bool GetRules();
-    bool GetRule();
-    bool CreateOrUpdateRule(bool update);
-    bool DeleteRule();
-    bool DeviceRules();
-    bool SupportedRepeatTimeouts();
-    bool SetValue();
-    bool ScanWiFiNetworks();
-    bool ListNetworks();
-    bool ConnectToWiFi();
+    private:
+        bool GetStatus();
+        bool GetDevices();
+        bool GetDevice();
+        bool UpdateDevice();
+        bool GetRules();
+        bool GetRule();
+        bool CreateOrUpdateRule(bool update);
+        bool DeleteRule();
+        bool DeviceRules();
+        bool SupportedRepeatTimeouts();
+        bool SetValue();
+        bool ScanWiFiNetworks();
+        bool ListNetworks();
+        bool ConnectToWiFi();
 
-private:
-    Command m_cmd;
-};
-}
+    private:
+        Command m_cmd;
+    };
+} // namespace aquabox

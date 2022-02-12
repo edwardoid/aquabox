@@ -21,4 +21,7 @@
 
 using namespace aquabox;
 
-BoxEvent::BoxEvent() { setSender(SERIAL_NUMBER, "aquabox"); }
+BoxEvent::BoxEvent()
+{
+    setSender(SERIAL_NUMBER, "aquabox");
+}

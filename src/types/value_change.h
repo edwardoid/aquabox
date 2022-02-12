@@ -21,14 +21,16 @@
 #include <ctime>
 #include <nlohmann/json.hpp>
 
-namespace aquabox {
-struct ValueChange {
-    std::string property;
-    std::string cron;
-    uint64_t when = 0;
-    nlohmann::json value;
-};
+namespace aquabox
+{
+    struct ValueChange
+    {
+        std::string property;
+        std::string cron;
+        uint64_t when = 0;
+        nlohmann::json value;
+    };
 
-void to_json(nlohmann::json& j, const ValueChange& v);
-void from_json(const nlohmann::json& j, ValueChange& v);
-}
+    void to_json(nlohmann::json& j, const ValueChange& v);
+    void from_json(const nlohmann::json& j, ValueChange& v);
+} // namespace aquabox

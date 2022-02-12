@@ -20,9 +20,11 @@
 
 #include <nlohmann/json-schema.hpp>
 
-namespace aquabox {
-class CommandValidator {
-public:
-    static nlohmann::json_schema::json_validator& validator();
-};
-}
+namespace aquabox
+{
+    class CommandValidator
+    {
+    public:
+        static nlohmann::json_schema::json_validator& validator();
+    };
+} // namespace aquabox

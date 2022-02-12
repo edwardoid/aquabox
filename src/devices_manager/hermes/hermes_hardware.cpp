@@ -22,8 +22,7 @@ using namespace aquabox;
 
 HermesHardware::HermesHardware(std::shared_ptr<HermesMaster> impl)
     : m_impl(impl)
-{
-}
+{}
 
 bool HermesHardware::isReady()
 {
@@ -86,7 +85,8 @@ int32_t HermesHardware::get()
     int32_t val = 0;
     if (m_impl->getProperty<int32_t>("times", val)) {
         return val;
-    } else {
+    }
+    else {
         LOG_WARNING << "Can't get property 'times'.";
     }
     return 0;
@@ -113,7 +113,8 @@ bool HermesHardware::callInProgress(const std::string& method)
     bool val = false;
     if (m_impl->getProperty<bool>(method.c_str(), val)) {
         return val;
-    } else {
+    }
+    else {
         LOG_WARNING << "Can't get property 'times'.";
     }
     return false;

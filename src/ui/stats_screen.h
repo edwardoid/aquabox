@@ -21,14 +21,16 @@
 #include "status_bar_screen.h"
 #include <text.h>
 
-namespace aquabox {
-class StatsScreen : public StatusBarScreen {
-public:
-    StatsScreen();
-    virtual ~StatsScreen() = default;
-    virtual void draw() override;
+namespace aquabox
+{
+    class StatsScreen : public StatusBarScreen
+    {
+    public:
+        StatsScreen();
+        virtual ~StatsScreen() = default;
+        virtual void draw() override;
 
-private:
-    LIBFB_NS::Text m_uptime;
-};
-}
+    private:
+        LIBFB_NS::Text m_uptime;
+    };
+} // namespace aquabox

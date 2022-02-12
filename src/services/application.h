@@ -27,17 +27,18 @@ namespace aquabox
     public:
         Application(const std::string& identifier);
         Application(const Application&) = delete;
-        const Application& operator = (const Application&) = delete;
+        const Application& operator=(const Application&) = delete;
         inline static Application* app() { return m_thisApp; }
         inline const std::string& identifier() const { return m_identifier; }
         void addOption(const std::string& arg, const std::string& description);
         bool optionsIsSet(const std::string option);
         int exec(int argc = 0, char** argv = nullptr);
         virtual int start();
+
     private:
         std::string m_identifier;
         static Application* m_thisApp;
         boost::program_options::options_description m_optionsDescription;
         boost::program_options::variables_map m_options;
     };
-}
+} // namespace aquabox

@@ -19,8 +19,8 @@
 #pragma once
 
 #include <common/command.h>
-#include <tgbot/tgbot.h>
 #include <sstream>
+#include <tgbot/tgbot.h>
 #include <unordered_map>
 
 namespace aquabox
@@ -28,54 +28,52 @@ namespace aquabox
     class MessageFormatter
     {
     public:
-        MessageFormatter(const Command& cmd, const TgBot::Api& api, std::int64_t chatId): m_cmd(cmd), m_api(api), m_chatId(chatId) {}
-        virtual void operator() (const Command& cmd, bool ok) const = 0;
+        MessageFormatter(const Command& cmd, const TgBot::Api& api, std::int64_t chatId)
+            : m_cmd(cmd)
+            , m_api(api)
+            , m_chatId(chatId)
+        {}
+        virtual void operator()(const Command& cmd, bool ok) const = 0;
+
     protected:
-        std::string bold(const std::string txt) const
-        {
-            return std::string("<b>") + txt + "</b>";
-        }
-        std::string italic(const std::string txt) const
-        {
-            return std::string("<i>") + txt + "</i>";
-        }
+        std::string bold(const std::string txt) const { return std::string("<b>") + txt + "</b>"; }
+        std::string italic(const std::string txt) const { return std::string("<i>") + txt + "</i>"; }
 
         const std::string emoji(const std::string txt) const
         {
-            static const std::unordered_map<std::string, std::string> emojis({
-                { "true", "✅" },
-                { "false", "⛔" },
-                { "yes", "✅" },
-                { "no", "⛔" },
-                { "on", "✅" },
-                { "off", "⛔" },
-                { "sad", "😞" },
-                { "filter", "💩" },
-                { "poo", "💩" },
-                { "light", "💡"},
-                { "co2", "🌱"},
-                { "plant", "🌱"},
-                { "food", "🍔" },
-                { "feeder", "🍔" },
-                { "food", "🍔" },
-                { "sensor", "📊" },
-                { "ph", "📊" },
-                { "ph", "📊" },
-                { "thermometer", "🌡️" },
-                { "us", "🇺🇸" },
-                { "ru", "🇷🇺" },
-                { "am", "🇦🇲" },
-                { "warning", "⚠️"},
-                { "info", "ℹ️"},
-                { "error", "🔴" },
-                { "cool", "😎" }
-            });
+            static const std::unordered_map<std::string, std::string> emojis({{"true", "✅"},
+                                                                              {"false", "⛔"},
+                                                                              {"yes", "✅"},
+                                                                              {"no", "⛔"},
+                                                                              {"on", "✅"},
+                                                                              {"off", "⛔"},
+                                                                              {"sad", "😞"},
+                                                                              {"filter", "💩"},
+                                                                              {"poo", "💩"},
+                                                                              {"light", "💡"},
+                                                                              {"co2", "🌱"},
+                                                                              {"plant", "🌱"},
+                                                                              {"food", "🍔"},
+                                                                              {"feeder", "🍔"},
+                                                                              {"food", "🍔"},
+                                                                              {"sensor", "📊"},
+                                                                              {"ph", "📊"},
+                                                                              {"ph", "📊"},
+                                                                              {"thermometer", "🌡️"},
+                                                                              {"us", "🇺🇸"},
+                                                                              {"ru", "🇷🇺"},
+                                                                              {"am", "🇦🇲"},
+                                                                              {"warning", "⚠️"},
+                                                                              {"info", "ℹ️"},
+                                                                              {"error", "🔴"},
+                                                                              {"cool", "😎"}});
 
             return emojis.count(txt) ? emojis.at(txt) : txt;
         }
+
     protected:
         const Command& m_cmd;
         const TgBot::Api& m_api;
         std::int64_t m_chatId;
     };
-}
+} // namespace aquabox

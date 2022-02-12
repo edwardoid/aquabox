@@ -23,8 +23,8 @@ using namespace aquabox;
 
 std::shared_ptr<CommandHandler> ServerConnection::get(const std::string& id)
 {
-    if(!m_openConnections.count(id)) {
-        m_openConnections.insert({ id, std::make_shared<ServerAquaboxConnection>(id) });
+    if (!m_openConnections.count(id)) {
+        m_openConnections.insert({id, std::make_shared<ServerAquaboxConnection>(id)});
     }
 
     return std::dynamic_pointer_cast<CommandHandler>(m_openConnections[id]);

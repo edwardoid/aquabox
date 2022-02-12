@@ -17,31 +17,44 @@
  */
 
 #pragma once
-#include <micro_clients/settings.h>
-#include <rpc/server_base.h>
 #include <condition_variable>
+#include <micro_clients/settings.h>
 #include <mutex>
-#include <queue>
+#include <rpc/server_base.h>
 #include <rules.grpc.pb.h>
 #include <string>
 #include <thread>
 #include <unordered_map>
+#include <queue>
 
-namespace aquabox {
+namespace aquabox
+{
     class Rule;
-namespace services {
-    class RulesServiceServer final : public ServerBase<RulesService> {
-    public:
-        RulesServiceServer();
-        virtual ~RulesServiceServer();
-        virtual bool init() override;
-        virtual ::grpc::Status Add(::grpc::ServerContext* context, const ::aquabox::services::RuleData* request, ::google::protobuf::BoolValue* response) override;
-        virtual ::grpc::Status Update(::grpc::ServerContext* context, const ::aquabox::services::RuleData* request, ::google::protobuf::BoolValue* response) override;
-        virtual ::grpc::Status Remove(::grpc::ServerContext* context, const ::google::protobuf::StringValue* request, ::google::protobuf::BoolValue* response) override;
-        virtual ::grpc::Status GetAll(::grpc::ServerContext* /*context*/, const ::google::protobuf::Empty* /*request*/, ::grpc::ServerWriter<::aquabox::services::RuleData>* writer) override;
-        virtual ::grpc::Status Get(::grpc::ServerContext* context, const ::google::protobuf::StringValue* request, ::aquabox::services::RuleData* response) override;
+    namespace services
+    {
+        class RulesServiceServer final : public ServerBase<RulesService>
+        {
+        public:
+            RulesServiceServer();
+            virtual ~RulesServiceServer();
+            virtual bool init() override;
+            virtual ::grpc::Status Add(::grpc::ServerContext* context,
+                                       const ::aquabox::services::RuleData* request,
+                                       ::google::protobuf::BoolValue* response) override;
+            virtual ::grpc::Status Update(::grpc::ServerContext* context,
+                                          const ::aquabox::services::RuleData* request,
+                                          ::google::protobuf::BoolValue* response) override;
+            virtual ::grpc::Status Remove(::grpc::ServerContext* context,
+                                          const ::google::protobuf::StringValue* request,
+                                          ::google::protobuf::BoolValue* response) override;
+            virtual ::grpc::Status GetAll(::grpc::ServerContext* /*context*/,
+                                          const ::google::protobuf::Empty* /*request*/,
+                                          ::grpc::ServerWriter<::aquabox::services::RuleData>* writer) override;
+            virtual ::grpc::Status Get(::grpc::ServerContext* context,
+                                       const ::google::protobuf::StringValue* request,
+                                       ::aquabox::services::RuleData* response) override;
 
-    private:
-    };
-}
-}
+        private:
+        };
+    } // namespace services
+} // namespace aquabox

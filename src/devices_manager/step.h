@@ -21,26 +21,28 @@
 #include "device.h"
 #include <map>
 
-namespace aquabox {
-class Step : public AbstractStep {
-    static const uint64_t INVALID_PRIORITY = static_cast<uint64_t>(-1);
+namespace aquabox
+{
+    class Step : public AbstractStep
+    {
+        static const uint64_t INVALID_PRIORITY = static_cast<uint64_t>(-1);
 
-public:
-    Step();
-    Step(const Step& src) = default;
-    Step(Step&& src) = default;
+    public:
+        Step();
+        Step(const Step& src) = default;
+        Step(Step&& src) = default;
 
-    virtual void addPendingAction(uint64_t priority, ValueChange action) override;
-    virtual bool performPendingAction(ValueChange& action) override;
+        virtual void addPendingAction(uint64_t priority, ValueChange action) override;
+        virtual bool performPendingAction(ValueChange& action) override;
 
-    virtual nlohmann::json value(std::string property) const override;
-    virtual bool setValue(std::string property, const nlohmann::json& value) override;
+        virtual nlohmann::json value(std::string property) const override;
+        virtual bool setValue(std::string property, const nlohmann::json& value) override;
 
-protected:
-    virtual int32_t steps() const override;
-    virtual void makeSteps(int32_t times = 1) override;
+    protected:
+        virtual int32_t steps() const override;
+        virtual void makeSteps(int32_t times = 1) override;
 
-private:
-    std::map<int64_t, ValueChange> m_pendingActions;
-};
-}
+    private:
+        std::map<int64_t, ValueChange> m_pendingActions;
+    };
+} // namespace aquabox

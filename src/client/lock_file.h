@@ -18,18 +18,20 @@
 
 #pragma once
 
-namespace aquabox {
-class Lockfile {
-public:
-    Lockfile();
-    ~Lockfile();
-    Lockfile(const Lockfile&) = delete;
-    Lockfile(Lockfile&&) = delete;
+namespace aquabox
+{
+    class Lockfile
+    {
+    public:
+        Lockfile();
+        ~Lockfile();
+        Lockfile(const Lockfile&) = delete;
+        Lockfile(Lockfile&&) = delete;
 
-    bool create();
-    void remove();
+        bool create();
+        void remove();
 
-private:
-    int m_fd = -1;
-};
-}
+    private:
+        int m_fd = -1;
+    };
+} // namespace aquabox

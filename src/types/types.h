@@ -18,8 +18,8 @@
 
 #pragma once
 
-#include <types.grpc.pb.h>
 #include <nlohmann/json.hpp>
+#include <types.grpc.pb.h>
 
 namespace aquabox
 {
@@ -30,5 +30,5 @@ namespace aquabox
     {
         void to_json(nlohmann::json& j, const DeviceData& d);
         void from_json(const nlohmann::json& j, DeviceData& d);
-    }
-}
+    } // namespace services
+} // namespace aquabox

@@ -17,34 +17,31 @@
  */
 
 #include "scan_screen.h"
-#include <framebuffer.h>
-#include <libfb_globals.h>
-#include <pngprovider.h>
-#include <qrcode.h>
 #include <common/log.h>
 #include <common/singleton.h>
-#include <types/serial.h>
-#include <micro_clients/settings.h>
+#include <framebuffer.h>
+#include <libfb_globals.h>
 #include <micro_clients/network_manager.h>
+#include <micro_clients/settings.h>
+#include <pngprovider.h>
 #include <sprite.h>
+#include <types/serial.h>
+#include <qrcode.h>
 using namespace aquabox;
 
-#define degree(angle) ((double)(angle)*0.0174533)
+#define degree(angle) ((double) (angle) *0.0174533)
 
 #define QR_X 2
 #define QR_Y 2
 #define QR_SIZE 124
 
-
 std::string configurationData()
 {
     std::string configurationDataString;
-    configurationDataString += std::to_string(Singleton<ISettings>::i()->get(
-        Settings::Keys::HTTP_PORT, Settings::Defaults::REST_PORT));
+    configurationDataString += std::to_string(Singleton<ISettings>::i()->get(Settings::Keys::HTTP_PORT, Settings::Defaults::REST_PORT));
     configurationDataString += ";";
 
-    configurationDataString += std::to_string(Singleton<ISettings>::i()->get(
-        Settings::Keys::STREAM_PORT, Settings::Defaults::WS_PORT));
+    configurationDataString += std::to_string(Singleton<ISettings>::i()->get(Settings::Keys::STREAM_PORT, Settings::Defaults::WS_PORT));
     configurationDataString += ";";
 
     configurationDataString += SERIAL_NUMBER;
@@ -81,8 +78,7 @@ void ScanScreen::draw()
     std::string temp = "0"; // std::to_string(Singleton<AquaBox>::get()->systemTemperature());
     temp += "°C";
 
-    code.mapTo((canvasWidth - code.width()) / 2,
-        (margins + StatusBarScreen::height()) + (canvasHeight - code.height()) / 2);
+    code.mapTo((canvasWidth - code.width()) / 2, (margins + StatusBarScreen::height()) + (canvasHeight - code.height()) / 2);
 
     fb->draw(&code);
 }
