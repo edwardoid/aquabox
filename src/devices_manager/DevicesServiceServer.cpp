@@ -164,8 +164,9 @@ bool DevicesServiceServer::init()
             meta[m.first] = m.second;
         }
         dev->setMetadata(meta);
-        boost::filesystem::path path = Singleton<ISettings>::i()->path("devices", "./devices");
-        path /= id;
+        boost::filesystem::path path = Singleton<ISettings>::i()->path(Settings::Keys::DATA_ROOT, Settings::Defaults::DATA_ROOT)
+                                     / Singleton<ISettings>::i()->path(Settings::Keys::DEVICES_DATA_SUBROOT, Settings::Defaults::DEVICES_DATA_SUBROOT)
+                                     / id;
         path.replace_extension(".json");
 
         if (!dev->saveToFile(path)) {

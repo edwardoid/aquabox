@@ -75,9 +75,10 @@ bool RulesMap::saveRule(const std::string& id)
     on<bool>(
         id,
         [this](auto id, auto rule) {
-            boost::filesystem::path root = Singleton<ISettings>::i()->path("rules", "./rules");
+            boost::filesystem::path root = Singleton<ISettings>::i()->path(Settings::Keys::DATA_ROOT, Settings::Defaults::DATA_ROOT)
+                                            / Singleton<ISettings>::i()->path(Settings::Keys::RULES_DATA_SUBROOT, Settings::Defaults::RULES_DATA_SUBROOT)
+                                            / rule->id();
 
-            root.append(rule->id());
             root.replace_extension("json");
 
             if (!rule->saveToFile(root)) {
@@ -106,9 +107,10 @@ bool RulesMap::removeRule(const std::string& id)
 
     if (erase(id)) {
         Singleton<IEvents>::i()->notify(std::make_shared<DeviceRulesChangedEvent>(device));
-        boost::filesystem::path root = Singleton<ISettings>::i()->path("rules", "./rules");
+        boost::filesystem::path root = Singleton<ISettings>::i()->path(Settings::Keys::DATA_ROOT, Settings::Defaults::DATA_ROOT)
+                                            / Singleton<ISettings>::i()->path(Settings::Keys::RULES_DATA_SUBROOT, Settings::Defaults::RULES_DATA_SUBROOT)
+                                            / id;
 
-        root.append(id);
         root.replace_extension("json");
 
         if (!boost::filesystem::exists(root)) {
