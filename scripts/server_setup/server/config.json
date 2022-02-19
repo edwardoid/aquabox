@@ -1,0 +1,11 @@
+{
+    "cloud": {
+        "cloudPort": 5555,
+        "cloudWSPort": 5556,
+        "database": "aquabox",
+        "databaseURI": "mongodb://aquabox_admin:aquabox_password@mongo:27017",
+        "httpPort": 1213,
+        "streamPort": 1214,
+        "telegramBotAPIKey": ""
+    }
+}

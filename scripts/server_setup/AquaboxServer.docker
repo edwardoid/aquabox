@@ -1,0 +1,23 @@
+FROM debian:buster
+
+ENV DEBIAN_FRONTEND noninteractive
+
+LABEL maintainer="Edward Sargsyan <edward.sarkisyan@gmail.com>"
+
+USER root
+
+ENV PLATFORM=x86_64
+
+
+RUN apt-get update && apt-get install -y \
+	curl \
+	tar
+
+RUN mkdir -p /aquabox && \
+    curl -s http://aquabox.me:8081/x86_64/aquabox-server-41.tar.gz | tar -xz -C /aquabox
+
+ENV LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/aquabox/lib
+
+WORKDIR /aquabox/bin
+
+CMD /aquabox/bin/aquabox-server
