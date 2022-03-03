@@ -2,7 +2,7 @@
 Description=Aquabox UI service.
 StartLimitIntervalSec=500
 StartLimitBurst=5
-Requires=ab_settings_provider.service ab_events_bus.service
+After=ab_settings_provider.service ab_events_bus.service
 Wants=ab_rules_manager.service ab_devices_manager.service ab_devices_manager.service ab_network_manager.service ab_client.service
 
 [Service]
