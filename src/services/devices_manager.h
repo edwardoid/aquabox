@@ -33,6 +33,7 @@ namespace aquabox
         virtual bool set(const std::string& id, const ValueChange& value) = 0;
         virtual bool set(const std::string& id, const std::string& property, const nlohmann::json& value) = 0;
         virtual bool has(const std::string& id) = 0;
+        virtual bool rulesEnabled(const std::string& id) = 0;
         virtual std::vector<DeviceRef> all() = 0;
         virtual std::vector<std::string> properties(const std::string& id) = 0;
         virtual nlohmann::json value(const std::string& id, const std::string& property) = 0;

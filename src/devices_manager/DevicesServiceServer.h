@@ -46,6 +46,9 @@ namespace aquabox
             virtual ::grpc::Status Set(::grpc::ServerContext* context,
                                        const ::aquabox::services::SetValueRequest* request,
                                        ::google::protobuf::BoolValue* response) override;
+            virtual ::grpc::Status RulesEnabled(::grpc::ServerContext* context,
+                                       const ::google::protobuf::StringValue* request,
+                                       ::google::protobuf::BoolValue* response) override;
             virtual ::grpc::Status FetchProperties(::grpc::ServerContext* context,
                                                    const ::google::protobuf::StringValue* request,
                                                    ::grpc::ServerWriter<::google::protobuf::StringValue>* writer) override;

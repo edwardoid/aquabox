@@ -24,5 +24,6 @@ service DevicesService {
     rpc Set(SetValueRequest) returns (google.protobuf.BoolValue);
     rpc GetAll(google.protobuf.Empty) returns (stream DeviceData);
     rpc FetchProperties(google.protobuf.StringValue) returns (stream google.protobuf.StringValue);
+    rpc RulesEnabled(google.protobuf.StringValue) returns (google.protobuf.BoolValue);
     rpc PropertyValue(GetPropertyValueRequest) returns (google.protobuf.DoubleValue);
 }

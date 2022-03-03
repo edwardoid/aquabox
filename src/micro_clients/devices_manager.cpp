@@ -37,6 +37,7 @@ public:
     virtual bool update(const DeviceRef& revice) override;
     virtual bool set(const std::string& id, const ValueChange& value) override;
     virtual bool set(const std::string& id, const std::string& property, const nlohmann::json& value) override;
+    virtual bool rulesEnabled(const std::string& id) override;
     virtual std::vector<DeviceRef> all() override;
     virtual std::vector<std::string> properties(const std::string& id) override;
     virtual nlohmann::json value(const std::string& id, const std::string& property) override;
@@ -126,6 +127,19 @@ bool DevicesManagerImpl::set(const std::string& id, const std::string& property,
     req.set_value(value.get<double>());
     if (client().call(&services::DevicesService::Stub::Set, req, &res).ok()) {
         return true;
+    }
+
+    return false;
+}
+
+bool DevicesManagerImpl::rulesEnabled(const std::string& id)
+{
+    google::protobuf::StringValue _id;
+    _id.set_value(id);
+    google::protobuf::BoolValue enabled;
+
+    if (client().call(&services::DevicesService::Stub::RulesEnabled, _id, &enabled).ok()) {
+        return enabled.value();
     }
 
     return false;

@@ -288,6 +288,26 @@ void DevicesServiceServer::processSensorUpdates()
     }
 }
 
+::grpc::Status DevicesServiceServer::RulesEnabled(::grpc::ServerContext* context,
+                                                  const ::google::protobuf::StringValue* request,
+                                                  ::google::protobuf::BoolValue* response)
+{
+    LOG_DEBUG << "Checking if rules enabled on '" << request->value() << "'";
+    ::grpc::Status ret;
+    bool found = Singleton<DevicesMap>::i()->on<::grpc::Status>(
+        request->value(),
+        [request, response](const auto& id, auto& dev) {
+            response->set_value(dev->rulesEnabled());
+            return ::grpc::Status::OK;
+        },
+        ret);
+
+    if (found) {
+        return ::grpc::Status::OK;
+    }
+    return grpc::Status(grpc::StatusCode::NOT_FOUND, std::string("Device") + request->value() + "not found");
+}
+
 ::grpc::Status DevicesServiceServer::FetchProperties(::grpc::ServerContext* context,
                                                      const ::google::protobuf::StringValue* request,
                                                      ::grpc::ServerWriter<::google::protobuf::StringValue>* writer)
