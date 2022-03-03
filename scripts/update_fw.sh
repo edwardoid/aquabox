@@ -12,7 +12,10 @@ for s in ${SERVICES[@]};do
     systemctl stop $s.service
 done
 
-TMP_DIR=$(mktemp -d -t aquabox-XXXXXXXXXX)
+#TMP_DIR=$(mktemp -d -t aquabox-XXXXXXXXXX)
+TMP_DIR=/install
+rm -rf $TMP_DIR
+mkdir -p $TMP_DIR
 echo "Temporary dir: $TMP_DIR Update: $UPDATE_ARCHIVE. Extracting update archive"
 tar xvf $UPDATE_ARCHIVE -C $TMP_DIR
 
@@ -47,10 +50,17 @@ cd $AB_DIR
 echo "Restoring config file from $AB_BACKUP_DIR/bin/config.json to $AB_DIR/bin/config.json"
 cp $AB_BACKUP_DIR/bin/config.json $AB_DIR/bin/config.json
 
+echo "Restoring device files from $AB_BACKUP_DIR/data/devices to $AB_DIR/data/devices"
+cp $AB_BACKUP_DIR/data/devices/*.json $AB_DIR/data/devices/
+
+echo "Restoring rule files from $AB_BACKUP_DIR/data/devices to $AB_DIR/data/devices"
+cp $AB_BACKUP_DIR/data/rules/*.json $AB_DIR/data/rules/
+
 echo "Version: "
 cat $AB_DIR/version.txt
 
 for s in ${SERVICES[@]};do
     echo "Starting $s"
+    systemctl unmask $s.service
     systemctl start $s.service
 done
