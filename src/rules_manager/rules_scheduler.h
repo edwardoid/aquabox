@@ -31,12 +31,17 @@ namespace aquabox
         void recover();
         void add(const Rule& rule);
         void remove(const Rule& rule);
-
+        void trigger();
+        void updateDeviceRules(const std::string& deviceId);
+        inline void beginTransaction() { Scheduler<std::pair<std::string, ValueChange>>::beginTransaction();  }
+        inline void endTransaction() { Scheduler<std::pair<std::string, ValueChange>>::endTransaction();  }
     private:
         virtual void begin() override;
         virtual void finish() override;
 
         virtual bool ready(const int& id, std::pair<std::string, ValueChange>& data) override;
+
+        void updateDeviceRule(const int deviceId);
 
     private:
         enum State

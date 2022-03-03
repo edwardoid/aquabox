@@ -68,6 +68,12 @@ bool RulesServiceServer::init()
 
     Singleton<RuleScheduler>::i()->recover();
 
+    Singleton<IEvents>::i()->subscribe("devices_manager", [this](const std::shared_ptr<Event> e) {
+        if(e->hasProperty("rules_enabled")) {
+            Singleton<RuleScheduler>::i()->updateDeviceRules(e->sender());
+        }
+    });
+
     return true;
 }
 
@@ -81,6 +87,7 @@ bool RulesServiceServer::init()
         std::shared_ptr<Rule> rule = std::make_shared<Rule>(src);
 
         if (Singleton<RulesMap>::i()->addRule(rule, false)) {
+            Singleton<RuleScheduler>::i()->updateDeviceRules(rule->device());
             return ::grpc::Status::OK;
         }
 
@@ -103,6 +110,7 @@ bool RulesServiceServer::init()
     std::shared_ptr<Rule> rule = std::make_shared<Rule>(Converter<RuleData, Rule>::convert(*request));
 
     if (Singleton<RulesMap>::i()->addRule(rule, true)) {
+        Singleton<RuleScheduler>::i()->updateDeviceRules(rule->device());
         return ::grpc::Status::OK;
     }
 

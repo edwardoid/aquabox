@@ -1,6 +1,6 @@
 /*
  * AquaBox
- * Copyright (C) 2019  Eduard Sargsyan
+ * Copyright (C) 2019-2022  Eduard Sargsyan
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -58,7 +58,7 @@ void RuleScheduler::add(const Rule& rule)
         ValueChange remainValue;
         remainValue.property = "remain";
         std::pair<std::string, ValueChange> data({rule.id(), remainValue});
-        Scheduler<std::pair<std::string, ValueChange>>::add("* * * * * *", data, rule.lastRun());
+        Scheduler<std::pair<std::string, ValueChange>>::add("* * * * * *", data, 0);
     }
 }
 
@@ -70,6 +70,9 @@ void RuleScheduler::begin()
 void RuleScheduler::finish()
 {
     for (auto& change : m_changes) {
+        if (!Singleton<IDevicesManager>::i()->rulesEnabled(change.first)) {
+            LOG_INFO << "Rules disabled on device " << change.first;
+        }
         if (!Singleton<IDevicesManager>::i()->set(change.first, change.second.property, change.second.value)) {
             LOG_ERROR << "Can't apply change on " << change.first;
         }
@@ -112,5 +115,35 @@ void RuleScheduler::remove(const Rule& rule)
 {
     std::string ruleId = rule.id();
     LOG_DEBUG << "Removing actions for rule " << ruleId;
-    removeIf([ruleId](const int& id, std::pair<std::string, ValueChange>& vc) { return vc.first == ruleId; });
+    int count = 0;
+    removeIf([ruleId, &count](const int& id, std::pair<std::string, ValueChange>& vc) { ++count; return vc.first == ruleId; });
+    LOG_DEBUG << "Removed " << count << " actions from for rule " << ruleId;
+}
+
+void RuleScheduler::updateDeviceRules(const std::string& deviceId)
+{
+    time_t rawtime;
+
+    time (&rawtime);
+    struct tm* timeinfo = localtime (&rawtime);
+    timeinfo->tm_hour = 0;
+    timeinfo->tm_min = 0;
+    timeinfo->tm_sec = 0;
+    rawtime = mktime (timeinfo);
+
+    beginTransaction();
+
+    bool reAdd = Singleton<IDevicesManager>::i()->rulesEnabled(deviceId);
+
+    Singleton<RulesMap>::i()->for_each([this, deviceId, rawtime, reAdd] (const std::string id, std::shared_ptr<Rule>& rule) {
+        if (rule->device() == deviceId && rule->enabled()) {
+            remove(*rule);
+            if (reAdd) {
+                rule->setLastRun(rawtime);
+                add(*rule);
+            }
+        }
+    });
+
+    endTransaction();
 }

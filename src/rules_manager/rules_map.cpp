@@ -1,6 +1,6 @@
 /*
  * AquaBox
- * Copyright (C) 2019  Eduard Sargsyan
+ * Copyright (C) 2019-2022  Eduard Sargsyan
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -47,13 +47,7 @@ bool RulesMap::addRule(std::shared_ptr<Rule> rule, bool replace)
     else {
         insert(rule->id(), rule);
     }
-
-    if (replace) {
-        Singleton<RuleScheduler>::i()->remove(*rule);
-    }
-    rule->setLastRun(std::chrono::system_clock::to_time_t(std::chrono::system_clock::now()) - 1);
-    Singleton<RuleScheduler>::i()->add(*rule);
-
+    
     if (saveRule(rule->id())) {
         auto dev = Singleton<IDevicesManager>::i()->get(rule->device());
         Singleton<IEvents>::i()->notify(std::make_shared<DeviceRulesChangedEvent>(dev));
@@ -63,9 +57,10 @@ bool RulesMap::addRule(std::shared_ptr<Rule> rule, bool replace)
         else {
             Singleton<IEvents>::i()->notify(std::make_shared<RuleCreatedEvent>(*rule));
         }
+        LOG_INFO << "Rule saved";
         return true;
     }
-
+    LOG_ERROR << "Can't save rule!";
     return false;
 }
 
@@ -106,6 +101,7 @@ bool RulesMap::removeRule(const std::string& id)
         device);
 
     if (erase(id)) {
+        Singleton<RuleScheduler>::i()->updateDeviceRules(device.id());
         Singleton<IEvents>::i()->notify(std::make_shared<DeviceRulesChangedEvent>(device));
         boost::filesystem::path root = Singleton<ISettings>::i()->path(Settings::Keys::DATA_ROOT, Settings::Defaults::DATA_ROOT)
                                             / Singleton<ISettings>::i()->path(Settings::Keys::RULES_DATA_SUBROOT, Settings::Defaults::RULES_DATA_SUBROOT)
