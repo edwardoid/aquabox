@@ -1,6 +1,6 @@
 /*
  * AquaBox
- * Copyright (C) 2019  Eduard Sargsyan
+ * Copyright (C) 2019-2022  Eduard Sargsyan
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -25,7 +25,6 @@ namespace aquabox
     {
         j["property"] = v.property;
         j["value"] = v.value;
-        j["when"] = v.when;
         j["cron"] = v.cron;
     }
 
@@ -34,7 +33,6 @@ namespace aquabox
         try {
             j.at("property").get_to(v.property);
             v.value = j.at("value");
-            v.when = j.at("when");
             v.cron = j.at("cron");
         }
         catch (const nlohmann::detail::exception& e) {
