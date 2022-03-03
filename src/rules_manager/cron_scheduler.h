@@ -1,3 +1,21 @@
+/*
+ * AquaBox
+ * Copyright (C) 2019-2022  Eduard Sargsyan
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
 #pragma once
 #include <chrono>
 #include <condition_variable>
@@ -76,6 +94,8 @@ namespace aquabox
     public:
         Scheduler() = default;
         void start();
+        void beginTransaction();
+        void endTransaction();
         int add(std::string cronexpr, TaskData data, std::time_t from = clock_t::to_time_t(clock_t::now()));
         void remove(int id);
         void removeIf(std::function<bool(const int&, TaskData&)> cb);
@@ -90,6 +110,7 @@ namespace aquabox
 
     private:
         int m_id = 0;
+        bool m_interrupt = true;
         std::thread m_loop;
         std::mutex m_mx;
         std::map<int, TaskInfo> m_tasks;
@@ -105,6 +126,19 @@ namespace aquabox
     }
 
     template<typename TaskData>
+    void Scheduler<TaskData>::beginTransaction()
+    {
+        m_interrupt = false;
+    }
+
+    template<typename TaskData>
+    void Scheduler<TaskData>::endTransaction()
+    {
+        m_interrupt = true;
+        m_sleep.interrupt();
+    }
+
+    template<typename TaskData>
     int Scheduler<TaskData>::add(std::string cronexpr, TaskData data, std::time_t from)
     {
         try {
@@ -114,7 +148,8 @@ namespace aquabox
             std::lock_guard<std::mutex> lock(m_mx);
             m_queue.push(ref);
             m_tasks.insert({id, info});
-            m_sleep.interrupt();
+            if (m_interrupt)
+                m_sleep.interrupt();
             return ref.id;
         }
         catch (const cron::bad_cronexpr& e) {
@@ -135,7 +170,8 @@ namespace aquabox
     {
         std::lock_guard<std::mutex> lock(m_mx);
         m_tasks.erase(id);
-        m_sleep.interrupt();
+        if (m_interrupt)
+            m_sleep.interrupt();
     }
 
     template<typename TaskData>
@@ -152,7 +188,8 @@ namespace aquabox
         for (auto id : idsToRemove) {
             m_tasks.erase(id);
         };
-        m_sleep.interrupt();
+        if (m_interrupt)
+            m_sleep.interrupt();
     }
 
     template<typename TaskData>
@@ -161,7 +198,7 @@ namespace aquabox
         while (1) {
             if (!m_queue.empty()) {
                 std::tm* moment = std::localtime(&m_queue.top().when);
-                LOG_DEBUG << "Sleeping till " << moment->tm_hour << ":" << moment->tm_min << ":" << moment->tm_sec;
+                LOG_DEBUG << "Sleeping till " << std::asctime(moment);
                 m_sleep.sleep_until(clock_t::from_time_t(m_queue.top().when));
             }
             else {
@@ -172,7 +209,7 @@ namespace aquabox
             LOG_DEBUG << "Working... Queue size: " << m_queue.size();
             if (!m_queue.empty()) {
                 std::tm* moment = std::localtime(&m_queue.top().when);
-                LOG_DEBUG << "Next action expected on " << moment->tm_hour << ":" << moment->tm_min << ":" << moment->tm_sec;
+                LOG_DEBUG << "Next action expected on " << std::asctime(moment);
             }
 
             bool emit = false;
