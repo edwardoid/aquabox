@@ -31,6 +31,11 @@ void Event::setSender(std::string sender, std::string _class)
     m_class = _class;
 }
 
+const std::string& Event::sender() const
+{
+    return m_sender;
+}
+
 void Event::setData(const nlohmann::json& data)
 {
     for (auto i : data.items()) {
@@ -43,6 +48,11 @@ void Event::setPropertiesUpdate(const nlohmann::json& update)
     for (auto i : update.items()) {
         m_properties.emplace(i.key(), i.value());
     }
+}
+
+bool Event::hasProperty(const std::string& key) const
+{
+    return m_properties.find(key) != m_properties.end();
 }
 
 nlohmann::json Event::serialize() const

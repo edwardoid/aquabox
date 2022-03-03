@@ -36,8 +36,15 @@ namespace aquabox
     public:
         Event();
         void setSender(std::string sender, std::string _class);
+        const std::string& sender() const;
         void setData(const nlohmann::json& data);
         void setPropertiesUpdate(const nlohmann::json& update);
+        bool hasProperty(const std::string& key) const;
+        template<typename T>
+        T getProperty(const std::string key)
+        {
+            return m_properties.at(key).get<T>();
+        }
         nlohmann::json serialize() const;
 
     private:
