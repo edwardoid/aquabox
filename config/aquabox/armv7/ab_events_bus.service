@@ -3,7 +3,6 @@ Description=Aquabox Events Bus service.
 StartLimitIntervalSec=500
 StartLimitBurst=5
 After=ab_settings_provider.service
-Requires=ab_settings_provider.service
 
 [Service]
 Type=simple
