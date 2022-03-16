@@ -41,6 +41,8 @@ using namespace aquabox;
 
 std::string Settings::domain = "";
 const std::string Settings::Keys::LOG_LEVEL = "log";
+const std::string Settings::Keys::PERSISTENT_LOG_ENABLED = "keepLogs";
+const std::string Settings::Keys::PERSISTENT_LOG_LOCATION = "logLocation";
 
 const std::string Settings::Keys::WORKING_DIRECTORY = "workingDirectory";
 const std::string Settings::Keys::WEB_ROOT = "webRoot";
@@ -75,6 +77,8 @@ const std::string Settings::Keys::DEVICES_DATA_SUBROOT = "devices";
 const std::string Settings::Keys::RULES_DATA_SUBROOT = "rules";
 const std::string Settings::Keys::FPS = "fps";
 
+const bool Settings::Defaults::PERSISTENT_LOG_ENABLED = false;
+const std::string Settings::Defaults::PERSISTENT_LOG_LOCATION = "logs";
 const std::string Settings::Defaults::GIT_HASH = AB_GIT_HASH;
 const std::string Settings::Defaults::APPLICATION = "aquabox";
 const std::string Settings::Defaults::DESCRIPTION = "Some kind of smart aquarium controller";

@@ -38,6 +38,8 @@ namespace aquabox
         struct Keys
         {
             static const std::string LOG_LEVEL;
+            static const std::string PERSISTENT_LOG_ENABLED;
+            static const std::string PERSISTENT_LOG_LOCATION;
 
             static const std::string WORKING_DIRECTORY;
             static const std::string WEB_ROOT;
@@ -78,6 +80,9 @@ namespace aquabox
 
         struct Defaults
         {
+            static const bool PERSISTENT_LOG_ENABLED;
+            static const std::string PERSISTENT_LOG_LOCATION;
+
             static const std::string APPLICATION;
             static const std::string DESCRIPTION;
             static const std::string VERSION;

@@ -46,6 +46,24 @@ namespace aquabox
 
             const std::string severity = Singleton<ISettings>::i()->get(Settings::Keys::LOG_LEVEL,
                                                                         std::string(plog::severityToString(plog::Severity::info)));
+
+            bool persistentLogging = Singleton<ISettings>::i()->get(Settings::Keys::PERSISTENT_LOG_ENABLED, Settings::Defaults::PERSISTENT_LOG_ENABLED);
+            if (persistentLogging)
+            {
+                std::ostringstream oss;
+                oss << Implementation::service_full_name() << ".csv";
+                std::string pattern = oss.str();
+
+                boost::filesystem::path logfile = Singleton<ISettings>::i()->path(Settings::Keys::DATA_ROOT, Settings::Defaults::DATA_ROOT)
+                                                / Singleton<ISettings>::i()->path(Settings::Keys::PERSISTENT_LOG_LOCATION, Settings::Defaults::PERSISTENT_LOG_LOCATION);
+                try {
+                boost::filesystem::create_directory(logfile);
+                }
+                catch(...) {}
+                logfile /= pattern;
+                static plog::RollingFileAppender<plog::CsvFormatter> fileAppender(logfile.c_str(), 1000000, 10);
+                plog::get()->addAppender(&fileAppender); 
+            }
             plog::get()->setMaxSeverity(plog::severityFromString(severity.c_str()));
 
             grpc::ServerBuilder builder;
