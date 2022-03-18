@@ -101,8 +101,8 @@ function pack_client {
                     version.txt \
                     lib \
                     data \
-                    bin/aquabox-client \
-                    bin/aquabox-client.service \
+                    bin/ab_client \
+                    bin/ab_client.service \
                     bin/ab_devices_manager \
                     bin/ab_devices_manager.service \
                     bin/ab_events_bus \

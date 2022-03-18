@@ -1,4 +1,4 @@
-project(ab_client)
+project(ab_api)
 
 file(GLOB SOURCES "${CMAKE_CURRENT_LIST_DIR}/*.cpp")
 add_executable(${PROJECT_NAME} ${SOURCES} ${AQUABOX_MICROSERVICES_HEADERS})

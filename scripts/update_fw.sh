@@ -5,7 +5,7 @@ UPDATE_ARCHIVE=$1
 AB_DIR=/aquabox
 AB_BACKUP_DIR=/aquabox.bak
 
-SERVICES=(ab_settings_provider ab_events_bus ab_devices_manager ab_rules_manager ab_network_manager aquabox-client ab_ui)
+SERVICES=(ab_settings_provider ab_events_bus ab_devices_manager ab_rules_manager ab_network_manager ab_client ab_ui)
 
 echo "Stopping the service"
 for s in ${SERVICES[@]};do

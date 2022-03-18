@@ -3,10 +3,11 @@ Description=Aquabox Client Manager service.
 StartLimitIntervalSec=500
 StartLimitBurst=5
 Requires=ab_settings_provider.service ab_events_bus.service ab_rules_manager.service ab_devices_manager.service ab_devices_manager.service ab_network_manager.service
+After=ab_settings_provider.service ab_events_bus.service
 
 [Service]
 Type=simple
-Environment="APP_ARGS=--debug --nodraw"
+Environment="DBUS_SYSTEM_BUS_ADDRESS=unix:path=/var/run/dbus/system_bus_socket"
 Environment="LD_LIBRARY_PATH=${AQUABOX_RUN_PATH_LIB}"
 WorkingDirectory=${AQUABOX_RUN_PATH_BIN}
 ExecStart=${AQUABOX_RUN_PATH_BIN}/${PROJECT_NAME} $APP_ARGS
