@@ -1,6 +1,6 @@
 /*
  * AquaBox
- * Copyright (C) 2019  Eduard Sargsyan
+ * Copyright (C) 2019-2022  Eduard Sargsyan
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,15 +17,8 @@
  */
 
 #pragma once
-#include <condition_variable>
-#include <micro_clients/settings.h>
-#include <mutex>
 #include <rpc/server_base.h>
 #include <rules.grpc.pb.h>
-#include <string>
-#include <thread>
-#include <unordered_map>
-#include <queue>
 
 namespace aquabox
 {
