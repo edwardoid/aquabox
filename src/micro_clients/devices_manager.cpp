@@ -1,6 +1,6 @@
 /*
  * AquaBox
- * Copyright (C) 2019  Eduard Sargsyan
+ * Copyright (C) 2019-2022  Eduard Sargsyan
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -80,11 +80,7 @@ bool DevicesManagerImpl::has(const std::string& id)
     _id.set_value(id);
     services::DeviceData data;
 
-    if (client().call(&services::DevicesService::Stub::Get, _id, &data).ok()) {
-        return !data.address().empty();
-    }
-
-    return false;
+    return client().call(&services::DevicesService::Stub::Get, _id, &data).error_code() != grpc::StatusCode::NOT_FOUND;
 }
 
 bool DevicesManagerImpl::update(const DeviceRef& device)
