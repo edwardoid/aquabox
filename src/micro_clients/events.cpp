@@ -26,6 +26,8 @@
 #include <sstream>
 #include <thread>
 #include <unordered_map>
+#include <boost/thread/thread.hpp>
+#include <boost/asio.hpp>
 
 using namespace aquabox;
 
@@ -83,7 +85,10 @@ private:
             e->setPropertiesUpdate(json["props"]);
             LOG_INFO << "Got event from " << request->sender();
             while (handlers.first != handlers.second) {
-                handlers.first->second(e);
+                auto cb = handlers.first->second;
+                boost::asio::post(m_pool, [cb, e](){
+                    cb(e);
+                });
                 ++handlers.first;
             }
             return ::grpc::Status::OK;
@@ -91,6 +96,7 @@ private:
 
     private:
         std::unordered_multimap<std::string, std::function<void(const std::shared_ptr<Event>)>> m_callbacks;
+        static boost::asio::thread_pool m_pool;
     };
 
 private:
@@ -98,6 +104,8 @@ private:
     ConsumerService m_service;
     std::unordered_map<std::string, std::function<void(const std::shared_ptr<Event>)>> m_handlers;
 };
+
+boost::asio::thread_pool EventsBaseImpl::ConsumerService::m_pool;
 
 EventsBaseImpl::EventsBaseImpl()
 {
