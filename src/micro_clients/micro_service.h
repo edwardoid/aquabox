@@ -30,6 +30,7 @@ namespace aquabox
             {
                 auto p = iface.get();
                 grpc::ClientContext cxt;
+                cxt.set_deadline(std::chrono::system_clock::now() + std::chrono::milliseconds(100));
                 return (p->*fn)(&cxt, args...);
             }
             virtual ~MicroService() {}
