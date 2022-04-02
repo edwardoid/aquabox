@@ -1,6 +1,6 @@
 /*
  * AquaBox
- * Copyright (C) 2019  Eduard Sargsyan
+ * Copyright (C) 2019-2022  Eduard Sargsyan
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -39,7 +39,7 @@ namespace aquabox
         virtual void begin() override;
         virtual void finish() override;
 
-        virtual bool ready(const int& id, std::pair<std::string, ValueChange>& data) override;
+        virtual bool ready(const int& id, const std::pair<std::string, ValueChange>& data) override;
 
         void updateDeviceRule(const int deviceId);
 

@@ -100,7 +100,7 @@ namespace aquabox
         void remove(int id);
         void removeIf(std::function<bool(const int&, TaskData&)> cb);
 
-        virtual bool ready(const int& id, TaskData& data) = 0;
+        virtual bool ready(const int& id, const TaskData& data) = 0;
         virtual void begin() = 0;
         virtual void finish() = 0;
 
@@ -148,8 +148,9 @@ namespace aquabox
             std::lock_guard<std::mutex> lock(m_mx);
             m_queue.push(ref);
             m_tasks.insert({id, info});
-            if (m_interrupt)
+            if (m_interrupt) {
                 m_sleep.interrupt();
+            }
             return ref.id;
         }
         catch (const cron::bad_cronexpr& e) {

@@ -57,6 +57,7 @@ void RuleScheduler::add(const Rule& rule)
     if (rule.isTemporary()) {
         ValueChange remainValue;
         remainValue.property = "remain";
+        remainValue.value = "next";
         std::pair<std::string, ValueChange> data({rule.id(), remainValue});
         Scheduler<std::pair<std::string, ValueChange>>::add("* * * * * *", data, 0);
     }
@@ -83,14 +84,16 @@ void RuleScheduler::finish()
     }
 }
 
-bool RuleScheduler::ready(const int& id, std::pair<std::string, ValueChange>& data)
+bool RuleScheduler::ready(const int& id, const std::pair<std::string, ValueChange>& data)
 {
-    LOG_DEBUG << "Action " << id << " is ready";
     auto r = Singleton<RulesMap>::i()->get(data.first, nullptr);
 
     if (r == nullptr) {
+        LOG_DEBUG << "Action " << id << " is ready but rule is missing";
         return false;
     }
+
+    LOG_DEBUG << "Action " << id << " is ready. Should set " << data.second.property << " = " << data.second.value.dump();
 
     if (r->isTemporary() && data.second.property == "remain") {
         Singleton<IEvents>::i()->notify(std::make_shared<TemporaryRuleRemainEvent>(*r));
