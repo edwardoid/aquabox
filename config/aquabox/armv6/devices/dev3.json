@@ -1,0 +1,15 @@
+{
+    "address": "PHY:GPIO:13",
+    "class": "relay",
+    "id": "dev3",
+    "index": 4,
+    "meta": {
+        "model": "7200lm",
+        "vendor": "daytime"
+    },
+    "name": "Device 3",
+    "rules_enabled": false,
+    "type": "light",
+    "accepted": true,
+    "available": true
+}

@@ -12,5 +12,5 @@
     "workingDirectory": "/aquabox/bin",
     "debug": true,
     "meshEnabled": false,
-    "root": "${CMAKE_BINARY_DIR}/..",
+    "root": "/aquabox/data",
 }

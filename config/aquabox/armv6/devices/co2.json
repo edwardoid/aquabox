@@ -1,0 +1,15 @@
+{
+    "address": "PHY:GPIO:26",
+    "class": "relay",
+    "id": "co2",
+    "index": 0,
+    "meta": {
+        "model": "7200lm",
+        "vendor": "daytime"
+    },
+    "name": "CO2",
+    "rules_enabled": false,
+    "type": "light",
+    "accepted": true,
+    "available": true
+}
