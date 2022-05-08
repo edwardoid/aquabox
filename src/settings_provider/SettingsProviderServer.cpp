@@ -1,3 +1,21 @@
+/*
+ * AquaBox
+ * Copyright (C) 2019-2022  Eduard Sargsyan
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+ 
 #include "SettingsProviderServer.h"
 
 #include <fstream>
@@ -5,6 +23,9 @@
 #include <grpcpp/client_context.h>
 #include <grpcpp/create_channel.h>
 #include <grpcpp/security/credentials.h>
+#include <boost/filesystem.hpp>
+#include "services/settings.h"
+#include "common/log.h"
 
 using namespace aquabox;
 using namespace services;
@@ -12,14 +33,18 @@ using namespace services;
 SettingsProviderServer::SettingsProviderServer(uint32_t startFrom)
     : m_lastPort(startFrom)
 {
+    m_json_path = (boost::filesystem::current_path() / "config.json").c_str();
     load();
 }
 
 void SettingsProviderServer::load()
 {
+    plog::get()->setMaxSeverity(plog::severityFromString("DEBUG"));
     std::unique_lock<std::recursive_mutex> lock(m_mx);
 
-    std::ifstream is("config.json");
+    LOG_INFO << "Loading configuration from " << m_json_path;
+
+    std::ifstream is(m_json_path);
     std::string content;
     std::string line;
     while (std::getline(is, line)) {
@@ -38,19 +63,26 @@ void SettingsProviderServer::load()
             LOG_INFO << "Config is ready!";
         }
         catch (nlohmann::detail::parse_error& e) {
-            //LOG_ERROR << "Can't parse settings " << e.what();
+            LOG_ERROR << "Can't parse settings " << e.what();
         }
+    }
+
+    if (m_data.contains(aquabox::Settings::Keys::LOG_LEVEL)) {
+        const std::string severity = m_data[aquabox::Settings::Keys::LOG_LEVEL];
+        plog::get()->setMaxSeverity(plog::severityFromString(severity.c_str()));
+    } else {
+        plog::get()->setMaxSeverity(plog::severityFromString("DEBUG"));
     }
 }
 
 void SettingsProviderServer::save()
 {
-    LOG_INFO << "Saving configuration file...";
+    LOG_INFO << "Saving configuration file to " << m_json_path;
     std::lock_guard<std::recursive_mutex> lock(m_mx);
 
     m_data["ports"] = m_ports;
     m_data["lastPort"] = m_lastPort;
-    std::ofstream os("config.json");
+    std::ofstream os(m_json_path);
     os << m_data.dump(4);
 }
 

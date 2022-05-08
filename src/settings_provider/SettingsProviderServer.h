@@ -62,6 +62,7 @@ namespace aquabox
 
         private:
             std::recursive_mutex m_mx;
+            std::string m_json_path;
             std::unordered_map<std::string, std::uint32_t> m_ports;
             nlohmann::json m_data;
             std::uint32_t m_lastPort = 50050;

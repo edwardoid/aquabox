@@ -67,12 +67,12 @@ int AquaBox::start()
     srand(time(NULL));
 
     Singleton<IEvents>::i()->subscribe("rules_manager", [this](const std::shared_ptr<Event> e) {
-        LOG_ERROR << e->serialize().dump();
+        LOG_DEBUG << e->serialize().dump();
         postUpdate(e);
     });
 
     Singleton<IEvents>::i()->subscribe("devices_manager", [this](const std::shared_ptr<Event> e) {
-        LOG_ERROR << e->serialize().dump();
+        LOG_DEBUG << e->serialize().dump();
         postUpdate(e);
     });
 

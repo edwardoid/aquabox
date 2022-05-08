@@ -1,6 +1,6 @@
 /*
  * AquaBox
- * Copyright (C) 2019  Eduard Sargsyan
+ * Copyright (C) 2019-2022  Eduard Sargsyan
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,6 +18,7 @@
 
 #include "physical_gpio_bus.h"
 #include "../gpio.h"
+#include "../../common/log.h"
 #include <unordered_map>
 
 using namespace aquabox;
@@ -30,28 +31,36 @@ PhysicalGPIOBus::~PhysicalGPIOBus() {}
 
 std::shared_ptr<Hardware> PhysicalGPIOBus::hw(const std::string& hw)
 {
-    static std::unordered_map<std::string, std::shared_ptr<GPIO>> pins({{"12", nullptr},
+    static std::unordered_map<std::string, std::shared_ptr<GPIO>> pins({
+                                                                        {"10", nullptr},
                                                                         {"11", nullptr},
+                                                                        {"12", nullptr},
+                                                                        {"13", nullptr},
+                                                                        {"14", nullptr},
+                                                                        {"15", nullptr},
+                                                                        {"16", nullptr},
+                                                                        {"5", nullptr}, // armv6
                                                                         {"6", nullptr},
                                                                         {"1", nullptr},
                                                                         {"0", nullptr},
                                                                         {"3", nullptr},
                                                                         {"4", nullptr}, // armv6
-                                                                        {"15", nullptr},
-                                                                        {"16", nullptr},
-                                                                        {"14", nullptr},
                                                                         {"198", nullptr},
                                                                         {"199", nullptr},
                                                                         {"7", nullptr},
-                                                                        {"19", nullptr},
                                                                         {"18", nullptr},
+                                                                        {"19", nullptr},
                                                                         {"2", nullptr},
-                                                                        {"13", nullptr},
-                                                                        {"10", nullptr}});
+                                                                        {"24", nullptr}, // armv6
+                                                                        {"26", nullptr}
+                                                                        });
 
     auto pos = pins.find(hw);
     if (pos == pins.end())
+    {
+        LOG_ERROR << "GPIO" << hw << " is not available";
         return nullptr;
+    }
     if (pos->second == nullptr)
         pos->second = std::make_shared<GPIO>(pos->first);
 

@@ -1,6 +1,6 @@
 /*
  * AquaBox
- * Copyright (C) 2019  Eduard Sargsyan
+ * Copyright (C) 2019-2022  Eduard Sargsyan
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -71,7 +71,7 @@ public:
     virtual boost::filesystem::path path(const std::string& key, const boost::filesystem::path& defaultVal) override;
 
 private:
-    services::MicroService<services::SettingsProvider> m_client;
+    services::MicroService<services::SettingsProvider, 0> m_client;
     CachedSettings<std::int32_t> m_ints;
     CachedSettings<std::uint32_t> m_uints;
     CachedSettings<std::string> m_strings;
@@ -117,6 +117,7 @@ void SettingsImpl::set(const std::string& key, std::int32_t value)
     req.set_key(key);
     req.set_value(value);
     if (m_client.call(&services::SettingsProvider::Stub::SetInt, req, &e).ok()) {
+        LOG_DEBUG << "Changing " << key << " to " << value;
         m_ints.set(key, value);
     }
 }
@@ -127,11 +128,13 @@ bool SettingsImpl::get(const std::string& key, bool defaultValue)
         google::protobuf::StringValue _key;
         _key.set_value(key);
         google::protobuf::BoolValue val;
-        if (m_client.call(&services::SettingsProvider::Stub::GetBool, _key, &val).ok()) {
+        grpc::Status result = m_client.call(&services::SettingsProvider::Stub::GetBool, _key, &val);
+        if (result.ok()) {
             m_uints.set(key, val.value());
             return val.value();
         }
         else {
+            LOG_DEBUG << "Can't get property " << key << " " << result.error_message() << " code: " << result.error_message();
             set(key, defaultValue);
         }
     }
@@ -145,6 +148,7 @@ void SettingsImpl::set(const std::string& key, bool value)
     req.set_key(key);
     req.set_value(value);
     if (m_client.call(&services::SettingsProvider::Stub::SetBool, req, &e).ok()) {
+        LOG_DEBUG << "Changing " << key << " to " << value;
         m_bools.set(key, value);
     }
 }
@@ -156,11 +160,13 @@ std::string SettingsImpl::get(const std::string& key, const std::string& default
         google::protobuf::StringValue _key;
         _key.set_value(key);
         google::protobuf::StringValue val;
-        if (m_client.call(&services::SettingsProvider::Stub::GetString, _key, &val).ok()) {
+        grpc::Status result = m_client.call(&services::SettingsProvider::Stub::GetString, _key, &val);
+        if (result.ok()) {
             m_strings.set(key, val.value());
             return val.value();
         }
         else {
+            LOG_DEBUG << "Can't get property " << key << " " << result.error_message() << " code: " << result.error_message();
             set(key, defaultValue);
         }
     }

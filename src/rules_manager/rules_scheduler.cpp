@@ -26,6 +26,8 @@
 #include <types/types.h>
 #include <types/update_events.h>
 
+#define MAGIC_TEMPORARY_PROPERTY "__remain__"
+
 using namespace aquabox;
 
 RuleScheduler::RuleScheduler() {}
@@ -56,7 +58,7 @@ void RuleScheduler::add(const Rule& rule)
 
     if (rule.isTemporary()) {
         ValueChange remainValue;
-        remainValue.property = "remain";
+        remainValue.property = MAGIC_TEMPORARY_PROPERTY;
         remainValue.value = "next";
         std::pair<std::string, ValueChange> data({rule.id(), remainValue});
         Scheduler<std::pair<std::string, ValueChange>>::add("* * * * * *", data, 0);
@@ -89,13 +91,15 @@ bool RuleScheduler::ready(const int& id, const std::pair<std::string, ValueChang
     auto r = Singleton<RulesMap>::i()->get(data.first, nullptr);
 
     if (r == nullptr) {
-        LOG_DEBUG << "Action " << id << " is ready but rule is missing";
+        LOG_DEBUG << "Action " << id << " is ready. "
+                  << "Rule \"" << data.first << "\" for property \"" << data.second.property << "\" but is missing";
         return false;
     }
 
-    LOG_DEBUG << "Action " << id << " is ready. Should set " << data.second.property << " = " << data.second.value.dump();
+    LOG_DEBUG << "Action " << id << " is ready. "
+              << "Rule \"" << data.first << "\" for property \"" << data.second.property << "\", should set is to " << data.second.value.dump();
 
-    if (r->isTemporary() && data.second.property == "remain") {
+    if (r->isTemporary() && data.second.property == MAGIC_TEMPORARY_PROPERTY) {
         Singleton<IEvents>::i()->notify(std::make_shared<TemporaryRuleRemainEvent>(*r));
     }
     else if (r->enabled()) {

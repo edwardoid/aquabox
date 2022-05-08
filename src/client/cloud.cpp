@@ -125,7 +125,7 @@ bool Cloud::requestStreams()
                         }
                         else {
                             std::shared_ptr<CloudStream> stream;
-                            LOG_DEBUG << "Creating stream" << name;
+                            LOG_DEBUG << "Creating stream " << name;
                             if (name == "commands") {
                                 stream = std::make_shared<CommandsStream>(url);
                             }

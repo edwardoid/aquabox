@@ -43,6 +43,7 @@ void BoxConnection::runCommand(Command& cmd)
     commands->send(response.dump());
 
     if (!results.waitFor(cmd.seqNum(), cmd)) {
+        LOG_DEBUG << "Command execution timed out!";
         cmd.response(Result::AccessDenied);
     }
 }
