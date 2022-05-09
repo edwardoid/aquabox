@@ -1,6 +1,6 @@
 /*
  * AquaBox
- * Copyright (C) 2019  Eduard Sargsyan
+ * Copyright (C) 2019-2022  Eduard Sargsyan
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -193,6 +193,8 @@ nlohmann::json Command::responseJson() const
     obj["result"] = Serializable<Result>::convert(m_result);
     if (!m_response.is_null())
         obj["response"] = m_response;
+    if (!m_request.is_null())
+        obj["request"] = m_request;
     return obj;
 }
 

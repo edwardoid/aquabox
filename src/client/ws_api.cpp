@@ -142,9 +142,9 @@ DEFINE_WS_API_IMPL(Commands)
 
     try {
         resp["data"] = command.response();
+        connection->send(resp.dump(4));
     }
     catch (...) {
+        LOG_ERROR << "Response serialization failed!";
     }
-
-    connection->send(resp.dump(4));
 }
