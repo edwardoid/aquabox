@@ -43,7 +43,9 @@ Command createCommand(Operation operation,
     command.setParameters(params);
     if (body) {
         try {
-            command.setRequest(nlohmann::json::parse(request->content.string()));
+            std::string bodyData = request->content.string();
+            LOG_DEBUG << "body: " << bodyData;
+            command.setRequest(nlohmann::json::parse(bodyData));
         }
         catch (...) {
             LOG_ERROR << "Can't set request data for operation " << (int) operation;
@@ -66,7 +68,7 @@ void execCommand(Command& cmd, Web::Response response, Web::Headers headers)
     }
 
     if (box->empty()) {
-        response->write(nlohmann::json({{"online", false}}).dump());
+        response->write(SimpleWeb::StatusCode::client_error_not_found, nlohmann::json({{"online", false}}).dump());
         return;
     }
 
