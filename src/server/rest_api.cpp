@@ -1,6 +1,6 @@
 /*
  * AquaBox
- * Copyright (C) 2019  Eduard Sargsyan
+ * Copyright (C) 2019-2022  Eduard Sargsyan
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -43,9 +43,10 @@ Command createCommand(Operation operation,
     command.setParameters(params);
     if (body) {
         try {
-            std::string bodyData = request->content.string();
-            LOG_DEBUG << "body: " << bodyData;
-            command.setRequest(nlohmann::json::parse(bodyData));
+            command.setRequest(nlohmann::json::parse(request->content.string()));
+        }
+        catch (nlohmann::json::parse_error e) {
+            LOG_ERROR << "Can't parse request from application: " << e.what();
         }
         catch (...) {
             LOG_ERROR << "Can't set request data for operation " << (int) operation;

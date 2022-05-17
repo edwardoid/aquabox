@@ -1,6 +1,6 @@
 /*
  * AquaBox
- * Copyright (C) 2019  Eduard Sargsyan
+ * Copyright (C) 2019-2022  Eduard Sargsyan
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -30,6 +30,7 @@ CommandsStream::CommandsStream(const std::string& url)
 nlohmann::json CommandsStream::messageReceived(const nlohmann::json& message)
 {
     try {
+        LOG_DEBUG << "Got command: " << message.dump(4);
         Command cmd;
         cmd.fromJSON(message);
 
