@@ -30,7 +30,7 @@ using namespace aquabox;
 Command createCommand(Operation operation,
                       Web::Request request,
                       bool body,
-                      std::unordered_map<std::string, std::string> params = std::unordered_map<std::string, std::string>())
+                      const std::unordered_map<std::string, std::string>& params = std::unordered_map<std::string, std::string>())
 {
     static std::atomic_int seqNum;
     Command command;
@@ -55,21 +55,21 @@ Command createCommand(Operation operation,
     return command;
 }
 
-void execCommand(Command& cmd, Web::Response response, Web::Headers headers)
+void execCommand(Command& cmd, Web::Response response, Web::Headers& headers)
 {
     if (!cmd.hasParameter("boxId")) {
-        response->write(SimpleWeb::StatusCode::client_error_bad_request, "Missed BoxId");
+        response->write(SimpleWeb::StatusCode::client_error_bad_request, "Missed BoxId", headers);
         return;
     }
 
     auto box = BoxesManager::get(cmd.getParameter("boxId"), true);
     if (box == nullptr) {
-        response->write(SimpleWeb::StatusCode::client_error_not_found, "Specified box is not available");
+        response->write(SimpleWeb::StatusCode::client_error_not_found, "Specified box is not available", headers);
         return;
     }
 
     if (box->empty()) {
-        response->write(SimpleWeb::StatusCode::client_error_not_found, nlohmann::json({{"online", false}}).dump());
+        response->write(SimpleWeb::StatusCode::client_error_not_found, nlohmann::json({{"online", false}}).dump(), headers);
         return;
     }
 

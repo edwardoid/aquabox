@@ -74,7 +74,7 @@ namespace aquabox
             void setup(std::string method, const Route&, void (API::*Callback)(const Route&, Request&, Response&, Headers&));
 
         private:
-            void addCORSHeaders(Headers& headers);
+            void addCORSHeaders(Request request, Headers& headers);
             void dispatcher(const Route&,
                             void (API::*Callback)(const Route&, Request&, Response&, Headers&),
                             Request request,

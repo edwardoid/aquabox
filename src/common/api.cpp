@@ -92,21 +92,34 @@ void API::init(std::shared_ptr<HttpServer> http, Route base)
     setup("GET", m_history, &API::GetHistory);
 }
 
-void API::defaultHandler(const Route& route, Request& request, Response& response, Headers& headers) {}
+void API::defaultHandler(const Route& route, Request& request, Response& response, Headers& headers)
+{
+    if (m_allowCORS) {
+        addCORSHeaders(request, headers);
+    }
+    response->write(SimpleWeb::StatusCode::success_ok, headers);
+}
 
 void API::CORSOptions(Web::Request request, Web::Response response)
 {
     Headers headers;
-    addCORSHeaders(headers);
+    addCORSHeaders(request, headers);
     response->write(SimpleWeb::StatusCode::success_ok, headers);
 }
 
-void API::addCORSHeaders(Web::Headers& headers)
+void API::addCORSHeaders(Web::Request request, Web::Headers& headers)
 {
-    headers.emplace("Content-Type", "application/json");
-    headers.emplace(Access_Control_Allow_Origin, "*");
-    headers.emplace(Access_Control_Allow_Headers, "Origin, X-Requested-With, Content-Type, Accept, boxId, appId");
-    headers.emplace(Access_Control_Allow_Methods, "POST, GET, PUT, PATCH, DELETE, OPTIONS");
+    static std::unordered_map<std::string, std::string> templates({
+        {"Content-Type", "application/json"},
+        { Access_Control_Allow_Origin, "*" },
+        { Access_Control_Allow_Headers, "Origin, X-Requested-With, Content-Type, Accept, boxId, appId" },
+        { Access_Control_Allow_Methods, "POST, GET, PUT, PATCH, DELETE, OPTIONS" }
+    });
+
+    for(auto &field : templates)
+    {
+        headers.emplace(field.first, field.second);
+    }
 }
 
 void API::enableCORS(bool enable)
@@ -130,7 +143,7 @@ void API::dispatcher(const Route& route,
 {
     Headers headers;
     if (m_allowCORS) {
-        addCORSHeaders(headers);
+        addCORSHeaders(request, headers);
     }
 
     (this->*Callback)(route, request, response, headers);
