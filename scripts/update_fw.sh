@@ -51,7 +51,7 @@ echo "Restoring config file from $AB_BACKUP_DIR/bin/config.json to $AB_DIR/bin/c
 cp $AB_BACKUP_DIR/bin/config.json $AB_DIR/bin/config.json
 
 echo "Restoring device files from $AB_BACKUP_DIR/data/devices to $AB_DIR/data/devices"
-cp $AB_BACKUP_DIR/data/devices/*.json $AB_DIR/data/devices/
+#cp $AB_BACKUP_DIR/data/devices/*.json $AB_DIR/data/devices/
 
 echo "Restoring rule files from $AB_BACKUP_DIR/data/devices to $AB_DIR/data/devices"
 cp $AB_BACKUP_DIR/data/rules/*.json $AB_DIR/data/rules/
