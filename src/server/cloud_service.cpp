@@ -57,6 +57,6 @@ bool CloudService::start()
 
     Database::i();
 
-    ApplicationsApi::start();
+    Singleton<ApplicationsApi>::get()->start();
     return HardwareApi::start();
 }

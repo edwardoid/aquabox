@@ -38,6 +38,12 @@ void Box::removeConnection(std::shared_ptr<ApplicationConnection> connection)
         m_applications.erase(p);
 }
 
+void Box::removeAllConnections()
+{
+    LOG_INFO << "Removing all application connections";
+    m_applications.clear();
+}
+
 std::set<int64_t> Box::telegramChats() const
 {
     return Database::i().telegramChats(id());

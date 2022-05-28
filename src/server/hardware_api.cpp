@@ -148,6 +148,7 @@ void HardwareApi::setupRoutes()
         LOG_INFO << "Connection from " << connection->remote_endpoint().address().to_string() << " to " << connection->path << " closed.";
         const auto id = m_events.extract(connection->path)[":id"];
         BoxesManager::get(id)->events.reset();
+        BoxesManager::get(id)->removeAllConnections();
         BoxesManager::eraseIfNeed(id);
     };
 
@@ -156,6 +157,7 @@ void HardwareApi::setupRoutes()
                  << " closed due error.";
         const auto id = m_events.extract(connection->path)[":id"];
         BoxesManager::get(id)->events.reset();
+        BoxesManager::get(id)->removeAllConnections();
         BoxesManager::eraseIfNeed(id);
     };
 
@@ -186,6 +188,7 @@ void HardwareApi::setupRoutes()
         LOG_INFO << "Connection from " << connection->remote_endpoint().address().to_string() << " to " << connection->path << " closed.";
         const auto id = m_commands.extract(connection->path)[":id"];
         BoxesManager::get(id)->commands.reset();
+        BoxesManager::get(id)->removeAllConnections();
         BoxesManager::eraseIfNeed(id);
     };
 
@@ -194,6 +197,7 @@ void HardwareApi::setupRoutes()
                  << " closed due error.";
         const auto id = m_commands.extract(connection->path)[":id"];
         BoxesManager::get(id)->commands.reset();
+        BoxesManager::get(id)->removeAllConnections();
         BoxesManager::eraseIfNeed(id);
     };
 

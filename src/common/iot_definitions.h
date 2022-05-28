@@ -19,6 +19,7 @@
 #pragma once
 
 #define STREAM_CONNECTION_REJECTED 0xDEADBEEF
+#define BOX_IS_OFFLINE 0xDEADC0DE
 
 #include <server_http.hpp>
 #include <server_ws.hpp>

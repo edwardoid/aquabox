@@ -9,15 +9,13 @@
 
 using namespace aquabox;
 
-ApplicationsApi ApplicationsApi::m_instance;
-
 void ApplicationsApi::start()
 {
-    m_instance.m_base = Route().word("api").word("v1");
+    m_base = Route().word("api").word("v1");
 
-    static std::thread httpRoutine([]() { m_instance.startWebServer(); });
+    m_httpRoutine = std::move(std::thread(std::bind(&ApplicationsApi::startWebServer, this)));
 
-    static std::thread wsRoutine([]() { m_instance.startStreamServer(); });
+    m_streamRoutine = std::move(std::thread(std::bind(&ApplicationsApi::startStreamServer, this)));
 }
 
 void ApplicationsApi::startWebServer()
@@ -46,6 +44,10 @@ void ApplicationsApi::startStreamServer()
                  << " by application " << params["appId"];
         if (!Database::i().isApplicationAuthorized(appId, boxId)) {
             connection->send_close(STREAM_CONNECTION_REJECTED);
+            return;
+        }
+        if (BoxesManager::get(boxId, false) == nullptr) {
+            connection->send_close(BOX_IS_OFFLINE);
             return;
         }
         LOG_INFO << "Application " << appId << " is authorized for box " << boxId;

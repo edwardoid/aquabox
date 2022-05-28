@@ -32,6 +32,7 @@ namespace aquabox
         SignalSlot::Signal<const nlohmann::json&> UpdateReceived;
         void addConnection(std::shared_ptr<ApplicationConnection> connection);
         void removeConnection(std::shared_ptr<ApplicationConnection> connection);
+        void removeAllConnections();
         std::vector<std::shared_ptr<ApplicationConnection>> connections() const;
         std::set<int64_t> telegramChats() const;
 

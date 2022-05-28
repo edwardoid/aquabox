@@ -26,7 +26,7 @@ namespace aquabox
     class ApplicationsApi
     {
     public:
-        static void start();
+        void start();
 
     private:
         void startWebServer();
@@ -34,10 +34,9 @@ namespace aquabox
         void removeConnection(std::string boxId, std::shared_ptr<WSServer::Connection> connection);
 
     private:
-        static ApplicationsApi m_instance;
-
-    private:
         Route m_base;
+        std::thread m_httpRoutine;
+        std::thread m_streamRoutine;
         std::shared_ptr<HttpServer> m_http;
         std::shared_ptr<WSServer> m_ws;
         v1::REST RESTApi;
