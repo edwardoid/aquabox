@@ -100,13 +100,13 @@ namespace aquabox
         void remove(int id);
         void removeIf(std::function<bool(const int&, TaskData&)> cb);
 
-        virtual bool ready(const int& id, const TaskData& data) = 0;
+        virtual bool ready(const int& id, std::time_t wasReadyAt, const TaskData& data) = 0;
         virtual void begin() = 0;
         virtual void finish() = 0;
 
     private:
         void loop();
-        void exec(int id);
+        void exec(int id, std::time_t when);
 
     private:
         int m_id = 0;
@@ -223,9 +223,10 @@ namespace aquabox
                         emit = true;
                     }
                     int id = m_queue.top().id;
+                    std::time_t when = m_queue.top().when;
                     LOG_DEBUG << "Task " << id << " is ready";
                     m_queue.pop();
-                    exec(id);
+                    exec(id, when);
                 }
             }
 
@@ -239,14 +240,14 @@ namespace aquabox
     }
 
     template<typename TaskData>
-    void Scheduler<TaskData>::exec(int id)
+    void Scheduler<TaskData>::exec(int id, std::time_t when)
     {
         if (m_tasks.count(id)) {
             TaskInfo& t = m_tasks[id];
             try {
-                if (ready(id, t.data)) {
-                    std::time_t when = cron::cron_next<cron::cron_oracle_traits>(t.when, clock_t::to_time_t(clock_t::now()));
-                    TaskRef ref = {id, when};
+                if (ready(id, when, t.data)) {
+                    std::time_t next = cron::cron_next(t.when, when);
+                    TaskRef ref = {id, next};
                     m_queue.push(ref);
                 }
                 else {
@@ -254,6 +255,7 @@ namespace aquabox
                 }
             }
             catch (...) {
+                LOG_ERROR << "Somethign went wrong...";
             }
         }
     }

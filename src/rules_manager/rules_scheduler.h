@@ -39,7 +39,7 @@ namespace aquabox
         virtual void begin() override;
         virtual void finish() override;
 
-        virtual bool ready(const int& id, const std::pair<std::string, ValueChange>& data) override;
+        virtual bool ready(const int& id, std::time_t wasReadyAt, const std::pair<std::string, ValueChange>& data) override;
 
         void updateDeviceRule(const int deviceId);
 

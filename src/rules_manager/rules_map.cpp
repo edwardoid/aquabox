@@ -77,9 +77,12 @@ bool RulesMap::saveRule(const std::string& id)
             root.replace_extension("json");
 
             if (!rule->saveToFile(root)) {
+                LOG_ERROR << "Can't save rule file " << root.c_str();
                 erase(rule->id());
                 return false;
             }
+
+            LOG_DEBUG << "Updated rule file " << root.c_str();
 
             return true;
         },

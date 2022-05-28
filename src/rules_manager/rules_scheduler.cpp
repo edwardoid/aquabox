@@ -47,7 +47,7 @@ void RuleScheduler::add(const Rule& rule)
     }
     for (auto& vc : rule.actions()) {
         std::pair<std::string, ValueChange> data({rule.id(), vc});
-        int id = Scheduler<std::pair<std::string, ValueChange>>::add(vc.cron, data, rule.lastRun());
+        int id = Scheduler<std::pair<std::string, ValueChange>>::add(vc.cron, data, rule.lastRun() - 1);
         if (id < 0) {
             LOG_ERROR << "Can't add action for rule " << rule.id();
         }
@@ -86,7 +86,7 @@ void RuleScheduler::finish()
     }
 }
 
-bool RuleScheduler::ready(const int& id, const std::pair<std::string, ValueChange>& data)
+bool RuleScheduler::ready(const int& id, std::time_t wasReadyAt, const std::pair<std::string, ValueChange>& data)
 {
     auto r = Singleton<RulesMap>::i()->get(data.first, nullptr);
 
@@ -103,7 +103,7 @@ bool RuleScheduler::ready(const int& id, const std::pair<std::string, ValueChang
         Singleton<IEvents>::i()->notify(std::make_shared<TemporaryRuleRemainEvent>(*r));
     }
     else if (r->enabled()) {
-        r->setLastRun(std::chrono::system_clock::to_time_t(std::chrono::system_clock::now()));
+        r->setLastRun(wasReadyAt);
         Singleton<RulesMap>::i()->saveRule(data.first);
 
         m_changes[r->device()] = data.second;
