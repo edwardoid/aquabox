@@ -42,6 +42,7 @@ namespace aquabox
         virtual ~Device() = default;
 
         bool parseFile(const boost::filesystem::path& file);
+        nlohmann::json savedProperties(const boost::filesystem::path& file) const;
         bool saveToFile(const boost::filesystem::path& file);
 
         std::vector<std::shared_ptr<class Rule>> rules() const;
@@ -82,6 +83,8 @@ namespace aquabox
 
         bool supports(DeviceClass _class) const;
 
+        virtual void restoreLastState() {}
+
     protected:
         void enableSupport(DeviceClass _class);
 
@@ -112,6 +115,7 @@ namespace aquabox
     {
         AbstractRelay();
         virtual std::vector<std::string> properties() const override { return {ON_OFF_PROPERTY}; }
+        virtual void restoreLastState() override { setValue(ON_OFF_PROPERTY, value(ON_OFF_PROPERTY)); }
     };
 
     struct AbstractSensor : public Device
@@ -126,5 +130,6 @@ namespace aquabox
         virtual int steps() const = 0;
         virtual void makeSteps(int times = 1) = 0;
         virtual std::vector<std::string> properties() const override { return {STEP_PROPERTY}; }
+        virtual void restoreLastState() override { setValue(STEP_PROPERTY, value(STEP_PROPERTY)); }
     };
 } // namespace aquabox

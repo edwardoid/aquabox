@@ -41,6 +41,12 @@ namespace aquabox
                                {"meta", d.metadata()},
                                {"accepted", d.accepted()},
                                {"available", d.available()}};
+            nlohmann::json props;
+            for(auto p : d.properties())
+            {
+                props[p] = d.value(p);
+            }
+            j["properties"] = props;
         }
         catch (const nlohmann::detail::exception& e) {
             LOG_ERROR << "Can't serialize Device: " << e.what();
@@ -59,6 +65,8 @@ namespace aquabox
             d.setDeviceClass(Serializable<DeviceClass>::convert((std::string) j.at("class")));
             d.setMetadata(j.at("meta"));
             d.accept(j.at("accepted"));
+
+            // Can't restore properties here!
         }
         catch (std::exception& e) {
             LOG_ERROR << "Parsing failed: " << e.what();
@@ -248,6 +256,16 @@ bool Device::parseFile(const boost::filesystem::path& file)
     ifs >> json;
     *this = json;
     return true;
+}
+
+nlohmann::json Device::savedProperties(const boost::filesystem::path& file) const
+{
+    std::ifstream ifs(file.string());
+    if (!ifs)
+        return nlohmann::json{};
+    nlohmann::json json;
+    ifs >> json;
+    return json["properties"];
 }
 
 bool Device::saveToFile(const boost::filesystem::path& file)

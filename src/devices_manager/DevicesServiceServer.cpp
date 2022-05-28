@@ -126,11 +126,22 @@ bool DevicesServiceServer::init()
             }
 
             if (dev != nullptr && dev->parseFile(p)) {
+                auto propertiesToRestore = dev->savedProperties(p);
+                if (propertiesToRestore.is_object())
+                {
+                    for(auto item : propertiesToRestore.items())
+                    {
+                        dev->setValue(item.key(), item.value());
+                    }
+                }
                 Singleton<DevicesMap>::i()->addDevice(dev);
 
                 m_pool.run([dev]() {
                     bool avail = Hardware::resolve(dev->address()) != nullptr;
                     dev->setAvailable(avail);
+                    if(!dev->rulesEnabled()) {
+                        dev->restoreLastState();
+                    }
                 });
             }
         }
@@ -231,6 +242,14 @@ bool DevicesServiceServer::init()
             if (p == request->property()) {
                 nlohmann::json v = request->value();
                 if (dev->setValue(p, v)) {
+                    boost::filesystem::path path = Singleton<ISettings>::i()->path(Settings::Keys::DATA_ROOT, Settings::Defaults::DATA_ROOT)
+                                     / Singleton<ISettings>::i()->path(Settings::Keys::DEVICES_DATA_SUBROOT, Settings::Defaults::DEVICES_DATA_SUBROOT)
+                                     / request->deviceid();
+                    path.replace_extension(".json");
+                    if (!dev->saveToFile(path)) {
+                        LOG_ERROR << "Can't save " << path.c_str();
+                    }
+
                     Singleton<IEvents>::i()->notify(std::make_shared<ValueChangedEvent>(dev, p, dev->value(p), "user"));
                     return true;
                 }
