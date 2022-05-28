@@ -1,15 +1,16 @@
 {
+    "accepted": true,
     "address": "PHY:GPIO:19",
+    "available": true,
     "class": "relay",
     "id": "dev4",
-    "index": 5,
+    "index": 2,
     "meta": {
-        "model": "7200lm",
-        "vendor": "daytime"
+        "model": "Valve",
+        "vendor": "other"
     },
-    "name": "Device 4",
-    "rules_enabled": false,
-    "type": "light",
-    "accepted": true,
-    "available": true
+    "name": "External",
+    "rules_enabled": true,
+    "type": "co2",
+    "properties": {}
 }

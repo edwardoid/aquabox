@@ -1,15 +1,16 @@
 {
+    "accepted": true,
     "address": "PHY:GPIO:5",
+    "available": true,
     "class": "relay",
     "id": "dev1",
-    "index": 1,
+    "index": 0,
     "meta": {
         "model": "7200lm",
         "vendor": "daytime"
     },
-    "name": "Device 1",
-    "rules_enabled": false,
+    "name": "matrix 80.4",
+    "rules_enabled": true,
     "type": "light",
-    "accepted": true,
-    "available": true
+    "properties": {}
 }

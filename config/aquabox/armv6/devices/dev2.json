@@ -1,15 +1,16 @@
 {
+    "accepted": true,
     "address": "PHY:GPIO:6",
+    "available": true,
     "class": "relay",
     "id": "dev2",
-    "index": 3,
+    "index": 0,
     "meta": {
-        "model": "7200lm",
-        "vendor": "daytime"
+        "model": "7860",
+        "vendor": "eheim"
     },
-    "name": "Device 2",
+    "name": "Professional 3e",
     "rules_enabled": false,
-    "type": "light",
-    "accepted": true,
-    "available": true
+    "type": "external_filter",
+    "properties": {}
 }

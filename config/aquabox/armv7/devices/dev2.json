@@ -1,14 +1,15 @@
 {
+    "accepted": true,
     "address": "PHY:GPIO:19",
+    "available": true,
     "class": "relay",
     "id": "dev2",
-    "index": 2,
+    "index": 0,
     "meta": {
         "model": "1000lm",
-        "vendor": "eheim"
+        "vendor": "jbl"
     },
-    "name": "classicLED",
+    "name": "Professional 3",
     "rules_enabled": false,
-    "type": "light",
-    "accepted": true
+    "type": "external_filter"
 }

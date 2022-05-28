@@ -1,14 +1,15 @@
 {
+    "accepted": true,
     "address": "PHY:GPIO:18",
+    "available": true,
     "class": "relay",
     "id": "dev3",
-    "index": 3,
+    "index": 0,
     "meta": {
         "model": "300W",
-        "vendor": "jbl"
+        "vendor": "eheim"
     },
-    "name": "Pro Heat",
-    "rules_enabled": true,
-    "type": "heater",
-    "accepted": true
+    "name": "Heater",
+    "rules_enabled": false,
+    "type": "heater"
 }

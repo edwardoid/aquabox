@@ -1,15 +1,16 @@
 {
+    "accepted": true,
     "address": "PHY:GPIO:13",
+    "available": true,
     "class": "relay",
     "id": "dev3",
-    "index": 4,
+    "index": 0,
     "meta": {
-        "model": "7200lm",
-        "vendor": "daytime"
+        "model": "Integrated into the filter",
+        "vendor": "eheim"
     },
-    "name": "Device 3",
+    "name": "Integrated heater",
     "rules_enabled": false,
-    "type": "light",
-    "accepted": true,
-    "available": true
+    "type": "heater",
+    "properties": {}
 }

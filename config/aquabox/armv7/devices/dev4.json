@@ -1,14 +1,15 @@
 {
+    "accepted": true,
     "address": "PHY:GPIO:0",
+    "available": true,
     "class": "relay",
     "id": "dev4",
-    "index": 4,
+    "index": 0,
     "meta": {
         "model": "1dps",
         "vendor": "dennerle"
     },
     "name": "CO2",
     "rules_enabled": true,
-    "type": "co2",
-    "accepted": true
+    "type": "co2"
 }

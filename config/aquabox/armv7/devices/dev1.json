@@ -1,5 +1,7 @@
 {
+    "accepted": true,
     "address": "PHY:GPIO:7",
+    "available": true,
     "class": "relay",
     "id": "dev1",
     "index": 0,
@@ -9,6 +11,5 @@
     },
     "name": "matrix 80.4",
     "rules_enabled": true,
-    "type": "light",
-    "accepted": true
+    "type": "light"
 }
