@@ -37,6 +37,7 @@ Cloud::Cloud()
     : m_updateTimeout(std::chrono::minutes(1))
     , isRegistered(false)
 {
+    m_updateTimeout.forceExpire();
     isRegistered.connect([](bool registered) { Singleton<aquabox::AquaBox>::get()->postUpdate(std::make_shared<CloudEvent>(registered)); });
 }
 

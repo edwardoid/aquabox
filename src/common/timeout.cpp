@@ -20,10 +20,10 @@
 
 using namespace aquabox;
 
-Timeout::Timeout(std::chrono::milliseconds timeout)
+Timeout::Timeout(std::chrono::milliseconds timeout, std::chrono::high_resolution_clock::time_point lastPoint)
     : m_timeout(timeout)
+    , m_lastPoint(lastPoint)
 {
-    reset();
 }
 
 void Timeout::setTimeout(std::chrono::milliseconds timeout)
@@ -34,6 +34,11 @@ void Timeout::setTimeout(std::chrono::milliseconds timeout)
 const std::chrono::milliseconds Timeout::timeout() const
 {
     return m_timeout;
+}
+
+void Timeout::forceExpire()
+{
+    m_lastPoint = std::chrono::high_resolution_clock::now() - m_timeout;
 }
 
 size_t Timeout::expired() const

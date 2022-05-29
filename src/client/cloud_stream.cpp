@@ -69,7 +69,7 @@ CloudStream::~CloudStream()
 void CloudStream::onOpen(std::shared_ptr<CloudStream::Connection> connection)
 {
     m_connection = connection;
-    LOG_DEBUG << "Atatched to stream " << m_url;
+    LOG_DEBUG << "Attached to stream " << m_url;
     m_attached = true;
 }
 

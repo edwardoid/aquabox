@@ -25,9 +25,10 @@ namespace aquabox
     class Timeout
     {
     public:
-        Timeout(std::chrono::milliseconds timeout);
+        Timeout(std::chrono::milliseconds timeout, std::chrono::high_resolution_clock::time_point lastPoint = std::chrono::high_resolution_clock::now());
         void setTimeout(std::chrono::milliseconds timeout);
         const std::chrono::milliseconds timeout() const;
+        void forceExpire();
         size_t expired() const;
         void reset();
 
