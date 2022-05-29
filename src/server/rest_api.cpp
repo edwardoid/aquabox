@@ -57,19 +57,22 @@ Command createCommand(Operation operation,
 
 void execCommand(Command& cmd, Web::Response response, Web::Headers& headers)
 {
+    static const std::string mixedBoxId = "{ \"error\": \"Missed boxId\" }";
     if (!cmd.hasParameter("boxId")) {
-        response->write(SimpleWeb::StatusCode::client_error_bad_request, "Missed BoxId", headers);
+        response->write(SimpleWeb::StatusCode::client_error_bad_request, mixedBoxId, headers);
         return;
     }
 
+    static const std::string boxIsNotAvailable = "{ \"error\": \"Box is not available\" }";
     auto box = BoxesManager::get(cmd.getParameter("boxId"), true);
     if (box == nullptr) {
-        response->write(SimpleWeb::StatusCode::client_error_not_found, "Specified box is not available", headers);
+        response->write(SimpleWeb::StatusCode::client_error_not_found, boxIsNotAvailable, headers);
         return;
     }
 
+    static const std::string boxIsOffline = "{ \"error\": \"Box is offline\" }";
     if (box->empty()) {
-        response->write(SimpleWeb::StatusCode::client_error_not_found, nlohmann::json({{"online", false}}).dump(), headers);
+        response->write(SimpleWeb::StatusCode::client_error_not_found, boxIsOffline, headers);
         return;
     }
 
