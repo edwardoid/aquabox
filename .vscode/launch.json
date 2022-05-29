@@ -1,28 +1,116 @@
 {
     "version": "0.2.0",
     "configurations": [
-    {
-        "name": "(gdb) Pipe Launch",
-        "type": "cppdbg",
-        "request": "launch",
-        "program": "/build/bin/aquabox",
-        "cwd": "/build/bin",
-        "args": [ "--nodraw", "--ignore-networking", "--ignore-lock"],
-        "stopAtEntry": true,
-        "environment": [],
-        "externalConsole": true,
-        "sourceFileMap": { "/sources": "${workspaceFolder}" },
-        "pipeTransport": {
-            "debuggerPath": "/usr/bin/gdb",
-            "pipeProgram": "docker",
-            "pipeArgs": ["exec", "-i", "430f82b29522", "sh", "-c"],
-            "pipeCwd": "${workspaceRoot}"
+
+        {
+            "type": "gdb",
+            "request": "attach",
+            "name": "Attach to gdbserver",
+            "gdbpath": "/usr/bin/gdb-multiarch",
+            "executable": "/build/bin/ab_devices_manager",
+            "target": "192.168.1.228:4444",
+            "remote": true,
+            "cwd": "${workspaceRoot}",
+            "valuesFormatting": "parseText",
+            "autorun": [
+                "monitor sleep 5000000"
+            ]
         },
-        "MIMode": "gdb",
-        "setupCommands": [{
-            "description": "Enable pretty-printing for gdb",
-            "text": "-enable-pretty-printing",
-            "ignoreFailures": true
-        }]
-    }, ]
+        {
+            "name": "Launch Server",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "/build/bin/aquabox-server",
+            "cwd": "/build/bin",
+            "MIMode": "gdb",
+            "miDebuggerPath": "/usr/bin/gdb",
+            "setupCommands": [
+                {
+                "description": "Enable pretty-printing for gdb",
+                "text": "-enable-pretty-printing",
+                "ignoreFailures": true
+                }
+            ]
+        },
+        {
+            "name": "Launch Setting Provider",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "/build/bin/ab_settings_provider",
+            "cwd": "/build/bin",
+            "MIMode": "gdb",
+            "miDebuggerPath": "/usr/bin/gdb",
+            "setupCommands": [
+                {
+                "description": "Enable pretty-printing for gdb",
+                "text": "-enable-pretty-printing",
+                "ignoreFailures": true
+                }
+            ]
+        },
+        {
+            "name": "Launch Events Bus",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "/build/bin/ab_events_bus",
+            "cwd": "/build/bin",
+            "MIMode": "gdb",
+            "miDebuggerPath": "/usr/bin/gdb",
+            "setupCommands": [
+                {
+                "description": "Enable pretty-printing for gdb",
+                "text": "-enable-pretty-printing",
+                "ignoreFailures": true
+                }
+            ]
+        },
+        {
+            "name": "Launch Rules Manager",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "/build/bin/ab_rules_manager",
+            "cwd": "/build/bin",
+            "MIMode": "gdb",
+            "miDebuggerPath": "/usr/bin/gdb",
+            "setupCommands": [
+                {
+                "description": "Enable pretty-printing for gdb",
+                "text": "-enable-pretty-printing",
+                "ignoreFailures": true
+                }
+            ]
+        },
+        {
+            "name": "Launch Devices Manager",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "/build/bin/ab_devices_manager",
+            "cwd": "/build/bin",
+            "MIMode": "gdb",
+            "miDebuggerPath": "/usr/bin/gdb",
+            "setupCommands": [
+                {
+                "description": "Enable pretty-printing for gdb",
+                "text": "-enable-pretty-printing",
+                "ignoreFailures": true
+                }
+            ]
+        },
+        {
+            "name": "Launch Client",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "/build/bin/ab_client",
+            "cwd": "/build/bin",
+            "MIMode": "gdb",
+            "miDebuggerPath": "/usr/bin/gdb",
+            "setupCommands": [
+                {
+                "description": "Enable pretty-printing for gdb",
+                "text": "-enable-pretty-printing",
+                "ignoreFailures": true
+                }
+            ]
+        }
+]
 }
