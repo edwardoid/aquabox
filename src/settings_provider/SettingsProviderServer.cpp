@@ -176,3 +176,30 @@ SettingsProviderServer::~SettingsProviderServer() {}
     save();
     return ::grpc::Status::OK;
 }
+
+::grpc::Status SettingsProviderServer::GetInt(::grpc::ServerContext* context,
+                                               const ::google::protobuf::StringValue* request,
+                                               ::google::protobuf::Int32Value* response)
+{
+    std::unique_lock<std::recursive_mutex> lock(m_mx);
+    if (m_data.contains(request->value())) {
+        response->set_value(m_data[request->value()]);
+        LOG_DEBUG << "Value of " << request->value() << " -> " << response->value();
+    }
+    else {
+        LOG_WARNING << "Can't find value for " << request->value();
+        return grpc::Status(grpc::StatusCode::NOT_FOUND, std::string("Configuration does not have") + request->value());
+    }
+    return ::grpc::Status::OK;
+}
+
+::grpc::Status SettingsProviderServer::SetInt(::grpc::ServerContext* context,
+                                               const ::aquabox::services::SettingsSetIntRequest* request,
+                                               ::google::protobuf::Empty* response)
+{
+    std::unique_lock<std::recursive_mutex> lock(m_mx);
+    LOG_DEBUG << "Updating " << request->key() << " to " << request->value();
+    m_data[request->key()] = request->value();
+    save();
+    return ::grpc::Status::OK;
+}

@@ -56,6 +56,13 @@ namespace aquabox
                                            const ::aquabox::services::SettingsSetBoolRequest* request,
                                            ::google::protobuf::Empty* response) override;
 
+            virtual ::grpc::Status GetInt(::grpc::ServerContext* context,
+                                           const ::google::protobuf::StringValue* request,
+                                           ::google::protobuf::Int32Value* response) override;
+            virtual ::grpc::Status SetInt(::grpc::ServerContext* context,
+                                           const ::aquabox::services::SettingsSetIntRequest* request,
+                                           ::google::protobuf::Empty* response) override;
+
         private:
             void load();
             void save();
