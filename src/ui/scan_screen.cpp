@@ -23,6 +23,7 @@
 #include <libfb_globals.h>
 #include <micro_clients/network_manager.h>
 #include <micro_clients/settings.h>
+#include <boost/asio.hpp>
 #include <pngprovider.h>
 #include <sprite.h>
 #include <types/serial.h>
@@ -48,7 +49,14 @@ std::string configurationData()
     configurationDataString += ";";
 
     if (Singleton<INetworkManager>::i() != nullptr)
-        configurationDataString += Singleton<INetworkManager>::i()->currentNetwork().ip;
+    {
+        std::string ip = Singleton<INetworkManager>::i()->currentNetwork().ip;
+        if (ip.empty())
+        {
+            ip = boost::asio::ip::host_name();
+        }
+        configurationDataString += ip;
+    }
     else
         configurationDataString += "aquabox";
     configurationDataString += ";";
