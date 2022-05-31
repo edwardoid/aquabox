@@ -42,7 +42,7 @@ namespace aquabox
         SignalSlot::Property<bool> isRegistered;
         bool checkIfRegistered();
         void doRegister();
-        void heartheat();
+        void heartheat(bool force);
         void postUpdate(std::shared_ptr<class Event> event);
         std::shared_ptr<CloudStream> stream(std::string name);
 

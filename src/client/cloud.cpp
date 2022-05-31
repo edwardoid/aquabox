@@ -38,7 +38,7 @@ Cloud::Cloud()
     , isRegistered(false)
 {
     m_updateTimeout.forceExpire();
-    isRegistered.connect([](bool registered) { Singleton<aquabox::AquaBox>::get()->postUpdate(std::make_shared<CloudEvent>(registered)); });
+    isRegistered.connect([](bool registered) { Singleton<aquabox::AquaBox>::get()->scheduleUpdate(std::make_shared<CloudEvent>(registered)); });
 }
 
 void Cloud::connect()
@@ -164,25 +164,25 @@ bool Cloud::isConnected()
     return false;
 }
 
-void Cloud::heartheat()
+void Cloud::heartheat(bool force)
 {
     static bool working = false;
     if (working) {
         return;
     }
     m_working = true;
-    Singleton<AquaBox>::get()->doLater("cloud_connection_manager", [this]() {
+    Singleton<AquaBox>::get()->doLater("cloud_connection_manager", [this, force]() {
         do {
             if (isConnected()) {
                 break;
             }
             auto nm = Singleton<INetworkManager>::i();
 
-            if (Singleton<INetworkManager>::i()->hasInternetConnection()) {
+            if (!force && Singleton<INetworkManager>::i()->hasInternetConnection()) {
                 break;
             }
 
-            if (isRegistered) {
+            if (checkIfRegistered()) {
                 connect();
             }
             else {
