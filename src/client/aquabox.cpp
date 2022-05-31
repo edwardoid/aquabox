@@ -64,16 +64,16 @@ int AquaBox::start()
                                                                 std::string(plog::severityToString(plog::Severity::info)));
     plog::init(plog::severityFromString(severity.c_str()), &m_consoleAppender);
 
+    m_postUpdatesThread = std::move(std::thread([this]() { while(1) { this->postUpdate(m_pendingEvents.pop());  } }));
+
     srand(time(NULL));
 
     Singleton<IEvents>::i()->subscribe("rules_manager", [this](const std::shared_ptr<Event> e) {
-        LOG_DEBUG << e->serialize().dump();
-        postUpdate(e);
+        scheduleUpdate(e);
     });
 
     Singleton<IEvents>::i()->subscribe("devices_manager", [this](const std::shared_ptr<Event> e) {
-        LOG_DEBUG << e->serialize().dump();
-        postUpdate(e);
+        scheduleUpdate(e);
     });
 
     m_globalTimer = std::make_unique<GlobalTimer>();
@@ -81,6 +81,8 @@ int AquaBox::start()
     m_server->start();
 
     m_globalTimer->waitToFinish();
+
+    m_postUpdatesThread.join();
 
     return EXIT_SUCCESS;
 }
@@ -97,6 +99,14 @@ void AquaBox::doLater(const std::string& name, std::function<void(void)>&& task)
         t();
         m_perfomance.taskFinished(id);
     });
+}
+
+void AquaBox::scheduleUpdate(std::shared_ptr<Event> event)
+{
+    if(!m_pendingEvents.push(event))
+    {
+        LOG_WARNING << "Dropped an event because of too many unsent events are waiting to be sent.";
+    }
 }
 
 void AquaBox::postUpdate(std::shared_ptr<Event> event)

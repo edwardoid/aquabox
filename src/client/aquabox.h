@@ -1,6 +1,6 @@
 /*
  * AquaBox
- * Copyright (C) 2020  Eduard Sargsyan
+ * Copyright (C) 2019-2022  Eduard Sargsyan
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -23,7 +23,9 @@
 #include <common/log.h>
 #include <common/performance_metrics.h>
 #include <common/singleton.h>
+#include <common/waitable_queue.h>
 #include <memory>
+#include <thread>
 #include <services/application.h>
 #include <types/serial.h>
 
@@ -59,20 +61,22 @@ namespace aquabox
         ~AquaBox();
         UsersMap& users() const;
         void doLater(const std::string& name, std::function<void(void)>&& task);
-        void postUpdate(std::shared_ptr<Event> event);
+        void scheduleUpdate(std::shared_ptr<Event> event);
         bool assistantIsConnected() const { return false; }
         double systemTemperature() const;
         std::string configurationData() const;
 
     private:
         void onCurrentNetworkChanged(const class CurrentNetworkState& state);
-
+        void postUpdate(std::shared_ptr<Event> event);
     private:
         PerformanceMetrics m_perfomance;
+        std::thread m_postUpdatesThread;
         boost::asio::thread_pool m_pool;
         plog::ColorConsoleAppender<plog::TxtFormatter> m_consoleAppender;
         mutable UsersMap m_users;
         WebServer* m_server;
+        WaitableQueue<std::shared_ptr<Event>, 1024> m_pendingEvents;
         std::unique_ptr<GlobalTimer> m_globalTimer;
     };
 } // namespace aquabox
