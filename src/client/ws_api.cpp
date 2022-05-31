@@ -56,12 +56,13 @@ void API::onClose(const std::string& route, Connection connection, Status status
 void API::postEvent(Event event)
 {
     std::lock_guard<std::mutex> guard(m_lock);
-    auto data = event->serialize().dump(4);
 
     auto connections = m_connections.find(UpdatesUrl);
     if (connections == m_connections.end()) {
         return;
     }
+
+    auto data = event->serialize().dump(4);
 
     for (auto& connection : connections->second) {
         connection->send(data);

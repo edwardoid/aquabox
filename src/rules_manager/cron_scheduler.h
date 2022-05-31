@@ -34,10 +34,11 @@ namespace aquabox
     template<typename TaskData>
     class Scheduler
     {
+    public:
         using clock_t = std::chrono::high_resolution_clock;
         using time_point_t = clock_t::time_point;
         using duration_t = clock_t::duration;
-
+    private:
         class Sleep
         {
         public:

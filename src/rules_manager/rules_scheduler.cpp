@@ -61,7 +61,8 @@ void RuleScheduler::add(const Rule& rule)
         remainValue.property = MAGIC_TEMPORARY_PROPERTY;
         remainValue.value = "next";
         std::pair<std::string, ValueChange> data({rule.id(), remainValue});
-        Scheduler<std::pair<std::string, ValueChange>>::add("* * * * * *", data, 0);
+        using clock_t = Scheduler<std::pair<std::string, ValueChange>>::clock_t;
+        Scheduler<std::pair<std::string, ValueChange>>::add("* * * * * *", data, clock_t::to_time_t(clock_t::now()) + 1);
     }
 }
 
