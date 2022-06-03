@@ -31,7 +31,7 @@ GlobalTimer::GlobalTimer()
         [this](const Timer::ClockTimePoint&) {
             auto cloud = Singleton<Cloud>::i();
             if (cloud) {
-                cloud->heartheat(true);
+                cloud->checkIfRegistered();
             }
         },
         std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::seconds(1)));

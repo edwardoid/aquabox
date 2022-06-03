@@ -1,6 +1,6 @@
 /*
  * AquaBox
- * Copyright (C) 2020  Eduard Sargsyan
+ * Copyright (C) 2020-2022  Eduard Sargsyan
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -27,10 +27,16 @@ namespace aquabox
     class CloudStream : SimpleWeb::SocketClient<SimpleWeb::WS>
     {
     public:
+        enum Status
+        {
+            Detached = 0,
+            Attaching,
+            Attached
+        };
         CloudStream(const std::string& url);
         void attach();
-        bool isAttached() const;
         ~CloudStream();
+        virtual Status status() const { return m_status; }
         virtual void sendMessage(const nlohmann::json& message);
         virtual nlohmann::json messageReceived(const nlohmann::json& message) = 0;
 
@@ -41,13 +47,13 @@ namespace aquabox
 
     private:
         virtual void onMessage(std::shared_ptr<class Connection> connection, std::shared_ptr<class InMessage> message);
-        void send(std::string data);
+        void send(const std::string data);
 
     private:
         std::shared_ptr<CloudStream::Connection> m_connection;
         std::thread m_thread;
         std::atomic_bool m_reattach;
         std::string m_url;
-        bool m_attached;
+        Status m_status;
     };
 } // namespace aquabox

@@ -1,6 +1,6 @@
 /*
  * AquaBox
- * Copyright (C) 2019  Eduard Sargsyan
+ * Copyright (C) 2019-2022  Eduard Sargsyan
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -26,7 +26,7 @@ using namespace aquabox;
 CloudStream::CloudStream(const std::string& url)
     : SimpleWeb::SocketClient<SimpleWeb::WS>(url)
     , m_url(url)
-    , m_attached(false)
+    , m_status(Status::Detached)
 {
     LOG_DEBUG << "Creating stream for " << url;
     on_open = [this](std::shared_ptr<Connection> conenction) { onOpen(connection); };
@@ -53,12 +53,8 @@ CloudStream::CloudStream(const std::string& url)
 
 void CloudStream::attach()
 {
+    m_status = Status::Attaching;
     m_reattach.exchange(true);
-}
-
-bool CloudStream::isAttached() const
-{
-    return m_attached || m_reattach;
 }
 
 CloudStream::~CloudStream()
@@ -70,12 +66,13 @@ void CloudStream::onOpen(std::shared_ptr<CloudStream::Connection> connection)
 {
     m_connection = connection;
     LOG_DEBUG << "Attached to stream " << m_url;
-    m_attached = true;
+    m_status = Status::Attached;
+    Singleton<Cloud>::i()->isRegistered = true;
 }
 
 void CloudStream::onMessage(std::shared_ptr<CloudStream::Connection> connection, std::shared_ptr<CloudStream::InMessage> message)
 {
-    m_attached = true;
+    m_status = Status::Attached;
     std::string messageString = "";
     ;
     try {
@@ -95,17 +92,15 @@ void CloudStream::onMessage(std::shared_ptr<CloudStream::Connection> connection,
 void CloudStream::onClose(std::shared_ptr<CloudStream::Connection> connection, int status, const std::string& reason)
 {
     LOG_INFO << "Closed connection to " << m_url << " because: " << reason << "(" << status << ")";
-    m_attached = false;
+    m_status = Status::Detached;
     m_connection = nullptr;
     SimpleWeb::SocketClient<SimpleWeb::WS>::stop();
-
-    Singleton<Cloud>::i()->isRegistered = false;
 }
 
 void CloudStream::onError(std::shared_ptr<CloudStream::Connection>, const SimpleWeb::error_code& code)
 {
     LOG_INFO << "Error occured in connection to " << m_url << " error code " << code.message();
-    m_attached = false;
+    m_status = Status::Detached;
     m_connection = nullptr;
     SimpleWeb::SocketClient<SimpleWeb::WS>::stop();
     Singleton<Cloud>::i()->isRegistered = false;
@@ -113,10 +108,18 @@ void CloudStream::onError(std::shared_ptr<CloudStream::Connection>, const Simple
 
 void CloudStream::sendMessage(const nlohmann::json& message)
 {
-    send(message.dump(4));
+    try
+    {
+        send(message.dump(4));
+    }
+    catch(...)
+    {
+        LOG_ERROR << "Can't sent message to stream " << m_url;
+        m_status = Status::Detached;
+    }
 }
 
-void CloudStream::send(std::string data)
+void CloudStream::send(const std::string data)
 {
     if (m_connection) {
         m_connection->send(data);

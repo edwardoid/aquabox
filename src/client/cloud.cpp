@@ -1,6 +1,6 @@
 /*
  * AquaBox
- * Copyright (C) 2019  Eduard Sargsyan
+ * Copyright (C) 2019-2022  Eduard Sargsyan
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -43,26 +43,8 @@ Cloud::Cloud()
 
 void Cloud::connect()
 {
-    if (m_updateTimeout.expired() == 0) {
-        return;
-    }
-    m_updateTimeout.reset();
-    m_streams.for_each([](const std::string& name, std::shared_ptr<CloudStream>& stream) {
-        try {
-            if (!stream->isAttached()) {
-                stream->attach();
-            }
-        }
-        catch (std::exception& e) {
-            LOG_ERROR << "Can't connect to stream " << name << ": " << e.what();
-        }
-        catch (...) {
-            LOG_ERROR << "Can't connect to stream " << name;
-        }
-    });
+    connectToStreams();
 }
-
-void Cloud::disconnect() {}
 
 bool Cloud::checkIfRegistered()
 {
@@ -71,27 +53,55 @@ bool Cloud::checkIfRegistered()
     }
 
     m_updateTimeout.reset();
-    isRegistered = requestStreams();
+    heartheat(true);
 
     return isRegistered;
 }
 
-bool Cloud::requestStreams()
+bool Cloud::connectToStreams()
 {
-    bool streamsAreOk = true;
+    bool connectionRequested = false;
+    auto names = requiredStreamNames();
+    std::stringstream ss;
+    ss << Singleton<ISettings>::i()->get(Settings::Keys::CLOUD_URL, Settings::Defaults::CLOUD_URL);
+    ss << ":" << Singleton<ISettings>::i()->get(Settings::Keys::CLOUD_WS_PORT, Settings::Defaults::CLOUD_WS_PORT);
+    ss << "/hw/api/v1/stream/" << SERIAL_NUMBER << "/";
+    for(auto& name : names)
+    {
+        std::unique_lock<std::mutex> ul(m_mx);
+        auto& stream = m_streams[name];
+        if (!stream)
+        {
+            std::string url = ss.str() + name;
+            LOG_INFO << "Creating stream " << name;
+            if (name == "commands") {
+                stream = std::make_shared<CommandsStream>(url);
+            }
+            else if (name == "events") {
+                stream = std::make_shared<EventsStream>(url);
+            }
+            connectionRequested = true;
+        }
 
-    m_streams.for_each([&streamsAreOk](auto& name, auto& stream) { streamsAreOk &= stream->isAttached(); });
-
-    if (streamsAreOk && !m_streams.empty()) {
-        return streamsAreOk;
+        if (stream->status() < CloudStream::Status::Attaching) {
+            LOG_INFO << "Attaching to stream " << name;
+            stream->attach();
+            connectionRequested = true;
+        } else {
+            LOG_DEBUG << "Stream " << name << " status: " << (int) stream->status();
+        }
     }
+
+    return connectionRequested;
+}
+
+std::vector<std::string> Cloud::requiredStreamNames()
+{
+    std::vector<std::string> names;
     const auto cloudBaseUrl = Singleton<ISettings>::i()->get(Settings::Keys::CLOUD_URL, Settings::Defaults::CLOUD_URL);
     const std::string cloudHttpUrl = cloudBaseUrl + ":"
                                      + std::to_string(
                                          Singleton<ISettings>::i()->get(Settings::Keys::CLOUD_PORT, Settings::Defaults::CLOUD_PORT));
-    const std::string cloudWSUrl = cloudBaseUrl + ":"
-                                   + std::to_string(
-                                       Singleton<ISettings>::i()->get(Settings::Keys::CLOUD_WS_PORT, Settings::Defaults::CLOUD_WS_PORT));
     LOG_INFO << "Checking if device is registered on " << cloudHttpUrl;
     HttpClient client(cloudHttpUrl);
 
@@ -106,106 +116,50 @@ bool Cloud::requestStreams()
             nlohmann::json resp = nlohmann::json::parse(data);
             auto streamsAvailable = resp.find("streams");
 
-            if (streamsAvailable->is_array()) {
-                for (size_t i = 0; i < streamsAvailable.value().size(); ++i) {
-                    auto stream = streamsAvailable.value().at(i);
-                    if (stream.is_string()) {
-                        auto name = stream.get<std::string>();
-                        std::string url = cloudWSUrl;
-                        url += "/hw/api/v1/stream/";
-                        url += SERIAL_NUMBER;
-                        url += "/";
-                        url += name;
-                        std::shared_ptr<CloudStream> existingStream = m_streams.get(name, nullptr);
-
-                        if (existingStream) {
-                            if (!existingStream->isAttached()) {
-                                LOG_DEBUG << "Stream " << name << " exists but not attached. Reattaching...";
-                                existingStream->attach();
-                            }
-                        }
-                        else {
-                            std::shared_ptr<CloudStream> stream;
-                            LOG_DEBUG << "Creating stream " << name;
-                            if (name == "commands") {
-                                stream = std::make_shared<CommandsStream>(url);
-                            }
-                            else if (name == "events") {
-                                stream = std::make_shared<EventsStream>(url);
-                            }
-
-                            if (stream)
-                                m_streams.insert(name, stream);
-                        }
-                    }
+            for (size_t i = 0;
+                 streamsAvailable->is_array() && i < streamsAvailable.value().size();
+                 ++i) {
+                auto stream = streamsAvailable.value().at(i);
+                if (stream.is_string()) {
+                    names.push_back(stream.get<std::string>());
                 }
             }
-            return true;
         }
         else {
-            disconnect();
             LOG_ERROR << "Device is not registered. " << response->status_code << " cause: " << response->content.string();
-            return false;
         }
     }
     catch (std::exception& e) {
         LOG_ERROR << e.what() << " was connected to " << m_streams.size() << " streams";
-        return false;
     }
-}
-
-void Cloud::doRegister()
-{
-    checkIfRegistered();
-}
-
-bool Cloud::isConnected()
-{
-    return false;
+    return names;
 }
 
 void Cloud::heartheat(bool force)
 {
-    static bool working = false;
-    if (working) {
+    if (!force && Singleton<INetworkManager>::i()->hasInternetConnection()) {
         return;
     }
-    m_working = true;
-    Singleton<AquaBox>::get()->doLater("cloud_connection_manager", [this, force]() {
-        do {
-            if (isConnected()) {
-                break;
-            }
-            auto nm = Singleton<INetworkManager>::i();
 
-            if (!force && Singleton<INetworkManager>::i()->hasInternetConnection()) {
-                break;
-            }
+    connect();
 
-            if (checkIfRegistered()) {
-                connect();
-            }
-            else {
-                doRegister();
-            }
-        } while (false);
-
-        m_working = false;
-    });
+    isRegistered = postUpdate(std::make_shared<CloudEvent>(true));
 }
 
-void Cloud::postUpdate(std::shared_ptr<Event> event)
+bool Cloud::postUpdate(std::shared_ptr<Event> event)
 {
     auto str = stream("events");
-    if (str) {
+    if (str != nullptr && str->status() == CloudStream::Status::Attached) {
         str->sendMessage(event->serialize());
+        return true;
     }
     else {
-        LOG_WARNING << "Can't post update becase stream is not avaialable";
+        LOG_WARNING << "Can't post update becase stream is not attached";
     }
+    return false;
 }
 
 std::shared_ptr<CloudStream> Cloud::stream(std::string name)
 {
-    return m_streams.get(name, nullptr);
+    return m_streams[name];
 }

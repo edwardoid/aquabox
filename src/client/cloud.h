@@ -1,6 +1,6 @@
 /*
  * AquaBox
- * Copyright (C) 2019  Eduard Sargsyan
+ * Copyright (C) 2019-2022  Eduard Sargsyan
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,9 +19,7 @@
 #pragma once
 
 #include "cloud_stream.h"
-#include <atomic>
 #include <client_http.hpp>
-#include <common/lockablemap.h>
 #include <common/timeout.h>
 #include <memory>
 #include <s2s_property.h>
@@ -37,22 +35,20 @@ namespace aquabox
     public:
         Cloud();
         void connect();
-        void disconnect();
 
         SignalSlot::Property<bool> isRegistered;
         bool checkIfRegistered();
-        void doRegister();
         void heartheat(bool force);
-        void postUpdate(std::shared_ptr<class Event> event);
+        bool postUpdate(std::shared_ptr<class Event> event);
         std::shared_ptr<CloudStream> stream(std::string name);
 
     private:
-        bool requestStreams();
-        bool isConnected();
+        bool connectToStreams();
+        std::vector<std::string> requiredStreamNames();
 
     private:
-        std::atomic_bool m_working;
-        LockableHashMap<std::string, std::shared_ptr<CloudStream>> m_streams;
+        std::mutex m_mx;
+        std::unordered_map<std::string, std::shared_ptr<CloudStream>> m_streams;
         Timeout m_updateTimeout;
     };
 } // namespace aquabox
