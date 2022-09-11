@@ -1,6 +1,6 @@
 /*
  * AquaBox
- * Copyright (C) 2019  Eduard Sargsyan
+ * Copyright (C) 2019-2022  Eduard Sargsyan
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -34,6 +34,8 @@ namespace aquabox
         void setConnectedApps(const std::string& id, const std::vector<std::string>& appId);
         void setStreamAvailable(const std::string& id, const std::string& stream, bool available);
         nlohmann::json firmwareVersions(const std::string& version);
+        void addTelegramChat(const std::string& id, int64_t chatId);
+        void removeTelegramChat(const std::string& id, int64_t chatId);
         std::set<int64_t> telegramChats(const std::string& id);
 
     protected:

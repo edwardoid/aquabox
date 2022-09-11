@@ -1,6 +1,6 @@
 /*
  * AquaBox
- * Copyright (C) 2019-2020 Eduard Sargsyan
+ * Copyright (C) 2019-2022 Eduard Sargsyan
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -136,6 +136,24 @@ nlohmann::json Database::firmwareVersions(const std::string& version)
 {
     nlohmann::json versions({{"current", version}});
     return versions;
+}
+
+void Database::addTelegramChat(const std::string& id, int64_t chatId)
+{
+    m_aquabox[Settings::string(Settings::Keys::HW_COLLECTION_NAME, Settings::Defaults::HW_COLLECTION_NAME)]
+        .update_one(bsoncxx::builder::stream::document{} << "serial" << id << bsoncxx::builder::stream::finalize,
+                    bsoncxx::builder::stream::document{} << "$addToSet" << bsoncxx::builder::stream::open_document << "tgChats"
+                                                         << chatId << bsoncxx::builder::stream::close_document
+                                                         << bsoncxx::builder::stream::finalize);
+}
+
+void Database::removeTelegramChat(const std::string& id, int64_t chatId)
+{
+    m_aquabox[Settings::string(Settings::Keys::HW_COLLECTION_NAME, Settings::Defaults::HW_COLLECTION_NAME)]
+        .update_one(bsoncxx::builder::stream::document{} << "serial" << id << bsoncxx::builder::stream::finalize,
+                    bsoncxx::builder::stream::document{} << "$pull" << bsoncxx::builder::stream::open_document << "tgChats"
+                                                         << chatId << bsoncxx::builder::stream::close_document
+                                                         << bsoncxx::builder::stream::finalize);
 }
 
 std::set<int64_t> Database::telegramChats(const std::string& id)
