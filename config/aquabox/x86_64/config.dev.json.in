@@ -3,7 +3,7 @@
     "encryption": "WPA",
     "http": "",
     "httpPort": 8974,
-    "log": "INFO",
+    "log": "DEBUG",
     "network": "725bbc7c-8e2b-4225-abec-111d35c6f4f9",
     "password": "azazello",
     "ssid": "AquaBox",
@@ -17,6 +17,6 @@
     ],
 
     "meshEnabled": false,
-    "root": "${CMAKE_BINARY_DIR}/..",
+    "root": "${CMAKE_BINARY_DIR}/data",
     "workingDirectory": "${CMAKE_BINARY_DIR}"
 }
