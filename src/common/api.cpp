@@ -83,13 +83,11 @@ void API::init(std::shared_ptr<HttpServer> http, Route base)
     setup("PUT", m_createRule, &API::CreateRule);
     setup("POST", m_updateRule, &API::CreateRule);
     setup("GET", m_rulesForDevice, &API::DeviceRules);
-    setup("GET", m_repeatUnits, &API::SupportedRepeatTimeouts);
     setup("GET", m_wifiNetworks, &API::ListNetworks);
     setup("GET", m_wifiScan, &API::ScanWiFiNetworks);
     setup("POST", m_wifiConnect, &API::ConnectToWiFi);
     setup("PUT", m_set, &API::SetValue);
     setup("PUT", m_call, &API::Call);
-    setup("GET", m_history, &API::GetHistory);
 }
 
 void API::defaultHandler(const Route& route, Request& request, Response& response, Headers& headers)

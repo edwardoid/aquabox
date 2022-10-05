@@ -40,10 +40,8 @@ namespace aquabox
             virtual void CreateRule(const Route& route, Request& request, Response& response, Headers& headers) override;
             virtual void DeleteRule(const Route& route, Request& request, Response& response, Headers& headers) override;
             virtual void DeviceRules(const Route& route, Request& request, Response& response, Headers& headers) override;
-            virtual void SupportedRepeatTimeouts(const Route& route, Request& request, Response& response, Headers& headers) override;
             virtual void SetValue(const Route& route, Request& request, Response& response, Headers& headers) override;
             virtual void Call(const Route& route, Request& request, Response& response, Headers& headers) override;
-            virtual void GetHistory(const Route& route, Request& request, Response& response, Headers& headers) override;
 
             virtual void init(std::shared_ptr<HttpServer> http, Route base) override;
             void StatusQR(const Route& route, Request& request, Response& response, Headers& headers);

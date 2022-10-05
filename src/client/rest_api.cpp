@@ -62,7 +62,7 @@ void execCommand(Command& cmd, Web::Response response, Web::Headers headers)
     }
     else {
         LOG_DEBUG << "Command " << (int) (cmd.operation()) << " finished with " << (int) (cmd.result())
-                  << " data: " << cmd.response().dump() << "seqNum " << cmd.seqNum();
+                  << " data: " << cmd.response().dump() << "seqNum " << cmd.sequenceId;
     }
     SimpleWeb::StatusCode code = SimpleWeb::StatusCode::server_error_not_implemented;
     switch (cmd.result()) {
@@ -265,12 +265,6 @@ void REST::DeviceRules(const Route& route, Web::Request& request, Web::Response&
     execCommand(cmd, response, headers);
 }
 
-void REST::SupportedRepeatTimeouts(const Route& route, Web::Request& request, Web::Response& response, Headers& headers)
-{
-    auto cmd = createCommand(Operation::SupportedRepeatTimeouts, request, false);
-    execCommand(cmd, response, headers);
-}
-
 void REST::SetValue(const Route& route, Web::Request& request, Web::Response& response, Headers& headers)
 {
     auto cmd = createCommand(Operation::Set, request, true, route.extract(request->path));
@@ -280,12 +274,6 @@ void REST::SetValue(const Route& route, Web::Request& request, Web::Response& re
 void REST::Call(const Route& route, Request& request, Response& response, Headers& headers)
 {
     auto cmd = createCommand(Operation::Call, request, false);
-    execCommand(cmd, response, headers);
-}
-
-void REST::GetHistory(const Route& route, Request& request, Response& response, Headers& headers)
-{
-    auto cmd = createCommand(Operation::GetHistory, request, false);
     execCommand(cmd, response, headers);
 }
 

@@ -47,10 +47,8 @@ namespace aquabox
             virtual void CreateRule(const Route& route, Request& request, Response& response, Headers& headers) = 0;
             virtual void DeleteRule(const Route& route, Request& request, Response& response, Headers& headers) = 0;
             virtual void DeviceRules(const Route& route, Request& request, Response& response, Headers& headers) = 0;
-            virtual void SupportedRepeatTimeouts(const Route& route, Request& request, Response& response, Headers& headers) = 0;
             virtual void SetValue(const Route& route, Request& request, Response& response, Headers& headers) = 0;
             virtual void Call(const Route& route, Request& request, Response& response, Headers& headers) = 0;
-            virtual void GetHistory(const Route& route, Request& request, Response& response, Headers& headers) = 0;
 
             using APiInterfaceCallback = void (API::*)(const Route&, Request&, Response&, Headers&);
 

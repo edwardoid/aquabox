@@ -19,7 +19,7 @@
 #include "rest_api.h"
 #include "box.h"
 #include "boxes_manager.h"
-#include "command.h"
+#include <types/command.h>
 #include "log.h"
 #include <atomic>
 #include <random>
@@ -34,7 +34,7 @@ Command createCommand(Operation operation,
 {
     static std::atomic_int seqNum;
     Command command;
-    command.setSeqNum(seqNum.fetch_add(1));
+    command.sequenceId = seqNum.fetch_add(1);
     command.setOperation(operation);
     auto boxId = request->header.find("boxId");
     if (boxId != request->header.end()) {
@@ -181,12 +181,6 @@ void REST::DeviceRules(const Route& route, Web::Request& request, Web::Response&
     execCommand(cmd, response, headers);
 }
 
-void REST::SupportedRepeatTimeouts(const Route& route, Web::Request& request, Web::Response& response, Web::Headers& headers)
-{
-    auto cmd = createCommand(Operation::SupportedRepeatTimeouts, request, false);
-    execCommand(cmd, response, headers);
-}
-
 void REST::SetValue(const Route& route, Web::Request& request, Web::Response& response, Web::Headers& headers)
 {
     auto cmd = createCommand(Operation::Set, request, true, route.extract(request->path));
@@ -194,12 +188,6 @@ void REST::SetValue(const Route& route, Web::Request& request, Web::Response& re
 }
 
 void REST::Call(const Route& route, Web::Request& request, Web::Response& response, Web::Headers& headers)
-{
-    auto cmd = createCommand(Operation::Call, request, true, route.extract(request->path));
-    execCommand(cmd, response, headers);
-}
-
-void REST::GetHistory(const Route& route, Web::Request& request, Web::Response& response, Web::Headers& headers)
 {
     auto cmd = createCommand(Operation::Call, request, true, route.extract(request->path));
     execCommand(cmd, response, headers);
