@@ -46,8 +46,8 @@ void RuleScheduler::add(const Rule& rule)
         return;
     }
     for (auto& vc : rule.actions()) {
-        std::pair<std::string, ValueChange> data({rule.id(), vc});
-        int id = Scheduler<std::pair<std::string, ValueChange>>::add(vc.cron, data, rule.lastRun() - 1);
+        RuleSchedulerData data({rule.id(), vc});
+        int id = Scheduler<RuleSchedulerData>::add(vc.cron, data, rule.lastRun() - 1);
         if (id < 0) {
             LOG_ERROR << "Can't add action for rule " << rule.id();
         }
@@ -60,9 +60,9 @@ void RuleScheduler::add(const Rule& rule)
         ValueChange remainValue;
         remainValue.property = MAGIC_TEMPORARY_PROPERTY;
         remainValue.value = "next";
-        std::pair<std::string, ValueChange> data({rule.id(), remainValue});
-        using clock_t = Scheduler<std::pair<std::string, ValueChange>>::clock_t;
-        Scheduler<std::pair<std::string, ValueChange>>::add("* * * * * *", data, clock_t::to_time_t(clock_t::now()) + 1);
+        RuleSchedulerData data({rule.id(), remainValue});
+        using clock_t = Scheduler<RuleSchedulerData>::clock_t;
+        Scheduler<RuleSchedulerData>::add("* * * * * *", data, clock_t::to_time_t(clock_t::now()) + 1);
     }
 }
 
@@ -87,32 +87,32 @@ void RuleScheduler::finish()
     }
 }
 
-bool RuleScheduler::ready(const int& id, std::time_t wasReadyAt, const std::pair<std::string, ValueChange>& data)
+bool RuleScheduler::ready(const int& id, std::time_t wasReadyAt, const RuleSchedulerData& data)
 {
-    auto r = Singleton<RulesMap>::i()->get(data.first, nullptr);
+    auto r = Singleton<RulesMap>::i()->get(data.id, nullptr);
 
     if (r == nullptr) {
         LOG_DEBUG << "Action " << id << " is ready. "
-                  << "Rule \"" << data.first << "\" for property \"" << data.second.property << "\" but is missing";
+                  << "Rule \"" << data.id << "\" for property \"" << data.change.property << "\" but is missing";
         return false;
     }
 
     LOG_DEBUG << "Action " << id << " is ready. "
-              << "Rule \"" << data.first << "\" for property \"" << data.second.property << "\", should set is to " << data.second.value.dump();
+              << "Rule \"" << data.id << "\" for property \"" << data.change.property << "\", should set is to " << data.change.value.dump();
 
-    if (r->isTemporary() && data.second.property == MAGIC_TEMPORARY_PROPERTY) {
+    if (r->isTemporary() && data.change.property == MAGIC_TEMPORARY_PROPERTY) {
         Singleton<IEvents>::i()->notify(std::make_shared<TemporaryRuleRemainEvent>(*r));
     }
     else if (r->enabled()) {
         r->setLastRun(wasReadyAt);
-        Singleton<RulesMap>::i()->saveRule(data.first);
+        Singleton<RulesMap>::i()->saveRule(data.id);
 
-        m_changes[r->device()] = data.second;
+        m_changes[r->device()] = data.change;
     }
 
     if (r->expired()) {
-        LOG_VERBOSE << "Rule " << data.first << " has expired. Scheduling for delete";
-        m_rulesToDelete.insert(data.first);
+        LOG_VERBOSE << "Rule " << data.id << " has expired. Scheduling for delete";
+        m_rulesToDelete.insert(data.id);
         return false;
     }
 
@@ -124,7 +124,7 @@ void RuleScheduler::remove(const Rule& rule)
     std::string ruleId = rule.id();
     LOG_DEBUG << "Removing actions for rule " << ruleId;
     int count = 0;
-    removeIf([ruleId, &count](const int& id, std::pair<std::string, ValueChange>& vc) { ++count; return vc.first == ruleId; });
+    removeIf([ruleId, &count](const int& id, const RuleSchedulerData& vc) { ++count; return vc.id == ruleId; });
     LOG_DEBUG << "Removed " << count << " actions from for rule " << ruleId;
 }
 

@@ -24,7 +24,14 @@
 
 namespace aquabox
 {
-    class RuleScheduler : protected Scheduler<std::pair<std::string, ValueChange>>
+
+    using RuleId = std::string;
+    struct RuleSchedulerData
+    {
+        RuleId id;
+        ValueChange change;
+    };
+    class RuleScheduler : protected Scheduler<RuleSchedulerData>
     {
     public:
         RuleScheduler();
@@ -33,13 +40,13 @@ namespace aquabox
         void remove(const Rule& rule);
         void trigger();
         void updateDeviceRules(const std::string& deviceId);
-        inline void beginTransaction() { Scheduler<std::pair<std::string, ValueChange>>::beginTransaction();  }
-        inline void endTransaction() { Scheduler<std::pair<std::string, ValueChange>>::endTransaction();  }
+        inline void beginTransaction() { Scheduler<RuleSchedulerData>::beginTransaction();  }
+        inline void endTransaction() { Scheduler<RuleSchedulerData>::endTransaction();  }
     private:
         virtual void begin() override;
         virtual void finish() override;
 
-        virtual bool ready(const int& id, std::time_t wasReadyAt, const std::pair<std::string, ValueChange>& data) override;
+        virtual bool ready(const int& id, std::time_t wasReadyAt, const RuleSchedulerData& data) override;
 
         void updateDeviceRule(const int deviceId);
 
