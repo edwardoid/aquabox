@@ -3,12 +3,89 @@
     "configurations": [
 
         {
+            "name": "(gdb) Attach RM",
+            "type": "cppdbg",
+            "request": "attach",
+            "program": "/build/bin/ab_rules_manager",,
+            "MIMode": "gdb",
+            "setupCommands": [
+                {
+                    "description": "Enable pretty-printing for gdb",
+                    "text": "-enable-pretty-printing",
+                    "ignoreFailures": true
+                },
+                {
+                    "description":  "Set Disassembly Flavor to Intel",
+                    "text": "-gdb-set disassembly-flavor intel",
+                    "ignoreFailures": true
+                }
+            ]
+        },
+        {
+            "name": "(gdb) Attach DM",
+            "type": "cppdbg",
+            "request": "attach",
+            "program": "/build/bin/ab_devices_manager",,
+            "MIMode": "gdb",
+            "setupCommands": [
+                {
+                    "description": "Enable pretty-printing for gdb",
+                    "text": "-enable-pretty-printing",
+                    "ignoreFailures": true
+                },
+                {
+                    "description":  "Set Disassembly Flavor to Intel",
+                    "text": "-gdb-set disassembly-flavor intel",
+                    "ignoreFailures": true
+                }
+            ]
+        },
+        {
+            "name": "(gdb) Attach Client",
+            "type": "cppdbg",
+            "request": "attach",
+            "program": "/build/bin/ab_client",,
+            "MIMode": "gdb",
+            "setupCommands": [
+                {
+                    "description": "Enable pretty-printing for gdb",
+                    "text": "-enable-pretty-printing",
+                    "ignoreFailures": true
+                },
+                {
+                    "description":  "Set Disassembly Flavor to Intel",
+                    "text": "-gdb-set disassembly-flavor intel",
+                    "ignoreFailures": true
+                }
+            ]
+        },
+        {
+            "name": "(gdb) Attach EB",
+            "type": "cppdbg",
+            "request": "attach",
+            "program": "/build/bin/ab_client",,
+            "MIMode": "gdb",
+            "setupCommands": [
+                {
+                    "description": "Enable pretty-printing for gdb",
+                    "text": "-enable-pretty-printing",
+                    "ignoreFailures": true
+                },
+                {
+                    "description":  "Set Disassembly Flavor to Intel",
+                    "text": "-gdb-set disassembly-flavor intel",
+                    "ignoreFailures": true
+                }
+            ]
+        },
+
+        {
             "type": "gdb",
             "request": "attach",
             "name": "Attach to gdbserver",
             "gdbpath": "/usr/bin/gdb-multiarch",
             "executable": "/build/bin/ab_devices_manager",
-            "target": "192.168.1.228:4444",
+            "target": "aquabox.me:2345",
             "remote": true,
             "cwd": "${workspaceRoot}",
             "valuesFormatting": "parseText",
@@ -110,7 +187,8 @@
                 "text": "-enable-pretty-printing",
                 "ignoreFailures": true
                 }
-            ]
+            ],
+            "args": [ ]
         }
-]
+],
 }

@@ -1,13 +1,18 @@
 {
 	"folders": [
 		{
-			"path": "/sources"
+			"path": "/sources",
+			"name": "Sources"
 		},
 		{
-			"path": "/build"
+			"path": "/build",
+			"name": "Server/Client Build"
 		}
 	],
 	"settings": {
+		"files.include": [
+			"/root/.conan/data"
+		],
 		"files.associations": {
 			"array": "cpp",
 			"atomic": "cpp",

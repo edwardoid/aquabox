@@ -77,8 +77,28 @@
         "regex": "cpp",
         "set": "cpp",
         "string": "cpp",
-        "bit": "cpp"
+        "bit": "cpp",
+        "*.inc": "cpp",
+        "variant": "cpp",
+        "any": "cpp",
+        "charconv": "cpp",
+        "source_location": "cpp"
     },
     "cmake.configureOnOpen": true,
-    "git.ignoreLimitWarning": true
+    "git.ignoreLimitWarning": true,
+    "files.exclude": {
+        "/sources/conan_data_*/**": true
+    },
+    "search.exclude": {
+        "/sources/conan_data_*/**": true
+    },
+    "C_Cpp.default.includePath": [
+        "/root/.conan/data/**/package/**"
+    ],
+    "C_Cpp.files.exclude": {
+        "conan_data_*": true,
+        "**/.vscode": true
+    },
+    "cmake.buildDirectory": "/build",
+    "cmake.buildTask": true
 }
