@@ -2,11 +2,16 @@ project(aquabox-common)
 
 file(GLOB AQUABOX_COMMON_SOURCES "*.cpp")
 
+add_definitions(-DMQTT_USE_WS)
 add_library(${PROJECT_NAME} SHARED ${AQUABOX_COMMON_SOURCES})
-target_link_libraries(${PROJECT_NAME} CONAN_PKG::nlohmann_json)
-target_link_libraries(${PROJECT_NAME} CONAN_PKG::json-schema-validator)
-target_link_libraries(${PROJECT_NAME} CONAN_PKG::boost)
-target_link_libraries(${PROJECT_NAME} CONAN_PKG::openssl)
-target_link_libraries(${PROJECT_NAME} rpc)
-target_link_libraries(${PROJECT_NAME} micro-clients)
+target_link_libraries(${PROJECT_NAME}   
+                                        rpc
+                                        micro-clients
+                                        CONAN_PKG::nlohmann_json
+                                        CONAN_PKG::json-schema-validator
+                                        CONAN_PKG::boost
+                                        CONAN_PKG::openssl
+                                        CONAN_PKG::mqtt_cpp
+    )
+
 set_property(TARGET ${PROJECT_NAME} PROPERTY POSITION_INDEPENDENT_CODE 1)

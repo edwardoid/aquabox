@@ -10,19 +10,24 @@ include_directories(${OWT_INCLUDE_DIR})
 include_directories(${S2S_INCLUDE_DIR})
 include_directories(${AQUABOX_COMMON_PATH})
 
+add_definitions(-DMQTT_USE_WS)
+
 file(GLOB AQUABOX_CLOUD_SOURCES "*.cpp")
 include_directories(${AQUABOX_COMMON_PATH})
 add_executable(${PROJECT_NAME} ${AQUABOX_CLOUD_SOURCES})
 
-target_link_libraries(${PROJECT_NAME} aquabox-common)
-target_link_libraries(${PROJECT_NAME} CONAN_PKG::mongo-cxx-driver)
-target_link_libraries(${PROJECT_NAME} CONAN_PKG::json-schema-validator)
-target_link_libraries(${PROJECT_NAME} CONAN_PKG::boost)
-target_link_libraries(${PROJECT_NAME} CONAN_PKG::openssl)
-target_link_libraries(${PROJECT_NAME} CONAN_PKG::tgbot)
-target_link_libraries(${PROJECT_NAME} Threads::Threads)
-target_link_libraries(${PROJECT_NAME} dl)
-target_link_libraries(${PROJECT_NAME} rt)
+target_link_libraries(${PROJECT_NAME}
+                                        aquabox-common
+                                        dl
+                                        rt
+                                        CONAN_PKG::mongo-cxx-driver
+                                        CONAN_PKG::json-schema-validator
+                                        CONAN_PKG::boost
+                                        CONAN_PKG::openssl
+                                        CONAN_PKG::tgbot
+                                        CONAN_PKG::mqtt_cpp
+                                        Threads::Threads
+    ) 
 
 set_target_properties(${PROJECT_NAME}
     PROPERTIES

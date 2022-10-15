@@ -19,6 +19,7 @@
 #include "EventsBusServer.h"
 #include "../micro_clients/micro_service.h"
 #include <common/log.h>
+#include <common/calltime.h>
 
 #include <grpcpp/channel.h>
 #include <grpcpp/client_context.h>
@@ -44,6 +45,7 @@ std::string EventsBusServer::getId(::grpc::ServerContext* context) const
                                        const ::aquabox::services::EventData* request,
                                        ::google::protobuf::Empty* response)
 {
+    LOG_DEBUG << "Got event from " << request->sender();
     std::unique_lock<std::mutex> lock(m_mx);
     for (auto c : m_consumers) {
         if (c.first == request->sender()) {
@@ -60,7 +62,7 @@ std::string EventsBusServer::getId(::grpc::ServerContext* context) const
             google::protobuf::Empty v;
             auto res = consumer->On(&cxt, e, &v);
             if (!res.ok()) {
-                LOG_WARNING << "Can't notify service " << c.first << " at " << c.second << "due: " << res.error_message();
+                LOG_WARNING << "Can't notify service " << c.first << " at " << c.second << " due: " << res.error_message();
             }
         });
     }
