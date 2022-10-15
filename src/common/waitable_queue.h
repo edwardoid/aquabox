@@ -47,7 +47,7 @@ namespace aquabox
             }
             return m_elements.front();
         }
-        T pop()
+        T pop(size_t* pending = nullptr)
         {
             std::unique_lock<std::mutex> ul(m_mx);
             while(m_elements.empty()) {
@@ -55,6 +55,8 @@ namespace aquabox
             }
             T v = m_elements.front();
             m_elements.pop();
+            if (pending)
+                *pending = m_elements.size();
             return v;
         }
     private:
