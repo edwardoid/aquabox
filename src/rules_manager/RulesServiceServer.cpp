@@ -58,6 +58,7 @@ bool RulesServiceServer::init()
         LOG_ERROR << root << " is not a directory!";
         return false;
     }
+    LOG_DEBUG << "Looking for rules in " << root;
     for (auto const& file : boost::filesystem::directory_iterator(root)) {
         if (boost::filesystem::is_regular_file(file)) {
             auto p = boost::filesystem::path(file);
