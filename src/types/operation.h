@@ -1,34 +1,49 @@
 /*
  * AquaBox
- * Copyright (C) 2020  Eduard Sargsyan
+ * Copyright (C) 2022  Eduard Sargsyan
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+
 #pragma once
 
-#include "cloud_stream.h"
+#include <nlohmann/json.hpp>
 
 namespace aquabox
 {
-    class EventsStream : public CloudStream
+    enum class Operation : int16_t
     {
-    public:
-        EventsStream(const std::string& url);
-        virtual ~EventsStream();
-
-    protected:
-        virtual nlohmann::json messageReceived(const nlohmann::json& message) override;
+        Unknown = 0,
+        GetStatus = 1,
+        GetDevices = 2,
+        GetDevice = 3,
+        UpdateDevice = 4,
+        GetRules = 5,
+        GetRule = 6,
+        CreateRule = 7,
+        UpdateRule = 8,
+        DeleteRule = 9,
+        DeviceRules = 10,
+        ScanWiFiNetworks = 11,
+        WiFiNetworks = 12,
+        ConnectToWiFi = 13,
+        Set = 15,
+        Call = 16,
+        SubscribeToBox = 17
     };
-} // namespace aquabox
+
+    void to_json(nlohmann::json& j, const Operation& o);
+    void from_json(const nlohmann::json& j, Operation& o);
+}

@@ -23,7 +23,7 @@
 
 using namespace aquabox;
 
-BoxConnection::BoxConnection(const std::string& id, ResultsMap<Command>& resutsMap)
+BoxConnection::BoxConnection(const std::string& id, ResultsMap<BoxResponse>& resutsMap)
     : results(resutsMap)
     , m_id(id)
 {}
@@ -35,39 +35,64 @@ const std::string& BoxConnection::id() const
 
 void BoxConnection::ready(const std::string& body)
 {
-    Command cmd;
-    cmd.response(Result::ServerError);
     try {
-        nlohmann::json data = nlohmann::json::parse(body);
-        cmd.fromJSON(data);
+        BoxResponse resp;
+        resp.type = ApiMessageType::Error;
+        resp.data.error = ErrorResponse::parseError();
+        nlohmann::json raw = nlohmann::json::parse(body);
+        BaseStreamMessage result = raw;
+
+        resp.type = result.type;
+        if (result.type == ApiMessageType::Event)
+        {
+            LOG_INFO << "Got an event";
+        }
+        else if (result.type == ApiMessageType::Command)
+        {
+            resp.data.ok = raw;
+            results.ready(resp.data.ok.rpid, resp);
+        }
+        else
+        {
+            resp.data.error = raw;
+            results.ready(resp.data.error.rpid, resp);
+        }
     }
     catch (nlohmann::json::parse_error e) {
         LOG_ERROR << "Can't parse JSON from client: " << e.what();
     }
     catch (...) {
     }
-    results.ready(cmd.seqNum(), cmd);
 }
 
-void BoxConnection::runCommand(Command& cmd)
+void BoxConnection::runCommand(const CommandRequest& cmd)
 {
-    if (commands == nullptr) {
-        cmd.response(Result::AccessDenied);
-        return;
-    }
-    nlohmann::json response = cmd.responseJson();
+    nlohmann::json response = as_json(cmd);
 
     LOG_DEBUG << "Executing command\n" << response.dump();
 
     commands->send(response.dump());
+}
 
-    if (!results.waitFor(cmd.seqNum(), cmd)) {
-        LOG_DEBUG << "Command execution timed out!";
-        cmd.response(Result::AccessDenied);
+BoxResponse BoxConnection::runCommandAndWait(CommandRequest& cmd)
+{
+    BoxResponse resp;
+    resp.type = ApiMessageType::Error;
+    if (commands == nullptr) {
+        resp.data.error = ErrorResponse::boxIsOffline();
+        resp.data.error.rpid = cmd.rqid;
+        return resp;
     }
+    runCommand(cmd);
+    if (!results.waitFor(cmd.rqid, resp)) {
+        LOG_DEBUG << "Command execution timed out!";
+        resp.data.error = ErrorResponse::boxIsOffline();
+        resp.data.error.rpid = cmd.rqid;
+    }
+    return resp;
 }
 
 bool BoxConnection::empty() const
 {
-    return events == nullptr || commands == nullptr;
+    return commands == nullptr;
 }

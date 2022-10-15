@@ -1,6 +1,6 @@
 /*
  * AquaBox
- * Copyright (C) 2019  Eduard Sargsyan
+ * Copyright (C) 2019-2022  Eduard Sargsyan
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,8 +18,9 @@
 
 #pragma once
 
-#include "command.h"
 #include "results_map.h"
+#include <types/command.h>
+#include <types/error_response.h>
 #include <memory>
 #include <server_ws.hpp>
 #include <string>
@@ -27,18 +28,34 @@
 
 namespace aquabox
 {
+    struct BoxResponse
+    {
+        BoxResponse() = default; 
+        BoxResponse(const BoxResponse& src)
+        {
+            this->type = src.type;
+            this->data = src.data;
+        }
+        ApiMessageType type;
+        struct BoxResponseData
+        {
+            ErrorResponse error;
+            CommandResult ok;
+        } data;
+    };
+
     class BoxConnection
     {
     public:
-        BoxConnection(const std::string& id, ResultsMap<Command>& results);
+
+        BoxConnection(const std::string& id, ResultsMap<BoxResponse>& results);
         using WSServer = SimpleWeb::SocketServer<SimpleWeb::WS>;
         const std::string& id() const;
         bool empty() const;
         void ready(const std::string& data);
-        void runCommand(Command& cmd);
-        ResultsMap<Command>& results;
-        std::shared_ptr<WSServer::Connection> logs;
-        std::shared_ptr<WSServer::Connection> events;
+        void runCommand(const CommandRequest& cmd);
+        BoxResponse runCommandAndWait(CommandRequest& cmd);
+        ResultsMap<BoxResponse>& results;
         std::shared_ptr<WSServer::Connection> commands;
 
     private:

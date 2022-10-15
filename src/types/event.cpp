@@ -1,6 +1,6 @@
 /*
  * AquaBox
- * Copyright (C) 2019  Eduard Sargsyan
+ * Copyright (C) 2019-2022  Eduard Sargsyan
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,11 +18,46 @@
 
 #include "event.h"
 
+namespace aquabox
+{
+    void to_json(nlohmann::json& j, const Event& event)
+    {
+        to_json(j, (const BaseStreamMessage&) event);
+        try {
+            j.emplace("sender", event.sender());
+            j.emplace("class", event.clazz());
+
+            if (event.data().is_object())
+                j.emplace("data", event.data());
+
+            if (event.properties().is_object())
+                j.emplace("properties", event.properties());
+        } catch (const nlohmann::json::exception& ex) {
+
+        }
+    }
+
+    void from_json(const nlohmann::json& j, Event& event)
+    {
+        from_json(j, (BaseStreamMessage&) event);
+        try {
+            event.setSender(j["sender"], j["class"]);
+            if (j.count("data"))
+                event.setData(j["data"]);
+            if (j.count("properties"))
+            event.setProperties(j["properties"]);
+        } catch (const nlohmann::json::exception& ex) {
+
+        }
+    }
+}
+
 using namespace aquabox;
 
 Event::Event()
+    : m_properties(nlohmann::json::object())
 {
-    m_properties = nlohmann::json({});
+    type = ApiMessageType::Event;
 }
 
 void Event::setSender(std::string sender, std::string _class)
@@ -36,11 +71,9 @@ const std::string& Event::sender() const
     return m_sender;
 }
 
-void Event::setData(const nlohmann::json& data)
+const std::string& Event::clazz() const
 {
-    for (auto i : data.items()) {
-        m_data.emplace(i.key(), i.value());
-    }
+    return m_class;
 }
 
 void Event::setPropertiesUpdate(const nlohmann::json& update)
@@ -50,12 +83,17 @@ void Event::setPropertiesUpdate(const nlohmann::json& update)
     }
 }
 
+void Event::setProperties(const nlohmann::json& properties)
+{
+    m_properties = properties;
+}
+
 bool Event::hasProperty(const std::string& key) const
 {
     return m_properties.find(key) != m_properties.end();
 }
 
-nlohmann::json Event::serialize() const
+const nlohmann::json& Event::properties() const
 {
-    return nlohmann::json({{"sender", m_sender}, {"class", m_class}, {"data", m_data}, {"props", m_properties}});
+    return m_properties;
 }

@@ -1,6 +1,6 @@
 /*
  * AquaBox
- * Copyright (C) 2019  Eduard Sargsyan
+ * Copyright (C) 2019-2022  Eduard Sargsyan
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,8 +18,9 @@
 
 #pragma once
 
-#include "command.h"
+#include <types/command.h>
 #include "results_map.h"
+#include "box.h"
 #include <mutex>
 #include <unordered_map>
 
@@ -28,14 +29,26 @@ namespace aquabox
     class BoxesManager
     {
     public:
-        static std::shared_ptr<class Box> get(const std::string& id, bool createIfNotExists = false);
+        static std::shared_ptr<Box> get(const std::string& id, bool createIfNotExists = false);
         static bool eraseIfNeed(std::string id);
 
     private:
         static BoxesManager self;
 
-        ResultsMap<Command> m_results;
-        std::unordered_map<std::string, std::shared_ptr<class Box>> m_connections;
+        ResultsMap<BoxResponse> m_results;
+        std::unordered_map<std::string, std::shared_ptr<Box>> m_connections;
         std::mutex m_mx;
+    };
+
+
+    class BoxSubscribtions
+    {
+    public:
+        void subscribe(std::shared_ptr<class ApplicationConnection> connection);
+        void unsubscribe(std::shared_ptr<class ApplicationConnection> connection);
+        void goneOffline();
+        void cameOnline();
+    private:
+        std::unordered_map<std::string, std::shared_ptr<ApplicationConnection>> m_apps;
     };
 } // namespace aquabox

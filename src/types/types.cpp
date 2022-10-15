@@ -58,6 +58,7 @@ namespace aquabox
                 d.set_type(j.at("type"));
                 d.set_clazz(j.at("class"));
                 d.set_accepted(j.at("accepted"));
+                d.set_available(j.at("available"));
                 for (auto& m : j["meta"].get<nlohmann::json::object_t>()) {
                     LOG_INFO << "Updating meta " << m.first << " to  " << ((std::string) m.second);
                     d.mutable_meta()->insert({m.first, (std::string) m.second});

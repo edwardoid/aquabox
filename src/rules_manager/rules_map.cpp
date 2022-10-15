@@ -35,7 +35,7 @@ bool RulesMap::addRule(std::shared_ptr<Rule> rule, bool replace)
             replaceError = !replace;
 
             if (!replaceError) {
-                *v = beforeUpdate;
+                beforeUpdate = *v;
                 v = rule;
             }
         })) {

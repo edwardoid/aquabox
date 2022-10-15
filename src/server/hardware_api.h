@@ -35,17 +35,12 @@ namespace aquabox
         static bool start();
 
     private:
-        bool acceptConnectionFromHW(std::string id, std::shared_ptr<Web::WSConnection> connection);
+        bool acceptConnectionFromHW(const std::string& id, std::shared_ptr<Web::WSConnection> connection);
         void setupRoutes();
 
     private:
         static HardwareApi self;
-        Web::HttpServer m_http;
         Web::WSServer m_ws;
-        Route m_register;
-        Route m_login;
-        Route m_firmware;
-        Route m_events;
-        Route m_commands;
+        Route m_url;
     };
 } // namespace aquabox

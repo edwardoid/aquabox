@@ -1,7 +1,7 @@
 #include "mqtt_bus.h"
-#include "../mqtt/mqtt_broker.h"
 #include <common/log.h>
 #include <common/singleton.h>
+#include <common/broker.h>
 #include <micro_clients/settings.h>
 #include <thread>
 
@@ -13,7 +13,7 @@ MQTTBus::MQTTBus(const std::string& address)
 {
     static std::thread t([this]() {
         try {
-            m_broker->start(Singleton<ISettings>::i()->port(Settings::Keys::MQTT_PORT, Settings::Defaults::MQTT_PORT));
+            m_broker->start(Singleton<ISettings>::i()->port(Settings::Keys::MQTT_BUS_PORT, Settings::Defaults::MQTT_BUS_PORT));
         }
         catch (boost::wrapexcept<boost::system::system_error> e) {
             LOG_ERROR << e.what();

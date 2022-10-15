@@ -18,7 +18,7 @@
 
 #include "command_executor.h"
 #include "aquabox.h"
-#include "cloud.h"
+#include "cloud_stream.h"
 #include <boost/asio/ip/host_name.hpp>
 #include <micro_clients/devices_manager.h>
 #include <micro_clients/network_manager.h>
@@ -28,12 +28,33 @@
 #include <types/types.h>
 #include <types/update_events.h>
 
+namespace aquabox
+{
+    void to_json(nlohmann::json& j, const ExecutionResult& res)
+    {
+        to_json(j, (const BaseStreamResponse&) res);
+        if (res)
+        {
+            to_json(j, res.ok);
+        }
+        else
+        {
+            to_json(j, res.fail);
+        }
+    }
+}
+
 using namespace aquabox;
 
-bool CommandExecutor::exec(const Command& cmd)
+ExecutionResult CommandExecutor::exec(const CommandRequest& cmd)
 {
+    m_res.rpid = cmd.rqid;
+    m_res.ok.setOperation(cmd.operation());
+    m_res.ok.setParameters(cmd.parameters());
+    m_res.ok.rpid = cmd.rqid;
+    m_res.fail.rpid = cmd.rqid;
     m_cmd = cmd;
-    bool ok = false;
+    Result ok = Result::Ok;
     switch (cmd.operation()) {
     case Operation::GetStatus: {
         ok = GetStatus();
@@ -75,10 +96,6 @@ bool CommandExecutor::exec(const Command& cmd)
         ok = DeviceRules();
         break;
     }
-    case Operation::SupportedRepeatTimeouts: {
-        ok = SupportedRepeatTimeouts();
-        break;
-    }
     case Operation::Set: {
         ok = SetValue();
         break;
@@ -96,14 +113,21 @@ bool CommandExecutor::exec(const Command& cmd)
         break;
     }
     default: {
+        m_res = ErrorResponse::unsupportedCommand();
         LOG_ERROR << "Unsupported operation " << (int) (cmd.operation());
     }
     }
-    const_cast<Command&>(cmd) = m_cmd;
-    return ok;
+
+    m_res.fail.setResult(ok);
+
+    if (m_res)
+        m_res.type = m_res.ok.type;
+    else
+        m_res.type = m_res.fail.type;
+    return m_res;
 }
 
-bool CommandExecutor::GetStatus()
+Result CommandExecutor::GetStatus()
 {
     nlohmann::json host({{"rest", Singleton<ISettings>::i()->get(Settings::Keys::HTTP_PORT, Settings::Defaults::REST_PORT)},
                          {"stream", Singleton<ISettings>::i()->get(Settings::Keys::STREAM_PORT, Settings::Defaults::WS_PORT)},
@@ -118,13 +142,15 @@ bool CommandExecutor::GetStatus()
     host["config"] = Singleton<AquaBox>::get()->configurationData();
 
     auto cloud = Singleton<Cloud>::i();
-    bool isRegistered = cloud == nullptr ? false : (bool) cloud->isRegistered;
+    bool isRegistered = cloud == nullptr ? false : (bool) cloud->isRegistered();
 
-    m_cmd.response(nlohmann::json({{"aquabox", host}, {"status", "online"}, {"registered", isRegistered}}), Result::Ok);
-    return true;
+    const nlohmann::json data({{"aquabox", host}, {"status", "online"}, {"registered", isRegistered}});
+    
+    m_res.ok.setData(data);
+    return Result::Ok;
 }
 
-bool CommandExecutor::GetDevices()
+Result CommandExecutor::GetDevices()
 {
     std::vector<nlohmann::json> all;
     for (auto& dev : Singleton<IDevicesManager>::i()->all()) {
@@ -136,25 +162,24 @@ bool CommandExecutor::GetDevices()
         all.push_back(json);
     };
 
-    m_cmd.response(nlohmann::json({{"devices", all}}), Result::Ok);
-    return true;
+    m_res.ok.setData({{"devices", all}});
+    return Result::Ok;
 }
 
-bool CommandExecutor::GetDevice()
+Result CommandExecutor::GetDevice()
 {
     if (!m_cmd.hasParameter(":dev")) {
         LOG_ERROR << "No device id parameter in URL";
-        m_cmd.response(Result::BadCommand);
-        return true;
+        m_res.fail = ErrorResponse::missedParameter(":dev");
+        return m_res.fail.result();
     }
 
     std::string id = m_cmd.getParameter(":dev");
 
     auto dev = Singleton<IDevicesManager>::i()->get(id);
     if (dev.id().empty()) {
-        LOG_ERROR << "No device " << id << " not found";
-        m_cmd.response(Result::NotFound);
-        return true;
+        m_res.fail = ErrorResponse::deviceNotFound(id);
+        return m_res.fail.result();
     }
 
     nlohmann::json data = dev;
@@ -162,39 +187,35 @@ bool CommandExecutor::GetDevice()
         data[p] = Singleton<IDevicesManager>::i()->value(id, p);
     }
 
-    m_cmd.response(data, Result::Ok);
-    return true;
+    m_res.ok.setData(data);
+    return Result::Ok;
 }
 
-bool CommandExecutor::UpdateDevice()
+Result CommandExecutor::UpdateDevice()
 {
     if (!m_cmd.hasParameter(":dev")) {
         LOG_ERROR << "No device id parameter in URL";
-        m_cmd.response(Result::BadCommand);
-        return true;
+        m_res.fail = ErrorResponse::missedParameter(":dev");
+        return m_res.fail.result();
     }
 
     std::string id = m_cmd.getParameter(":dev");
 
     DeviceRef d;
     try {
-        d = m_cmd.request();
+        d = m_cmd.data();
     }
     catch (nlohmann::detail::parse_error& e) {
-        nlohmann::json data;
-        data["request"] = m_cmd.request();
-        data["error"] = e.what();
-        data["cause"] = "Parse Error";
-        m_cmd.response(data, Result::BadCommand);
-        return true;
+        m_res.fail = ErrorResponse::parseError();
+        return m_res.fail.result();
     }
 
     auto src = Singleton<IDevicesManager>::i()->get(id);
 
     if (src.id().empty()) {
         LOG_ERROR << "No device " << id << " not found";
-        m_cmd.response(Result::NotFound);
-        return true;
+        m_res.fail = ErrorResponse::deviceNotFound(id);
+        return m_res.fail.result();
     }
 
     nlohmann::json before = src;
@@ -204,101 +225,99 @@ bool CommandExecutor::UpdateDevice()
     }
 
     if (Singleton<IDevicesManager>::i()->update(d)) {
-        m_cmd.response(Result::Ok);
-    }
-    else {
-        m_cmd.response(Result::ServerError);
+        m_res.ok.setData(d);
+        return Result::Ok;
     }
 
-    return true;
+    return Result::ServerError;
 }
 
-bool CommandExecutor::GetRules()
+Result CommandExecutor::GetRules()
 {
     std::vector<nlohmann::json> all;
     for (const Rule& rule : Singleton<IRulesManager>::i()->all()) {
         nlohmann::json data = rule;
         all.push_back(data);
     };
-    m_cmd.response(nlohmann::json({{"rules", all}}), Result::Ok);
-    return true;
+    m_res.ok.setData(nlohmann::json({{"rules", all}}));
+    return Result::Ok;
 }
 
-bool CommandExecutor::GetRule()
+Result CommandExecutor::GetRule()
 {
     if (!m_cmd.hasParameter(":rule")) {
         LOG_ERROR << "No rule id parameter in URL";
-        m_cmd.response(Result::BadCommand);
-        return true;
+        m_res.fail = ErrorResponse::missedParameter(":rule");
+        return Result::BadCommand;
     }
     std::string id = m_cmd.getParameter(":rule");
 
     Rule rule = Singleton<IRulesManager>::i()->get(id);
 
     if (rule.id() != id) {
-        m_cmd.response(Result::NotFound);
+        m_res.fail = ErrorResponse::ruleNotFound(id);
+        return m_res.fail.result();
     }
-    else {
-        nlohmann::json data = rule;
-        m_cmd.response(data, Result::Ok);
-    }
-    return true;
+
+    m_res.ok.setData(as_json(rule));
+    return Result::Ok;
 }
 
-bool CommandExecutor::CreateOrUpdateRule(bool update)
+Result CommandExecutor::CreateOrUpdateRule(bool update)
 {
     if (!m_cmd.hasParameter(":dev")) {
         LOG_ERROR << "No device id parameter in URL";
-        m_cmd.response(Result::BadCommand);
-        return true;
+        m_res.fail = ErrorResponse::missedParameter(":dev");
+        return m_res.fail.result();
     }
     std::string dev = m_cmd.getParameter(":dev");
     Rule r;
     try {
-        r = m_cmd.request();
+        r = m_cmd.data();
     }
     catch (nlohmann::detail::parse_error& e) {
         LOG_ERROR << "Rule can not be parsed because: " << e.what();
-        m_cmd.response(e.what(), Result::BadCommand);
-        return true;
+        m_res.fail = ErrorResponse::parseError();
+        m_res.fail.setDetails(e.what());
+        return m_res.fail.result();
     }
 
     bool res = update ? (Singleton<IRulesManager>::i()->update(r)) : (Singleton<IRulesManager>::i()->add(r));
 
     if (!res) {
-        m_cmd.response("Wrong method or internal data", Result::BadCommand);
-        return true;
+        m_res.fail = ErrorResponse(Result::BadCommand, "Wrong method or internal data");
+        return m_res.fail.result();
     }
 
-    m_cmd.response(m_cmd.request(), Result::Ok);
-    return true;
+    m_res.ok.setData(m_cmd.data());
+    return Result::Ok;
 }
 
-bool CommandExecutor::DeleteRule()
+Result CommandExecutor::DeleteRule()
 {
     if (!m_cmd.hasParameter(":rule")) {
         LOG_ERROR << "No rule id parameter in URL";
-        m_cmd.response(Result::BadCommand);
-        return true;
+        m_res.fail = ErrorResponse::missedParameter(":rule");
+        return m_res.fail.result();
     }
     auto id = m_cmd.getParameter(":rule");
     if (Singleton<IRulesManager>::i()->remove(id)) {
         LOG_DEBUG << "Rule " << id << " removed";
-        m_cmd.response(Result::Ok);
     }
     else {
         LOG_ERROR << "Rule " << id << " removal failed";
-        m_cmd.response(Result::ServerError);
+        m_res.fail = ErrorResponse(Result::ServerError, "Can't remove rule");
+        return m_res.fail.result();
     }
-    return true;
+    return Result::Ok;
 }
 
-bool CommandExecutor::DeviceRules()
+Result CommandExecutor::DeviceRules()
 {
     if (!m_cmd.hasParameter(":dev")) {
         LOG_ERROR << "No dev id parameter in URL";
-        m_cmd.response(Result::BadCommand);
-        return true;
+        m_res.fail = ErrorResponse::missedParameter(":dev");
+        return m_res.fail.result();
     }
     std::string dev = m_cmd.getParameter(":dev");
     std::vector<nlohmann::json> all;
@@ -312,37 +331,31 @@ bool CommandExecutor::DeviceRules()
         }
     });
 
-    nlohmann::json res({{"rules", all}, {"device", dev}});
-    m_cmd.response(res, Result::Ok);
-    return true;
+    nlohmann::json data({{"rules", all}, {"device", dev}});
+    m_res.ok.setData(data);
+    return Result::Ok;
 }
 
-bool CommandExecutor::SupportedRepeatTimeouts()
-{
-    nlohmann::json res;
-    res["units"] = std::vector<std::string>({"hour"});
-    m_cmd.response(res, Result::Ok);
-    return true;
-}
-
-bool CommandExecutor::SetValue()
+Result CommandExecutor::SetValue()
 {
     if (!m_cmd.hasParameter(":dev")) {
         LOG_ERROR << "No dev id parameter in URL";
-        m_cmd.response(Result::BadCommand);
-        return true;
+        m_res.fail = ErrorResponse::missedParameter(":dev");
+        return m_res.fail.result();
     }
 
-    auto changes = m_cmd.request()["changes"];
+    auto changes = m_cmd.data()["changes"];
     if (!changes.is_array()) {
         LOG_ERROR << "Set value should be array";
+        m_res.fail = ErrorResponse::wrongType("changes", "array");
+        return m_res.fail.result();
     }
 
     std::string id = m_cmd.getParameter(":dev");
     auto dev = Singleton<IDevicesManager>::i()->get(id);
     if (dev.id().empty()) {
-        m_cmd.response(Result::NotFound);
-        return true;
+        m_res.fail = ErrorResponse::deviceNotFound(id);
+        return m_res.fail.result();
     }
 
     nlohmann::json data = dev;
@@ -360,19 +373,18 @@ bool CommandExecutor::SetValue()
 
     Singleton<IDevicesManager>::i()->update(dev);
 
-    m_cmd.response(data, Result::Ok);
-    return true;
+    return Result::Ok;
 }
 
-bool CommandExecutor::ScanWiFiNetworks()
+Result CommandExecutor::ScanWiFiNetworks()
 {
     bool res = Singleton<INetworkManager>::i()->startScan();
 
-    m_cmd.response(nlohmann::json({{"requestResult", res}}), Result::Ok);
-    return true;
+    m_res.ok.setData(nlohmann::json({{"requestResult", res}}));
+    return Result::Ok;
 }
 
-bool CommandExecutor::ListNetworks()
+Result CommandExecutor::ListNetworks()
 {
     std::vector<nlohmann::json> nets;
 
@@ -381,33 +393,44 @@ bool CommandExecutor::ListNetworks()
             nlohmann::json({{"ssid", net.ssid}, {"ip", net.ip}, {"auth", net.auth}, {"encrypted", net.secure}, {"signal", net.strength}}));
     }
 
-    m_cmd.response(nlohmann::json({{"networks", nets}, {"count", nets.size()}}), Result::Ok);
-    return true;
+    m_res.ok.setData(nlohmann::json({{"networks", nets}, {"count", nets.size()}}));
+    return Result::Ok;
 }
 
-bool CommandExecutor::ConnectToWiFi()
+Result CommandExecutor::ConnectToWiFi()
 {
-    const nlohmann::json& networkInfo = m_cmd.request();
+    const nlohmann::json& networkInfo = m_cmd.data();
 
     auto ssid = networkInfo.find("ssid");
+    
     auto password = networkInfo.find("password");
-    if (ssid == networkInfo.end() || password == networkInfo.end() || !ssid->is_string() || !password->is_string()) {
-        m_cmd.response(Result::BadCommand);
-        return true;
+
+    if (ssid == networkInfo.end() || password == networkInfo.end() || !ssid->is_string() || !password->is_string())
+    {
+        m_res.fail = ErrorResponse::parseError();
+        return m_res.fail.result();
     }
 
     std::string ssidStr = ssid->get<std::string>();
     std::string passwordStr = password->get<std::string>();
-    if (ssidStr.empty() || passwordStr.size() < 8) {
-        m_cmd.response(Result::BadCommand);
-        return true;
+    if (ssidStr.empty()) {
+        m_res.fail = ErrorResponse::wrongType("SSID", "string");
+        return m_res.fail.result();
+    }
+    
+    if(passwordStr.size() < 8) {
+        m_res.fail = ErrorResponse::wrongType("password", "string");
+        return m_res.fail.result();
     }
 
     std::string uuid = Singleton<INetworkManager>::i()->connect(ssidStr, passwordStr);
 
     if (uuid.empty())
-        m_cmd.response(Result::NotFound);
-    else
-        m_cmd.response({{"uuid", uuid}}, Result::Ok);
-    return true;
+    {
+        m_res.fail = ErrorResponse(Result::NotFound, "Wifi network not found", ssidStr);
+        return m_res.fail.result();
+    }
+
+    m_res.ok.setData({{"uuid", uuid}});
+    return Result::Ok;
 }

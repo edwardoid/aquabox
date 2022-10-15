@@ -21,7 +21,7 @@
 
 using namespace aquabox;
 
-bool CommandExecutor::exec(const Command& cmd)
+bool CommandExecutor::exec(const CommandRequest& cmd)
 {
     m_cmd = cmd;
 

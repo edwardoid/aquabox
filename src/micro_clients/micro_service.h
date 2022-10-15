@@ -25,11 +25,19 @@
 #include <grpcpp/create_channel.h>
 #include <grpcpp/security/credentials.h>
 
+#ifndef GRPC_TIMEOUT
+#ifdef NDEBUG
+#define GRPC_TIMEOUT 500
+#else
+#define GRPC_TIMEOUT 180000 /* 3 minutes */
+#endif
+#endif // GRPC_TIMEOUT
+
 namespace aquabox
 {
     namespace services
     {
-        template<class MicroServiceInterface, int timeout = 500>
+        template<class MicroServiceInterface, int timeout = GRPC_TIMEOUT>
         class MicroService
         {
         public:

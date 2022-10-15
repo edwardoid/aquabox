@@ -1,6 +1,6 @@
 /*
  * AquaBox
- * Copyright (C) 2019  Eduard Sargsyan
+ * Copyright (C) 2019-2022  Eduard Sargsyan
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,16 +18,16 @@
 
 #pragma once
 
-#include <common/command.h>
+#include <types/command.h>
 
 namespace aquabox
 {
     class CommandExecutor
     {
     public:
-        bool exec(const Command& cmd);
+        bool exec(const CommandRequest& cmd);
 
     private:
-        Command m_cmd;
+        CommandRequest m_cmd;
     };
 } // namespace aquabox

@@ -18,11 +18,16 @@
 
 #include "ws_api.h"
 #include "command_executor.h"
-#include <common/command.h>
+#include <types/command.h>
 #include <common/enumerations.h>
 #include <types/event.h>
 
 using namespace aquabox::ws;
+
+
+static std::function<void(const Error &)> Fail([](const Error& e) {
+    if (e) LOG_WARNING << "Write to ws filed with: " << e.message() << " (code: " << e.value() << ")";
+});
 
 void API::onOpen(const std::string& route, Connection connection)
 {
@@ -57,21 +62,21 @@ void API::postEvent(Event event)
 {
     std::lock_guard<std::mutex> guard(m_lock);
 
-    auto connections = m_connections.find(UpdatesUrl);
+    auto connections = m_connections.find(CommandsUrl);
     if (connections == m_connections.end()) {
         return;
     }
 
-    auto data = event->serialize().dump(4);
-
+    nlohmann::json msg = *event;
+    
     for (auto& connection : connections->second) {
-        connection->send(data);
+        connection->send(msg.dump(4), Fail);
     }
 }
 
 DEFINE_WS_API_IMPL(Updates)
 {
-    connection->send("Updates");
+    connection->send("Updates", Fail);
 }
 
 DEFINE_WS_API_IMPL(Commands)
@@ -82,68 +87,61 @@ DEFINE_WS_API_IMPL(Commands)
     }
     catch (nlohmann::json::parse_error& e) {
         LOG_ERROR << "Can't parse command: " << e.what();
+        ErrorResponse err = ErrorResponse::parseError();
+        err.setDetails(e.what());
+        connection->send(as_json(err).dump(4), Fail);
         return;
     }
 
     auto rqid = request.find("rqid");
     if (rqid == request.end()) {
-        LOG_ERROR << "No request ID in command";
+        LOG_ERROR << "Request id is not specified";
+        connection->send(as_json(ErrorResponse::rqidMissed()).dump(4), Fail);
         return;
     }
 
     if (!rqid->is_number_unsigned()) {
         LOG_ERROR << "Request id is not a number";
+        connection->send(as_json(ErrorResponse::rqidWrongType()).dump(4), Fail);
         return;
     }
 
     auto cmd = request.find("command");
     if (cmd == request.end()) {
         LOG_ERROR << "Request does not contain command";
+        connection->send(as_json(ErrorResponse::requestIsNotCommand()).dump(4), Fail);
         return;
     }
 
     if (!cmd->is_string()) {
         LOG_ERROR << "Command is not a string";
+        connection->send(as_json(ErrorResponse::parseError()).dump(4), Fail);
         return;
     }
 
-    Operation op = Serializable<Operation>::convert(cmd->get<std::string>());
+    Operation op = cmd->get<Operation>();
     if (Operation::Unknown == op) {
         LOG_ERROR << "Unknown command";
+        connection->send(as_json(ErrorResponse::unknownCommand()).dump(4), Fail);
         return;
     }
 
     auto body = request.find("data");
 
-    Command command;
-    command.setOperation(op);
-
-    if (body != request.end()) {
-        command.setRequest(body.value());
-    }
-
-    auto params = request.find("params");
-    if (params != request.end() && params->is_object()) {
-        for (auto& x : params.value().items()) {
-            command.setParameter(x.key(), x.value());
-        }
-    }
+    CommandRequest command;
+    from_json(request, command);
 
     CommandExecutor exec;
-    if (!exec.exec(command)) {
-        LOG_ERROR << "Can't execute command! " << (int) (command.operation());
+    ExecutionResult result = exec.exec(command);
+    if (result) {
+        LOG_DEBUG << "Command " << (int) (command.operation()) << " finished with " << (int) (result.fail.result());
     }
     else {
-        LOG_DEBUG << "Command " << (int) (command.operation()) << " finished with " << (int) (command.result());
+        LOG_ERROR << "Can't execute command! " << (int) (command.operation());
     }
 
-    nlohmann::json resp;
-    resp["rpid"] = rqid->get<unsigned int>();
-    resp["result"] = (int) command.result();
-
     try {
-        resp["data"] = command.response();
-        connection->send(resp.dump(4));
+        connection->send(as_json(result).dump(4), Fail);
     }
     catch (...) {
         LOG_ERROR << "Response serialization failed!";

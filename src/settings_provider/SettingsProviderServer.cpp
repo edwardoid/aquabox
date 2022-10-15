@@ -134,7 +134,7 @@ SettingsProviderServer::~SettingsProviderServer() {}
     }
     else {
         LOG_WARNING << "Can't find value for " << request->value();
-        return grpc::Status(grpc::StatusCode::NOT_FOUND, std::string("Configuration does not have") + request->value());
+        return grpc::Status(grpc::StatusCode::NOT_FOUND, std::string("Configuration does not have ") + request->value());
     }
     return ::grpc::Status::OK;
 }

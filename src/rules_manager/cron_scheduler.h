@@ -86,6 +86,7 @@ namespace aquabox
         {
             int id;
             std::time_t when;
+            std::string description;
         };
         struct Cmp : std::less<TaskRef>
         {
@@ -97,7 +98,7 @@ namespace aquabox
         void start();
         void beginTransaction();
         void endTransaction();
-        int add(std::string cronexpr, TaskData data, std::time_t from = clock_t::to_time_t(clock_t::now()));
+        int add(const std::string& cronexpr, TaskData data, std::time_t from = clock_t::to_time_t(clock_t::now()), const std::string& description = "");
         void remove(int id);
         void removeIf(std::function<bool(const int&, TaskData&)> cb);
 
@@ -140,12 +141,12 @@ namespace aquabox
     }
 
     template<typename TaskData>
-    int Scheduler<TaskData>::add(std::string cronexpr, TaskData data, std::time_t from)
+    int Scheduler<TaskData>::add(const std::string& cronexpr, TaskData data, std::time_t from, const std::string& description)
     {
         try {
             TaskInfo info = {cron::make_cron(cronexpr), data};
             int id = ++m_id;
-            TaskRef ref = {id, cron::cron_next(info.when, from)};
+            TaskRef ref = {id, cron::cron_next(info.when, from), description};
             std::lock_guard<std::mutex> lock(m_mx);
             m_queue.push(ref);
             m_tasks.insert({id, info});

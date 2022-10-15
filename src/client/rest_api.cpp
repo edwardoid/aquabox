@@ -35,17 +35,17 @@
 using namespace aquabox::v1;
 using namespace aquabox;
 
-Command createCommand(Operation operation,
+CommandRequest createCommand(Operation operation,
                       Web::Request request,
                       bool body,
                       std::unordered_map<std::string, std::string> params = std::unordered_map<std::string, std::string>())
 {
-    Command command;
+    CommandRequest command;
     command.setOperation(operation);
     command.setParameters(params);
     if (body) {
         try {
-            command.setRequest(nlohmann::json::parse(request->content.string()));
+            command.setData(nlohmann::json::parse(request->content.string()));
         }
         catch (...) {
             LOG_ERROR << "Can't set request data for operation " << (int) operation;
@@ -54,18 +54,18 @@ Command createCommand(Operation operation,
     return command;
 }
 
-void execCommand(Command& cmd, Web::Response response, Web::Headers headers)
+void execCommand(CommandRequest& cmd, Web::Response response, Web::Headers headers)
 {
     CommandExecutor exec;
-    if (!exec.exec(cmd)) {
-        LOG_ERROR << "Can't execute command! " << (int) (cmd.operation());
+    ExecutionResult result = exec.exec(cmd);
+    if (result) {
+        LOG_ERROR << "Command " << (int) (cmd.operation()) << " failed with: " << result.fail.message() << " deetails: " << result.fail.details();
     }
     else {
-        LOG_DEBUG << "Command " << (int) (cmd.operation()) << " finished with " << (int) (cmd.result())
-                  << " data: " << cmd.response().dump() << "seqNum " << cmd.sequenceId;
+        LOG_DEBUG << "Command " << (int) (cmd.operation()) << " finished";
     }
     SimpleWeb::StatusCode code = SimpleWeb::StatusCode::server_error_not_implemented;
-    switch (cmd.result()) {
+    switch (result.fail.result()) {
     case Result::BadCommand: {
         code = SimpleWeb::StatusCode::client_error_bad_request;
         break;
@@ -91,10 +91,10 @@ void execCommand(Command& cmd, Web::Response response, Web::Headers headers)
         code = SimpleWeb::StatusCode::success_ok;
     }
 
-    if (cmd.response().empty())
+    if (result.ok.data().is_null())
         response->write(code, headers);
     else
-        response->write(code, cmd.response().dump(), headers);
+        response->write(code, as_json(result).dump(), headers);
 }
 
 nlohmann::json getStatusInfo(bool detailed)
@@ -291,6 +291,6 @@ void REST::ListNetworks(const Route& route, Request& request, Response& response
 
 void REST::ConnectToWiFi(const Route& route, Web::Request& request, Web::Response& response, Headers& headers)
 {
-    Command cmd = createCommand(Operation::ConnectToWiFi, request, true);
+    auto cmd = createCommand(Operation::ConnectToWiFi, request, true);
     execCommand(cmd, response, headers);
 }

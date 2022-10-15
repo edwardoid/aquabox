@@ -1,6 +1,6 @@
 /*
  * AquaBox
- * Copyright (C) 2019  Eduard Sargsyan
+ * Copyright (C) 2019-2022  Eduard Sargsyan
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,13 +17,11 @@
  */
 
 #include "aquabox.h"
-#include "cloud.h"
+#include "cloud_stream.h"
 #include "options.h"
 #include <common/performance_metrics.h>
 #include <common/singleton.h>
 #include <micro_clients/settings.h>
-// #include <common/stacktrace.h>
-#include <iostream>
 
 int main(int argc, char** argv)
 {

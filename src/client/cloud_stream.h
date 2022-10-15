@@ -33,12 +33,15 @@ namespace aquabox
             Attaching,
             Attached
         };
-        CloudStream(const std::string& url);
+        CloudStream();
         void attach();
         ~CloudStream();
+        void checkIfRegistered();
+        bool isRegistered();
+        void postUpdate(std::shared_ptr<class Event> event);
         virtual Status status() const { return m_status; }
         virtual void sendMessage(const nlohmann::json& message);
-        virtual nlohmann::json messageReceived(const nlohmann::json& message) = 0;
+        virtual void messageReceived(const nlohmann::json& message);
 
     protected:
         virtual void onOpen(std::shared_ptr<class Connection> connection);
@@ -48,12 +51,16 @@ namespace aquabox
     private:
         virtual void onMessage(std::shared_ptr<class Connection> connection, std::shared_ptr<class InMessage> message);
         void send(const std::string data);
+        nlohmann::json exec(const nlohmann::json& message);
+
+        static std::string url();
 
     private:
         std::shared_ptr<CloudStream::Connection> m_connection;
         std::thread m_thread;
         std::atomic_bool m_reattach;
-        std::string m_url;
         Status m_status;
     };
+
+    using Cloud = CloudStream;
 } // namespace aquabox

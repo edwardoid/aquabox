@@ -25,6 +25,6 @@ namespace aquabox
     class ApplicationManager
     {
     public:
-        static Application* getAppication(std::string id);
+        static Application* getAppication(const std::string& id);
     };
 } // namespace aquabox

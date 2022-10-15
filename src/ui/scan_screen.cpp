@@ -23,6 +23,7 @@
 #include <libfb_globals.h>
 #include <micro_clients/network_manager.h>
 #include <micro_clients/settings.h>
+#include <micro_clients/cloud.h>
 #include <boost/asio.hpp>
 #include <pngprovider.h>
 #include <sprite.h>
@@ -62,6 +63,9 @@ std::string configurationData()
     configurationDataString += ";";
 
     configurationDataString += std::to_string(16);
+
+    configurationDataString += std::to_string(Singleton<ICloud>::i()->connected() ? 1 : 0);
+
     return configurationDataString;
 }
 

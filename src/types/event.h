@@ -1,6 +1,6 @@
 /*
  * AquaBox
- * Copyright (C) 2019  Eduard Sargsyan
+ * Copyright (C) 2019-2022  Eduard Sargsyan
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,6 +19,7 @@
 #pragma once
 
 #include <nlohmann/json.hpp>
+#include <types/base_stream_message.h>
 
 namespace aquabox
 {
@@ -31,21 +32,25 @@ namespace aquabox
             }
         }
     */
-    class Event
+    class Event: public BaseStreamMessage
     {
     public:
         Event();
         void setSender(std::string sender, std::string _class);
         const std::string& sender() const;
-        void setData(const nlohmann::json& data);
+        const std::string& clazz() const;
+        inline void setData(const nlohmann::json& data) { m_data = data; }
+        const nlohmann::json& data() const { return m_data; }
         void setPropertiesUpdate(const nlohmann::json& update);
+        void setProperties(const nlohmann::json& update);
         bool hasProperty(const std::string& key) const;
         template<typename T>
         T getProperty(const std::string key)
         {
             return m_properties.at(key).get<T>();
         }
-        nlohmann::json serialize() const;
+        const nlohmann::json& properties() const;
+
 
     private:
         std::string m_sender;
@@ -53,4 +58,7 @@ namespace aquabox
         nlohmann::json m_data;
         nlohmann::json m_properties;
     };
+
+    void to_json(nlohmann::json& j, const Event& req);
+    void from_json(const nlohmann::json& j, Event& req);
 } // namespace aquabox

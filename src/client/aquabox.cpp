@@ -17,7 +17,7 @@
  */
 
 #include "aquabox.h"
-#include "cloud.h"
+#include "cloud_stream.h"
 #include "global_timer.h"
 #include "lock_file.h"
 #include "options.h"

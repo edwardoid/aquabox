@@ -29,7 +29,7 @@ namespace aquabox
     class CommandHandler
     {
     public:
-        virtual void runCommand(Command cmd, std::function<void(const Command&, bool)>&& onResult) = 0;
+        virtual void runCommand(const CommandRequest& cmd, std::function<void(const CommandResult&, bool)>&& onResult) = 0;
     };
 
     class RemoteCommandHandler : public CommandHandler
@@ -37,7 +37,7 @@ namespace aquabox
     public:
         virtual bool isConnected() const = 0;
         virtual bool connect() const = 0;
-        virtual bool send(const Command&) = 0;
+        virtual bool send(const CommandRequest&) = 0;
     };
 
     class RemoteAquabox : public RemoteCommandHandler

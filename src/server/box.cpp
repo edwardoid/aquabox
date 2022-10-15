@@ -1,5 +1,22 @@
+/*
+ * AquaBox
+ * Copyright (C) 2019-2022  Eduard Sargsyan
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
 #include "box.h"
-#include "application_connection.h"
 #include "boxes_manager.h"
 #include "database.h"
 #include "telegram_bot.h"
@@ -9,7 +26,7 @@
 
 using namespace aquabox;
 
-Box::Box(const std::string& id, ResultsMap<Command>& results)
+Box::Box(const std::string& id, ResultsMap<BoxResponse>& results)
     : BoxConnection(id, results)
 {
     UpdateReceived.connect([this](const nlohmann::json& event) {
@@ -17,31 +34,6 @@ Box::Box(const std::string& id, ResultsMap<Command>& results)
             Singleton<TelegramBot>::i()->updateReceived(*this, event);
         }
     });
-}
-
-std::vector<std::shared_ptr<ApplicationConnection>> Box::connections() const
-{
-    return m_applications;
-}
-
-void Box::addConnection(std::shared_ptr<ApplicationConnection> connection)
-{
-    LOG_INFO << "Addind application connection";
-    m_applications.push_back(connection);
-}
-
-void Box::removeConnection(std::shared_ptr<ApplicationConnection> connection)
-{
-    LOG_INFO << "Removing application connection";
-    auto p = std::find(m_applications.begin(), m_applications.end(), connection);
-    if (p != m_applications.end())
-        m_applications.erase(p);
-}
-
-void Box::removeAllConnections()
-{
-    LOG_INFO << "Removing all application connections";
-    m_applications.clear();
 }
 
 std::set<int64_t> Box::telegramChats() const

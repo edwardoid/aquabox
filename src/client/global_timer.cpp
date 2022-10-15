@@ -17,7 +17,7 @@
  */
 
 #include "global_timer.h"
-#include "cloud.h"
+#include "cloud_stream.h"
 #include "options.h"
 #include <common/log.h>
 #include <common/singleton.h>

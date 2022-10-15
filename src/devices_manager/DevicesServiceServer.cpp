@@ -97,6 +97,8 @@ bool DevicesServiceServer::init()
         return false;
     }
 
+    LOG_DEBUG << "Looking for devices in " << root;
+
     for (auto const& file : boost::filesystem::directory_iterator(root)) {
         if (boost::filesystem::is_regular_file(file)) {
             auto p = boost::filesystem::path(file);

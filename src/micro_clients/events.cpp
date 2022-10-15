@@ -1,6 +1,6 @@
 /*
  * AquaBox
- * Copyright (C) 2019  Eduard Sargsyan
+ * Copyright (C) 2019-2022  Eduard Sargsyan
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,6 +19,8 @@
 #include "events.h"
 #include "micro_service.h"
 #include "settings.h"
+#include <common/waitable_queue.h>
+#include <common/calltime.h>
 #include <events.grpc.pb.h>
 #include <grpcpp/server_builder.h>
 #include <memory>
@@ -35,7 +37,16 @@ namespace
 {
     services::MicroService<services::EventsBus>& client()
     {
-        static services::MicroService<services::EventsBus> c(Singleton<ISettings>::i()->port(services::EventsBus::service_full_name()));
+        int p = 0;
+        do
+        {
+            p = Singleton<ISettings>::i()->port(services::EventsBus::service_full_name());
+
+            while(p == 0)
+                std::this_thread::sleep_for(std::chrono::seconds(3));
+        } while(p == 0);
+        
+        static services::MicroService<services::EventsBus> c(p);
         return c;
     }
 
@@ -79,10 +90,7 @@ private:
         {
             auto handlers = m_callbacks.equal_range(request->sender());
             std::shared_ptr<Event> e = std::make_shared<Event>();
-            auto json = nlohmann::json::parse(request->event());
-            e->setSender(json["sender"], json["class"]);
-            e->setData(json["data"]);
-            e->setPropertiesUpdate(json["props"]);
+            *e =  nlohmann::json::parse(request->event());
             LOG_INFO << "Got event from " << request->sender();
             while (handlers.first != handlers.second) {
                 auto cb = handlers.first->second;
@@ -100,9 +108,11 @@ private:
     };
 
 private:
+    std::thread m_producer;
     std::thread m_consumer;
     ConsumerService m_service;
     std::unordered_map<std::string, std::function<void(const std::shared_ptr<Event>)>> m_handlers;
+    WaitableQueue<services::EventData> m_events;
 };
 
 boost::asio::thread_pool EventsBaseImpl::ConsumerService::m_pool;
@@ -116,6 +126,23 @@ EventsBaseImpl::EventsBaseImpl()
         std::unique_ptr<grpc::Server> server(builder.BuildAndStart());
         server->Wait();
     });
+
+    m_producer = std::thread([this]() {
+        while(1) {
+            LOG_DEBUG << "Waiting for next event to publish";
+            size_t pending = 0;
+            services::EventData e = m_events.pop(&pending);
+            LOG_DEBUG << "Scheduling event. Pending " << pending;
+            google::protobuf::Empty v;
+            if (!client().call(&services::EventsBus::Stub::Notify, e, &v).ok()) {
+                LOG_ERROR << "Can't publish update " << e.event();
+            }
+            else
+            {
+                LOG_DEBUG << "Event sent " << e.event();
+            }
+        }
+    });
 }
 
 void EventsBaseImpl::subscribe(const std::string& sender, std::function<void(const std::shared_ptr<Event>)>&& handler)
@@ -127,11 +154,16 @@ void EventsBaseImpl::subscribe(const std::string& sender, std::function<void(con
 
     google::protobuf::Empty e;
 
-    if (client().call(&services::EventsBus::Stub::Subscribe, id, &e).ok()) {
-        m_service.add(sender, handler);
-    }
-    else {
-        LOG_ERROR << "Can't subscribe for events";
+    while(1) {
+        if (client().call(&services::EventsBus::Stub::Subscribe, id, &e).ok()) {
+            m_service.add(sender, handler);
+            LOG_INFO << "Subscribed!";
+            break;
+        }
+        else {
+            LOG_ERROR << "Can't subscribe for events";
+        }
+        std::this_thread::sleep_for(std::chrono::seconds(5));
     }
 }
 
@@ -139,12 +171,10 @@ void EventsBaseImpl::notify(const std::shared_ptr<const Event> event)
 {
     services::EventData e;
     e.set_sender(Application::app()->identifier());
-    e.set_event(event->serialize().dump());
+    nlohmann::json msg = *event;
+    e.set_event(msg.dump());
 
-    google::protobuf::Empty v;
-    if (!client().call(&services::EventsBus::Stub::Notify, e, &v).ok()) {
-        LOG_ERROR << "Can't publish update " << event->serialize().dump();
-    }
+    m_events.push(e);
 }
 
 template<>

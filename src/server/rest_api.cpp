@@ -27,14 +27,14 @@
 using namespace aquabox::v1;
 using namespace aquabox;
 
-Command createCommand(Operation operation,
+CommandRequest createCommand(Operation operation,
                       Web::Request request,
                       bool body,
                       const std::unordered_map<std::string, std::string>& params = std::unordered_map<std::string, std::string>())
 {
     static std::atomic_int seqNum;
-    Command command;
-    command.sequenceId = seqNum.fetch_add(1);
+    CommandRequest command;
+    command.rqid = seqNum.fetch_add(1);
     command.setOperation(operation);
     auto boxId = request->header.find("boxId");
     if (boxId != request->header.end()) {
@@ -43,7 +43,7 @@ Command createCommand(Operation operation,
     command.setParameters(params);
     if (body) {
         try {
-            command.setRequest(nlohmann::json::parse(request->content.string()));
+            command.setData(nlohmann::json::parse(request->content.string()));
         }
         catch (nlohmann::json::parse_error e) {
             LOG_ERROR << "Can't parse request from application: " << e.what();
@@ -55,7 +55,7 @@ Command createCommand(Operation operation,
     return command;
 }
 
-void execCommand(Command& cmd, Web::Response response, Web::Headers& headers)
+void execCommand(CommandRequest& cmd, Web::Response response, Web::Headers& headers)
 {
     static const std::string mixedBoxId = "{ \"error\": \"Missed boxId\" }";
     if (!cmd.hasParameter("boxId")) {
@@ -76,10 +76,10 @@ void execCommand(Command& cmd, Web::Response response, Web::Headers& headers)
         return;
     }
 
-    box->runCommand(cmd);
+    BoxResponse rsp = box->runCommandAndWait(cmd);
 
     SimpleWeb::StatusCode code = SimpleWeb::StatusCode::server_error_not_implemented;
-    switch (cmd.result()) {
+    switch (rsp.data.error.result()) {
     case Result::BadCommand: {
         code = SimpleWeb::StatusCode::client_error_bad_request;
         break;
@@ -105,11 +105,19 @@ void execCommand(Command& cmd, Web::Response response, Web::Headers& headers)
         code = SimpleWeb::StatusCode::success_ok;
     }
 
-    if (cmd.response().is_null()) {
-        response->write(code, headers);
+
+    if (rsp.type == ApiMessageType::Error)
+    {
+        response->write(code, as_json(rsp.data.error).dump(4), headers);
     }
-    else {
-        response->write(code, cmd.response().dump(4), headers);
+    else
+    {
+        if (rsp.data.ok.data().is_null()) {
+            response->write(code, headers);
+        }
+        else {
+            response->write(code, as_json(rsp.data.ok).dump(4), headers);
+        }
     }
 }
 
@@ -207,6 +215,6 @@ void REST::ListNetworks(const Route& route, Web::Request& request, Web::Response
 
 void REST::ConnectToWiFi(const Route& route, Web::Request& request, Web::Response& response, Web::Headers& headers)
 {
-    Command cmd = createCommand(Operation::ConnectToWiFi, request, true);
+    auto cmd = createCommand(Operation::ConnectToWiFi, request, true);
     execCommand(cmd, response, headers);
 }

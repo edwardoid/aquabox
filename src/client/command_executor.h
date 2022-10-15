@@ -18,32 +18,53 @@
 
 #pragma once
 
-#include <common/command.h>
+#include <types/command.h>
+#include <types/error_response.h>
 
 namespace aquabox
 {
+    struct ExecutionResult: public BaseStreamResponse
+    {
+        ExecutionResult() = default;
+        ExecutionResult(const ExecutionResult& src)
+            : BaseStreamResponse(static_cast<const BaseStreamResponse&>(src))
+        {
+            this->ok = src.ok;
+            this->fail = src.fail;
+        }
+        CommandResult ok;
+        ErrorResponse fail;
+        ExecutionResult& operator = (const ErrorResponse& e) { fail = e; return *this; }
+        ExecutionResult& operator = (const CommandResult& r) { fail.setResult(Result::Ok); ok = r; return *this; }
+        operator bool() const
+        {
+            return fail.result() == Result::Ok;
+        }
+    };
     class CommandExecutor
     {
     public:
-        bool exec(const Command& cmd);
+        ExecutionResult exec(const CommandRequest& cmd);
 
     private:
-        bool GetStatus();
-        bool GetDevices();
-        bool GetDevice();
-        bool UpdateDevice();
-        bool GetRules();
-        bool GetRule();
-        bool CreateOrUpdateRule(bool update);
-        bool DeleteRule();
-        bool DeviceRules();
-        bool SupportedRepeatTimeouts();
-        bool SetValue();
-        bool ScanWiFiNetworks();
-        bool ListNetworks();
-        bool ConnectToWiFi();
+        Result GetStatus();
+        Result GetDevices();
+        Result GetDevice();
+        Result UpdateDevice();
+        Result GetRules();
+        Result GetRule();
+        Result CreateOrUpdateRule(bool update);
+        Result DeleteRule();
+        Result DeviceRules();
+        Result SetValue();
+        Result ScanWiFiNetworks();
+        Result ListNetworks();
+        Result ConnectToWiFi();
 
     private:
-        Command m_cmd;
+        BaseCommand m_cmd;
+        ExecutionResult m_res;
     };
+
+    void to_json(nlohmann::json& j, const ExecutionResult& req);
 } // namespace aquabox

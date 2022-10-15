@@ -17,18 +17,35 @@
  */
 
 #include "cloud_stream.h"
-#include "cloud.h"
+#include <types/serial.h>
+#include <types/event.h>
+#include <types/command.h>
+#include <types/error_response.h>
+#include "command_executor.h"
 #include <common/log.h>
 #include <common/singleton.h>
+#include <micro_clients/settings.h>
 
 using namespace aquabox;
 
-CloudStream::CloudStream(const std::string& url)
-    : SimpleWeb::SocketClient<SimpleWeb::WS>(url)
-    , m_url(url)
+std::string CloudStream::url()
+{
+    std::stringstream ss;
+    ss  << Singleton<ISettings>::i()->get(Settings::Keys::CLOUD_URL, Settings::Defaults::CLOUD_URL)
+        << ":"
+        << Singleton<ISettings>::i()->get(Settings::Keys::CLOUD_PORT, Settings::Defaults::CLOUD_WS_PORT)
+        << "/hw/api/v1/stream/"
+        << SERIAL_NUMBER
+        << "/commands";
+
+    return ss.str();
+}
+
+CloudStream::CloudStream()
+    : SimpleWeb::SocketClient<SimpleWeb::WS>(url())
     , m_status(Status::Detached)
 {
-    LOG_DEBUG << "Creating stream for " << url;
+    LOG_DEBUG << "Creating stream for " << url();
     on_open = [this](std::shared_ptr<Connection> conenction) { onOpen(connection); };
 
     on_message = [this](std::shared_ptr<Connection> connection, std::shared_ptr<InMessage> message) { onMessage(connection, message); };
@@ -51,6 +68,34 @@ CloudStream::CloudStream(const std::string& url)
     }));
 }
 
+void CloudStream::checkIfRegistered()
+{
+    if (m_status < Status::Attaching)
+    {
+        attach();
+    }
+}
+
+bool CloudStream::isRegistered()
+{
+    return m_status == Status::Attached;
+}
+
+void CloudStream::postUpdate(std::shared_ptr<Event> event)
+{
+    if (m_status == Status::Attached)
+    {
+        nlohmann::json json;
+        json = *event;
+        sendMessage(json);
+    }
+    else 
+    {
+        LOG_WARNING << "Cloud stream is not attached yet";
+    }
+    
+}
+
 void CloudStream::attach()
 {
     m_status = Status::Attaching;
@@ -65,9 +110,8 @@ CloudStream::~CloudStream()
 void CloudStream::onOpen(std::shared_ptr<CloudStream::Connection> connection)
 {
     m_connection = connection;
-    LOG_DEBUG << "Attached to stream " << m_url;
+    LOG_DEBUG << "Attached to stream";
     m_status = Status::Attached;
-    Singleton<Cloud>::i()->isRegistered = true;
 }
 
 void CloudStream::onMessage(std::shared_ptr<CloudStream::Connection> connection, std::shared_ptr<CloudStream::InMessage> message)
@@ -78,8 +122,7 @@ void CloudStream::onMessage(std::shared_ptr<CloudStream::Connection> connection,
     try {
         messageString = message->string();
         const nlohmann::json json = nlohmann::json::parse(messageString);
-        auto reply = messageReceived(json);
-        connection->send(reply.dump(4));
+        messageReceived(json);
     }
     catch (const std::exception& ex) {
         LOG_ERROR << "Invalid message from cloud \"" << messageString << "\" :" << ex.what();
@@ -91,7 +134,7 @@ void CloudStream::onMessage(std::shared_ptr<CloudStream::Connection> connection,
 
 void CloudStream::onClose(std::shared_ptr<CloudStream::Connection> connection, int status, const std::string& reason)
 {
-    LOG_INFO << "Closed connection to " << m_url << " because: " << reason << "(" << status << ")";
+    LOG_INFO << "Closed connection to cloud because: " << reason << "(" << status << ")";
     m_status = Status::Detached;
     m_connection = nullptr;
     SimpleWeb::SocketClient<SimpleWeb::WS>::stop();
@@ -99,11 +142,10 @@ void CloudStream::onClose(std::shared_ptr<CloudStream::Connection> connection, i
 
 void CloudStream::onError(std::shared_ptr<CloudStream::Connection>, const SimpleWeb::error_code& code)
 {
-    LOG_INFO << "Error occured in connection to " << m_url << " error code " << code.message();
+    LOG_INFO << "Error occured in connection to cloud error code " << code.message();
     m_status = Status::Detached;
     m_connection = nullptr;
     SimpleWeb::SocketClient<SimpleWeb::WS>::stop();
-    Singleton<Cloud>::i()->isRegistered = false;
 }
 
 void CloudStream::sendMessage(const nlohmann::json& message)
@@ -114,7 +156,7 @@ void CloudStream::sendMessage(const nlohmann::json& message)
     }
     catch(...)
     {
-        LOG_ERROR << "Can't sent message to stream " << m_url;
+        LOG_ERROR << "Can't sent message to the cloud stream";
         m_status = Status::Detached;
     }
 }
@@ -123,5 +165,35 @@ void CloudStream::send(const std::string data)
 {
     if (m_connection) {
         m_connection->send(data);
+    }
+}
+
+void CloudStream::messageReceived(const nlohmann::json& message)
+{
+    sendMessage(exec(message));
+}
+
+nlohmann::json CloudStream::exec(const nlohmann::json& message)
+{
+    try {
+        LOG_DEBUG << "Got command: " << message.dump(4);
+        CommandRequest cmd;
+        from_json(message, cmd);
+
+        CommandExecutor exe;
+        return as_json(exe.exec(cmd));
+    }
+    catch (nlohmann::json::parse_error err) {
+        return as_json(ErrorResponse::parseError());;
+    }
+    catch (std::exception err) {
+        ErrorResponse resp;
+        resp.setMessage("Execution failed");
+        resp.setResult(Result::ServerError);
+        resp.setDetails(err.what());
+        return as_json(resp);
+    }
+    catch (...) {
+        return as_json(ErrorResponse::unknownError());;
     }
 }

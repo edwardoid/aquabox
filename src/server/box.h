@@ -1,6 +1,6 @@
 /*
  * AquaBox
- * Copyright (C) 2019  Eduard Sargsyan
+ * Copyright (C) 2019-2022  Eduard Sargsyan
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,24 +19,14 @@
 
 #include "box_connection.h"
 #include <s2s.h>
-#include <set>
 
 namespace aquabox
 {
-    class ApplicationConnection;
-
     class Box : public BoxConnection
     {
     public:
-        Box(const std::string& id, ResultsMap<Command>& results);
+        Box(const std::string& id, ResultsMap<BoxResponse>& results);
         SignalSlot::Signal<const nlohmann::json&> UpdateReceived;
-        void addConnection(std::shared_ptr<ApplicationConnection> connection);
-        void removeConnection(std::shared_ptr<ApplicationConnection> connection);
-        void removeAllConnections();
-        std::vector<std::shared_ptr<ApplicationConnection>> connections() const;
         std::set<int64_t> telegramChats() const;
-
-    private:
-        std::vector<std::shared_ptr<ApplicationConnection>> m_applications;
     };
 } // namespace aquabox
