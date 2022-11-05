@@ -57,8 +57,9 @@ namespace aquabox
     struct BaseStreamResponse: public BaseStreamMessage
     {
         BaseStreamResponse() = default;
-        inline BaseStreamResponse(ApiMessageType t): BaseStreamMessage(t) {}
+        BaseStreamResponse(ApiMessageType t);
         uint64_t    rpid;
+        std::string boxId;
     };
     
     template<typename T>
