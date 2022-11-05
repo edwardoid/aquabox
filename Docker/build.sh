@@ -11,9 +11,14 @@ function clean_build {
     return $?
 }
 
+function prepare_env {
+    pip install conan -U
+    return $?
+}
+
 function do_build {
     CPU_COUNT=$(grep -c ^processor /proc/cpuinfo)
-    make -j$J_ARG |& tee -a build.log && \
+    make -C /build -j$J_ARG |& tee -a build.log && \
     chmod +rw -R /build |& tee -a build.log
     return $?
 }
@@ -125,6 +130,7 @@ function pack_client {
 
 cd /build
 
+prepare_env && \
 clean_build && \
 prepare_build && \
 create_version && \
