@@ -46,7 +46,7 @@ std::string configurationData()
     configurationDataString += std::to_string(Singleton<ISettings>::i()->get(Settings::Keys::STREAM_PORT, Settings::Defaults::WS_PORT));
     configurationDataString += ";";
 
-    configurationDataString += SERIAL_NUMBER;
+    configurationDataString += serial();
     configurationDataString += ";";
 
     if (Singleton<INetworkManager>::i() != nullptr)

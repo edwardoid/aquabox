@@ -35,7 +35,7 @@ std::string CloudStream::url()
         << ":"
         << Singleton<ISettings>::i()->get(Settings::Keys::CLOUD_PORT, Settings::Defaults::CLOUD_WS_PORT)
         << "/hw/api/v1/stream/"
-        << SERIAL_NUMBER
+        << serial()
         << "/commands";
 
     return ss.str();

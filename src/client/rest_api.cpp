@@ -101,7 +101,7 @@ nlohmann::json getStatusInfo(bool detailed)
 {
     nlohmann::json host({{"rest", Singleton<ISettings>::i()->get(Settings::Keys::HTTP_PORT, Settings::Defaults::REST_PORT)},
                          {"stream", Singleton<ISettings>::i()->get(Settings::Keys::STREAM_PORT, Settings::Defaults::WS_PORT)},
-                         {"serial", SERIAL_NUMBER}});
+                         {"serial", serial()}});
 
     if (detailed) {
         auto net = Singleton<INetworkManager>::i()->currentNetwork();

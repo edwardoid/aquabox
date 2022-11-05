@@ -23,5 +23,5 @@ using namespace aquabox;
 
 NetworkEvent::NetworkEvent()
 {
-    setSender(SERIAL_NUMBER, "network");
+    setSender(serial(), "network");
 }

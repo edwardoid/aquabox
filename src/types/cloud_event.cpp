@@ -23,7 +23,7 @@ using namespace aquabox;
 
 CloudEvent::CloudEvent(bool online)
 {
-    setSender(SERIAL_NUMBER, "cloud");
+    setSender(serial(), "cloud");
 
     setData({{"cloud", online}});
 

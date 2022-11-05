@@ -17,6 +17,8 @@
  */
 
 #include "base_stream_message.h"
+#include "serial.h"
+
 
 namespace aquabox {
     void to_json(nlohmann::json& j, const ApiMessageType& type)
@@ -119,6 +121,7 @@ namespace aquabox {
         }
         try {
             to_json(j, static_cast<const BaseStreamMessage&>(resp));
+            j.emplace("boxId", resp.boxId);
             j.emplace("rpid", resp.rpid);
         } catch (const nlohmann::json::exception& ex) {
 
@@ -130,6 +133,7 @@ namespace aquabox {
         try {
             from_json(j, static_cast<BaseStreamMessage&>(resp));
             resp.rpid = j["rpid"];
+            resp.boxId = j["boxId"];
         } catch (const nlohmann::json::exception& ex) {
 
         }
@@ -140,6 +144,12 @@ namespace aquabox {
 
 using namespace aquabox;
 
+
 BaseStreamMessage::BaseStreamMessage(ApiMessageType t)
     : type(t)
 {}
+
+BaseStreamResponse::BaseStreamResponse(ApiMessageType t): BaseStreamMessage(t)
+{
+    boxId = serial();
+}

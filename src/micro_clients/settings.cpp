@@ -18,6 +18,7 @@
 
 #include "settings.h"
 #include "micro_service.h"
+#include <types/serial.h>
 #include <chrono>
 #include <settings.grpc.pb.h>
 
@@ -80,7 +81,9 @@ private:
 
 SettingsImpl::SettingsImpl()
     : m_client(500500)
-{}
+{
+    set_serial(get(Settings::Keys::SERIAL, Settings::Defaults::SERIAL));
+}
 
 bool SettingsImpl::has(const std::string& key)
 {

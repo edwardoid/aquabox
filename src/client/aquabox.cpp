@@ -62,6 +62,7 @@ int AquaBox::start()
 
     const std::string severity = Singleton<ISettings>::i()->get(Settings::Keys::LOG_LEVEL,
                                                                 std::string(plog::severityToString(plog::Severity::info)));
+
     plog::init(plog::severityFromString(severity.c_str()), &m_consoleAppender);
 
     m_postUpdatesThread = std::move(std::thread([this]() { while(1) { this->postUpdate(m_pendingEvents.pop());  } }));
@@ -142,7 +143,7 @@ std::string AquaBox::configurationData() const
     configurationDataString += std::to_string(Singleton<ISettings>::i()->get(Settings::Keys::STREAM_PORT, Settings::Defaults::WS_PORT));
     configurationDataString += ";";
 
-    configurationDataString += SERIAL_NUMBER;
+    configurationDataString += serial();
     configurationDataString += ";";
 
     configurationDataString += Singleton<INetworkManager>::i()->currentNetwork().ip;
