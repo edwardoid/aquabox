@@ -70,7 +70,6 @@ namespace aquabox
 
             void postEvent(Event);
 
-            ENABLE_WS_API(Updates);
             ENABLE_WS_API(Commands);
 
         private:

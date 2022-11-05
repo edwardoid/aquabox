@@ -74,11 +74,6 @@ void API::postEvent(Event event)
     }
 }
 
-DEFINE_WS_API_IMPL(Updates)
-{
-    connection->send("Updates", Fail);
-}
-
 DEFINE_WS_API_IMPL(Commands)
 {
     nlohmann::json request;
