@@ -17,8 +17,7 @@
  */
 
 #include "rest_api.h"
-#include "box.h"
-#include "boxes_manager.h"
+#include "hardware_api.h"
 #include <types/command.h>
 #include "log.h"
 #include <atomic>
@@ -64,15 +63,9 @@ void execCommand(CommandRequest& cmd, Web::Response response, Web::Headers& head
     }
 
     static const std::string boxIsNotAvailable = "{ \"error\": \"Box is not available\" }";
-    auto box = BoxesManager::get(cmd.getParameter("boxId"), true);
+    auto box = HardwareApi::box(cmd.getParameter("boxId"));
     if (box == nullptr) {
         response->write(SimpleWeb::StatusCode::client_error_not_found, boxIsNotAvailable, headers);
-        return;
-    }
-
-    static const std::string boxIsOffline = "{ \"error\": \"Box is offline\" }";
-    if (box->empty()) {
-        response->write(SimpleWeb::StatusCode::client_error_not_found, boxIsOffline, headers);
         return;
     }
 

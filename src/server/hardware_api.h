@@ -20,26 +20,33 @@
 
 #include <iot_definitions.h>
 #include <route.h>
+#include <types/command.h>
+#include <types/event.h>
+#include <types/error_response.h>
+#include <unordered_map>
+#include "box_connection.h"
+#include "api_calls_handler.h"
 
 namespace aquabox
 {
     class HardwareApi
     {
-        HardwareApi(){};
+        HardwareApi() {};
         HardwareApi(const HardwareApi&) = delete;
         HardwareApi(HardwareApi&&) = delete;
         HardwareApi& operator=(const HardwareApi&) = delete;
         HardwareApi& operator=(HardwareApi&&) = delete;
-
     public:
-        static bool start();
-
+        static bool start(ApiCallsHandler* handler);
+        static std::shared_ptr<BoxConnection> box(const std::string& boxId);
     private:
         bool acceptConnectionFromHW(const std::string& id, std::shared_ptr<Web::WSConnection> connection);
         void setupRoutes();
-
+        
     private:
         static HardwareApi self;
+        std::unordered_map<std::string /* box id */, std::shared_ptr<BoxConnection>> m_boxes;
+        ApiCallsHandler* m_handler;
         Web::WSServer m_ws;
         Route m_url;
     };

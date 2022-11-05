@@ -21,7 +21,6 @@
 #include "database.h"
 #include "hardware_api.h"
 #include "events_queue.h"
-#include "telegram_bot.h"
 #include <common/singleton.h>
 #include <micro_clients/settings.h>
 
@@ -51,15 +50,15 @@ bool CloudService::start()
     LOG_INFO << "Starting Aquabox Cloud Service...";
 
     Singleton<EventsQueue>::i();
-
+/*
     Singleton<TelegramBot>::available = !Settings::string(Settings::Keys::TELEGRAM_BOT_API, "").empty();
     auto telegram = Singleton<TelegramBot>::i();
     if (telegram != nullptr) {
         telegram->start();
-    }
+    }*/
 
     Database::i();
 
     Singleton<ApplicationsApi>::get()->start();
-    return HardwareApi::start();
+    return HardwareApi::start(Singleton<ApplicationsApi>::get());
 }

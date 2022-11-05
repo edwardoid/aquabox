@@ -23,9 +23,8 @@
 
 using namespace aquabox;
 
-BoxConnection::BoxConnection(const std::string& id, ResultsMap<BoxResponse>& resutsMap)
-    : results(resutsMap)
-    , m_id(id)
+BoxConnection::BoxConnection(const std::string& id)
+    : m_id(id)
 {}
 
 const std::string& BoxConnection::id() const
@@ -50,12 +49,12 @@ void BoxConnection::ready(const std::string& body)
         else if (result.type == ApiMessageType::Command)
         {
             resp.data.ok = raw;
-            results.ready(resp.data.ok.rpid, resp);
+            m_results.ready(resp.data.ok.rpid, resp);
         }
         else
         {
             resp.data.error = raw;
-            results.ready(resp.data.error.rpid, resp);
+            m_results.ready(resp.data.error.rpid, resp);
         }
     }
     catch (nlohmann::json::parse_error e) {
@@ -65,34 +64,33 @@ void BoxConnection::ready(const std::string& body)
     }
 }
 
-void BoxConnection::runCommand(const CommandRequest& cmd)
+bool BoxConnection::runCommand(const CommandRequest& cmd)
 {
     nlohmann::json response = as_json(cmd);
 
     LOG_DEBUG << "Executing command\n" << response.dump();
 
-    commands->send(response.dump());
+    if (commands.expired()) {
+        return false;
+    }
+    commands.lock()->send(response.dump());
+    return true;
 }
 
 BoxResponse BoxConnection::runCommandAndWait(CommandRequest& cmd)
 {
     BoxResponse resp;
     resp.type = ApiMessageType::Error;
-    if (commands == nullptr) {
+    if (commands.expired()) {
         resp.data.error = ErrorResponse::boxIsOffline();
         resp.data.error.rpid = cmd.rqid;
         return resp;
     }
     runCommand(cmd);
-    if (!results.waitFor(cmd.rqid, resp)) {
+    if (!m_results.waitFor(cmd.rqid, resp)) {
         LOG_DEBUG << "Command execution timed out!";
         resp.data.error = ErrorResponse::boxIsOffline();
         resp.data.error.rpid = cmd.rqid;
     }
     return resp;
-}
-
-bool BoxConnection::empty() const
-{
-    return commands == nullptr;
 }

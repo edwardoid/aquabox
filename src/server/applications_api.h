@@ -20,19 +20,25 @@
 
 #include "iot_definitions.h"
 #include "rest_api.h"
+#include "api_calls_handler.h"
+#include "application_connection.h"
 #include <types/error_response.h>
+#include <set>
 
 namespace aquabox
 {
-    class ApplicationsApi
+    class ApplicationsApi: public ApiCallsHandler
     {
     public:
         void start();
-
+    public:
+        virtual bool handle(const std::string&, const CommandResult&) override;
+        virtual bool handle(const std::string&, const Event&) override;
+        virtual bool handle(const std::string&, const ErrorResponse&, uint64_t) override;
     private:
         void startWebServer();
         void startStreamServer();
-        void removeConnection(const std::string& boxId, std::shared_ptr<WSServer::Connection> connection);
+        void removeConnection(std::shared_ptr<WSServer::Connection>  connection);
     private:
         void onOpen(std::shared_ptr<WSServer::Connection> connection);
         void onMessage( std::shared_ptr<WSServer::Connection> connection,
@@ -40,7 +46,7 @@ namespace aquabox
         void onClose(   std::shared_ptr<WSServer::Connection> connection,
                         int status, const std::string& reason);
         void onError(std::shared_ptr<WSServer::Connection> connection, SimpleWeb::error_code);
-        void createConnection(std::shared_ptr<WSServer::Connection> ws, const std::string& boxId);
+        void createConnection(std::shared_ptr<WSServer::Connection> ws);
         void sendError(std::shared_ptr<WSServer::Connection> ws, const ErrorResponse& error);
     private:
         Route m_base;
@@ -49,7 +55,7 @@ namespace aquabox
         std::thread m_streamRoutine;
         std::shared_ptr<HttpServer> m_http;
         std::shared_ptr<WSServer> m_ws;
-        std::unordered_map<std::uint32_t /* id */, std::shared_ptr<WSServer::Connection>> m_connections;
+        std::map<ApplicationConnectionRawPtr, std::shared_ptr<ApplicationConnection>> m_connections;
         v1::REST RESTApi;
     };
 } // namespace aquabox

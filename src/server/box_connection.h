@@ -19,12 +19,14 @@
 #pragma once
 
 #include "results_map.h"
+#include "application_connection.h"
 #include <types/command.h>
 #include <types/error_response.h>
 #include <memory>
 #include <server_ws.hpp>
 #include <string>
 #include <unordered_map>
+#include <list>
 
 namespace aquabox
 {
@@ -48,17 +50,17 @@ namespace aquabox
     {
     public:
 
-        BoxConnection(const std::string& id, ResultsMap<BoxResponse>& results);
+        BoxConnection(const std::string& id);
         using WSServer = SimpleWeb::SocketServer<SimpleWeb::WS>;
         const std::string& id() const;
-        bool empty() const;
         void ready(const std::string& data);
-        void runCommand(const CommandRequest& cmd);
+        bool runCommand(const CommandRequest& cmd);
         BoxResponse runCommandAndWait(CommandRequest& cmd);
-        ResultsMap<BoxResponse>& results;
-        std::shared_ptr<WSServer::Connection> commands;
+        std::weak_ptr<WSServer::Connection> commands;
 
     private:
+        ResultsMap<BoxResponse> m_results;
+        std::list<ApplicationConnectionPtr> m_applications;
         std::string m_id;
     };
 } // namespace aquabox

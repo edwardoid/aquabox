@@ -17,14 +17,14 @@
  */
 
 #include "applications_api.h"
-#include "box.h"
-#include "boxes_manager.h"
 #include "database.h"
 #include "route.h"
-#include "telegram_bot.h"
 #include "command_executor.h"
+#include "hardware_api.h"
 #include <micro_clients/settings.h>
 #include <types/error_response.h>
+#include <types/event.h>
+
 
 using namespace aquabox;
 
@@ -57,7 +57,7 @@ void ApplicationsApi::startStreamServer()
     m_ws->config.port = Settings::integer(Settings::Keys::STREAM_PORT, Settings::Defaults::WS_PORT);
     LOG_INFO << "Starting websocket server " << m_ws->config.address << ":" << m_ws->config.port;
 
-    m_rpc = m_base.sub().string(":boxId").string(":appId").word("rpc");
+    m_rpc = m_base.sub().word("rpc");
 
     // Got new connection from an application
     m_ws->endpoint[m_rpc.url()].on_open = std::bind(& ApplicationsApi::onOpen,  this,
@@ -75,53 +75,29 @@ void ApplicationsApi::startStreamServer()
     m_ws->start();
 }
 
-void ApplicationsApi::removeConnection(const std::string& boxId, std::shared_ptr<WSServer::Connection> connection)
+void ApplicationsApi::removeConnection(std::shared_ptr<WSServer::Connection> connection)
 {
-    auto box = BoxesManager::get(boxId);
-    if (box == nullptr) {
-        LOG_ERROR << "Can't remove connection to box " << boxId << " because it is missed";
-        return;
-    }
-
-    auto pos = std::find_if(m_connections.begin(), m_connections.end(), [connection](auto& c)
-    {
-        return c.second == connection;
-    });
-    if (pos != m_connections.end()) {
-        m_connections.erase(pos);
-        LOG_INFO << "Removing application connection " << pos->first;
-    }
+    m_connections.erase(connection.get());
+    LOG_INFO << "Removing application connection " << connection->remote_endpoint().address().to_string();
 }
 
-void ApplicationsApi::createConnection(std::shared_ptr<WSServer::Connection> ws, const std::string& boxId)
+void ApplicationsApi::createConnection(std::shared_ptr<WSServer::Connection> connection)
 {
     static std::atomic_uint32_t id(0);
-    auto box = BoxesManager::get(boxId, true);
-    m_connections.insert({ id.fetch_add(1),  ws});
-    LOG_INFO << "Got new application connection. Assigned " << id.load();
+    id.fetch_add(1);
+    LOG_INFO << "Got new application connection " << connection->remote_endpoint().address().to_string();
 }
 
 void ApplicationsApi::onOpen(std::shared_ptr<WSServer::Connection> connection)
 {
-        auto params = m_rpc.extract(connection->path);
-        auto boxId = params[":boxId"];
-        auto appId = params[":appId"];
-        LOG_INFO << "Connection opened from " << connection->remote_endpoint().address().to_string() << " to box " << boxId
-                 << " by application " << params["appId"];
-        if (!Database::i().isApplicationAuthorized(appId, boxId)) {
+        LOG_INFO << "Connection opened from application";
+        if (!Database::i().isApplicationRegistered("testDev")) {
             nlohmann::json msg;
             aquabox::to_json(msg, ErrorResponse::connectionRejected());
             connection->send(msg.dump());
             return;
         }
-        if (BoxesManager::get(boxId, false) == nullptr) {
-            nlohmann::json msg;
-            aquabox::to_json(msg, ErrorResponse::boxIsOffline());
-            connection->send(msg.dump());
-            return;
-        }
-        LOG_INFO << "Application " << appId << " is authorized for box " << boxId;
-        createConnection(connection, boxId);
+        createConnection(connection);
     }
 
 void ApplicationsApi::onMessage(std::shared_ptr<WSServer::Connection> connection,
@@ -132,11 +108,22 @@ void ApplicationsApi::onMessage(std::shared_ptr<WSServer::Connection> connection
     try {
         request = nlohmann::json::parse(message->string());
     }
-    catch (nlohmann::json::parse_error& e) {
+    catch (const nlohmann::json::parse_error& e) {
         LOG_ERROR << "Can't parse command: " << e.what();
         sendError(connection, ErrorResponse::parseError());
         return;
     }
+    catch (const std::exception& e) {
+        LOG_ERROR << "General error: " << e.what();
+        sendError(connection, ErrorResponse::parseError());
+        return;
+    }
+    catch (...) {
+        LOG_ERROR << "Unknown error";
+        sendError(connection, ErrorResponse::parseError());
+        return;
+    }
+
 
     auto rqid = request.find("rqid");
     if (rqid == request.end()) {
@@ -169,7 +156,6 @@ void ApplicationsApi::onMessage(std::shared_ptr<WSServer::Connection> connection
         return;
     }
 
-    
     CommandRequest command = request;
 
     std::string boxId = command.getParameter(":boxId");
@@ -177,7 +163,7 @@ void ApplicationsApi::onMessage(std::shared_ptr<WSServer::Connection> connection
     {
         LOG_ERROR << "BoxId is empty";
         sendError(connection, ErrorResponse::boxIdMissed());
-        return;
+        return; 
     }
 
     std::string appId = command.getParameter(":appId");
@@ -188,36 +174,44 @@ void ApplicationsApi::onMessage(std::shared_ptr<WSServer::Connection> connection
         return;
     }
 
-    std::shared_ptr<Box> box = BoxesManager::get(boxId);
-
-    BoxResponse rsp = box->runCommandAndWait(command);
-
-    if (rsp.type == ApiMessageType::Error)
+    if(!Database::i().wasProduced(boxId))
     {
-        connection->send(as_json(rsp.data.error).dump(4), Fail);
+        LOG_INFO << "Authorization failed for " << appId << " on " << boxId;
+        sendError(connection, ErrorResponse::authorizationFailed());
+        return;
+    }
+
+    auto c = m_connections.find(connection.get());
+    if (m_connections.end() == c)
+    {
+        m_connections[connection.get()] = std::make_shared<ApplicationConnection>(connection);
+    }
+
+    if (command.operation() == Operation::SubscribeToBox)
+    {
+        m_connections[connection.get()]->subscribe(boxId);
+        CommandResult result = CommandResult::createResult(command);
+        result.appendData("cloud_available", HardwareApi::box(boxId) != nullptr);
+        nlohmann::json j;
+        to_json(j, result);
+        connection->send(j.dump());
     }
     else
-    {
-        connection->send(as_json(rsp.data.ok).dump(4), Fail);
-    }
+        m_connections[connection.get()]->run(command);
 }
 
 void ApplicationsApi::onClose(  std::shared_ptr<WSServer::Connection> connection,
                                 int status, const std::string& reason)
 {
     LOG_INFO << "Closed connection from " << connection->remote_endpoint().address().to_string();
-    auto params = m_rpc.extract(connection->path);
-    auto boxId = params[":boxId"];
-    removeConnection(boxId, connection);
+    removeConnection(connection);
 }
 
 void ApplicationsApi::onError(std::shared_ptr<WSServer::Connection> connection, SimpleWeb::error_code)
 {
     LOG_INFO << "Connection from " << connection->remote_endpoint().address().to_string() << " to " << connection->path
                 << " closed due error.";
-    auto params = m_rpc.extract(connection->path);
-    auto boxId = params[":boxId"];
-    removeConnection(boxId, connection);
+    removeConnection(connection);
 }
 
 void ApplicationsApi::sendError(std::shared_ptr<WSServer::Connection> ws, const ErrorResponse& error)
@@ -225,4 +219,34 @@ void ApplicationsApi::sendError(std::shared_ptr<WSServer::Connection> ws, const 
     nlohmann::json j;
     to_json(j, error);
     ws->send(j.dump());
+}
+
+bool ApplicationsApi::handle(const std::string& boxId, const CommandResult& cmd)
+{
+    for(const auto& ad : m_connections)
+    {
+        if(ad.second->handle(boxId, cmd))
+            return true;
+    }
+    return false;
+}
+
+bool ApplicationsApi::handle(const std::string& boxId, const Event& e)
+{
+    for(const auto& ad : m_connections)
+    {
+        if(ad.second->handle(boxId, e))
+            return true;
+    }
+    return false;
+}
+
+bool ApplicationsApi::handle(const std::string& boxId, const ErrorResponse& err, uint64_t rpId)
+{
+    for(const auto& ad : m_connections)
+    {
+        if(ad.second->handle(boxId, err, rpId))
+            return true;
+    }
+    return false;
 }
