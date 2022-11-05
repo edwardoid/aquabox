@@ -30,6 +30,7 @@ namespace aquabox
     public:
         static Database& i();
         bool wasProduced(const std::string& id);
+        bool isApplicationRegistered(const std::string& app);
         bool isApplicationAuthorized(const std::string& app, const std::string& box);
         void setConnectedApps(const std::string& id, const std::vector<std::string>& appId);
         void setStreamAvailable(const std::string& id, const std::string& stream, bool available);

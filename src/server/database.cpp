@@ -97,6 +97,11 @@ bool Database::wasProduced(const std::string& id)
     return res;
 }
 
+bool Database::isApplicationRegistered(const std::string& app)
+{
+    return true;
+}
+
 bool Database::isApplicationAuthorized(const std::string& app, const std::string& box)
 {
     bool res = (bool) (m_aquabox[Settings::string(Settings::Keys::HW_COLLECTION_NAME, Settings::Defaults::HW_COLLECTION_NAME)].find_one(
