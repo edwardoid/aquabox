@@ -20,6 +20,7 @@
 
 #include <nlohmann/json.hpp>
 #include <types/base_stream_message.h>
+#include <types/serial.h>
 
 namespace aquabox
 {
@@ -35,7 +36,9 @@ namespace aquabox
     class Event: public BaseStreamMessage
     {
     public:
-        Event();
+        Event(const std::string& boxId = serial());
+        const std::string& boxId() const { return m_boxId; }
+        inline void setBoxId(const std::string& boxId) { m_boxId = boxId; }
         void setSender(std::string sender, std::string _class);
         const std::string& sender() const;
         const std::string& clazz() const;
@@ -51,8 +54,10 @@ namespace aquabox
         }
         const nlohmann::json& properties() const;
 
-
+        static Event cameOnline(const std::string& boxId);
+        static Event wentOffline(const std::string& boxId);
     private:
+        std::string m_boxId;
         std::string m_sender;
         std::string m_class;
         nlohmann::json m_data;

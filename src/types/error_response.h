@@ -46,6 +46,7 @@ namespace aquabox
         static const ErrorResponse& rqidMissed();
         static const ErrorResponse& requestIsNotCommand();
         static const ErrorResponse& boxIdMissed();
+        static const ErrorResponse& authorizationFailed();
         static const ErrorResponse& boxIsOffline();
         static const ErrorResponse& appIdIdMissed();
         static const ErrorResponse& rqidWrongType();

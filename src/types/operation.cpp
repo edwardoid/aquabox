@@ -71,7 +71,7 @@ void to_json(nlohmann::json& j, const Operation& o)
         case Operation::ConnectToWiFi:      { j = "connect";            break; }
         case Operation::Set:                { j = "set";                break; }
         case Operation::Call:               { j = "call";               break; }
-        case Operation::SubscribeToBox:     { j = "subsribe_to_box";    break; }
+        case Operation::SubscribeToBox:     { j = "subscribe_to_box";   break; }
     }
 }
 
@@ -95,7 +95,7 @@ void from_json(const nlohmann::json& j, Operation& o)
             {"networks", Operation::WiFiNetworks},
             {"connect", Operation::ConnectToWiFi},
             {"set", Operation::Set},
-            {"subsribe_to_box", Operation::SubscribeToBox}
+            {"subscribe_to_box", Operation::SubscribeToBox}
         });
         o = values.at(v);
     } catch (const std::out_of_range& ex) {

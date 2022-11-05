@@ -27,9 +27,12 @@ namespace aquabox
     {
     public:
         BaseCommand() = default;
+        const BaseCommand& operator = (const BaseCommand&);
         void setOperation(Operation op);
         Operation operation() const;
         inline void setData(const nlohmann::json& data) { m_data = data; }
+        template<typename T>
+        void appendData(const std::string& key, const T& value) { m_data[key] = value; }
         const nlohmann::json& data() const { return m_data; }
         void setParameters(const std::unordered_map<std::string, std::string>& params);
         const std::unordered_map<std::string, std::string>& parameters() const;
@@ -50,6 +53,7 @@ namespace aquabox
     struct CommandResult:  public BaseCommand, public BaseStreamResponse
     {
         CommandResult(): BaseStreamResponse(ApiMessageType::Command) {}
+        static CommandResult createResult(const CommandRequest& req);
     };
 
     void to_json(nlohmann::json& j, const BaseCommand& bc);

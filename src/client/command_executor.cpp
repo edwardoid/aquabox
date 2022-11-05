@@ -56,6 +56,10 @@ ExecutionResult CommandExecutor::exec(const CommandRequest& cmd)
     m_cmd = cmd;
     Result ok = Result::Ok;
     switch (cmd.operation()) {
+    case Operation::SubscribeToBox: {
+        ok = Subscribe();
+        break;
+    }
     case Operation::GetStatus: {
         ok = GetStatus();
         break;
@@ -118,6 +122,7 @@ ExecutionResult CommandExecutor::exec(const CommandRequest& cmd)
     }
     }
 
+    m_res.ok.setParameters(m_cmd.parameters());
     m_res.fail.setResult(ok);
 
     if (m_res)
@@ -127,11 +132,34 @@ ExecutionResult CommandExecutor::exec(const CommandRequest& cmd)
     return m_res;
 }
 
+Result CommandExecutor::Subscribe()
+{
+    nlohmann::json host({{"rest", Singleton<ISettings>::i()->get(Settings::Keys::HTTP_PORT, Settings::Defaults::REST_PORT)},
+                         {"stream", Singleton<ISettings>::i()->get(Settings::Keys::STREAM_PORT, Settings::Defaults::WS_PORT)},
+                         {"serial", serial() }});
+
+    auto network = Singleton<INetworkManager>::i()->currentNetwork();
+    host["network"] = nlohmann::json(
+        {{"ssid", network.ssid}, {"ip", network.ip}, {"internet", Singleton<INetworkManager>::i()->hasInternetConnection()}});
+
+    host["host"] = boost::asio::ip::host_name();
+
+    host["config"] = Singleton<AquaBox>::get()->configurationData();
+
+    auto cloud = Singleton<Cloud>::i();
+    bool isRegistered = cloud == nullptr ? false : (bool) cloud->isRegistered();
+
+    const nlohmann::json data({{"aquabox", host}, {"status", "online"}, {"registered", isRegistered}});
+    Singleton<AquaBox>::i()->scheduleUpdate(std::make_shared<Event>(Event::cameOnline(serial())));
+    m_res.ok.setData(data);
+    return Result::Ok;
+}
+
 Result CommandExecutor::GetStatus()
 {
     nlohmann::json host({{"rest", Singleton<ISettings>::i()->get(Settings::Keys::HTTP_PORT, Settings::Defaults::REST_PORT)},
                          {"stream", Singleton<ISettings>::i()->get(Settings::Keys::STREAM_PORT, Settings::Defaults::WS_PORT)},
-                         {"serial", SERIAL_NUMBER}});
+                         {"serial", serial()}});
 
     auto network = Singleton<INetworkManager>::i()->currentNetwork();
     host["network"] = nlohmann::json(

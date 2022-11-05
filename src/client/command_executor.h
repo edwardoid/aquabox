@@ -47,6 +47,7 @@ namespace aquabox
         ExecutionResult exec(const CommandRequest& cmd);
 
     private:
+        Result Subscribe();
         Result GetStatus();
         Result GetDevices();
         Result GetDevice();

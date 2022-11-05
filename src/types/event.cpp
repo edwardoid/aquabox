@@ -17,6 +17,7 @@
  */
 
 #include "event.h"
+#include <types/serial.h>
 
 namespace aquabox
 {
@@ -24,6 +25,7 @@ namespace aquabox
     {
         to_json(j, (const BaseStreamMessage&) event);
         try {
+            j.emplace("boxId", event.boxId());
             j.emplace("sender", event.sender());
             j.emplace("class", event.clazz());
 
@@ -42,6 +44,7 @@ namespace aquabox
         from_json(j, (BaseStreamMessage&) event);
         try {
             event.setSender(j["sender"], j["class"]);
+            event.setBoxId(j["boxId"]);
             if (j.count("data"))
                 event.setData(j["data"]);
             if (j.count("properties"))
@@ -54,8 +57,9 @@ namespace aquabox
 
 using namespace aquabox;
 
-Event::Event()
+Event::Event(const std::string& boxId)
     : m_properties(nlohmann::json::object())
+    , m_boxId(boxId)
 {
     type = ApiMessageType::Event;
 }
@@ -96,4 +100,26 @@ bool Event::hasProperty(const std::string& key) const
 const nlohmann::json& Event::properties() const
 {
     return m_properties;
+}
+
+Event Event::cameOnline(const std::string& boxId)
+{
+    Event event;
+    event.setBoxId(boxId);
+    event.setSender(boxId, "aquabox");
+    event.setData({
+        { "available", true }
+    });
+    return event;
+}
+
+Event Event::wentOffline(const std::string& boxId)
+{
+    Event event;
+    event.setBoxId(boxId);
+    event.setSender(boxId, "aquabox");
+    event.setData({
+        { "available", false }
+    });
+    return event;
 }

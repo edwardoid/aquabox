@@ -77,6 +77,15 @@ namespace aquabox
 
 using namespace aquabox;
 
+
+const BaseCommand& BaseCommand::operator = (const BaseCommand& src)
+{
+    m_operation = src.m_operation;
+    m_params = src.m_params;
+    m_data = src.m_data;
+    return *this;
+}
+
 void BaseCommand::setParameters(const std::unordered_map<std::string, std::string>& params)
 {
     for (auto p : params) {
@@ -118,4 +127,12 @@ void BaseCommand::setOperation(Operation op)
 Operation BaseCommand::operation() const
 {
     return m_operation;
+}
+
+CommandResult CommandResult::createResult(const CommandRequest& req)
+{
+    CommandResult res;
+    (BaseCommand&)  res = (const BaseCommand&) req;
+    res.rpid = req.rqid;
+    return res;
 }

@@ -131,6 +131,12 @@ const ErrorResponse& ErrorResponse::boxIdMissed()
     return err;
 }
 
+const ErrorResponse& ErrorResponse::authorizationFailed()
+{
+    static ErrorResponse err(Result::AccessDenied, "Authorization faied", "This application is not authorized on specified box");
+    return err;
+}
+
 const ErrorResponse& ErrorResponse::boxIsOffline()
 {
     static ErrorResponse err(Result::NotFound, "Aquabox is offline", "Specified client is not online(yet)");
