@@ -35,7 +35,7 @@ const std::string& ServerAquaboxConnection::id() const
 }
 */
 
-void ServerAquaboxConnection::runCommand(Command cmd, std::function<void(const Command&, bool)>&& onResult)
+void ServerAquaboxConnection::runCommand(const CommandRequest& cmd, std::function<void(const CommandResult&, bool)>&& onResult)
 {
     static std::string baseUrl;
     if (baseUrl.empty()) {
@@ -48,26 +48,27 @@ void ServerAquaboxConnection::runCommand(Command cmd, std::function<void(const C
     // Asynchronous request example
     client.request("GET",
                    "/api/v1/devices",
-                   cmd.responseJson().dump(),
+                   as_json(cmd).dump(),
                    {{"boxId", m_id}, {"appId", "aquaboxTgBot"}},
                    [cmd, onResult](std::shared_ptr<SimpleWeb::Client<SimpleWeb::HTTP>::Response> response, const SimpleWeb::error_code& ec) {
                        try {
                            std::stringstream ss;
                            ss << response->content.rdbuf();
                            LOG_DEBUG << "API response" << ss.str();
-                           (const_cast<Command&>(cmd)).response(nlohmann::json::parse(ss.str()), Result::Ok);
-                           onResult(cmd, true);
+                            CommandResult res;
+                            from_json(nlohmann::json::parse(ss.str()), res);
+                            onResult(res, res.type == ApiMessageType::Command);
                        }
                        catch (...) {
-                           (const_cast<Command&>(cmd)).response(Result::ServerError);
-                           onResult(cmd, false);
+                            CommandResult res;
+                            onResult(res, false);
                        }
                    });
 
     client.io_service->run();
 }
 
-void ServerAquaboxConnection::runCommand(Command cmd, MessageFormatter&& onResult)
+void ServerAquaboxConnection::runCommand(const CommandRequest& cmd, MessageFormatter&& onResult)
 {
-    runCommand(cmd, [&onResult](const Command& cmd, bool ok) { onResult(cmd, ok); });
+    runCommand(cmd, [&onResult](const CommandResult& cmd, bool ok) { onResult(cmd, ok); });
 }

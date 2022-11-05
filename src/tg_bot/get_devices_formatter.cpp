@@ -21,17 +21,17 @@
 #include <sstream>
 using namespace aquabox;
 
-GetDevicesFormatter::GetDevicesFormatter(const Command& cmd, const TgBot::Api& api, std::int64_t chatId)
-    : MessageFormatter(cmd, api, chatId)
+GetDevicesFormatter::GetDevicesFormatter(const TgBot::Api& api, std::int64_t chatId)
+    : MessageFormatter(api, chatId)
 {}
 
-void GetDevicesFormatter::operator()(const Command& cmd, bool ok) const
+void GetDevicesFormatter::operator()(const CommandResult& cmd, bool ok) const
 {
     std::stringstream ss;
     try {
-        if (cmd.response().is_object()) {
+        if (cmd.data().is_object()) {
             ss << bold(italic("Available Devices")) << "\n";
-            for (const nlohmann::json& d : cmd.response().at("devices")) {
+            for (const nlohmann::json& d : cmd.data().at("devices")) {
                 if (d.count("name") && d.count("type")) {
                     ss << "    Name: " << d["name"].get<std::string>() << "\n";
                     ss << "    Type: " << d["type"].get<std::string>() << "\n";

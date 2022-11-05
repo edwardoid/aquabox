@@ -29,8 +29,8 @@ namespace aquabox
         ServerAquaboxConnection(const std::string id);
 
         //virtual const std::string& id() const override;
-        virtual void runCommand(Command cmd, std::function<void(const Command&, bool)>&& onResult) override;
-        virtual void runCommand(Command cmd, MessageFormatter&& onResult);
+        virtual void runCommand(const CommandRequest& cmd, std::function<void(const CommandResult&, bool)>&& onResult) override;
+        virtual void runCommand(const CommandRequest& cmd, MessageFormatter&& onResult);
 
     private:
         std::string m_id;

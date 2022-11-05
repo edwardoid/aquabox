@@ -1,6 +1,6 @@
 /*
  * AquaBox
- * Copyright (C) 2019  Eduard Sargsyan
+ * Copyright (C) 2019-2022  Eduard Sargsyan
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,7 +18,7 @@
 
 #pragma once
 
-#include <common/command.h>
+#include <types/command.h>
 #include <sstream>
 #include <tgbot/tgbot.h>
 #include <unordered_map>
@@ -28,12 +28,11 @@ namespace aquabox
     class MessageFormatter
     {
     public:
-        MessageFormatter(const Command& cmd, const TgBot::Api& api, std::int64_t chatId)
-            : m_cmd(cmd)
-            , m_api(api)
+        MessageFormatter(const TgBot::Api& api, std::int64_t chatId)
+            : m_api(api)
             , m_chatId(chatId)
         {}
-        virtual void operator()(const Command& cmd, bool ok) const = 0;
+        virtual void operator()(const CommandResult& cmd, bool ok) const = 0;
 
     protected:
         std::string bold(const std::string txt) const { return std::string("<b>") + txt + "</b>"; }
@@ -72,7 +71,6 @@ namespace aquabox
         }
 
     protected:
-        const Command& m_cmd;
         const TgBot::Api& m_api;
         std::int64_t m_chatId;
     };

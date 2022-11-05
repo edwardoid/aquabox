@@ -32,10 +32,10 @@ void TelegramBot::start()
     m_bot = std::make_shared<TgBot::Bot>(api_key);
     m_bot->getEvents().onCommand("devices", [this](TgBot::Message::Ptr message) {
         auto client = m_server.get("testDev");
-        Command devices;
-        devices.setSeqNum(0);
+        CommandRequest devices;
+        devices.rqid = 0;
         devices.setOperation(Operation::GetDevices);
-        client->runCommand(devices, GetDevicesFormatter(devices, m_bot->getApi(), message->chat->id));
+        client->runCommand(devices, GetDevicesFormatter(m_bot->getApi(), message->chat->id));
     });
 
     m_bot->getEvents().onCommand("list_rules", [this](TgBot::Message::Ptr message) {
