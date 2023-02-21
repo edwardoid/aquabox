@@ -65,6 +65,10 @@ void CloudScreen::draw()
 
 bool CloudScreen::hasUpdate()
 {
+    if (Singleton<ICloud>::i() == nullptr) {
+        return false;
+    }
+
     if (m_lastState != Singleton<ICloud>::i()->connected()) {
         m_lastState = !m_lastState;
         m_stateImage.jump(m_lastState ? 1 : 0);

@@ -1,6 +1,6 @@
 /*
  * AquaBox
- * Copyright (C) 2019  Eduard Sargsyan
+ * Copyright (C) 2023  Eduard Sargsyan
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -24,7 +24,7 @@ using namespace aquabox;
 
 Relay::Relay() {}
 
-nlohmann::json Relay::value(std::string property) const
+nlohmann::json Relay::value(const std::string& property) const
 {
     if (property == ON_OFF_PROPERTY) {
         return turnedOn() ? 1 : 0;
@@ -33,7 +33,7 @@ nlohmann::json Relay::value(std::string property) const
     return Device::value(property);
 };
 
-bool Relay::setValue(std::string property, const nlohmann::json& value)
+bool Relay::setValue(const std::string& property, const nlohmann::json& value)
 {
     if (property == ON_OFF_PROPERTY) {
         if (value.is_number()) {

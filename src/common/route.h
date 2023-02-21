@@ -1,6 +1,6 @@
 /*
  * AquaBox
- * Copyright (C) 2020  Eduard Sargsyan
+ * Copyright (C) 2023  Eduard Sargsyan
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -27,17 +27,17 @@ namespace aquabox
     class Route
     {
     public:
-        Route& any(std::string name = "");
-        Route& string(std::string name = "");
-        Route& word(std::string work);
-        Route& number(std::string name = "");
+        Route& any(const std::string& name = "");
+        Route& string(const std::string& name = "");
+        Route& word(const std::string& work);
+        Route& number(const std::string& name = "");
 
         Route sub() const;
 
         std::string url() const;
 
-        std::vector<std::string> parse(std::string& url) const;
-        std::unordered_map<std::string, std::string> extract(std::string& url) const;
+        std::vector<std::string> parse(const std::string& url) const;
+        std::unordered_map<std::string, std::string> extract(const std::string& url) const;
 
     private:
         std::unordered_map<std::string, size_t> m_component2Indx;

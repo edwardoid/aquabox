@@ -1,6 +1,6 @@
 /*
  * AquaBox
- * Copyright (C) 2020  Eduard Sargsyan
+ * Copyright (C) 2023  Eduard Sargsyan
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -51,13 +51,13 @@ namespace aquabox
         void setId(const std::string& id);
 
         const std::string& name() const;
-        void setName(const std::string name);
+        void setName(const std::string& name);
 
         const int32_t& index() const;
         void setIndex(const int32_t& index);
 
         const std::string& address() const;
-        void setAddress(const std::string address);
+        void setAddress(const std::string& address);
 
         bool rulesEnabled() const;
         void setRulesEnabled(bool enabled);
@@ -78,8 +78,8 @@ namespace aquabox
         void setMetadata(const Metadata& metadata);
 
         virtual std::vector<std::string> properties() const { return {}; }
-        virtual nlohmann::json value(std::string property) const { return nlohmann::json(); };
-        virtual bool setValue(std::string property, const nlohmann::json& value) { return false; };
+        virtual nlohmann::json value(const std::string& property) const { return nlohmann::json(); };
+        virtual bool setValue(const std::string& property, const nlohmann::json& value) { return false; };
 
         bool supports(DeviceClass _class) const;
 

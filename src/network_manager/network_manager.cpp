@@ -101,8 +101,14 @@ void NetworkManager::updateCurrentState(bool notify)
 
             if (uuidPos != connectionSettings.connection.end()) {
                 auto& uuid = uuidPos->second;
-                if (uuid.get<std::string>() != nullptr) {
-                    newValue.uuid = *(uuid.get<std::string>());
+                try
+                {
+                    newValue.uuid = std::get<std::string>(uuid);
+                }
+                catch (const std::bad_variant_access& ex)
+                {
+                    LOG_ERROR << ex.what();
+                    break;
                 }
             }
 
@@ -135,7 +141,7 @@ void NetworkManager::updateCurrentState(bool notify)
 
             newValue.ip = ipv4->ip();
         }
-        catch (std::exception& ex) {
+        catch (const std::exception& ex) {
             LOG_ERROR << ex.what();
             break;
         }

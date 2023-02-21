@@ -64,7 +64,7 @@ std::string configurationData()
 
     configurationDataString += std::to_string(16);
 
-    configurationDataString += std::to_string(Singleton<ICloud>::i()->connected() ? 1 : 0);
+    //configurationDataString += std::to_string(Singleton<ICloud>::i()->connected() ? 1 : 0);
 
     return configurationDataString;
 }

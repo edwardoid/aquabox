@@ -11,7 +11,7 @@ target_link_libraries(${PROJECT_NAME}
                                         CONAN_PKG::json-schema-validator
                                         CONAN_PKG::boost
                                         CONAN_PKG::openssl
-                                        CONAN_PKG::mqtt_cpp
+                                        CONAN_PKG::redboltz-mqtt_cpp
     )
 
 set_property(TARGET ${PROJECT_NAME} PROPERTY POSITION_INDEPENDENT_CODE 1)

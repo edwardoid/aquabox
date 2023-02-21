@@ -37,6 +37,7 @@
 #include <grpcpp/security/credentials.h>
 #include <micro_clients/settings.h>
 #include <sstream>
+#include <fstream>
 
 using namespace aquabox;
 using namespace services;

@@ -1,6 +1,6 @@
 /*
  * AquaBox
- * Copyright (C) 2019  Eduard Sargsyan
+ * Copyright (C) 2019-2023  Eduard Sargsyan
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,7 +20,7 @@
 #include <sstream>
 
 using namespace aquabox;
-
+/*
 void ValidationErrorHandler::error(const nlohmann::json_pointer<nlohmann::basic_json<>>& pointer,
                                    const nlohmann::json& instance,
                                    const std::string& message)
@@ -30,7 +30,7 @@ void ValidationErrorHandler::error(const nlohmann::json_pointer<nlohmann::basic_
     ss << "ERROR: '" << pointer << "' - '" << instance << "': " << message;
     m_error = ss.str();
 }
-
+*/
 const std::string& ValidationErrorHandler::error() const
 {
     return m_error;

@@ -22,6 +22,7 @@ target_link_libraries (${PROJECT_NAME}
         types
         rf24meshgw
         w1temp
+        CONAN_PKG::redboltz-mqtt_cpp
     )
 
 cpack_add_component(${PROJECT_NAME}

@@ -42,8 +42,7 @@ namespace aquabox
                                {"accepted", d.accepted()},
                                {"available", d.available()}};
             nlohmann::json props;
-            for(auto p : d.properties())
-            {
+            for (auto p : d.properties()) {
                 props[p] = d.value(p);
             }
             j["properties"] = props;
@@ -134,7 +133,7 @@ const std::string& Device::name() const
     return m_name;
 }
 
-void Device::setName(const std::string name)
+void Device::setName(const std::string& name)
 {
     m_name = name;
 }
@@ -154,7 +153,7 @@ const std::string& Device::address() const
     return m_address;
 }
 
-void Device::setAddress(const std::string address)
+void Device::setAddress(const std::string& address)
 {
     m_address = address;
 }

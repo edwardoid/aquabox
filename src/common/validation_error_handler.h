@@ -1,6 +1,6 @@
 /*
  * AquaBox
- * Copyright (C) 2019  Eduard Sargsyan
+ * Copyright (C) 2019-2023  Eduard Sargsyan
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -25,9 +25,10 @@ namespace aquabox
     class ValidationErrorHandler : public nlohmann::json_schema::basic_error_handler
     {
     public:
+    /*
         void error(const nlohmann::json_pointer<nlohmann::basic_json<>>& pointer,
                    const nlohmann::json& instance,
-                   const std::string& message) override;
+                   const std::string& message) override;*/
         const std::string& error() const;
 
     private:

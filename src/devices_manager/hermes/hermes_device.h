@@ -54,7 +54,7 @@ namespace aquabox
                 return Base::properties();
             return m_props;
         }
-        virtual nlohmann::json value(std::string property) const override
+        virtual nlohmann::json value(const std::string& property) const override
         {
             if (property.size() > 0 && property[0] == '+') {
                 std::shared_ptr<HermesHardware> hw = std::dynamic_pointer_cast<HermesHardware>(Hardware::resolve(Base::address()));
@@ -65,7 +65,7 @@ namespace aquabox
             }
             return Base::value(property);
         }
-        virtual bool setValue(std::string property, const nlohmann::json& value) override
+        virtual bool setValue(const std::string& property, const nlohmann::json& value) override
         {
             if (property.empty()) {
                 return false;

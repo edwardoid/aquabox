@@ -122,7 +122,7 @@ const int Settings::Defaults::FPS = 10;
 bool Settings::dataToWrite = false;
 bool Settings::ready = false;
 std::recursive_mutex Settings::mx;
-nlohmann::json Settings::json;
+nlohmann::json Settings::json = {};
 
 void Settings::read()
 {

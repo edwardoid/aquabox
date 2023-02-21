@@ -1,6 +1,6 @@
 /*
  * AquaBox
- * Copyright (C) 2019  Eduard Sargsyan
+ * Copyright (C) 2023  Eduard Sargsyan
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -24,7 +24,7 @@ using namespace aquabox;
 
 Step::Step() {}
 
-nlohmann::json Step::value(std::string property) const
+nlohmann::json Step::value(const std::string& property) const
 {
     if (property == STEP_PROPERTY) {
         return steps();
@@ -33,7 +33,7 @@ nlohmann::json Step::value(std::string property) const
     return Device::value(property);
 };
 
-bool Step::setValue(std::string property, const nlohmann::json& value)
+bool Step::setValue(const std::string& property, const nlohmann::json& value)
 {
     if (property == STEP_PROPERTY) {
         if (value.is_number()) {

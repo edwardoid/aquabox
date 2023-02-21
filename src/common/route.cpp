@@ -1,6 +1,6 @@
 /*
  * AquaBox
- * Copyright (C) 2019  Eduard Sargsyan
+ * Copyright (C) 2023  Eduard Sargsyan
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,20 +22,20 @@
 
 using namespace aquabox;
 
-Route& Route::number(std::string name)
+Route& Route::number(const std::string& name)
 {
     m_components.push_back("([\\d]+)");
     m_component2Indx.insert({name, m_component2Indx.size()});
     return *this;
 }
 
-Route& Route::word(std::string word)
+Route& Route::word(const std::string& word)
 {
     m_components.push_back(word);
     return *this;
 }
 
-Route& Route::any(std::string name)
+Route& Route::any(const std::string& name)
 {
     m_component2Indx.insert({name, m_components.size()});
     m_components.push_back("[\\s\\w\\W]+");
@@ -43,7 +43,7 @@ Route& Route::any(std::string name)
     return *this;
 }
 
-Route& Route::string(std::string name)
+Route& Route::string(const std::string& name)
 {
     m_component2Indx.insert({name, m_components.size()});
     m_components.push_back("([\\w.+-]+)");
@@ -67,7 +67,7 @@ std::string Route::url() const
     return ss.str();
 }
 
-std::vector<std::string> Route::parse(std::string& url) const
+std::vector<std::string> Route::parse(const std::string& url) const
 {
     std::vector<std::string> tokens;
     size_t offset = 1;
@@ -87,7 +87,7 @@ std::vector<std::string> Route::parse(std::string& url) const
     return tokens;
 }
 
-std::unordered_map<std::string, std::string> Route::extract(std::string& url) const
+std::unordered_map<std::string, std::string> Route::extract(const std::string& url) const
 {
     std::vector<std::string> c = parse(url);
     std::unordered_map<std::string, std::string> extracted;

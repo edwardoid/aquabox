@@ -28,12 +28,14 @@ find_package(libqrencode REQUIRED)
 
 target_link_libraries(${PROJECT_NAME}   stats
                                         aquabox-common
+                                        micro-clients
                                         rt
                                         dl
                                         rf24meshgw
+                                        services
                                         types
-                                        libqrencode::libqrencode
                                         Threads::Threads
+                                        CONAN_PKG::libqrencode
                                         CONAN_PKG::tgbot
                                         CONAN_PKG::json-schema-validator
                                         CONAN_PKG::boost
@@ -41,7 +43,6 @@ target_link_libraries(${PROJECT_NAME}   stats
                                         CONAN_PKG::simppl
                                         CONAN_PKG::libserial
                                         CONAN_PKG::openssl
-                                        types
     )
 
 

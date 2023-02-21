@@ -25,7 +25,7 @@ target_link_libraries(${PROJECT_NAME}
                                         CONAN_PKG::boost
                                         CONAN_PKG::openssl
                                         CONAN_PKG::tgbot
-                                        CONAN_PKG::mqtt_cpp
+                                        CONAN_PKG::redboltz-mqtt_cpp
                                         Threads::Threads
     ) 
 

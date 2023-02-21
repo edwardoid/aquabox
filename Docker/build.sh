@@ -1,6 +1,6 @@
 #/bin/bash
 
-USABLE_CPU_COUNT=$(($CPU_COUNT - 1))
+USABLE_CPU_COUNT=$(nproc)
 J_ARG=$(( $USABLE_CPU_COUNT < 0 ? 1 : $USABLE_CPU_COUNT ))
 export CONAN_CPU_COUNT=$J_ARG
 
@@ -35,8 +35,8 @@ function prepare_build {
     fi
 
     if [ "$BUILD_PLATFORM" = "armv7" ]; then
-        export CONAN_EXTRA_ARGS=-"pr:h $BUILD_PLATFORM -pr:b default"
-        export CMAKE_EXTRA_ARGS="-DCMAKE_BUILD_TYPE=Release -DCMAKE_TOOLCHAIN_FILE=/sources/toolchain_armv7.cmake"
+        export CONAN_EXTRA_ARGS="-pr:h $BUILD_PLATFORM -pr:b default"
+        export CMAKE_EXTRA_ARGS="-DCMAKE_BUILD_TYPE=RelWithDebInfo -DCMAKE_TOOLCHAIN_FILE=/sources/toolchain_armv7.cmake"
     fi
 
     conan install /sources $CONAN_EXTRA_ARGS --build missing |& tee -a build.log  && \
@@ -81,7 +81,7 @@ SERVER_PKG_NAME="aquabox-server$NAME_BASE"
 
 function create_version {
     touch version.txt && \
-    echo "Branch: $GIT_BRANCH" >> version.txt && \
+    echo "Branch: $GIT_BRANCH" > version.txt && \
     echo "Commit $GIT_HASH" >> version.txt && \
     echo "Platform: $BUILD_PLATFORM" >> version.txt && \
     echo "Machine: $(uname -a)" >> version.txt && \
@@ -128,15 +128,16 @@ function pack_client {
     return $?
 }
 
-cd /build
+mkdir -p /build
+pushd /build
 
-prepare_env && \
+create_version && \
 clean_build && \
 prepare_build && \
-create_version && \
 do_build && \
 pack_server && \
 pack_client && \
 echo "Done"
 
+popd
 #exit

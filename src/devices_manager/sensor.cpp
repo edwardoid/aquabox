@@ -22,9 +22,9 @@
 
 using namespace aquabox;
 
-nlohmann::json Sensor::value(std::string prop) const
+nlohmann::json Sensor::value(const std::string& property) const
 {
-    if (prop != SENSOR_PROPERTY) {
+    if (property != SENSOR_PROPERTY) {
         return 0.;
     }
     auto hw = Hardware::resolve(m_address);

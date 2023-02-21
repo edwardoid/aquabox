@@ -35,8 +35,8 @@ namespace aquabox
         virtual void addPendingAction(uint64_t priority, ValueChange action) override;
         virtual bool performPendingAction(ValueChange& action) override;
 
-        virtual nlohmann::json value(std::string property) const override;
-        virtual bool setValue(std::string property, const nlohmann::json& value) override;
+        virtual nlohmann::json value(const std::string& property) const override;
+        virtual bool setValue(const std::string& property, const nlohmann::json& value) override;
 
     protected:
         void turnOn();

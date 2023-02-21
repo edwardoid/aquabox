@@ -64,7 +64,8 @@ namespace aquabox
         void scheduleUpdate(std::shared_ptr<Event> event);
         bool assistantIsConnected() const { return false; }
         double systemTemperature() const;
-        std::string configurationData() const;
+
+        std::string configurationData();
 
     private:
         void onCurrentNetworkChanged(const class CurrentNetworkState& state);

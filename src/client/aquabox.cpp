@@ -1,6 +1,6 @@
 /*
  * AquaBox
- * Copyright (C) 2019-2020  Eduard Sargsyan
+ * Copyright (C) 2019-2023  Eduard Sargsyan
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -121,20 +121,7 @@ void AquaBox::postUpdate(std::shared_ptr<Event> event)
     }
 }
 
-double AquaBox::systemTemperature() const
-{
-    double temp = 0;
-#ifdef TARGET_DEVICE
-    redi::ipstream tempCmd("cat /sys/devices/virtual/thermal/thermal_zone0/temp");
-    tempCmd >> temp;
-    temp /= 1000.;
-#else
-    temp = 65.89;
-#endif
-    return temp;
-}
-
-std::string AquaBox::configurationData() const
+std::string AquaBox::configurationData()
 {
     std::string configurationDataString;
     configurationDataString += std::to_string(Singleton<ISettings>::i()->get(Settings::Keys::HTTP_PORT, Settings::Defaults::REST_PORT));
@@ -146,9 +133,34 @@ std::string AquaBox::configurationData() const
     configurationDataString += serial();
     configurationDataString += ";";
 
-    configurationDataString += Singleton<INetworkManager>::i()->currentNetwork().ip;
+    if (Singleton<INetworkManager>::i() != nullptr)
+    {
+        std::string ip = Singleton<INetworkManager>::i()->currentNetwork().ip;
+        if (ip.empty())
+        {
+            ip = boost::asio::ip::host_name();
+        }
+        configurationDataString += ip;
+    }
+    else
+        configurationDataString += "aquabox";
     configurationDataString += ";";
 
-    configurationDataString += std::to_string((int) Singleton<AquaBox>::get()->systemTemperature());
+    configurationDataString += std::to_string(16);
+
+    
     return configurationDataString;
+}
+
+double AquaBox::systemTemperature() const
+{
+    double temp = 0;
+#ifdef TARGET_DEVICE
+    redi::ipstream tempCmd("cat /sys/devices/virtual/thermal/thermal_zone0/temp");
+    tempCmd >> temp;
+    temp /= 1000.;
+#else
+    temp = 65.89;
+#endif
+    return temp;
 }
