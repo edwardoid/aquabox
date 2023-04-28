@@ -1,0 +1,15 @@
+verbosity=3
+bootlogo=true
+#console=serial
+console=ttyS0,1500000n8
+extraagrs=quiet fbcon=map:0 fbcon=font:VGA8x8 consoleblank
+disp_mode=1920x1080p60
+overlay_prefix=sun8i-h3
+rootdev=UUID=2510827e-66b5-4bdd-ba13-284c1bb21514
+rootfstype=ext4
+overlays=spi-spidev uart3
+#spi-add-cs1
+user_overlays=adafruit18 custom-cs1
+param_spidev_spi_bus=0
+param_spidev_spi_cs=1
+usbstoragequirks=0x2537:0x1066:u,0x2537:0x1068:u
