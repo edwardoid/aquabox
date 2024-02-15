@@ -140,8 +140,7 @@ void NetworkManager::updateCurrentState(bool notify)
             }
 
             newValue.ip = ipv4->ip();
-        }
-        catch (const std::exception& ex) {
+        } catch (const std::exception& ex) {
             LOG_ERROR << ex.what();
             break;
         }

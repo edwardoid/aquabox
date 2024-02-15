@@ -86,6 +86,7 @@ bool DevicesServiceServer::init()
                                    / Singleton<ISettings>::i()->path(Settings::Keys::DEVICES_DATA_SUBROOT,
                                                                      Settings::Defaults::DEVICES_DATA_SUBROOT);
 
+    LOG_INFO << "Trying to find devices in " << root;
     if (!boost::filesystem::exists(root)) {
         if (!boost::filesystem::create_directory(root)) {
             LOG_ERROR << "Can't create devices directory" << root;
