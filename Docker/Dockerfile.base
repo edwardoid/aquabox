@@ -22,7 +22,7 @@ RUN wget -q --show-progress https://github.com/Kitware/CMake/releases/download/v
 RUN update-alternatives --install /usr/bin/python python /usr/bin/python3 1 && \
     update-alternatives --install /usr/bin/pip pip /usr/bin/pip3 1
 
-RUN pip install --force-reinstall -v "conan==1.59" && \
+RUN pip install --force-reinstall -v "conan==1.60" && \
     pip install numpy
 
 RUN wget -q --show-progress https://ipapi.co/timezone -O /timezone_info && \
@@ -53,12 +53,12 @@ RUN GRPC_VER="1.50.1" && \
             -DgRPC_SSL_PROVIDER=module \
             -DCMAKE_INSTALL_PREFIX=/opt/grpc \
             ../..  && \
-    make && \
-    make grpc_cpp_plugin && \
+    make grpc_cpp_plugin -j $(nproc) && \
     make install && \
     cd ../../.. && \
-    rm -rf grpc &&
-    RUN echo "export PATH=$PATH:/opt/grpc/bin" >> /root/.bashrc
+    rm -rf grpc
+
+RUN echo "export PATH=$PATH:/opt/grpc/bin" >> /root/.bashrc
 
 RUN apt-get update && \
     apt-get install -y gcc-8-arm-linux-gnueabihf \

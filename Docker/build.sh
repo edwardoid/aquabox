@@ -80,13 +80,13 @@ CLIENT_PKG_NAME="aquabox-client$NAME_BASE"
 SERVER_PKG_NAME="aquabox-server$NAME_BASE"
 
 function create_version {
-    touch version.txt && \
-    echo "Branch: $GIT_BRANCH" > version.txt && \
-    echo "Commit $GIT_HASH" >> version.txt && \
-    echo "Platform: $BUILD_PLATFORM" >> version.txt && \
-    echo "Machine: $(uname -a)" >> version.txt && \
-    echo "Build started at $(date)" >> version.txt && \
-    conan --version >> version.txt && \
+    touch version.txt
+    echo "Branch: $GIT_BRANCH" > version.txt
+    echo "Commit $GIT_HASH" >> version.txt
+    echo "Platform: $BUILD_PLATFORM" >> version.txt
+    echo "Machine: $(uname -a)" >> version.txt
+    echo "Build started at $(date)" >> version.txt
+    conan --version >> version.txt
     return $?
 }
 
