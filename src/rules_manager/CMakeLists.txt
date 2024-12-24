@@ -8,6 +8,6 @@ target_link_libraries (${PROJECT_NAME}
     micro-clients
     types
     rpc
-    CONAN_PKG::croncpp
-    CONAN_PKG::nlohmann_json
+    croncpp::croncpp
+    nlohmann_json::nlohmann_json
 )

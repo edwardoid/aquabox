@@ -1,0 +1,24 @@
+[settings]
+os=Linux
+arch=armv7
+compiler=gcc
+compiler.cppstd=gnu17
+compiler.libcxx=libstdc++11
+compiler.version=13
+build_type=Release
+
+[options]
+libpng/*:neon=False
+
+[buildenv]
+# for conan v2 recipes as well
+#PATH=[/toolchain/armv6/bin]
+#CHOST=$toolchain
+CHOST=arm-linux-gnueabihf
+AR=arm-linux-gnueabihf-ar
+AS=arm-linux-gnueabihf-as
+RANLIB=arm-linux-gnueabihf-ranlib
+LD=arm-linux-gnueabihf-ld
+STRIP=arm-linux-gnueabihf-strip
+CC=arm-linux-gnueabihf-gcc-13
+CXX=arm-linux-gnueabihf-g++-13

@@ -48,7 +48,7 @@ void RuleScheduler::add(const Rule& rule)
     for (auto& vc : rule.actions()) {
         RuleSchedulerData data({rule.id(), vc});
         int id = Scheduler<RuleSchedulerData>::add(vc.cron, data, rule.lastRun() - 1);
-        if (id < 0) {
+        if (id <= 0) {
             LOG_ERROR << "Can't add action for rule " << rule.id();
         }
         else {

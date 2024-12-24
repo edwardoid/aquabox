@@ -38,7 +38,7 @@ bool WebServer::start()
         m_ws.config.port = Singleton<ISettings>::i()->get(Settings::Keys::STREAM_PORT, Settings::Defaults::WS_PORT);
         LOG_INFO << "Starting websocket server " << m_ws.config.address << ":" << m_ws.config.port;
         m_updates = base.sub().string(":boxId").string(":appId").word("updates");
-        m_rpc = base.sub().word("rpc");
+        m_rpc = base.sub().string(":boxId").string(":appId").word("rpc");
 
         WS.Commands(m_ws, m_rpc);
 

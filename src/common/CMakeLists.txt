@@ -7,11 +7,11 @@ add_library(${PROJECT_NAME} SHARED ${AQUABOX_COMMON_SOURCES})
 target_link_libraries(${PROJECT_NAME}   
                                         rpc
                                         micro-clients
-                                        CONAN_PKG::nlohmann_json
-                                        CONAN_PKG::json-schema-validator
-                                        CONAN_PKG::boost
-                                        CONAN_PKG::openssl
-                                        CONAN_PKG::redboltz-mqtt_cpp
+                                        nlohmann_json::nlohmann_json
+                                        nlohmann_json_schema_validator
+                                        boost::boost
+                                        openssl::openssl
+                                        mqtt_cpp::mqtt_cpp
     )
 
 set_property(TARGET ${PROJECT_NAME} PROPERTY POSITION_INDEPENDENT_CODE 1)

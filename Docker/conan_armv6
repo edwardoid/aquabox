@@ -1,26 +1,29 @@
+#target_host=arm-linux-gnueabihf
+#standalone_toolchain=/toolchain/armv6/bin
+#cc_compiler=gcc
+#cxx_compiler=g++
+
 [settings]
-compiler=gcc
-compiler.version=8
-compiler.libcxx=libstdc++11
-compiler.cppstd=14
-build_type=Release
 os=Linux
-arch=armv7hf
-os_build=Linux
-arch_build=x86_64
+arch=armv6
+compiler=gcc
+compiler.version=12
+#compiler.libcxx=libstdc++11
+build_type=Release
+
 [options]
-libpng:neon=False
-[build_requires]
-[env]
+libpng/*:neon=False
+
+[buildenv]
+# for conan v2 recipes as well
+#PATH=[/toolchain/armv6/bin]
+#CHOST=$toolchain
+CXXFLAGS=-std=-m64 -D__INT64_TYPE__=long long -D__UINT64_TYPE__=unsigned long long
+CHOST=arm-linux-gnueabihf
 AR=arm-linux-gnueabihf-ar
 AS=arm-linux-gnueabihf-as
-CC=arm-linux-gnueabihf-gcc
-CHOST=arm-linux-gnueabihf
-CXX=arm-linux-gnueabihf-g++
-CXXFLAGS=-I/toolchain/armv6/arm-linux-gnueabihf/lib/include -pthread -ldl -lm
-CFLAGS=-I/toolchain/armv6/arm-linux-gnueabihf/lib/include -pthread -ldl -lm
-LD=arm-linux-gnueabihf-ld
-PATH=[/toolchain/armv6/bin]
 RANLIB=arm-linux-gnueabihf-ranlib
+LD=arm-linux-gnueabihf-ld
 STRIP=arm-linux-gnueabihf-strip
-LD_FLAGS=-pthread -lm
+CC=arm-linux-gnueabihf-gcc-12
+CXX=arm-linux-gnueabihf-g++-12

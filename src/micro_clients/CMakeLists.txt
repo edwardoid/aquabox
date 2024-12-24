@@ -8,5 +8,5 @@ target_link_libraries (${PROJECT_NAME}
                                         rpc
                                         types
                                         services
-                                        CONAN_PKG::nlohmann_json
+                                        nlohmann_json::nlohmann_json
     )

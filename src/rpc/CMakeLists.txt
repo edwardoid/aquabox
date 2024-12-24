@@ -8,6 +8,7 @@ find_package(Threads)
 file(GLOB PROTOS "${CMAKE_CURRENT_LIST_DIR}/*.proto")
 file(GLOB SOURCES "${CMAKE_CURRENT_LIST_DIR}/*.cpp")
 add_library(${PROJECT_NAME} SHARED ${AB_MS_SRCS} ${AB_MS_HDRS} ${PROTOS} ${SOURCES})
+set(Protobuf_PROTOC_EXECUTABLE /opt/grpc/bin/protoc)
 protobuf_generate(TARGET ${PROJECT_NAME} LANGUAGE cpp)
 protobuf_generate(TARGET ${PROJECT_NAME} LANGUAGE grpc GENERATE_EXTENSIONS .grpc.pb.h .grpc.pb.cc PLUGIN "protoc-gen-grpc=/opt/grpc/bin/grpc_cpp_plugin")
 
@@ -17,8 +18,8 @@ set(AQUABOX_MICROSERVICES_HEADERS ${CMAKE_CURRENT_BINARY_DIR}
 target_link_libraries(${PROJECT_NAME}
     PUBLIC
         protobuf::libprotobuf
-        CONAN_PKG::nlohmann_json
-        CONAN_PKG::boost
+        nlohmann_json::nlohmann_json
+        boost::boost
         gRPC::grpc
         gRPC::grpc++
 )

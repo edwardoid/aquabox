@@ -15,11 +15,18 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 cmake_minimum_required(VERSION 3.5)
+
 project(AquaboxProject)
+
+# cmake -S /sources -B /build -DCMAKE_PROJECT_TOP_LEVEL_INCLUDES=/sources/conan_provider.cmake -DCMAKE_BUILD_TYPE=Release
+# cmake -S /sources -B /build -DCMAKE_PROJECT_TOP_LEVEL_INCLUDES=/sources/conan_provider.cmake -DCONAN_BUILD_PROFILE=/sources/Docker/conan_armv6 -DCMAKE_BUILD_TYPE=Release
 
 #set(INSTALL_RPATH_USE_LINK_PATH true)
 
 set(CMAKE_INSTALL_RPATH "/aquabox/lib")
+set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
 set(LIBSTATS_SHARED ON)
 
@@ -81,9 +88,9 @@ set(CMAKE_CXX_FLAGS_UBSAN
 
 set(ENV{PKG_CONFIG_PATH}  "/usr/lib/arm-linux-gnueabihf/pkgconfig")
 
-include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
+#include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
 set(CMAKE_MODULE_PATH ${CMAKE_BINARY_DIR} ${CMAKE_MODULE_PATH})
-conan_basic_setup(TARGETS)
+#conan_basic_setup(TARGETS)
 
 if(("$ENV{BUILD_PLATFORM}" EQUAL "armv6") OR ("$ENV{BUILD_PLATFORM}" EQUAL "armv7"))
   option(TARGET_DEVICE ON)
@@ -96,9 +103,7 @@ if (TARGET_DEVICE)
 endif()
 
 set(THREE_DP_DIR "${PROJECT_SOURCE_DIR}/3dp")
-set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_CPPCHECK "")
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(BUILD_TESTING OFF)
 set(LIBFB_SHARED ON)
 set(LIBOWT_SHARED ON)
@@ -128,11 +133,13 @@ find_package(OpenSSL REQUIRED)
 find_package(Threads REQUIRED)
 find_package(nlohmann_json REQUIRED)
 find_package(libqrencode REQUIRED)
-find_package(simppl REQUIRED)
 find_package(DBus1 REQUIRED)
 find_package(nlohmann_json_schema_validator REQUIRED)
 find_package(tgbot REQUIRED)
 find_package(libserial REQUIRED)
+find_package(mqtt_cpp REQUIRED)
+find_package(mongocxx REQUIRED)
+find_package(croncpp)
 
 include_directories(${PLOG_INCLUDE_DIR})
 #include_directories(${THREAD_POOL_INCLUDE_DIR})
@@ -175,3 +182,13 @@ add_subdirectory("src")
 if (BUILD_TESTING)
   add_subdirectory("tests")
 endif()
+
+add_custom_target(
+    CopyConanDependencies
+    COMMAND ${CMAKE_COMMAND} 
+        -DCONAN_LIBS_LIST="${CONAN_RUNTIME_LIB_DIRS}"
+        -DSHARED_LIBS_TARGET_PATH=${CMAKE_LIBRARY_OUTPUT_DIRECTORY}
+        -P ${CMAKE_CURRENT_SOURCE_DIR}/copy_deps.cmake
+    COMMENT "Running copy script..."
+    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+)

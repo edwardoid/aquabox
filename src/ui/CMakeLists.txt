@@ -14,11 +14,11 @@ set_target_properties(${PROJECT_NAME}
     RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin"
 )
 
-target_link_libraries (${PROJECT_NAME} aquabox-common
+target_link_libraries (${PROJECT_NAME}  aquabox-common
                                         micro-clients
                                         types
                                         rpc
                                         fb
                                         libqrencode::libqrencode
-                                        CONAN_PKG::freetype
+                                        Freetype::Freetype
                                         PNG::PNG)

@@ -16,16 +16,18 @@ file(GLOB AQUABOX_CLOUD_SOURCES "*.cpp")
 include_directories(${AQUABOX_COMMON_PATH})
 add_executable(${PROJECT_NAME} ${AQUABOX_CLOUD_SOURCES})
 
+find_package(mongocxx REQUIRED)
+
 target_link_libraries(${PROJECT_NAME}
                                         aquabox-common
                                         dl
                                         rt
-                                        CONAN_PKG::mongo-cxx-driver
-                                        CONAN_PKG::json-schema-validator
-                                        CONAN_PKG::boost
-                                        CONAN_PKG::openssl
-                                        CONAN_PKG::tgbot
-                                        CONAN_PKG::redboltz-mqtt_cpp
+                                        mongo::mongocxx_shared
+                                        nlohmann_json_schema_validator
+                                        boost::boost
+                                        openssl::openssl
+                                        tgbot::tgbot
+                                        mqtt_cpp::mqtt_cpp
                                         Threads::Threads
     ) 
 

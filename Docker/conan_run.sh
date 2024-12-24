@@ -13,9 +13,9 @@ source $DIR/set_env.sh $1
 if [ "$1" = "x86_64" ]; then
     export DOCKER_EXTRA_ARGS_INT="-p 1213:1213 -p 1214:1214 -p 8974:8974 -p 2159:2159 -p 1800:1800 -p 1883:1883 --hostname $1 -v /var/run/dbus/system_bus_socket:/var/run/dbus/system_bus_socket"
 elif [ "$1" = "armv6" ]; then
-    export DOCKER_EXTRA_ARGS_INT="-v $SOURCES_DIR/Docker/conan_armv6:/root/.conan/profiles/armv6 -e LD_FLAGS='-lpthread -lm'"
+    export DOCKER_EXTRA_ARGS_INT="-v $SOURCES_DIR/Docker/conan_armv6:/root/.conan2/profiles/armv6"
 else
-    export DOCKER_EXTRA_ARGS_INT="-v $SOURCES_DIR/Docker/conan_armv7:/root/.conan/profiles/armv7"
+    export DOCKER_EXTRA_ARGS_INT="-v $SOURCES_DIR/Docker/conan_armv7:/root/.conan2/profiles/armv7"
 fi
 
 if [ -v DOCKER_EXTRA_ARGS ]; then

@@ -59,7 +59,7 @@ void execCommand(CommandRequest& cmd, Web::Response response, Web::Headers heade
     CommandExecutor exec;
     ExecutionResult result = exec.exec(cmd);
     if (result) {
-        LOG_ERROR << "Command " << (int) (cmd.operation()) << " failed with: " << result.fail.message() << " deetails: " << result.fail.details();
+        LOG_ERROR << "Command " << (int) (cmd.operation()) << " failed with: " << result.fail.message() << " details: " << result.fail.details();
     }
     else {
         LOG_DEBUG << "Command " << (int) (cmd.operation()) << " finished";

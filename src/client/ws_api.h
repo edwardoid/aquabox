@@ -71,6 +71,7 @@ namespace aquabox
             void postEvent(Event);
 
             ENABLE_WS_API(Commands);
+            ENABLE_WS_API(Updates);
 
         private:
             std::mutex m_lock;
