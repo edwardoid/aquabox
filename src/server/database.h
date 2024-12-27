@@ -18,6 +18,7 @@
 
 #pragma once
 
+#include <mongocxx/instance.hpp>
 #include <mongocxx/client.hpp>
 #include <mongocxx/database.hpp>
 #include <nlohmann/json.hpp>
@@ -49,6 +50,7 @@ namespace aquabox
         bool connect();
 
     private:
+        mongocxx::instance m_instance;
         mongocxx::client m_client;
         mongocxx::database m_aquabox;
     };

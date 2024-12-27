@@ -43,8 +43,8 @@ public:
 };
 
 Database::Database()
+    : m_instance(bsoncxx::stdx::make_unique<LoggerAdapter>())
 {
-    mongocxx::instance(bsoncxx::stdx::make_unique<LoggerAdapter>());
     if (!connect()) {
         LOG_ERROR << "Can't connect to " << m_client.uri().to_string();
     }
@@ -72,13 +72,18 @@ bool Database::connect()
             client_options.tls_opts(tls_options);
         }
 
-        m_client = std::move(mongocxx::client(uri, client_options));
+        const auto api = mongocxx::options::server_api{mongocxx::options::server_api::version::k_version_1};
+        client_options.server_api_opts(api);
+
+        //m_client = std::move(mongocxx::client(uri, client_options));
+        m_client= std::move(mongocxx::client(uri, client_options));
         if (!m_client) {
             return false;
         }
+
         m_aquabox = m_client[Settings::string(Settings::Keys::DATABASE_NAME, Settings::Defaults::DATABASE_NAME)];
         auto dbs = m_client.list_databases();
-        return (bool) m_client && (dbs.begin() != dbs.end());
+        return (bool) (m_client) && (dbs.begin() != dbs.end());
     }
     catch (mongocxx::exception& e) {
         LOG_ERROR << e.what();
