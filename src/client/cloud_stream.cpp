@@ -175,11 +175,12 @@ void CloudStream::messageReceived(const nlohmann::json& message)
 
 nlohmann::json CloudStream::exec(const nlohmann::json& message)
 {
+    int seqId = 0;
     try {
         LOG_DEBUG << "Got command: " << message.dump(4);
         CommandRequest cmd;
         from_json(message, cmd);
-
+        seqId = cmd.rqid;
         CommandExecutor exe;
         return as_json(exe.exec(cmd));
     }
@@ -188,6 +189,8 @@ nlohmann::json CloudStream::exec(const nlohmann::json& message)
     }
     catch (std::exception err) {
         ErrorResponse resp;
+        resp.rpid = seqId;
+        resp.boxId = Settings::string(Settings::Keys::SERIAL, Settings::Defaults::SERIAL);
         resp.setMessage("Execution failed");
         resp.setResult(Result::ServerError);
         resp.setDetails(err.what());

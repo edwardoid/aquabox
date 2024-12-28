@@ -124,6 +124,7 @@ ExecutionResult CommandExecutor::exec(const CommandRequest& cmd)
 
     m_res.ok.setParameters(m_cmd.parameters());
     m_res.fail.setResult(ok);
+    m_res.boxId = Settings::string(Settings::Keys::SERIAL, Settings::Defaults::SERIAL);
 
     if (m_res)
         m_res.type = m_res.ok.type;

@@ -26,7 +26,7 @@ namespace aquabox
     {
     public:
         ErrorResponse();
-        ErrorResponse(Result code, const std::string& message, const std::string& details = "");
+        ErrorResponse(Result code, const std::string& message, const std::string& details = "", int reqId = 0);
 
         inline void setResult(Result result) { m_result = result; }
         inline Result result() const { return m_result; }
@@ -37,22 +37,22 @@ namespace aquabox
         inline void setDetails(const std::string& details) { m_details = details; }
         inline const std::string details() const { return m_details; }
 
-        static ErrorResponse missedParameter(const std::string& name);
-        static ErrorResponse deviceNotFound(const std::string& id);
-        static ErrorResponse ruleNotFound(const std::string& id);
-        static ErrorResponse wrongType(const std::string& name, const std::string& expected, const std::string& provided = "");
-        static const ErrorResponse& unknownError();
-        static const ErrorResponse& parseError();
+        static ErrorResponse missedParameter(const std::string& name, int reqId = 0);
+        static ErrorResponse deviceNotFound(const std::string& id, int reqId = 0);
+        static ErrorResponse ruleNotFound(const std::string& id, int reqId = 0);
+        static ErrorResponse wrongType(const std::string& name, const std::string& expected, const std::string& provided = "", int reqId = 0);
+        static const ErrorResponse& unknownError(int reqId = 0);
+        static const ErrorResponse& parseError(int reqId = 0);
         static const ErrorResponse& rqidMissed();
-        static const ErrorResponse& requestIsNotCommand();
-        static const ErrorResponse& boxIdMissed();
-        static const ErrorResponse& authorizationFailed();
-        static const ErrorResponse& boxIsOffline();
-        static const ErrorResponse& appIdIdMissed();
+        static const ErrorResponse& requestIsNotCommand(int reqId = 0);
+        static const ErrorResponse& boxIdMissed(int reqId = 0);
+        static const ErrorResponse& authorizationFailed(int reqId = 0);
+        static const ErrorResponse& boxIsOffline(int reqId = 0);
+        static const ErrorResponse& appIdIdMissed(int reqId = 0);
         static const ErrorResponse& rqidWrongType();
-        static const ErrorResponse& unknownCommand();
-        static const ErrorResponse& unsupportedCommand();
-        static const ErrorResponse& connectionRejected();
+        static const ErrorResponse& unknownCommand(int reqId = 0);
+        static const ErrorResponse& unsupportedCommand(int reqId = 0);
+        static const ErrorResponse& connectionRejected(int reqId = 0);
     private:
         Result m_result = Result::Ok;
         std::string m_message;

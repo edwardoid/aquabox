@@ -55,38 +55,36 @@ ErrorResponse::ErrorResponse()
     : BaseStreamResponse(ApiMessageType::Error)
 {}
 
-ErrorResponse::ErrorResponse(Result code, const std::string& message, const std::string& details)
+ErrorResponse::ErrorResponse(Result code, const std::string& message, const std::string& details, int reqId)
     : BaseStreamResponse(ApiMessageType::Error)
 {
+    rpid = reqId;
     setResult(code);
     setMessage(message);
     setDetails(details);
 }
 
-ErrorResponse ErrorResponse::missedParameter(const std::string& name)
+ErrorResponse ErrorResponse::missedParameter(const std::string& name, int reqId)
 {
-    ErrorResponse err(Result::BadCommand, "Parameter is missed");
-    err.setDetails(name);
+    ErrorResponse err(Result::BadCommand, "Parameter is missed", name, reqId);
     return err;
 }
 
-ErrorResponse ErrorResponse::deviceNotFound(const std::string& id)
+ErrorResponse ErrorResponse::deviceNotFound(const std::string& id, int reqId)
 {
-    ErrorResponse err(Result::NotFound, "Device not found");
-    err.setDetails(id);
+    ErrorResponse err(Result::NotFound, "Device not found", id, reqId);
     return err;
 }
 
-ErrorResponse ErrorResponse::ruleNotFound(const std::string& id)
+ErrorResponse ErrorResponse::ruleNotFound(const std::string& id, int reqId)
 {
-    ErrorResponse err(Result::NotFound, "Rule not found");
-    err.setDetails(id);
+    ErrorResponse err(Result::NotFound, "Rule not found", id, reqId);
     return err;
 }
 
-ErrorResponse ErrorResponse::wrongType(const std::string& name, const std::string& expected, const std::string& provided)
+ErrorResponse ErrorResponse::wrongType(const std::string& name, const std::string& expected, const std::string& provided, int reqId)
 {
-    ErrorResponse err(Result::BadCommand, "Wrong type");
+    ErrorResponse err(Result::BadCommand, "Wrong type", "", reqId);
     std::stringstream ss;
     ss << "For parameter '" << name << "' expected type is " << expected;
     if (provided.empty())
@@ -101,15 +99,15 @@ ErrorResponse ErrorResponse::wrongType(const std::string& name, const std::strin
     return err;
 }
 
-const ErrorResponse& ErrorResponse::unknownError()
+const ErrorResponse& ErrorResponse::unknownError(int reqId)
 {
-    static ErrorResponse err(Result::ServerError, "Unknown error");
+    static ErrorResponse err(Result::ServerError, "Unknown error", "", reqId);
     return err;
 }
 
-const ErrorResponse& ErrorResponse::parseError()
+const ErrorResponse& ErrorResponse::parseError(int reqId)
 {
-    static ErrorResponse err(Result::BadCommand, "Malformed message");
+    static ErrorResponse err(Result::BadCommand, "Malformed message", "", reqId);
     return err;
 }
 
@@ -119,57 +117,57 @@ const ErrorResponse& ErrorResponse::rqidMissed()
     return err;
 }
 
-const ErrorResponse& ErrorResponse::requestIsNotCommand()
+const ErrorResponse& ErrorResponse::requestIsNotCommand(int reqId)
 {
-    static ErrorResponse err(Result::BadCommand, "Request does not contain a command", "Expected a command in request");
+    static ErrorResponse err(Result::BadCommand, "Request does not contain a command", "Expected a command in request", reqId);
     return err;
 }
 
-const ErrorResponse& ErrorResponse::boxIdMissed()
+const ErrorResponse& ErrorResponse::boxIdMissed(int reqId)
 {
-    static ErrorResponse err(Result::BadCommand, "Missed boxId", "Box Id fiels is missed in request");
+    static ErrorResponse err(Result::BadCommand, "Missed boxId", "Box Id fiels is missed in request", reqId);
     return err;
 }
 
-const ErrorResponse& ErrorResponse::authorizationFailed()
+const ErrorResponse& ErrorResponse::authorizationFailed(int reqId)
 {
-    static ErrorResponse err(Result::AccessDenied, "Authorization faied", "This application is not authorized on specified box");
+    static ErrorResponse err(Result::AccessDenied, "Authorization faied", "This application is not authorized on specified box", reqId);
     return err;
 }
 
-const ErrorResponse& ErrorResponse::boxIsOffline()
+const ErrorResponse& ErrorResponse::boxIsOffline(int reqId)
 {
-    static ErrorResponse err(Result::NotFound, "Aquabox is offline", "Specified client is not online(yet)");
+    static ErrorResponse err(Result::NotFound, "Aquabox is offline", "Specified client is not online(yet)", reqId);
     return err;
 }
 
 
-const ErrorResponse& ErrorResponse::appIdIdMissed()
+const ErrorResponse& ErrorResponse::appIdIdMissed(int reqId)
 {
-    static ErrorResponse err(Result::BadCommand, "Missed appId", "Application id is missed");
+    static ErrorResponse err(Result::BadCommand, "Missed appId", "Application id is missed", reqId);
     return err;
 }
 
 const ErrorResponse& ErrorResponse::rqidWrongType()
 {
-    static ErrorResponse err(Result::BadCommand, "Wrong type for rqId", "Request Id must be an integer");
+    static ErrorResponse err(Result::BadCommand, "Wrong type for rqId", "Request Id must be an integer", 0);
     return err;
 }
 
-const ErrorResponse& ErrorResponse::unknownCommand()
+const ErrorResponse& ErrorResponse::unknownCommand(int reqId)
 {
-    static ErrorResponse err(Result::BadCommand, "Wrong value for command", "Specified command is unknown");
+    static ErrorResponse err(Result::BadCommand, "Wrong value for command", "Specified command is unknown", reqId);
     return err;
 }
 
-const ErrorResponse& ErrorResponse::unsupportedCommand()
+const ErrorResponse& ErrorResponse::unsupportedCommand(int reqId)
 {
-    static ErrorResponse err(Result::BadCommand, "Unsupported command");
+    static ErrorResponse err(Result::BadCommand, "Unsupported command", "", reqId);
     return err;
 }
 
-const ErrorResponse& ErrorResponse::connectionRejected()
+const ErrorResponse& ErrorResponse::connectionRejected(int reqId)
 {
-    static ErrorResponse err(Result::AccessDenied, "Connection to specified box is not allowed");
+    static ErrorResponse err(Result::AccessDenied, "Connection to specified box is not allowed", "", reqId);
     return err;
 }

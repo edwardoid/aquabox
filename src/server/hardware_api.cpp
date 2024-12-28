@@ -99,11 +99,15 @@ void HardwareApi::setupRoutes()
             {
                 CommandResult c = raw;
                 m_handler->handle(id, c);
+                auto boxRESTInstance = box(c.boxId);
+                if(boxRESTInstance) boxRESTInstance->ready(data);
             }
             else
             {
                 ErrorResponse err = raw;
                 m_handler->handle(id, err, err.rpid);
+                auto boxRESTInstance = box(err.boxId);
+                if(boxRESTInstance) boxRESTInstance->ready(data);
             }
         }
         catch (const nlohmann::json::parse_error& e) {
