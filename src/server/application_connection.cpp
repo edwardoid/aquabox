@@ -56,7 +56,7 @@ void ApplicationConnection::run(const CommandRequest& command)
     if (box == nullptr) {
         CommandResult res = CommandResult::createResult(command);
         res.setData("on_cloud");
-        handle(boxId, ErrorResponse::boxIsOffline(), command.rqid);
+        handle(boxId, ErrorResponse::boxIsOffline(command.rqid), command.rqid);
         return;
     }
     m_boxes[boxId].insert(command.rqid);
@@ -94,6 +94,7 @@ bool ApplicationConnection::handle(const std::string& boxId, const ErrorResponse
         auto r = p->second.find(error.rpid);
         if (r != p->second.end()) {
             ErrorResponse e;
+            e.boxId = boxId;
             e.rpid = rpId;
             return send(as_json(e));
         }

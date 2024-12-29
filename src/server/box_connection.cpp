@@ -49,6 +49,7 @@ void BoxConnection::ready(const std::string& body)
         else if (result.type == ApiMessageType::Command)
         {
             resp.data.ok = raw;
+            resp.data.error.setResult(aquabox::Result::Ok);
             m_results.ready(resp.data.ok.rpid, resp);
         }
         else
