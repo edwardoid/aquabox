@@ -19,7 +19,6 @@
 #pragma once
 
 #include <types/event.h>
-#include <types/types.h>
 
 namespace aquabox
 {
@@ -56,7 +55,7 @@ namespace aquabox
     class DeviceRulesChangedEvent : public Event
     {
     public:
-        DeviceRulesChangedEvent(const DeviceRef& device);
+        DeviceRulesChangedEvent(const std::string& id, const std::string& name);
     };
 
 } // namespace aquabox

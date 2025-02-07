@@ -17,11 +17,11 @@ set(AQUABOX_MICROSERVICES_HEADERS ${CMAKE_CURRENT_BINARY_DIR}
 
 target_link_libraries(${PROJECT_NAME}
     PUBLIC
-        protobuf::libprotobuf
+        types
         nlohmann_json::nlohmann_json
         boost::boost
-        gRPC::grpc
-        gRPC::grpc++
+        openssl::openssl
+        grpc::grpc
 )
 target_include_directories(${PROJECT_NAME} PUBLIC ${CMAKE_CURRENT_BINARY_DIR})
 

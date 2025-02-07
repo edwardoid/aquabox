@@ -23,7 +23,7 @@
 #include <micro_clients/devices_manager.h>
 #include <micro_clients/events.h>
 #include <types/rule.h>
-#include <types/types.h>
+#include <rpc/types.h>
 #include <types/update_events.h>
 
 #define MAGIC_TEMPORARY_PROPERTY "__remain__"

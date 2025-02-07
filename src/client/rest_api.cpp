@@ -29,7 +29,6 @@
 #include <random>
 #include <stdio.h>
 #include <types/serial.h>
-#include <types/types.h>
 #include <types/update_events.h>
 
 using namespace aquabox::v1;

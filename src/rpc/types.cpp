@@ -17,7 +17,7 @@
  */
 
 #include "types.h"
-#include "device_type.h"
+#include <types/device_type.h>
 #include <common/log.h>
 
 namespace aquabox

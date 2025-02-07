@@ -19,7 +19,7 @@
 #pragma once
 
 #include <string>
-#include <types/types.h>
+#include <rpc/types.h>
 #include <types/value_change.h>
 #include <vector>
 

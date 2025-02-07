@@ -15,10 +15,11 @@ add_executable(${PROJECT_NAME} ${SOURCES} ${AQUABOX_MICROSERVICES_HEADERS})
 target_include_directories(${PROJECT_NAME} PUBLIC ${CMAKE_CURRENT_LIST_DIR}/..)
 
 target_link_libraries (${PROJECT_NAME}
-        micro-clients
         aquabox-common
         aquabox-proto
         rpc
+        protobuf::protobuf
+        micro-clients
         types
         rf24meshgw
         w1temp

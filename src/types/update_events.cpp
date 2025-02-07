@@ -20,7 +20,6 @@
 #include <chrono>
 #include <common/enumerations.h>
 #include <types/rule.h>
-#include <types/types.h>
 
 using namespace aquabox;
 
@@ -80,11 +79,11 @@ RuleDeletedEvent::RuleDeletedEvent(const Rule& rule)
     setData({{"sender_full", rule.name()}, {"device", rule.device()}, {"action", "deleted"}});
 }
 
-DeviceRulesChangedEvent::DeviceRulesChangedEvent(const DeviceRef& device)
+DeviceRulesChangedEvent::DeviceRulesChangedEvent(const std::string& id, const std::string& name)
 {
-    setSender(device.id(), "device");
+    setSender(id, "device");
     setData({
-        {"sender_full", device.name()},
+        {"sender_full", name},
     });
     /*
     std::vector<nlohmann::json> rules;

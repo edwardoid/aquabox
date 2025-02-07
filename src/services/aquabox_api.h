@@ -19,7 +19,7 @@
 #pragma once
 
 #include <types/rule.h>
-#include <types/types.h>
+#include <rpc/types.h>
 #include <vector>
 
 namespace aquabox

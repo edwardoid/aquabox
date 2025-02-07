@@ -25,7 +25,6 @@
 #include <micro_clients/rules_manager.h>
 #include <micro_clients/settings.h>
 #include <types/rule.h>
-#include <types/types.h>
 #include <types/update_events.h>
 
 namespace aquabox

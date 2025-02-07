@@ -34,7 +34,6 @@
 #include <random>
 #include <types/network_event.h>
 #include <types/rule.h>
-#include <types/types.h>
 #include <types/update_events.h>
 
 #define LOG_FILE_SIZE_IN_MB 10

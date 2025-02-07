@@ -50,7 +50,7 @@ bool RulesMap::addRule(std::shared_ptr<Rule> rule, bool replace)
     
     if (saveRule(rule->id())) {
         auto dev = Singleton<IDevicesManager>::i()->get(rule->device());
-        Singleton<IEvents>::i()->notify(std::make_shared<DeviceRulesChangedEvent>(dev));
+        Singleton<IEvents>::i()->notify(std::make_shared<DeviceRulesChangedEvent>(dev.id(), dev.name()));
         if (replace) {
             Singleton<IEvents>::i()->notify(std::make_shared<RuleUpdatedEvent>(*rule, beforeUpdate));
         }
@@ -105,7 +105,7 @@ bool RulesMap::removeRule(const std::string& id)
 
     if (erase(id)) {
         Singleton<RuleScheduler>::i()->updateDeviceRules(device.id());
-        Singleton<IEvents>::i()->notify(std::make_shared<DeviceRulesChangedEvent>(device));
+        Singleton<IEvents>::i()->notify(std::make_shared<DeviceRulesChangedEvent>(device.id(), device.name()));
         boost::filesystem::path root = Singleton<ISettings>::i()->path(Settings::Keys::DATA_ROOT, Settings::Defaults::DATA_ROOT)
                                             / Singleton<ISettings>::i()->path(Settings::Keys::RULES_DATA_SUBROOT, Settings::Defaults::RULES_DATA_SUBROOT)
                                             / id;
