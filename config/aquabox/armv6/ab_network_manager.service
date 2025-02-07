@@ -2,8 +2,8 @@
 Description=Aquabox Network Manager Manager service.
 StartLimitIntervalSec=500
 StartLimitBurst=5
-After=ab_events_bus.service network-online.target
-Wants=network-online.target
+After=ab_events_bus.service NetworkManager.service
+Wants=NetworkManager.service
 
 [Service]
 Type=simple
