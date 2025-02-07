@@ -8,5 +8,5 @@ target_include_directories(${PROJECT_NAME} PUBLIC ${AQUABOX_PROTO_PATH} ${NM_DBU
 
 target_link_libraries (${PROJECT_NAME}  nlohmann_json::nlohmann_json
                                         boost::boost
-                                        rpc
+                                        plog::plog
 )

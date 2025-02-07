@@ -15,8 +15,10 @@ croncpp/cci.20220503
 freetype/2.13.2
 libcurl/8.9.1
 grpc/1.67.1
-#openssl/3.1.0
 zlib/1.3.1
+openssl/3.3.2
+protobuf/5.27.0
+plog/1.1.10
 
 [tool_requires]
 cmake/3.30.5
@@ -33,6 +35,8 @@ cmake_layout
 boost/*:without_python=True
 boost/*:without_iostreams=True
 boost/*:fPIC=True
+openssl/*:fPIC=True
+openssl/*:shared=True
 mongo-c-driver/*:with_icu=False
 mongo-c-driver/*:with_zstd=False
 mongo-cxx-driver/*:shared=True
@@ -40,6 +44,9 @@ mongo-cxx-driver/*:polyfill=std
 libpng/*:shared=True
 tgbot/*:shared=True
 libqrencode/*:shared=True
+grpc/*:fPIC=True
+grpc/*:shared=True
+grpc/*:secure=True
 grpc/*:codegen=False
 grpc/*:csharp_plugin=False
 grpc/*:node_plugin=False
