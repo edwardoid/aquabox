@@ -157,7 +157,7 @@ NetworkChangeReason NetworkManager::changeReason() const
     return m_changeReason;
 }
 
-void NetworkManager::setInterface(std::string interface)
+void NetworkManager::setInterface(const std::string& interface)
 {
     LOG_INFO << "Monitoring " << interface;
     m_interface = interface;

@@ -75,7 +75,7 @@ namespace aquabox
 
     public:
         bool connectedToInternet();
-        void setInterface(std::string interface);
+        void setInterface(const std::string& interface);
         bool requestScan(bool force = true);
         SignalSlot::Property<Connection> currentConnection;
         SignalSlot::Property<NetworkingState> currentState;
