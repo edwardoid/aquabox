@@ -132,10 +132,15 @@ function do_build {
     else
         cmake --build . -t $_onlytarget --parallel $CPU_COUNT |& tee -a build.log
     fi
-    
-    cmake --build . --parallel $CPU_COUNT -t CopyConanDependencies |& tee -a build.log
     ret=$?
     popd
+
+    for filename in $(find $BUILD_DIR/lib -mindepth 1 ! -type l); do
+        patchelf --set-rpath $BUILD_DIR/lib:/aquabox/lib $filename
+    done
+    for filename in $(find $BUILD_DIR/bin -mindepth 1 ! -type f | grep -v service | grep -v json); do
+        patchelf --set-rpath $BUILD_DIR/lib:/aquabox/lib $filename
+    done
     return $ret
 }
 
@@ -226,6 +231,7 @@ if [ $_do_build -ne 0 ]; then
     do_build
     if [ $_pack_build -ne 0 ]; then
         pushd $BUILD_DIR
+        
         pack_server && \
         pack_client
         popd

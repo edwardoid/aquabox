@@ -78,7 +78,7 @@ void HttpHelpers::serveFile(Web::Response response, const boost::filesystem::pat
     auto length = ifs->tellg();
     ifs->seekg(0, std::ios::beg);
 
-    auto mime = ext2ContentType.find(boost::filesystem::extension(path));
+    auto mime = ext2ContentType.find(path.extension().string());
 
     if (mime == ext2ContentType.end()) {
         headers.find("Content-Type")->second = "application/octet-stream";

@@ -82,7 +82,12 @@
         "variant": "cpp",
         "any": "cpp",
         "charconv": "cpp",
-        "source_location": "cpp"
+        "source_location": "cpp",
+        "compare": "cpp",
+        "concepts": "cpp",
+        "numbers": "cpp",
+        "semaphore": "cpp",
+        "stop_token": "cpp"
     },
     "cmake.configureOnOpen": true,
     "git.ignoreLimitWarning": true,
